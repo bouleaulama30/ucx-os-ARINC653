@@ -19,9 +19,9 @@
 
 typedef  NAME_TYPE            PROCESS_NAME_TYPE;
 
-typedef  <implementation dependent>        PROCESS_ID_TYPE;
+typedef  APEX_INTEGER       PROCESS_ID_TYPE;
 #define  NULL_PROCESS_ID          0
-#define  MAIN_PROCESS_ID          <implementation dependent>
+#define  MAIN_PROCESS_ID          1
 
 typedef  APEX_INTEGER		PROCESS_INDEX_TYPE;
 
