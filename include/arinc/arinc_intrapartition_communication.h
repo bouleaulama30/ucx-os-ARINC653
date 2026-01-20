@@ -6,6 +6,9 @@
 /*----------------------------------------------------------------*/
 
 #include "arinc_apex_types.h"
+#include "arinc_process.h"
+
+
 
 #ifndef APEX_BUFFER
 #define APEX_BUFFER
@@ -14,7 +17,7 @@
 
 typedef  NAME_TYPE       BUFFER_NAME_TYPE;
 
-typedef  <implementation dependent>   BUFFER_ID_TYPE;
+typedef  APEX_INTEGER   BUFFER_ID_TYPE;
 #define  NULL_BUFFER_ID               0
 
 typedef
@@ -75,7 +78,7 @@ extern void GET_BUFFER_STATUS (
 
 typedef  NAME_TYPE       BLACKBOARD_NAME_TYPE;
 
-typedef  <implementation dependent>   BLACKBOARD_ID_TYPE;
+typedef  APEX_INTEGER   BLACKBOARD_ID_TYPE;
 #define  NULL_BLACKBOARD_ID           0
 
 typedef  enum { EMPTY = 0, OCCUPIED = 1 } EMPTY_INDICATOR_TYPE;
@@ -140,7 +143,7 @@ extern void GET_BLACKBOARD_STATUS (
 
 typedef  NAME_TYPE       SEMAPHORE_NAME_TYPE;
 
-typedef  <implementation dependent>   SEMAPHORE_ID_TYPE;
+typedef  APEX_INTEGER   SEMAPHORE_ID_TYPE;
 #define  NULL_SEMAPHORE_ID            0
 
 typedef  APEX_INTEGER    SEMAPHORE_VALUE_TYPE;
@@ -196,7 +199,7 @@ extern void GET_SEMAPHORE_STATUS (
 
 typedef  NAME_TYPE       EVENT_NAME_TYPE;
 
-typedef  <implementation dependent>   EVENT_ID_TYPE;
+typedef  APEX_INTEGER   EVENT_ID_TYPE;
 #define  NULL_EVENT_ID                0
 
 typedef  enum { DOWN = 0, UP = 1 } EVENT_STATE_TYPE;
@@ -255,7 +258,7 @@ extern void APERIODIC_WAIT_EVENT (
 
 typedef  NAME_TYPE       MUTEX_NAME_TYPE;
 
-typedef  <implementation dependent>   MUTEX_ID_TYPE;
+typedef  APEX_INTEGER   MUTEX_ID_TYPE;
 #define  NULL_MUTEX_ID           0
 #define  NO_MUTEX_OWNED          <implementation dependent>
 #define  PREEMPTION_LOCK_MUTEX   <implementation dependent>

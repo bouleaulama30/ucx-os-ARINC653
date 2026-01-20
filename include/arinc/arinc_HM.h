@@ -5,6 +5,8 @@
 /*                                                                */
 /*----------------------------------------------------------------*/
 #include "arinc_apex_types.h"
+#include "arinc_process.h"
+
 
 #ifndef APEX_ERROR
 #define APEX_ERROR

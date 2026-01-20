@@ -5,6 +5,8 @@
 /*--------------------------------------------------------------------*/
 
 #include "arinc_apex_types.h"
+#include "arinc_process.h"
+
 
 #ifndef APEX_SAMPLING
 #define APEX_SAMPLING
@@ -13,7 +15,7 @@
 
 typedef  NAME_TYPE       SAMPLING_PORT_NAME_TYPE;
 
-typedef  <implementation dependent>   SAMPLING_PORT_ID_TYPE;
+typedef  APEX_INTEGER   SAMPLING_PORT_ID_TYPE;
 #define  NULL_SAMPLING_PORT_ID          0
 
 typedef  enum { INVALID = 0, VALID = 1 } VALIDITY_TYPE;
@@ -75,7 +77,7 @@ extern void GET_SAMPLING_PORT_STATUS (
 
 typedef  NAME_TYPE       QUEUING_PORT_NAME_TYPE;
 
-typedef  <implementation dependent>   QUEUING_PORT_ID_TYPE;
+typedef  APEX_INTEGER   QUEUING_PORT_ID_TYPE;
 #define  NULL_QUEUING_PORT_ID          0
 
 typedef
