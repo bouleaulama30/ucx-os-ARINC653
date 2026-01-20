@@ -16,5 +16,12 @@
 #include <kernel/ecodes.h>
 #include <kernel/syscall.h>
 #include <kernel/spinlock.h>
+#include <arinc/arinc_apex_types.h>
+#include <arinc/arinc_HM.h>
+#include <arinc/arinc_interpartition_communication.h>
+#include <arinc/arinc_intrapartition_communication.h>
+#include <arinc/arinc_partition.h>
+#include <arinc/arinc_process.h>
+#include <arinc/arinc_time.h>
 #include <stdarg.h>
 
