@@ -54,10 +54,12 @@ debug: serial
 	cat ${SERIAL_DEVICE}
 
 ## kernel
-ucx: incl hal libs ddrivers network kernel
+ucx: incl hal libs ddrivers network kernel arinc
 	mv *.o $(SRC_DIR)/build/kernel
 	$(AR) $(ARFLAGS) $(BUILD_TARGET_DIR)/libucxos.a \
 		$(BUILD_KERNEL_DIR)/*.o
+
+arinc: arinc_partition.o
 
 kernel: timer.o message.o pipe.o spinlock.o semaphore.o ecodes.o syscall.o coroutine.o ucx.o main.o
 
@@ -98,6 +100,10 @@ libc.o: $(SRC_DIR)/lib/libc.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/lib/libc.c
 console.o: $(SRC_DIR)/lib/console.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/lib/console.c
+
+arinc_partition.o: $(SRC_DIR)/arinc/arinc_partition.c
+	$(CC) $(CFLAGS) $(SRC_DIR)/arinc/arinc_partition.c
+
 		
 ## kernel + application link
 link:
@@ -119,6 +125,11 @@ endif
 	hexdump -v -e '4/1 "%02x" "\n"' $(BUILD_TARGET_DIR)/image.bin > $(BUILD_TARGET_DIR)/code.txt
 
 ## applications
+## applications
+arinc_test: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test.o app/arinc_test.c
+	@$(MAKE) --no-print-directory link
+
 coroutine_args: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/coroutine_args.o app/coroutine_args.c
 	@$(MAKE) --no-print-directory link

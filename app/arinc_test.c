@@ -1,0 +1,55 @@
+#include <ucx.h>
+
+void task2(void)
+{
+	int32_t cnt = 300000;
+	uint32_t secs, msecs, time;
+
+	while (1) {
+		time = ucx_uptime();
+		secs = time / 1000;
+		msecs = time - secs * 1000;
+		printf("[task %d %ld - sys uptime: %ld.%03lds]\n", ucx_task_id(), cnt++, secs, msecs);
+		ucx_task_yield();
+	}
+}
+
+void task1(void)
+{
+	int32_t cnt = 200000;
+
+	while (1) {
+		printf("[task %d %ld]\n", ucx_task_id(), cnt++);
+		ucx_task_yield();
+	}
+}
+
+void task0(void)
+{
+	int32_t cnt = 100000;
+
+	APEX_INTEGER id;
+	RETURN_CODE_TYPE return_code;
+
+	GET_MY_PARTITION_ID(&id, &return_code);
+
+	while (1) {
+		printf("[task %d %ld, partition %d]\n", ucx_task_id(), cnt++, id);
+		ucx_task_yield();
+	}
+}
+
+int app_main(void)
+{
+	ucx_task_spawn(task0, DEFAULT_STACK_SIZE);
+	ucx_task_spawn(task1, DEFAULT_STACK_SIZE);
+	ucx_task_spawn(task2, DEFAULT_STACK_SIZE);
+	ucx_task_priority(2, TASK_LOW_PRIO);
+	
+	printf("task0 has id %d\n", ucx_task_idref(task0));
+	printf("task1 has id %d\n", ucx_task_idref(task1));
+	printf("task2 has id %d\n", ucx_task_idref(task2));
+
+	// start UCX/OS, preemptive mode
+	return 1;
+}
