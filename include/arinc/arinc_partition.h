@@ -25,6 +25,25 @@ typedef
 typedef APEX_INTEGER     PARTITION_ID_TYPE; 
 typedef APEX_UNSIGNED    NUM_CORES_TYPE; 
 
+// definition of new type
+typedef NAME_TYPE partition_name_type;
+typedef NAME_TYPE region_name_type;
+
+typedef 
+   struct {
+    //TODO -Q à revoir
+    region_name_type   region_name;
+    // APEX_UNSIGNED      base;
+    // APEX_UNSIGNED      size;
+
+
+   } memory_requirements_type;
+
+typedef 
+    enum {
+        false = 0,
+        true = 1
+    } system_partition_type;
 
 typedef
    enum {
@@ -44,6 +63,18 @@ typedef
       START_CONDITION_TYPE   START_CONDITION;
       NUM_CORES_TYPE         NUM_ASSIGNED_CORES;
    } PARTITION_STATUS_TYPE;
+
+
+struct pcb_s {
+    PARTITION_STATUS_TYPE *status;
+    partition_name_type name;
+    memory_requirements_type memory_requirements;
+    // interpartition_communication_type communication_ports;
+    // Partion HM Table
+    void* entry_point;
+    system_partition_type is_system_partition;
+    OPERATING_MODE_TYPE operating_mode;
+};
 
 
 extern void GET_PARTITION_STATUS (
