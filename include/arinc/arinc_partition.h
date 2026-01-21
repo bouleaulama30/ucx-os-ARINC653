@@ -26,24 +26,29 @@ typedef APEX_INTEGER     PARTITION_ID_TYPE;
 typedef APEX_UNSIGNED    NUM_CORES_TYPE; 
 
 // definition of new type
-typedef NAME_TYPE partition_name_type;
-typedef NAME_TYPE region_name_type;
+typedef NAME_TYPE PARTITION_NAME_TYPE;
+typedef NAME_TYPE REGION_NAME_TYPE;
+typedef NAME_TYPE ACCESS_TYPE;
 
 typedef 
    struct {
-    //TODO -Q à revoir
-    region_name_type   region_name;
-    // APEX_UNSIGNED      base;
-    // APEX_UNSIGNED      size;
+    REGION_NAME_TYPE   region_name;
+    void*      base;
+    APEX_UNSIGNED      size;
+    ACCESS_TYPE        access;
+   } MEMORY_REGION_TYPE;
 
-
-   } memory_requirements_type;
+typedef 
+   struct {
+      // une region code et une région data
+      MEMORY_REGION_TYPE memory[2];
+   } MEMORY_REQUIREMENTS_TYPE;
 
 typedef 
     enum {
         false = 0,
         true = 1
-    } system_partition_type;
+    } SYSTEM_PARTITION_TYPE;
 
 typedef
    enum {
@@ -66,14 +71,15 @@ typedef
 
 
 struct pcb_s {
-    PARTITION_STATUS_TYPE *status;
-    partition_name_type name;
-    memory_requirements_type memory_requirements;
-    // interpartition_communication_type communication_ports;
-    // Partion HM Table
-    void* entry_point;
-    system_partition_type is_system_partition;
-    OPERATING_MODE_TYPE operating_mode;
+   PARTITION_STATUS_TYPE *status;
+   PARTITION_NAME_TYPE name;
+   MEMORY_REQUIREMENTS_TYPE *memory_requirements;
+   // interpartition_communication_type communication_ports;
+   // Partion HM Table
+   void* entry_point;
+   SYSTEM_PARTITION_TYPE is_system_partition;
+   jmp_buf context;		/* jmp_buf is architecture specific */
+
 };
 
 

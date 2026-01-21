@@ -2,5 +2,5 @@
 
 ## Partition implem
 
-* memory requirements à revoir
+* pour partition init, gérer les tailles d'allocations avec data + code 
 
