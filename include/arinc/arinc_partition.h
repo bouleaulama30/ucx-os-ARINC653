@@ -71,6 +71,7 @@ typedef
 
 
 struct pcb_s {
+   struct tcb_s tcb;
    PARTITION_STATUS_TYPE *status;
    PARTITION_NAME_TYPE name;
    MEMORY_REQUIREMENTS_TYPE *memory_requirements;
@@ -78,7 +79,6 @@ struct pcb_s {
    // Partion HM Table
    void* entry_point;
    SYSTEM_PARTITION_TYPE is_system_partition;
-   jmp_buf context;		/* jmp_buf is architecture specific */
 
 };
 

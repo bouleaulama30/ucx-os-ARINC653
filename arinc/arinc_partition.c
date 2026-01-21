@@ -55,6 +55,15 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 	if (!new_pcb)
 		krnl_panic(ERR_PCB_ALLOC);
 
+    /* --- INITIALISATION DE LA PARTIE TCB (POUR LE KERNEL) --- */
+    new_pcb->tcb.id = (uint16_t)IDENTIFIER;         // L'ID pour ucx_task_id()
+    new_pcb->tcb.task = (void (*)(void))entry_point; // Le pointeur de fonction (Offset 0 !)
+    new_pcb->tcb.stack = code_region->base;         // La base de la pile
+    new_pcb->tcb.stack_sz = size_code_mem;          // La taille de la pile
+    new_pcb->tcb.state = TASK_READY;                // État initial (prêt à être exécuté)
+    new_pcb->tcb.priority = TASK_NORMAL_PRIO;       // Priorité par défaut (ou autre selon besoin)
+    new_pcb->tcb.delay = 0;
+
     CRITICAL_ENTER();
 
 #ifndef MULTICORE
@@ -82,7 +91,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 	memset(code_region->base, 0x33, 4);
 	memset((code_region->base) + code_region->size - 4, 0x33, 4);
 
-	_context_init(&new_pcb->context, (size_t)code_region->base,
+	_context_init(&new_pcb->tcb.context, (size_t)code_region->base,
 		code_region->size, (size_t)new_pcb->entry_point);
 
 	printf("core %d, partition %d: 0x%p, memory: 0x%p, size %d\n", _cpu_id(),
