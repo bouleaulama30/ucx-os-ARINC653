@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0" version="29.3.4">
   <diagram name="Page-1" id="0q3SbBAJOIODAcZKL59g">
-    <mxGraphModel dx="1296" dy="695" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1426" dy="765" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -19,25 +19,33 @@
         <mxCell id="w_J-VMkOT-6g-G2MwpKf-29" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="app_main" vertex="1">
           <mxGeometry height="54" width="130" x="95" y="285" as="geometry" />
         </mxCell>
-        <mxCell id="w_J-VMkOT-6g-G2MwpKf-30" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="main_kernel" vertex="1">
+        <mxCell id="w_J-VMkOT-6g-G2MwpKf-30" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="main" vertex="1">
           <mxGeometry height="54" width="147" x="87" y="413" as="geometry" />
         </mxCell>
-        <mxCell id="w_J-VMkOT-6g-G2MwpKf-31" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="ctx_dispatch" vertex="1">
+        <mxCell id="w_J-VMkOT-6g-G2MwpKf-31" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="crt0" vertex="1">
           <mxGeometry height="54" width="149" x="86" y="565" as="geometry" />
         </mxCell>
         <mxCell id="w_J-VMkOT-6g-G2MwpKf-32" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="Premiere_Task" vertex="1">
           <mxGeometry height="54" width="167" x="77" y="693" as="geometry" />
         </mxCell>
+        <mxCell id="Zext09b5VMfwgXAa0muV-13" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="w_J-VMkOT-6g-G2MwpKf-32" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="155" y="770" />
+              <mxPoint x="155" y="770" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
         <mxCell id="w_J-VMkOT-6g-G2MwpKf-33" parent="1" style="ellipse;aspect=fixed;strokeWidth=2;whiteSpace=wrap;" value="Interrupt" vertex="1">
           <mxGeometry height="75" width="75" x="117" y="830" as="geometry" />
         </mxCell>
-        <mxCell id="w_J-VMkOT-6g-G2MwpKf-34" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="hand_dispatcher" vertex="1">
+        <mxCell id="w_J-VMkOT-6g-G2MwpKf-34" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="krnl_dispatcher" vertex="1">
           <mxGeometry height="54" width="178" x="65" y="979" as="geometry" />
         </mxCell>
         <mxCell id="w_J-VMkOT-6g-G2MwpKf-35" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="dispatch" vertex="1">
           <mxGeometry height="54" width="120" x="94" y="1107" as="geometry" />
         </mxCell>
-        <mxCell id="w_J-VMkOT-6g-G2MwpKf-36" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="thrd_schedule" vertex="1">
+        <mxCell id="w_J-VMkOT-6g-G2MwpKf-36" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="krnl_schedule" vertex="1">
           <mxGeometry height="54" width="161" x="74" y="1235" as="geometry" />
         </mxCell>
         <mxCell id="w_J-VMkOT-6g-G2MwpKf-37" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="dispatch" vertex="1">
@@ -52,58 +60,92 @@
             <Array as="points" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="w_J-VMkOT-6g-G2MwpKf-40" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-28" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-29" value="init heap / list task">
+        <mxCell id="w_J-VMkOT-6g-G2MwpKf-40" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-28" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-29" value="">
           <mxGeometry relative="1" as="geometry">
             <Array as="points" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="w_J-VMkOT-6g-G2MwpKf-41" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-29" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-30" value="init task / alloc mem">
+        <mxCell id="w_J-VMkOT-6g-G2MwpKf-41" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-29" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-30" value="">
           <mxGeometry relative="1" as="geometry">
             <Array as="points" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="w_J-VMkOT-6g-G2MwpKf-42" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-30" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-31" value="save context / select 1st task">
+        <mxCell id="w_J-VMkOT-6g-G2MwpKf-42" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-30" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-31" value="">
           <mxGeometry relative="1" as="geometry">
             <Array as="points" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="w_J-VMkOT-6g-G2MwpKf-43" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-31" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-32" value="dispatch init / longjmp">
+        <mxCell id="w_J-VMkOT-6g-G2MwpKf-43" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-31" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-32" value="">
           <mxGeometry relative="1" as="geometry">
             <Array as="points" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="w_J-VMkOT-6g-G2MwpKf-44" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-32" style="curved=1;dashed=1;dashPattern=2 3;startArrow=none;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-33" value="">
+        <object label="" id="w_J-VMkOT-6g-G2MwpKf-45">
+          <mxCell edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-33" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=0.99;entryX=0.5;entryY=-0.01;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-34">
+            <mxGeometry relative="1" as="geometry">
+              <Array as="points" />
+            </mxGeometry>
+          </mxCell>
+        </object>
+        <mxCell id="Zext09b5VMfwgXAa0muV-7" connectable="0" parent="w_J-VMkOT-6g-G2MwpKf-45" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="handler interruption" vertex="1">
+          <mxGeometry relative="1" x="-0.109" y="5" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="w_J-VMkOT-6g-G2MwpKf-46" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-34" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=0.99;entryX=0.5;entryY=-0.01;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-35" value="">
           <mxGeometry relative="1" as="geometry">
             <Array as="points" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="w_J-VMkOT-6g-G2MwpKf-45" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-33" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=0.99;entryX=0.5;entryY=-0.01;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-34" value="tick">
+        <mxCell id="w_J-VMkOT-6g-G2MwpKf-47" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-35" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=0.99;entryX=0.5;entryY=-0.01;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-36" value="">
           <mxGeometry relative="1" as="geometry">
             <Array as="points" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="w_J-VMkOT-6g-G2MwpKf-46" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-34" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=0.99;entryX=0.5;entryY=-0.01;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-35" value="increm tick">
+        <mxCell id="w_J-VMkOT-6g-G2MwpKf-48" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-36" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=0.99;entryX=0.5;entryY=-0.01;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-37" value="">
           <mxGeometry relative="1" as="geometry">
             <Array as="points" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="w_J-VMkOT-6g-G2MwpKf-47" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-35" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=0.99;entryX=0.5;entryY=-0.01;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-36" value="update delay / stack check">
+        <mxCell id="w_J-VMkOT-6g-G2MwpKf-49" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-37" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=0.99;entryX=0.51;entryY=-0.01;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-38" value="">
           <mxGeometry relative="1" as="geometry">
             <Array as="points" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="w_J-VMkOT-6g-G2MwpKf-48" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-36" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=0.99;entryX=0.5;entryY=-0.01;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-37" value="schedule RR priority">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="w_J-VMkOT-6g-G2MwpKf-49" edge="1" parent="1" source="w_J-VMkOT-6g-G2MwpKf-37" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=0.99;entryX=0.51;entryY=-0.01;rounded=0;" target="w_J-VMkOT-6g-G2MwpKf-38" value="select task">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points" />
+        <mxCell id="Zext09b5VMfwgXAa0muV-12" connectable="0" parent="w_J-VMkOT-6g-G2MwpKf-49" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="longjmp(chosen_task)" vertex="1">
+          <mxGeometry relative="1" x="0.0002" y="1" as="geometry">
+            <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="w_J-VMkOT-6g-G2MwpKf-50" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Init BSS, Interrupt etc..." vertex="1">
           <mxGeometry height="30" width="106" x="214" y="39" as="geometry" />
+        </mxCell>
+        <mxCell id="Zext09b5VMfwgXAa0muV-1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;div&gt;init heap&lt;/div&gt;&lt;div&gt;init list task&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="106" x="225" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="Zext09b5VMfwgXAa0muV-2" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;div&gt;init task:&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;-alloc mem (stack on heap)&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;- context init&lt;/div&gt;" vertex="1">
+          <mxGeometry height="53" width="186" x="234" y="286" as="geometry" />
+        </mxCell>
+        <mxCell id="Zext09b5VMfwgXAa0muV-3" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;div&gt;save context kernel&lt;/div&gt;&lt;div&gt;sélection de la 1ère task&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="146" x="244" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="Zext09b5VMfwgXAa0muV-4" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="dispatch_init (longjump)" vertex="1">
+          <mxGeometry height="30" width="106" x="244" y="577" as="geometry" />
+        </mxCell>
+        <mxCell id="Zext09b5VMfwgXAa0muV-5" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="à chaque tick" vertex="1">
+          <mxGeometry height="30" width="106" x="192" y="852.5" as="geometry" />
+        </mxCell>
+        <mxCell id="Zext09b5VMfwgXAa0muV-8" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="incrémente le tick (logiciel)" vertex="1">
+          <mxGeometry height="30" width="106" x="250" y="991" as="geometry" />
+        </mxCell>
+        <mxCell id="Zext09b5VMfwgXAa0muV-9" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;div&gt;Update delay tasks,&lt;/div&gt;&lt;div&gt;stack check&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="135" x="214" y="1119" as="geometry" />
+        </mxCell>
+        <mxCell id="Zext09b5VMfwgXAa0muV-10" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="scheduler RR avec prio ou self defined scheduler" vertex="1">
+          <mxGeometry height="30" width="194.5" x="235.5" y="1247" as="geometry" />
+        </mxCell>
+        <mxCell id="Zext09b5VMfwgXAa0muV-11" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="sélection de la task choisie par le scheduler" vertex="1">
+          <mxGeometry height="30" width="194.5" x="225.5" y="1375" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
