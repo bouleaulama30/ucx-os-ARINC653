@@ -141,8 +141,8 @@
         <mxCell id="Zext09b5VMfwgXAa0muV-9" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;div&gt;Update delay tasks,&lt;/div&gt;&lt;div&gt;stack check&lt;/div&gt;" vertex="1">
           <mxGeometry height="30" width="135" x="214" y="1119" as="geometry" />
         </mxCell>
-        <mxCell id="Zext09b5VMfwgXAa0muV-10" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="scheduler RR avec prio ou self defined scheduler" vertex="1">
-          <mxGeometry height="30" width="194.5" x="235.5" y="1247" as="geometry" />
+        <mxCell id="Zext09b5VMfwgXAa0muV-10" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="self defined scheduler et si retourne -1 fall back sur le RR prio scheduler" vertex="1">
+          <mxGeometry height="30" width="214.5" x="235.5" y="1247" as="geometry" />
         </mxCell>
         <mxCell id="Zext09b5VMfwgXAa0muV-11" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="sélection de la task choisie par le scheduler" vertex="1">
           <mxGeometry height="30" width="194.5" x="225.5" y="1375" as="geometry" />
