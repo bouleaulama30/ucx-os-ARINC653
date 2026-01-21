@@ -4,15 +4,13 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         SYSTEM_TIME_TYPE DURATION,
                         PARTITION_ID_TYPE IDENTIFIER,
                         NUM_CORES_TYPE    NUM_ASSIGNED_CORES,
-                        PARTITION_NAME_TYPE name,
-                        REGION_NAME_TYPE   region_name_code_meme,
-                        // APEX_UNSIGNED      base_code_mem,
+                        const PARTITION_NAME_TYPE name,
+                        const REGION_NAME_TYPE   region_name_code_mem,
                         APEX_UNSIGNED      size_code_mem,
-                        ACCESS_TYPE        access_code_mem,
-                        REGION_NAME_TYPE   region_name_data_meme,
-                        // APEX_UNSIGNED      base_data_mem,
+                        const ACCESS_TYPE        access_code_mem,
+                        const REGION_NAME_TYPE   region_name_data_mem,
                         APEX_UNSIGNED      size_data_mem,
-                        ACCESS_TYPE        access_data_mem,
+                        const ACCESS_TYPE        access_data_mem,
                         SYSTEM_ADDRESS_TYPE entry_point,
                         SYSTEM_PARTITION_TYPE is_system_partition)
 {
@@ -40,7 +38,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     status->OPERATING_MODE = IDLE; // TODO -Q définir operating mode
     status->START_CONDITION = NORMAL_START; // TODO -Q définir start condition
 
-    strcpy(code_region->region_name, region_name_code_meme);
+    strcpy(code_region->region_name, region_name_code_mem);
     code_region->base = malloc(size_code_mem); // TODO -Q définir base code mem
     code_region->size = size_code_mem;
     strcpy(code_region->access, access_code_mem);
@@ -87,11 +85,9 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 	_context_init(&new_pcb->context, (size_t)code_region->base,
 		code_region->size, (size_t)new_pcb->entry_point);
 
-	printf("core %d, task %d: 0x%p, stack: 0x%p, size %d\n", _cpu_id(),
+	printf("core %d, partition %d: 0x%p, memory: 0x%p, size %d\n", _cpu_id(),
 		new_pcb->status->IDENTIFIER, new_pcb->entry_point ,new_pcb->memory_requirements->memory[0].base, new_pcb->memory_requirements->memory[0].size);
     return new_pcb->status->IDENTIFIER;
-    
-
 }
 
 

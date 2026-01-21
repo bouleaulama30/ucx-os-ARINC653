@@ -1,29 +1,5 @@
 #include <ucx.h>
 
-void task2(void)
-{
-	int32_t cnt = 300000;
-	uint32_t secs, msecs, time;
-
-	while (1) {
-		time = ucx_uptime();
-		secs = time / 1000;
-		msecs = time - secs * 1000;
-		printf("[task %d %ld - sys uptime: %ld.%03lds]\n", ucx_task_id(), cnt++, secs, msecs);
-		ucx_task_yield();
-	}
-}
-
-void task1(void)
-{
-	int32_t cnt = 200000;
-
-	while (1) {
-		printf("[task %d %ld]\n", ucx_task_id(), cnt++);
-		ucx_task_yield();
-	}
-}
-
 void task0(void)
 {
 	int32_t cnt = 100000;
@@ -41,14 +17,23 @@ void task0(void)
 
 int app_main(void)
 {
-	ucx_task_spawn(task0, DEFAULT_STACK_SIZE);
-	ucx_task_spawn(task1, DEFAULT_STACK_SIZE);
-	ucx_task_spawn(task2, DEFAULT_STACK_SIZE);
-	ucx_task_priority(2, TASK_LOW_PRIO);
+	partition_init(DEFAULT_PARTITION_CONFIG.period,
+				   DEFAULT_PARTITION_CONFIG.duration,
+				   DEFAULT_PARTITION_CONFIG.identifier,
+				   DEFAULT_PARTITION_CONFIG.num_assigned_cores,
+				   DEFAULT_PARTITION_CONFIG.name,
+				   DEFAULT_PARTITION_CONFIG.region_name_code_mem,
+				   DEFAULT_PARTITION_CONFIG.size_code_mem,
+				   DEFAULT_PARTITION_CONFIG.access_code_mem,
+				   DEFAULT_PARTITION_CONFIG.region_name_data_mem,
+				   DEFAULT_PARTITION_CONFIG.size_data_mem,
+				   DEFAULT_PARTITION_CONFIG.access_data_mem,
+				   task0,
+				   DEFAULT_PARTITION_CONFIG.is_system_partition);
+
 	
 	printf("task0 has id %d\n", ucx_task_idref(task0));
-	printf("task1 has id %d\n", ucx_task_idref(task1));
-	printf("task2 has id %d\n", ucx_task_idref(task2));
+
 
 	// start UCX/OS, preemptive mode
 	return 1;

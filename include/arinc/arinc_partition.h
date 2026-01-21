@@ -95,4 +95,17 @@ extern void GET_MY_PARTITION_ID (
        /*out*/ PARTITION_ID_TYPE          *PARTITION_ID,
        /*out*/ RETURN_CODE_TYPE           *RETURN_CODE );
 
+int32_t partition_init(SYSTEM_TIME_TYPE PERIOD, 
+                        SYSTEM_TIME_TYPE DURATION,
+                        PARTITION_ID_TYPE IDENTIFIER,
+                        NUM_CORES_TYPE    NUM_ASSIGNED_CORES,
+                        const PARTITION_NAME_TYPE name,
+                        const REGION_NAME_TYPE   region_name_code_mem,
+                        APEX_UNSIGNED      size_code_mem,
+                        const ACCESS_TYPE        access_code_mem,
+                        const REGION_NAME_TYPE   region_name_data_mem,
+                        APEX_UNSIGNED      size_data_mem,
+                        const ACCESS_TYPE        access_data_mem,
+                        SYSTEM_ADDRESS_TYPE entry_point,
+                        SYSTEM_PARTITION_TYPE is_system_partition);
 #endif
