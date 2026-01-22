@@ -60,8 +60,8 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     /* --- INITIALISATION DE LA PARTIE TCB (POUR LE KERNEL) --- */
     new_pcb->tcb.id = (uint16_t)IDENTIFIER;         
     new_pcb->tcb.task = (void (*)(void))entry_point; 
-    new_pcb->tcb.stack = code_region->base;         
-    new_pcb->tcb.stack_sz = size_code_mem;          
+    new_pcb->tcb.stack = malloc(new_pcb->tcb.stack_sz);;         
+    new_pcb->tcb.stack_sz = 4096;          
     new_pcb->tcb.state = TASK_READY;                
     new_pcb->tcb.priority = TASK_NORMAL_PRIO;       
     new_pcb->tcb.delay = 0;
@@ -88,13 +88,13 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 
     CRITICAL_LEAVE();
 
-    // initialisation de la mémoire pour le code, TO-DO faire pareil pour la data
-    memset(code_region->base, 0x69, code_region->size);
-	memset(code_region->base, 0x33, 4);
-	memset((code_region->base) + code_region->size - 4, 0x33, 4);
+    // // initialisation de la mémoire pour le code, TO-DO faire pareil pour la data
+    // memset(code_region->base, 0x69, code_region->size);
+	// memset(code_region->base, 0x33, 4);
+	// memset((code_region->base) + code_region->size - 4, 0x33, 4);
 
-	_context_init(&new_pcb->tcb.context, (size_t)code_region->base,
-		code_region->size, (size_t)new_pcb->entry_point);
+	_context_init(&new_pcb->tcb.context, (size_t)new_pcb->tcb.stack,
+		new_pcb->tcb.stack_sz, (size_t)new_pcb->entry_point);
 
 	printf("core %d, partition %d: 0x%p, memory: 0x%p, size %d\n", _cpu_id(),
 		new_pcb->status->IDENTIFIER, new_pcb->entry_point ,new_pcb->memory_requirements->memory[0].base, new_pcb->memory_requirements->memory[0].size);
