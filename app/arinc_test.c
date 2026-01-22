@@ -1,5 +1,10 @@
 #include <ucx.h>
 
+// Déclaration des symboles du linker script
+extern uint8_t _p1_code_start[];
+extern uint32_t _p1_code_size;
+
+__attribute__((section(".p1_code")))
 void task0(void)
 {
 	int32_t cnt = 100000;
@@ -23,7 +28,8 @@ int app_main(void)
 				   DEFAULT_PARTITION_CONFIG.num_assigned_cores,
 				   DEFAULT_PARTITION_CONFIG.name,
 				   DEFAULT_PARTITION_CONFIG.region_name_code_mem,
-				   DEFAULT_PARTITION_CONFIG.size_code_mem,
+				   (void*)_p1_code_start,
+				   (size_t)&_p1_code_size,
 				   DEFAULT_PARTITION_CONFIG.access_code_mem,
 				   DEFAULT_PARTITION_CONFIG.region_name_data_mem,
 				   DEFAULT_PARTITION_CONFIG.size_data_mem,

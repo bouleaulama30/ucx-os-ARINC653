@@ -6,9 +6,11 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         NUM_CORES_TYPE    NUM_ASSIGNED_CORES,
                         const PARTITION_NAME_TYPE name,
                         const REGION_NAME_TYPE   region_name_code_mem,
+                        void* base_code_mem,
                         APEX_UNSIGNED      size_code_mem,
                         const ACCESS_TYPE        access_code_mem,
                         const REGION_NAME_TYPE   region_name_data_mem,
+                        // void* base_data_mem,
                         APEX_UNSIGNED      size_data_mem,
                         const ACCESS_TYPE        access_data_mem,
                         SYSTEM_ADDRESS_TYPE entry_point,
@@ -39,11 +41,11 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     status->START_CONDITION = NORMAL_START; // TODO -Q définir start condition
 
     strcpy(code_region->region_name, region_name_code_mem);
-    code_region->base = malloc(size_code_mem); // TODO -Q définir base code mem
+    code_region->base = base_code_mem; // TODO -Q définir base code mem
     code_region->size = size_code_mem;
     strcpy(code_region->access, access_code_mem);
 
-    // strcpy(data_region->region_name, region_name_data_meme);
+    // strcpy(data_region->region_name, region_name_data_mem);
     // data_region->base = base_data_mem;
     // data_region->size = size_data_mem;
     // strcpy(data_region->access, access_data_mem);
@@ -56,12 +58,12 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 		krnl_panic(ERR_PCB_ALLOC);
 
     /* --- INITIALISATION DE LA PARTIE TCB (POUR LE KERNEL) --- */
-    new_pcb->tcb.id = (uint16_t)IDENTIFIER;         // L'ID pour ucx_task_id()
-    new_pcb->tcb.task = (void (*)(void))entry_point; // Le pointeur de fonction (Offset 0 !)
-    new_pcb->tcb.stack = code_region->base;         // La base de la pile
-    new_pcb->tcb.stack_sz = size_code_mem;          // La taille de la pile
-    new_pcb->tcb.state = TASK_READY;                // État initial (prêt à être exécuté)
-    new_pcb->tcb.priority = TASK_NORMAL_PRIO;       // Priorité par défaut (ou autre selon besoin)
+    new_pcb->tcb.id = (uint16_t)IDENTIFIER;         
+    new_pcb->tcb.task = (void (*)(void))entry_point; 
+    new_pcb->tcb.stack = code_region->base;         
+    new_pcb->tcb.stack_sz = size_code_mem;          
+    new_pcb->tcb.state = TASK_READY;                
+    new_pcb->tcb.priority = TASK_NORMAL_PRIO;       
     new_pcb->tcb.delay = 0;
 
     CRITICAL_ENTER();
