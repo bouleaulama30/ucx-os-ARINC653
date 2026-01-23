@@ -2,9 +2,12 @@
 
 // Déclaration des symboles du linker script
 extern uint8_t _p1_code_start[];
-extern uint32_t _p1_code_size;
+extern uint8_t _p1_code_end[];
 
+extern uint8_t _p1_data_start[];
+extern uint8_t _p1_data_end[];
 
+// on met la tache dans la section code de la p1
 __attribute__((section(".p1_code")))
 void task0(void)
 {
@@ -23,6 +26,11 @@ void task0(void)
 
 int app_main(void)
 {
+	size_t p1_code_size =  _p1_code_end -_p1_code_start;
+
+	// la partie data est pour l'instant la stack de la task de l'entry point de P1 donc elle grandit vers le bas
+	size_t p1_data_size =  _p1_data_start -_p1_data_end;
+
 	partition_init(DEFAULT_PARTITION_CONFIG.period,
 				   DEFAULT_PARTITION_CONFIG.duration,
 				   DEFAULT_PARTITION_CONFIG.identifier,
@@ -30,10 +38,11 @@ int app_main(void)
 				   DEFAULT_PARTITION_CONFIG.name,
 				   DEFAULT_PARTITION_CONFIG.region_name_code_mem,
 				   (void*)_p1_code_start,
-				   (size_t)&_p1_code_size,
+				   (size_t)p1_code_size,
 				   DEFAULT_PARTITION_CONFIG.access_code_mem,
 				   DEFAULT_PARTITION_CONFIG.region_name_data_mem,
-				   DEFAULT_PARTITION_CONFIG.size_data_mem,
+				   (void*)_p1_data_start,
+				   p1_data_size,
 				   DEFAULT_PARTITION_CONFIG.access_data_mem,
 				   task0,
 				   DEFAULT_PARTITION_CONFIG.is_system_partition);

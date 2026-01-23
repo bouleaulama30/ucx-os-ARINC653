@@ -1,8 +1,5 @@
 #include <ucx.h>
 
-extern uint8_t _p1_stack_start[];
-extern uint8_t _p1_stack_end[];
-
 
 int32_t partition_init(SYSTEM_TIME_TYPE PERIOD, 
                         SYSTEM_TIME_TYPE DURATION,
@@ -14,7 +11,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         APEX_UNSIGNED      size_code_mem,
                         const ACCESS_TYPE        access_code_mem,
                         const REGION_NAME_TYPE   region_name_data_mem,
-                        // void* base_data_mem,
+                        void* base_data_mem,
                         APEX_UNSIGNED      size_data_mem,
                         const ACCESS_TYPE        access_data_mem,
                         SYSTEM_ADDRESS_TYPE entry_point,
@@ -49,13 +46,13 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     code_region->size = size_code_mem;
     strcpy(code_region->access, access_code_mem);
 
-    // strcpy(data_region->region_name, region_name_data_mem);
-    // data_region->base = base_data_mem;
-    // data_region->size = size_data_mem;
-    // strcpy(data_region->access, access_data_mem);
+    strcpy(data_region->region_name, region_name_data_mem);
+    data_region->base = base_data_mem;
+    data_region->size = size_data_mem;
+    strcpy(data_region->access, access_data_mem);
 
-    memory_requirements->memory[0] = *code_region;
-    memory_requirements->memory[1] = *data_region;
+    memory_requirements->memory[CODE] = *code_region;
+    memory_requirements->memory[DATA] = *data_region;
 
 
 	if (!new_pcb)
@@ -64,8 +61,8 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     /* --- INITIALISATION DE LA PARTIE TCB (POUR LE KERNEL) --- */
     new_pcb->tcb.id = (uint16_t)IDENTIFIER;         
     new_pcb->tcb.task = (void (*)(void))entry_point; 
-    new_pcb->tcb.stack = (void*)_p1_stack_start;         
-    new_pcb->tcb.stack_sz = (size_t)(_p1_stack_start - _p1_stack_end);
+    new_pcb->tcb.stack = data_region->base;         
+    new_pcb->tcb.stack_sz = data_region->size;
     new_pcb->tcb.state = TASK_READY;                
     new_pcb->tcb.priority = TASK_NORMAL_PRIO;       
     new_pcb->tcb.delay = 0;
@@ -100,8 +97,8 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 	_context_init(&new_pcb->tcb.context, (size_t)new_pcb->tcb.stack,
 		new_pcb->tcb.stack_sz, (size_t)new_pcb->entry_point);
 
-	printf("core %d, partition %d: 0x%p, memory: 0x%p, memory size: %d,stack: 0x%p, stack size %d\n", _cpu_id(),
-		new_pcb->status->IDENTIFIER, new_pcb->entry_point ,new_pcb->memory_requirements->memory[0].base, new_pcb->memory_requirements->memory[0].size, new_pcb->tcb.stack, new_pcb->tcb.stack_sz);
+	printf("core %d, partition %d: 0x%p, memory code: 0x%p, memory code size: %d, memory data: 0x%p, memory data size %d\n", _cpu_id(),
+		new_pcb->status->IDENTIFIER, new_pcb->entry_point ,new_pcb->memory_requirements->memory[CODE].base, new_pcb->memory_requirements->memory[CODE].size, new_pcb->memory_requirements->memory[DATA].base, new_pcb->memory_requirements->memory[DATA].size);
     return new_pcb->status->IDENTIFIER;
 }
 

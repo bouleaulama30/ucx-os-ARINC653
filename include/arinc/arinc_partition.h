@@ -30,6 +30,11 @@ typedef NAME_TYPE PARTITION_NAME_TYPE;
 typedef NAME_TYPE REGION_NAME_TYPE;
 typedef NAME_TYPE ACCESS_TYPE;
 
+enum {
+      CODE = 0,
+      DATA = 1,
+    };
+
 typedef 
    struct {
     REGION_NAME_TYPE   region_name;
@@ -49,6 +54,7 @@ typedef
         false = 0,
         true = 1
     } SYSTEM_PARTITION_TYPE;
+
 
 typedef
    enum {
@@ -105,7 +111,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         APEX_UNSIGNED      size_code_mem,
                         const ACCESS_TYPE        access_code_mem,
                         const REGION_NAME_TYPE   region_name_data_mem,
-                        // void* base_data_mem,
+                        void* base_data_mem,
                         APEX_UNSIGNED      size_data_mem,
                         const ACCESS_TYPE        access_data_mem,
                         SYSTEM_ADDRESS_TYPE entry_point,

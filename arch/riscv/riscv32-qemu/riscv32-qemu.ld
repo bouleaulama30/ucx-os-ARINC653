@@ -3,7 +3,8 @@ MEMORY
 	ram (rwx)     : ORIGIN = 0x80000000, LENGTH = 16M
 
 	/* définition de la p1 */
-	p1 (rwx)  : ORIGIN = 0x81000000, LENGTH = 1M
+	p1_code (rx)  : ORIGIN = 0x81000000, LENGTH = 1M
+	p1_data (rw)  : ORIGIN = 0x82000000, LENGTH = 1M
 }
 
 /* Entry Point */
@@ -71,14 +72,13 @@ SECTIONS
         _p1_code_start = .;  
 
         *(.p1_code)
+		_p1_code_end = .;
+    } > p1_code
 
-    } > p1
-
-	.p1_stack : {
-        _p1_stack_end = .;
+	.p1_data : {
+        _p1_data_end = .;
         . += 256K;
-        _p1_stack_start = .;
-    } > p1
+        _p1_data_start = .;
+    } > p1_data
 
-    _p1_code_size = . - _p1_code_start; 
 }
