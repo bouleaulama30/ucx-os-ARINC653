@@ -114,8 +114,15 @@ void SET_PARTITION_MODE (
 void GET_MY_PARTITION_ID(
                /*out*/ PARTITION_ID_TYPE          *PARTITION_ID,
               /*out*/ RETURN_CODE_TYPE           *RETURN_CODE )
-       {
-           *PARTITION_ID = 2;
-           *RETURN_CODE = NO_ERROR;
-       
-       }
+{
+#ifndef MULTICORE
+    struct pcb_s* my_partition = kcb->task_current->data;
+#else
+    struct pcb_s* my_partition = kcb[_cpu_id()]->task_current->data;
+#endif
+    *PARTITION_ID = my_partition->status->IDENTIFIER;
+    if(*PARTITION_ID)
+        *RETURN_CODE = NO_ERROR;
+    else
+        *RETURN_CODE = NOT_AVAILABLE;       
+}
