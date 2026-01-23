@@ -68,11 +68,16 @@ SECTIONS
 	_end = .;
 
     .p1_code : {
-        . = ALIGN(4096);
         _p1_code_start = .;  
 
         *(.p1_code)
 
+    } > p1
+
+	.p1_stack : {
+        _p1_stack_end = .;
+        . += 256K;
+        _p1_stack_start = .;
     } > p1
 
     _p1_code_size = . - _p1_code_start; 

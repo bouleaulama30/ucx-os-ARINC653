@@ -1,5 +1,9 @@
 #include <ucx.h>
 
+extern uint8_t _p1_stack_start[];
+extern uint8_t _p1_stack_end[];
+
+
 int32_t partition_init(SYSTEM_TIME_TYPE PERIOD, 
                         SYSTEM_TIME_TYPE DURATION,
                         PARTITION_ID_TYPE IDENTIFIER,
@@ -60,8 +64,8 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     /* --- INITIALISATION DE LA PARTIE TCB (POUR LE KERNEL) --- */
     new_pcb->tcb.id = (uint16_t)IDENTIFIER;         
     new_pcb->tcb.task = (void (*)(void))entry_point; 
-    new_pcb->tcb.stack = malloc(new_pcb->tcb.stack_sz);;         
-    new_pcb->tcb.stack_sz = 4096;          
+    new_pcb->tcb.stack = (void*)_p1_stack_start;         
+    new_pcb->tcb.stack_sz = (size_t)(_p1_stack_start - _p1_stack_end);
     new_pcb->tcb.state = TASK_READY;                
     new_pcb->tcb.priority = TASK_NORMAL_PRIO;       
     new_pcb->tcb.delay = 0;
@@ -96,8 +100,8 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 	_context_init(&new_pcb->tcb.context, (size_t)new_pcb->tcb.stack,
 		new_pcb->tcb.stack_sz, (size_t)new_pcb->entry_point);
 
-	printf("core %d, partition %d: 0x%p, memory: 0x%p, size %d\n", _cpu_id(),
-		new_pcb->status->IDENTIFIER, new_pcb->entry_point ,new_pcb->memory_requirements->memory[0].base, new_pcb->memory_requirements->memory[0].size);
+	printf("core %d, partition %d: 0x%p, memory: 0x%p, memory size: %d,stack: 0x%p, stack size %d\n", _cpu_id(),
+		new_pcb->status->IDENTIFIER, new_pcb->entry_point ,new_pcb->memory_requirements->memory[0].base, new_pcb->memory_requirements->memory[0].size, new_pcb->tcb.stack, new_pcb->tcb.stack_sz);
     return new_pcb->status->IDENTIFIER;
 }
 
