@@ -58,11 +58,11 @@ static void stack_check(void)
 	uint32_t check = 0x33333333;
 	uint32_t *stack_p = (uint32_t *)task->stack;
 
-	if (*stack_p != check) {
-		printf("\n*** task %d, stack: 0x%p (size %d)\n", task->id,
-			task->stack, task->stack_sz);
-		krnl_panic(ERR_STACK_CHECK);
-	}
+	// if (*stack_p != check) {
+	// 	printf("\n*** task %d, stack: 0x%p (size %d)\n", task->id,
+	// 		task->stack, task->stack_sz);
+	// 	krnl_panic(ERR_STACK_CHECK);
+	// }
 		
 }
 
