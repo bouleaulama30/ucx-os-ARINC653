@@ -1,0 +1,133 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0" version="29.3.4">
+  <diagram name="Page-1" id="k5SdicFS81lSR6N--Wb1">
+    <mxGraphModel dx="2377" dy="1327" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-59" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="Layer 4: Applications (Partitions)" vertex="1">
+          <mxGeometry height="308" width="813" x="1261" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-60" parent="1" style="whiteSpace=wrap;strokeWidth=2;verticalAlign=top;" value="Partition 2 (Non-Critical)" vertex="1">
+          <mxGeometry height="129" width="344" x="1296" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-61" parent="YUGcmZN7Ua-yLOOV9CNM-60" style="rounded=1;arcSize=20;strokeWidth=2" value="Process B1" vertex="1">
+          <mxGeometry height="54" width="112" x="43" y="46" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-62" parent="YUGcmZN7Ua-yLOOV9CNM-60" style="rounded=1;arcSize=20;strokeWidth=2" value="Process B2" vertex="1">
+          <mxGeometry height="54" width="112" x="205" y="46" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-63" parent="1" style="whiteSpace=wrap;strokeWidth=2;verticalAlign=top;" value="Partition 1 (Critical)" vertex="1">
+          <mxGeometry height="258" width="350" x="1690" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-64" parent="YUGcmZN7Ua-yLOOV9CNM-63" style="rounded=1;arcSize=20;strokeWidth=2" value="Process A1" vertex="1">
+          <mxGeometry height="54" width="112" x="43" y="46" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-65" parent="YUGcmZN7Ua-yLOOV9CNM-63" style="rounded=1;arcSize=20;strokeWidth=2" value="Process A2" vertex="1">
+          <mxGeometry height="54" width="112" x="43" y="175" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-66" parent="YUGcmZN7Ua-yLOOV9CNM-63" style="rounded=1;arcSize=20;strokeWidth=2" value="Partition HM" vertex="1">
+          <mxGeometry height="54" width="118" x="205" y="175" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-67" edge="1" parent="YUGcmZN7Ua-yLOOV9CNM-63" source="YUGcmZN7Ua-yLOOV9CNM-64" style="curved=1;startArrow=none;endArrow=none;exitX=0.5;exitY=0.99;entryX=0.5;entryY=-0.01;rounded=0;" target="YUGcmZN7Ua-yLOOV9CNM-65" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-68" parent="1" style="whiteSpace=wrap;strokeWidth=2;verticalAlign=top;" value="Layer 3: APEX Interface (ARINC 653 API)" vertex="1">
+          <mxGeometry height="177" width="330" x="1506" y="403" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-69" parent="YUGcmZN7Ua-yLOOV9CNM-68" style="whiteSpace=wrap;strokeWidth=2;" value="APEX Services&#xa;(Communication, Process, Time, Memory)" vertex="1">
+          <mxGeometry height="102" width="260" x="43" y="46" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-70" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="Layer 2: Core Software (Module OS)" vertex="1">
+          <mxGeometry height="331" width="777" x="584" y="378" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-71" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="Layer 1: Hardware" vertex="1">
+          <mxGeometry height="818" width="544" x="20" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-72" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="Processor / CPU" vertex="1">
+          <mxGeometry height="54" width="179" x="203" y="759" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-73" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="MMU - Memory Protection" vertex="1">
+          <mxGeometry height="54" width="247" x="55" y="147" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-74" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="Real-Time Clock" vertex="1">
+          <mxGeometry height="54" width="178" x="352" y="147" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-75" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="Adapted RTOS Kernel" vertex="1">
+          <mxGeometry height="54" width="219" x="983" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-76" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="Partition Scheduler&#xa;(Time Partitioning)" vertex="1">
+          <mxGeometry height="78" width="195" x="870" y="453" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-77" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="Memory Manager&#xa;(Space Partitioning)" vertex="1">
+          <mxGeometry height="78" width="201" x="619" y="453" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-78" parent="1" style="whiteSpace=wrap;strokeWidth=2;" value="Health Monitor (HM)" vertex="1">
+          <mxGeometry height="54" width="204" x="1115" y="465" as="geometry" />
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-79" edge="1" parent="1" source="YUGcmZN7Ua-yLOOV9CNM-75" style="curved=1;startArrow=none;endArrow=none;exitX=0.2;exitY=0;entryX=0.5;entryY=0.99;rounded=0;" target="YUGcmZN7Ua-yLOOV9CNM-76" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="968" y="605" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-80" edge="1" parent="1" source="YUGcmZN7Ua-yLOOV9CNM-75" style="curved=1;startArrow=none;endArrow=none;exitX=0;exitY=0.22;entryX=0.5;entryY=0.99;rounded=0;" target="YUGcmZN7Ua-yLOOV9CNM-77" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="605" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-81" edge="1" parent="1" source="YUGcmZN7Ua-yLOOV9CNM-75" style="curved=1;startArrow=none;endArrow=none;exitX=0.8;exitY=0;entryX=0.5;entryY=0.99;rounded=0;" target="YUGcmZN7Ua-yLOOV9CNM-78" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1217" y="605" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-82" edge="1" parent="1" source="YUGcmZN7Ua-yLOOV9CNM-77" style="curved=1;dashed=1;dashPattern=2 3;startArrow=none;endArrow=block;exitX=0.5;exitY=-0.01;entryX=0.5;entryY=1;rounded=0;" target="YUGcmZN7Ua-yLOOV9CNM-73" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="378" />
+              <mxPoint x="178" y="353" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-83" edge="1" parent="1" source="YUGcmZN7Ua-yLOOV9CNM-76" style="curved=1;dashed=1;dashPattern=2 3;startArrow=none;endArrow=block;exitX=0.5;exitY=-0.01;entryX=0.5;entryY=1;rounded=0;" target="YUGcmZN7Ua-yLOOV9CNM-74" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="968" y="378" />
+              <mxPoint x="441" y="353" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-84" edge="1" parent="1" source="YUGcmZN7Ua-yLOOV9CNM-71" style="curved=1;startArrow=none;endArrow=none;strokeWidth=3;rounded=0;" target="YUGcmZN7Ua-yLOOV9CNM-70" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-85" edge="1" parent="1" source="YUGcmZN7Ua-yLOOV9CNM-70" style="curved=1;startArrow=none;endArrow=none;strokeWidth=3;rounded=0;" target="YUGcmZN7Ua-yLOOV9CNM-68" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-86" edge="1" parent="1" source="YUGcmZN7Ua-yLOOV9CNM-68" style="curved=1;startArrow=none;endArrow=none;strokeWidth=3;exitX=0.96;exitY=0;entryX=0.5;entryY=1;rounded=0;" target="YUGcmZN7Ua-yLOOV9CNM-63" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1865" y="378" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="YUGcmZN7Ua-yLOOV9CNM-87" edge="1" parent="1" source="YUGcmZN7Ua-yLOOV9CNM-68" style="curved=1;startArrow=none;endArrow=none;strokeWidth=3;exitX=0.02;exitY=0;entryX=0.5;entryY=1;rounded=0;" target="YUGcmZN7Ua-yLOOV9CNM-60" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1468" y="378" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
