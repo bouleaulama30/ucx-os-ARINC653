@@ -1,0 +1,103 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0" version="29.3.6">
+  <diagram name="Page-1" id="wMy652U03S2HfnQFjESo">
+    <mxGraphModel dx="1901" dy="1061" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="PlT81a2En6yFKn-U6k-s-1" parent="1" style="whiteSpace=wrap;strokeWidth=2;verticalAlign=top;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" value="" vertex="1">
+          <mxGeometry height="540" width="510" x="650" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-10" parent="PlT81a2En6yFKn-U6k-s-1" style="whiteSpace=wrap;strokeWidth=2;fontSize=27;fillColor=#e1d5e7;strokeColor=#9673a6;" value="" vertex="1">
+          <mxGeometry height="171.23890909090912" width="449.4" x="20" y="44.76109090909092" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-2" parent="PlT81a2En6yFKn-U6k-s-1" style="whiteSpace=wrap;strokeWidth=2;verticalAlign=top;fontSize=27;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="" vertex="1">
+          <mxGeometry height="261.05" width="240" x="10" y="238.95" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-3" parent="PlT81a2En6yFKn-U6k-s-2" style="whiteSpace=wrap;strokeWidth=2;fontSize=27;fillColor=#d5e8d4;strokeColor=#82b366;" value="P2 Code (RX)" vertex="1">
+          <mxGeometry height="52.3235" width="195.25876363636362" x="16.91607272727273" y="104.36485431277568" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-4" parent="PlT81a2En6yFKn-U6k-s-2" style="whiteSpace=wrap;strokeWidth=2;fontSize=27;fillColor=#d5e8d4;strokeColor=#82b366;" value="P2 Data (RW)" vertex="1">
+          <mxGeometry height="72.13223684210524" width="148.94539920329683" x="32.73068383710331" y="165.8269470559828" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-33" parent="PlT81a2En6yFKn-U6k-s-2" style="text;strokeColor=none;fillColor=none;html=1;fontSize=27;fontStyle=1;verticalAlign=middle;align=center;" value="&lt;div&gt;Partition 2 Region&amp;nbsp;&lt;/div&gt;&lt;div&gt;(e.g., 0x8300...)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="37.74853589762129" width="109.09090909090912" x="72.58909090909084" y="25.12165063986697" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-5" parent="PlT81a2En6yFKn-U6k-s-1" style="whiteSpace=wrap;strokeWidth=2;fontSize=27;" value="Partition Control Blocks (PCBs) Metadata" vertex="1">
+          <mxGeometry height="98.18181818181819" width="210" x="30" y="93.27272727272728" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-6" parent="PlT81a2En6yFKn-U6k-s-1" style="whiteSpace=wrap;strokeWidth=2;verticalAlign=top;fontSize=27;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="" vertex="1">
+          <mxGeometry height="258.86" width="240" x="260" y="241.14" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-7" parent="PlT81a2En6yFKn-U6k-s-6" style="whiteSpace=wrap;strokeWidth=2;fontSize=27;fillColor=#d5e8d4;strokeColor=#82b366;" value="P1 Code (RX)" vertex="1">
+          <mxGeometry height="54.983421052631584" width="201.84" x="12.355555555555553" y="101.9382894736842" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-8" parent="PlT81a2En6yFKn-U6k-s-6" style="whiteSpace=wrap;strokeWidth=2;fontSize=27;fillColor=#d5e8d4;strokeColor=#82b366;" value="P1 Data (RW)" vertex="1">
+          <mxGeometry height="69.25640350877192" width="132.35524787119553" x="53.82009398948199" y="165.4400859649123" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-32" parent="PlT81a2En6yFKn-U6k-s-6" style="text;strokeColor=none;fillColor=none;html=1;fontSize=27;fontStyle=1;verticalAlign=middle;align=center;" value="&lt;div&gt;Partition 1 Region&lt;/div&gt;&lt;div&gt;(e.g., 0x8100...)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="36.68520814880425" width="109.38924339106654" x="65.30537830446679" y="26.991141895482734" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-9" parent="PlT81a2En6yFKn-U6k-s-1" style="whiteSpace=wrap;strokeWidth=2;fontSize=27;" value="ucx-os Nano-Kernel Code/Data" vertex="1">
+          <mxGeometry height="88.36363636363637" width="210" x="249.99999999999997" y="93.27272727272727" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-14" edge="1" parent="PlT81a2En6yFKn-U6k-s-1" source="PlT81a2En6yFKn-U6k-s-5" style="curved=1;dashed=1;dashPattern=2 3;startArrow=none;endArrow=block;exitX=0.14;exitY=1;entryX=0.5;entryY=0;rounded=0;fontSize=20;" target="PlT81a2En6yFKn-U6k-s-2" value="PCB P2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="74.76052249637154" y="193.6216216216216" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-25" parent="PlT81a2En6yFKn-U6k-s-1" style="text;strokeColor=none;fillColor=none;html=1;fontSize=27;fontStyle=1;verticalAlign=middle;align=center;" value="Kernel Region (e.g., 0x8000...)" vertex="1">
+          <mxGeometry height="39.27272727272728" width="100" x="210" y="54.00000000000001" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-34" edge="1" parent="PlT81a2En6yFKn-U6k-s-1" source="PlT81a2En6yFKn-U6k-s-5" style="curved=1;dashed=1;dashPattern=2 3;startArrow=none;endArrow=block;exitX=0.86;exitY=1;entryX=0.5;entryY=0;rounded=0;fontSize=20;entryDx=0;entryDy=0;" target="PlT81a2En6yFKn-U6k-s-6" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+            <mxPoint x="861" y="220.9090909090909" as="sourcePoint" />
+            <mxPoint x="1010" y="266.07272727272726" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-36" connectable="0" parent="PlT81a2En6yFKn-U6k-s-34" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;PCB P1&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.077" y="3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-21" parent="PlT81a2En6yFKn-U6k-s-1" style="text;strokeColor=none;fillColor=none;html=1;fontSize=27;fontStyle=1;verticalAlign=middle;align=center;" value="Physical RAM Layout (Runtime View)" vertex="1">
+          <mxGeometry height="38.918918918918926" width="37.01015965166906" x="241.49813115475172" y="5.837837837837839" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-15" parent="1" style="whiteSpace=wrap;strokeWidth=2;fillColor=#f8cecc;strokeColor=#b85450;" value="" vertex="1">
+          <mxGeometry height="320" width="320" x="210" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-16" parent="1" style="whiteSpace=wrap;strokeWidth=2;fontSize=27;fillColor=#fff2cc;strokeColor=#d6b656;" value="Linker Script (riscv32-qemu.ld)" vertex="1">
+          <mxGeometry height="78" width="260" x="230" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-20" parent="1" style="text;strokeColor=none;fillColor=none;html=1;fontSize=27;fontStyle=1;verticalAlign=middle;align=center;" value="Build-Time Definition" vertex="1">
+          <mxGeometry height="40" width="270" x="240" y="134" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-17" parent="1" style="whiteSpace=wrap;strokeWidth=2;fontSize=27;fillColor=#fff2cc;strokeColor=#d6b656;" value="Defines static, disjoint MEMORY regions &amp; SECTIONS" vertex="1">
+          <mxGeometry height="102" width="260" x="230" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-28" edge="1" parent="1" source="PlT81a2En6yFKn-U6k-s-16" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.6;entryDx=0;entryDy=0;entryPerimeter=0;" target="PlT81a2En6yFKn-U6k-s-1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="499" y="376.1" as="sourcePoint" />
+            <mxPoint x="640" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-29" connectable="0" parent="PlT81a2En6yFKn-U6k-s-28" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;div&gt;&lt;font style=&quot;font-size: 24px;&quot;&gt;Enforces static&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 24px;&quot;&gt;segmentation&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.117" y="-3" as="geometry">
+            <mxPoint x="-3" y="50" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PlT81a2En6yFKn-U6k-s-31" edge="1" parent="1" source="PlT81a2En6yFKn-U6k-s-16" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;curved=1;" target="PlT81a2En6yFKn-U6k-s-17" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="630" y="270" />
+            </Array>
+            <mxPoint x="870" y="290" as="sourcePoint" />
+            <mxPoint x="920" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
