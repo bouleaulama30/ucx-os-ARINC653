@@ -14,6 +14,45 @@ extern uint8_t _p2_code_end[];
 extern uint8_t _p2_data_start[];
 extern uint8_t _p2_data_end[];
 
+// Fonction utilitaire pour afficher les résultats
+void print_test_result(const char* test_name, int success) {
+    if (success) {
+        printf("[TEST] %s : PASS\n", test_name);
+    } else {
+        printf("[TEST] %s : FAIL\n", test_name);
+    }
+}
+
+__attribute__((section(".p1_code")))
+void test_spatial_local_write(void) {
+    printf("--- Test 1: Ecriture locale (P1 Data) ---\n");
+    
+    volatile int *ptr = (int *)_p1_data_start;
+    int test_val = 0xCAFEBABE;
+    
+    *ptr = test_val; // Tentative d'écriture
+    
+    if (*ptr == test_val) {
+        print_test_result("Write P1 Own Memory", 1);
+    } else {
+        print_test_result("Write P1 Own Memory", 0);
+    }
+}
+
+__attribute__((section(".p1_code")))
+void test_spatial_violation_p2(void) {
+    printf("--- Test 2: Tentative d'ecriture sur P2 (0x%08x) ---\n", (unsigned int)_p2_data_start);
+    printf("ATTENTION: Le systeme DOIT crasher ou lever une exception maintenant.\n");
+    
+    volatile int *ptr = (int *)_p2_data_start;
+    
+    // Si l'isolation matérielle est active, cette ligne stoppe l'exécution
+    *ptr = 0xDEADBEEF; 
+
+    // Si on arrive ici, c'est un échec de l'isolation
+    printf("[CRITICAL FAIL] P1 a reussi a ecrire dans P2 !\n");
+}
+
 // on met la tache dans la section code de la p1
 __attribute__((section(".p1_code")))
 void task0(void)
@@ -40,10 +79,13 @@ void task1(void)
 	APEX_INTEGER id;
 	RETURN_CODE_TYPE return_code;
 
+	PARTITION_STATUS_TYPE status;
+
 	GET_MY_PARTITION_ID(&id, &return_code);
+	GET_PARTITION_STATUS(&status, &return_code);
 
 	while (1) {
-		printf("[task %d %ld, partition %d]\n", ucx_task_id(), cnt++, id);
+		printf("[task %d %ld, period=%ld duration=%ld]\n", ucx_task_id(), cnt++, (long)status.PERIOD, (long)status.DURATION);
 		ucx_task_yield();
 	}
 }
