@@ -2,7 +2,7 @@
 
 ## Partition implem
 
-* pour partition init, gérer les tailles d'allocations avec data + code 
+* comprendre l'importation et signification des symboles ldscript 
 
 ## remind debug
 
