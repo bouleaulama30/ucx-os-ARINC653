@@ -43,9 +43,9 @@ static const struct PartitionConfig P2_CONFIG = {
     .identifier = 2,
     .num_assigned_cores = 1,
     .name = "P2",
-    .region_name_code_mem = "p1_code",
+    .region_name_code_mem = "p2_code",
     .access_code_mem = "RX",
-    .region_name_data_mem = "p1_data",
+    .region_name_data_mem = "p2_data",
     .access_data_mem = "RW",
     .is_system_partition = (SYSTEM_PARTITION_TYPE)false,
 };

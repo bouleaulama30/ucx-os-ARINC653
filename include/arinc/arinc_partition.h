@@ -83,7 +83,7 @@ struct pcb_s {
    MEMORY_REQUIREMENTS_TYPE *memory_requirements;
    // interpartition_communication_type communication_ports;
    // Partion HM Table
-   void* entry_point;
+   SYSTEM_ADDRESS_TYPE entry_point;
    SYSTEM_PARTITION_TYPE is_system_partition;
 
 };
@@ -107,11 +107,11 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         NUM_CORES_TYPE    NUM_ASSIGNED_CORES,
                         const PARTITION_NAME_TYPE name,
                         const REGION_NAME_TYPE   region_name_code_mem,
-                        void* base_code_mem,
+                        SYSTEM_ADDRESS_TYPE base_code_mem,
                         APEX_UNSIGNED      size_code_mem,
                         const ACCESS_TYPE        access_code_mem,
                         const REGION_NAME_TYPE   region_name_data_mem,
-                        void* base_data_mem,
+                        SYSTEM_ADDRESS_TYPE base_data_mem,
                         APEX_UNSIGNED      size_data_mem,
                         const ACCESS_TYPE        access_data_mem,
                         SYSTEM_ADDRESS_TYPE entry_point,

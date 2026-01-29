@@ -7,11 +7,11 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         NUM_CORES_TYPE    NUM_ASSIGNED_CORES,
                         const PARTITION_NAME_TYPE name,
                         const REGION_NAME_TYPE   region_name_code_mem,
-                        void* base_code_mem,
+                        SYSTEM_ADDRESS_TYPE base_code_mem,
                         APEX_UNSIGNED      size_code_mem,
                         const ACCESS_TYPE        access_code_mem,
                         const REGION_NAME_TYPE   region_name_data_mem,
-                        void* base_data_mem,
+                        SYSTEM_ADDRESS_TYPE base_data_mem,
                         APEX_UNSIGNED      size_data_mem,
                         const ACCESS_TYPE        access_data_mem,
                         SYSTEM_ADDRESS_TYPE entry_point,
@@ -105,7 +105,23 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 
 void GET_PARTITION_STATUS (
     /*out*/ PARTITION_STATUS_TYPE      *PARTITION_STATUS,
-    /*out*/ RETURN_CODE_TYPE           *RETURN_CODE );
+    /*out*/ RETURN_CODE_TYPE           *RETURN_CODE ){
+#ifndef MULTICORE
+    struct pcb_s* my_partition = kcb->task_current->data;
+#else
+    struct pcb_s* my_partition = kcb[_cpu_id()]->task_current->data;
+#endif
+    
+    if (!my_partition->status) {
+        *RETURN_CODE = NOT_AVAILABLE;
+        return;
+    }
+
+    *PARTITION_STATUS = *(my_partition->status);
+    *RETURN_CODE = NOT_AVAILABLE;       
+}
+
+
     
 void SET_PARTITION_MODE (
        /*in */ OPERATING_MODE_TYPE        OPERATING_MODE,
