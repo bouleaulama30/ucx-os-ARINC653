@@ -82,10 +82,11 @@ void task1(void)
 	PARTITION_STATUS_TYPE status;
 
 	GET_MY_PARTITION_ID(&id, &return_code);
+	SET_PARTITION_MODE(NORMAL, &return_code);
 	GET_PARTITION_STATUS(&status, &return_code);
 
 	while (1) {
-		printf("[task %d %ld, period=%ld duration=%ld]\n", ucx_task_id(), cnt++, (long)status.PERIOD, (long)status.DURATION);
+		printf("[task %d %ld, period=%ld duration=%ld, mode=%d]\n", ucx_task_id(), cnt++, (long)status.PERIOD, (long)status.DURATION, status.OPERATING_MODE);
 		ucx_task_yield();
 	}
 }

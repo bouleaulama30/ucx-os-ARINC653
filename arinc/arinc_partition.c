@@ -125,7 +125,16 @@ void GET_PARTITION_STATUS (
     
 void SET_PARTITION_MODE (
        /*in */ OPERATING_MODE_TYPE        OPERATING_MODE,
-       /*out*/ RETURN_CODE_TYPE           *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE           *RETURN_CODE ){
+#ifndef MULTICORE
+    struct pcb_s* my_partition = kcb->task_current->data;
+#else
+    struct pcb_s* my_partition = kcb[_cpu_id()]->task_current->data;
+#endif
+    my_partition->status->OPERATING_MODE = OPERATING_MODE;
+    *RETURN_CODE = NO_ERROR;
+
+}
        
 void GET_MY_PARTITION_ID(
                /*out*/ PARTITION_ID_TYPE          *PARTITION_ID,
