@@ -3,6 +3,7 @@
 ## Partition implem
 
 * comprendre l'importation et signification des symboles ldscript 
+* changer ldscript pour mettre data_end à la fin de la région et non faire le truc avec 256ko
 
 ## remind debug
 
