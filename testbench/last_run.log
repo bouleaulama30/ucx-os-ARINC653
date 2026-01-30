@@ -1,0 +1,7 @@
+
+UCX/OS v1.1.1
+heap_init() 0x80002bb8 - 0x80c00000, 12571720 bytes free
+core 0, partition 1: 0x81000000, memory code: 0x81000000, memory code size: 616, memory data: 0x82000000, memory data size 65536
+core 0, partition 2: 0x83000000, memory code: 0x83000000, memory code size: 8, memory data: 0x84000000, memory data size 65536
+core 0 ready (preempt).
+[PERF] main() init time: 10 ms
