@@ -14,7 +14,10 @@ static volatile int boot = 0;
 
 int main(void)
 {
-	struct tcb_s *task;
+	uint64_t t_end_main = 0;
+	uint64_t t_start_main = ucx_uptime();
+
+    struct tcb_s *task;
 	int pr;
 	
 	_hardware_init();
@@ -66,6 +69,9 @@ int main(void)
 	
 	boot = 1;
 #endif
+
+	t_end_main = ucx_uptime();
+	printf("[PERF] main() init time: %lu ms\n", (unsigned long)(t_end_main - t_start_main));
 	_dispatch_init(task->context);
 	
 	/* never reached */

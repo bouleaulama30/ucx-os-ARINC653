@@ -4,11 +4,11 @@ MEMORY
 
 	/* définition de la p1 */
 	p1_code (rx)  : ORIGIN = 0x81000000, LENGTH = 1M
-	p1_data (rw)  : ORIGIN = 0x82000000, LENGTH = 1M
+	p1_data (rw)  : ORIGIN = 0x82000000, LENGTH = 64K
 	
 	/* définition de la p2 */
 	p2_code (rx)  : ORIGIN = 0x83000000, LENGTH = 1M
-	p2_data (rw)  : ORIGIN = 0x84000000, LENGTH = 1M
+	p2_data (rw)  : ORIGIN = 0x84000000, LENGTH = 64K
 }
 
 /* Entry Point */
@@ -80,9 +80,9 @@ SECTIONS
     } > p1_code
 
 	.p1_data : {
-        _p1_data_end = .;
-        . += 256K;
         _p1_data_start = .;
+        . += 64K;
+        _p1_data_end = .;
     } > p1_data
 	
 	.p2_code : {
@@ -93,9 +93,9 @@ SECTIONS
     } > p2_code
 
 	.p2_data : {
-        _p2_data_end = .;
-        . += 256K;
         _p2_data_start = .;
+        . += 64K;
+        _p2_data_end = .;
     } > p2_data
 
 }
