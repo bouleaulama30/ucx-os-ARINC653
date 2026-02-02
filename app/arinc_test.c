@@ -15,52 +15,6 @@ extern uint8_t _p2_data_start[];
 extern uint8_t _p2_data_end[];
 
 
-// Fonction de test pour les opérations de partition
-__attribute__((section(".p1_code")))
-void test_partition_operations(void) {
-    APEX_INTEGER partition_id;
-    RETURN_CODE_TYPE return_code;
-    PARTITION_STATUS_TYPE status;
-    int test_num = 1;
-    int pass = 1;
-    
-    printf("\n--- START TEST SEQUENCE P1 ---\n");
-    
-    // TEST 1: GET_MY_PARTITION_ID
-    printf("[TEST %d] GET_MY_PARTITION_ID...\n", test_num);
-    GET_MY_PARTITION_ID(&partition_id, &return_code);
-    printf("-> Expected: 1, Received: %d [%s]\n", 
-           partition_id, (partition_id == 1) ? "PASS" : "FAIL");
-    test_num++;
-    
-    // TEST 2: GET_PARTITION_STATUS (Initial)
-    printf("[TEST %d] GET_PARTITION_STATUS (Initial)...\n", test_num);
-    GET_PARTITION_STATUS(&status, &return_code);
-    const char* mode_str = (status.OPERATING_MODE == IDLE) ? "IDLE" : 
-                           (status.OPERATING_MODE == NORMAL) ? "NORMAL" : "COLD_START";
-    printf("-> Expected: IDLE, Received: %s [%s]\n", 
-           mode_str, (status.OPERATING_MODE == IDLE) ? "PASS" : "FAIL");
-    test_num++;
-    
-    // TEST 3: SET_PARTITION_MODE(NORMAL)
-    printf("[TEST %d] SET_PARTITION_MODE(NORMAL)...\n", test_num);
-    SET_PARTITION_MODE(NORMAL, &return_code);
-    printf("-> Return Code: %s [%s]\n", 
-           (return_code == NO_ERROR) ? "NO_ERROR" : "ERROR", 
-           (return_code == NO_ERROR) ? "PASS" : "FAIL");
-    test_num++;
-    
-    // TEST 4: GET_PARTITION_STATUS (Post-Switch)
-    printf("[TEST %d] GET_PARTITION_STATUS (Post-Switch)...\n", test_num);
-    GET_PARTITION_STATUS(&status, &return_code);
-    mode_str = (status.OPERATING_MODE == IDLE) ? "IDLE" : 
-               (status.OPERATING_MODE == NORMAL) ? "NORMAL" : "COLD_START";
-    printf("-> Expected: NORMAL, Received: %s [%s]\n", 
-           mode_str, (status.OPERATING_MODE == NORMAL) ? "PASS" : "FAIL");
-    
-    printf("--- END TEST SEQUENCE P1 ---\n\n");
-}
-
 __attribute__((section(".p1_code")))
 void test_spatial_violation_p2(void) {
     printf("--- Test 2: Tentative d'ecriture sur P2 (0x%08x) ---\n", (unsigned int)_p2_data_start);
@@ -166,6 +120,7 @@ void task2(void)
 	}
 }
 
+
 int app_main(void)
 {
 	// la partie data est pour l'instant la stack de la task de l'entry point de P1 donc elle grandit vers le bas
@@ -192,21 +147,21 @@ int app_main(void)
 				   task0,
 				   DEFAULT_PARTITION_CONFIG.is_system_partition);
 
-	partition_init(P2_CONFIG.period,
-				   P2_CONFIG.duration,
-				   P2_CONFIG.identifier,
-				   P2_CONFIG.num_assigned_cores,
-				   P2_CONFIG.name,
-				   P2_CONFIG.region_name_code_mem,
-				   (void*)_p2_code_start,
-				   (size_t)p2_code_size,
-				   P2_CONFIG.access_code_mem,
-				   P2_CONFIG.region_name_data_mem,
-				   (void*)_p2_data_start,
-				   p2_data_size,
-				   P2_CONFIG.access_data_mem,
-				   task1,
-				   P2_CONFIG.is_system_partition);
+	// partition_init(P2_CONFIG.period,
+	// 			   P2_CONFIG.duration,
+	// 			   P2_CONFIG.identifier,
+	// 			   P2_CONFIG.num_assigned_cores,
+	// 			   P2_CONFIG.name,
+	// 			   P2_CONFIG.region_name_code_mem,
+	// 			   (void*)_p2_code_start,
+	// 			   (size_t)p2_code_size,
+	// 			   P2_CONFIG.access_code_mem,
+	// 			   P2_CONFIG.region_name_data_mem,
+	// 			   (void*)_p2_data_start,
+	// 			   p2_data_size,
+	// 			   P2_CONFIG.access_data_mem,
+	// 			   task1,
+	// 			   P2_CONFIG.is_system_partition);
 
 	return 1;
 }

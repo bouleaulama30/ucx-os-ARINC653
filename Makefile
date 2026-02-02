@@ -130,6 +130,10 @@ arinc_test: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test.o app/arinc_test.c
 	@$(MAKE) --no-print-directory link
 
+arinc_test_api_partition: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_api_partition.o app/arinc_test_api_partition.c
+	@$(MAKE) --no-print-directory link
+
 coroutine_args: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/coroutine_args.o app/coroutine_args.c
 	@$(MAKE) --no-print-directory link
@@ -376,8 +380,8 @@ qemu_debug:
 gdb:
 	gdb -x ./debug/.gdbinit ./build/target/image.elf
 
-all: 
+all:
 	$(MAKE) ucx ARCH=riscv/riscv32-qemu
 	$(MAKE) arinc_test
-	-timeout 0.5 qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:test.txt
+	-timeout 0.5 qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:./debug/test.txt
 	head -n30 ./debug/test.txt

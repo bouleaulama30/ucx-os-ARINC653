@@ -131,7 +131,43 @@ void SET_PARTITION_MODE (
 #else
     struct pcb_s* my_partition = kcb[_cpu_id()]->task_current->data;
 #endif
+    // error
+    if(OPERATING_MODE != IDLE && OPERATING_MODE != COLD_START && OPERATING_MODE != WARM_START && OPERATING_MODE != NORMAL){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if(OPERATING_MODE == NORMAL && my_partition->status->OPERATING_MODE == NORMAL){
+        *RETURN_CODE = NO_ACTION;
+        return;
+    }
+
+    if(OPERATING_MODE == WARM_START && my_partition->status->OPERATING_MODE == COLD_START){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+
+    // normal
     my_partition->status->OPERATING_MODE = OPERATING_MODE;
+    
+    if (OPERATING_MODE == IDLE)
+    {
+        printf("OPERATING MODE is IDLE");
+        // shut down the partition
+    }
+
+    if (OPERATING_MODE == WARM_START || OPERATING_MODE == COLD_START)
+    {
+        // inhibit process scheduling and switch back to initialization mode
+        printf("OPERATING MODE is WARM START or COLD START");
+    }
+    
+    if (OPERATING_MODE == NORMAL)
+    {
+        // cf norme
+        printf("OPERATING MODE is NORMAL");
+    }
+    
     *RETURN_CODE = NO_ERROR;
 
 }
