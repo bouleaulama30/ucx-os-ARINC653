@@ -369,3 +369,15 @@ clean:
 veryclean: clean
 	echo "ARCH = none" > $(BUILD_TARGET_DIR)/target.mak
 	find '$(BUILD_TARGET_DIR)' -type f -name '*.a' -delete
+
+qemu_debug:
+	qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -nographic -s -S
+
+gdb:
+	gdb -x ./debug/.gdbinit ./build/target/image.elf
+
+all: 
+	$(MAKE) ucx ARCH=riscv/riscv32-qemu
+	$(MAKE) arinc_test
+	-timeout 0.5 qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:test.txt
+	head -n30 ./debug/test.txt
