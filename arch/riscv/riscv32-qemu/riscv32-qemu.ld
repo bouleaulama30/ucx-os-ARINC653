@@ -81,10 +81,10 @@ SECTIONS
 
 	.p1_data : {
         _p1_data_start = .;
-        . += 64K;
-        _p1_data_end = .;
     } > p1_data
 	
+    _p1_data_end = ORIGIN(p1_data) + LENGTH(p1_data) ;
+
 	.p2_code : {
         _p2_code_start = .;  
 
@@ -94,8 +94,7 @@ SECTIONS
 
 	.p2_data : {
         _p2_data_start = .;
-        . += 64K;
-        _p2_data_end = .;
     } > p2_data
 
+    _p2_data_end = ORIGIN(p2_data) + LENGTH(p2_data) ;
 }

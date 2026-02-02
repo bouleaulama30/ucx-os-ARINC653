@@ -75,43 +75,7 @@ void test_spatial_violation_p2(void) {
     printf("[CRITICAL FAIL] P1 a reussi a ecrire dans P2 !\n");
 }
 
-// on met la tache dans la section code de la p1
-__attribute__((section(".p1_code")))
-void task0(void)
-{
-	// int32_t cnt = 100000;
 
-	// APEX_INTEGER id;
-	// RETURN_CODE_TYPE return_code;
-
-	// GET_MY_PARTITION_ID(&id, &return_code);
-
-	// while (1) {
-	// 	printf("[task %d %ld, partition %d, address cnt: 0x%p]\n", ucx_task_id(), cnt++, id, &cnt);
-	// 	ucx_task_yield();
-	// }
-}
-	
-// on met la tache dans la section code de la p2
-__attribute__((section(".p2_code")))
-void task1(void)
-{
-	// int32_t cnt = 200000;
-	
-	// APEX_INTEGER id;
-	// RETURN_CODE_TYPE return_code;
-	
-	// PARTITION_STATUS_TYPE status;
-	
-	// GET_MY_PARTITION_ID(&id, &return_code);
-	// SET_PARTITION_MODE(NORMAL, &return_code);
-	// GET_PARTITION_STATUS(&status, &return_code);
-
-	// while (1) {
-	// 	printf("[task %d %ld, address cnt: 0x%p ,period=%ld duration=%ld, mode=%d]\n", ucx_task_id(), cnt++, &cnt,(long)status.PERIOD, (long)status.DURATION, status.OPERATING_MODE);
-	// ucx_task_yield();
-// }
-}
 
 __attribute__((section(".p1_code")))
 void test_id_1(void)
@@ -149,21 +113,59 @@ void test_id_2(void)
 	}
 }
 
+// on met la tache dans la section code de la p1
+__attribute__((section(".p1_code")))
+void task0(void)
+{
+	int32_t cnt = 100000;
 
-// void task2(void)
-// {
-// 	int32_t cnt = 300000;
+	APEX_INTEGER id;
+	RETURN_CODE_TYPE return_code;
 
-// 	APEX_INTEGER id;
-// 	RETURN_CODE_TYPE return_code;
+	GET_MY_PARTITION_ID(&id, &return_code);
 
-// 	GET_MY_PARTITION_ID(&id, &return_code);
+	while (1) {
+		printf("[task %d %ld, partition %d, address cnt: 0x%p]\n", ucx_task_id(), cnt++, id, &cnt);
+		ucx_task_yield();
+	}
+}
+	
+// on met la tache dans la section code de la p2
+__attribute__((section(".p2_code")))
+void task1(void)
+{
+	int32_t cnt = 200000;
+	
+	APEX_INTEGER id;
+	RETURN_CODE_TYPE return_code;
+	
+	PARTITION_STATUS_TYPE status;
+	
+	GET_MY_PARTITION_ID(&id, &return_code);
+	SET_PARTITION_MODE(NORMAL, &return_code);
+	GET_PARTITION_STATUS(&status, &return_code);
 
-// 	while (1) {
-// 		printf("[task %d %ld, partition %d, address cnt: 0x%p]\n", ucx_task_id(), cnt++, id, &cnt);
-// 		ucx_task_yield();
-// 	}
-// }
+	while (1) {
+		printf("[task %d %ld, address cnt: 0x%p ,period=%ld duration=%ld, mode=%d]\n", ucx_task_id(), cnt++, &cnt,(long)status.PERIOD, (long)status.DURATION, status.OPERATING_MODE);
+	ucx_task_yield();
+	}
+}
+
+void task2(void)
+{
+	int32_t cnt = 300000;
+
+	APEX_INTEGER id;
+	RETURN_CODE_TYPE return_code;
+
+	GET_MY_PARTITION_ID(&id, &return_code);
+
+	while (1) {
+		printf("[task %d %ld, partition %d, address cnt: 0x%p]\n", ucx_task_id(), cnt++, id, &cnt);
+		ucx_task_yield();
+	}
+}
+
 int app_main(void)
 {
 	// la partie data est pour l'instant la stack de la task de l'entry point de P1 donc elle grandit vers le bas
@@ -174,11 +176,6 @@ int app_main(void)
 	size_t p2_data_size =  _p2_data_end -_p2_data_start;
 	size_t p2_code_size =  _p2_code_end -_p2_code_start;
 
-	// uint64_t t_start_app_main = 0;
-	// uint64_t t_end_app_main = 0;
-	// uint64_t t_total_start_app_main = ucx_uptime();
-
-	// t_start_app_main = ucx_uptime();
 	partition_init(DEFAULT_PARTITION_CONFIG.period,
 				   DEFAULT_PARTITION_CONFIG.duration,
 				   DEFAULT_PARTITION_CONFIG.identifier,
@@ -192,12 +189,9 @@ int app_main(void)
 				   (void*)_p1_data_start,
 				   p1_data_size,
 				   DEFAULT_PARTITION_CONFIG.access_data_mem,
-				   test_id_1,
+				   task0,
 				   DEFAULT_PARTITION_CONFIG.is_system_partition);
-	// t_end_app_main = ucx_uptime();
-	// printf("[PERF] partition_init P1: %lu ms\n", (unsigned long)(t_end_app_main - t_start_app_main));
-	
-	// t_start_app_main = ucx_uptime();
+
 	partition_init(P2_CONFIG.period,
 				   P2_CONFIG.duration,
 				   P2_CONFIG.identifier,
@@ -211,17 +205,8 @@ int app_main(void)
 				   (void*)_p2_data_start,
 				   p2_data_size,
 				   P2_CONFIG.access_data_mem,
-				   test_id_2,
+				   task1,
 				   P2_CONFIG.is_system_partition);
-	// t_end_app_main = ucx_uptime();
-	// printf("[PERF] partition_init P2: %lu ms\n", (unsigned long)(t_end_app_main - t_start_app_main));
 
-	// printf("[PERF] total init time: %lu ms\n", (unsigned long)(ucx_uptime() - t_total_start_app_main));
-
-
-
-	// ucx_task_spawn(task2, DEFAULT_STACK_SIZE);
-
-	// start UCX/OS, preemptive mode
 	return 1;
 }
