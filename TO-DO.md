@@ -2,8 +2,11 @@
 
 ## Partition implem
 
-* terminer implémentation set_operating_mode
-* faire cleanup pour les tests
+* implémentation set_operating_mode:
+    * shut down the partition;
+    * inhibit process scheduling and switch back to initialization mode;
+    * faire les actions quand elle passe en normal (set to READY processes, activate process scheduling etc..)
+* faire scheduler pour les partitions
 
 ## remind debug
 
