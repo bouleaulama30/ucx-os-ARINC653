@@ -6,7 +6,26 @@
     * shut down the partition;
     * inhibit process scheduling and switch back to initialization mode;
     * faire les actions quand elle passe en normal (set to READY processes, activate process scheduling etc..)
-* faire scheduler pour les partitions
+
+* refractor code:
+    * regarder pok pour s'inspirer
+
+* fixe pb corruption mémoire une fois que la soumission de l'article est passée
+    * faire en sorte de lever exeption si écriture interdite ou débordement
+
+### static scheduler
+
+* faire scheduler pour les partitions:
+    * regarder comment fonctionne les timers
+    * faire pseudo algo
+    * regarder comment ils font sur POK
+
+* caractéristiques:
+    * si partition is IDLE alors elle ne peut pas être schedulé
+    * module schedule doit suivre la conf XML pour l'ordre, le début et la durée des partitions
+    * il doit satisfaire les attributs comme partition period, duration...
+    * la somme des partitions times windows doit être sup ou égale à la duration pendant une partition period
+
 
 ## remind debug
 
