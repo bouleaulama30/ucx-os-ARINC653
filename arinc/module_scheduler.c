@@ -1,8 +1,7 @@
 #include <ucx.h>
 
 
-
-void module_scheduler_init(char* name, uint32_t major_frame_tick, window_partition_type* windows_partition, uint32_t nbr_windows){
+void module_scheduler_init(PARTITION_NAME_TYPE name, PARTITION_ID_TYPE id,  uint32_t major_frame_tick, window_partition_type* windows_partition, uint32_t nbr_windows){
     struct mscb_s* module_scheduler;
     uint32_t nbr_windows_partition;
 
@@ -24,22 +23,26 @@ void module_scheduler_init(char* name, uint32_t major_frame_tick, window_partiti
 }
 
 int32_t partition_scheduler(void){
-
+    
 #ifndef MULTICORE
     struct mscb_s* module_scheduler = kcb->module_scheduler;
 #else
     struct mscb_s* module_scheduler = kcb[_cpu_id()]->module_scheduler;
 #endif
     static uint32_t relative_tick = 0;
-    int32_t windows_idx = module_scheduler->windows_idx;
+    int32_t* windows_idx = &module_scheduler->windows_idx;
 
-    // définit statiquement
-    uint32_t partition_start_tick = module_scheduler->windows_partition[windows_idx].start_tick;
-    uint32_t partition_duration_tick = module_scheduler->windows_partition[windows_idx].duration_tick;
+    uint32_t partition_start_tick = module_scheduler->windows_partition[*windows_idx].start_tick;
+    uint32_t partition_duration_tick = module_scheduler->windows_partition[*windows_idx].duration_tick;
     uint32_t partition_end_tick = partition_start_tick + partition_duration_tick;
-    PARTITION_ID_TYPE id = 1;
     
     if(relative_tick == module_scheduler->major_frame_tick){
+        if(module_scheduler->windows_idx == module_scheduler->nbr_windows - 1){
+            return -1;
+        }
+        
+        (*windows_idx)++;
+        PARTITION_ID_TYPE id = module_scheduler->windows_partition[*windows_idx].id;
         relative_tick = 0;
         partition_start_tick = 2;
         partition_duration_tick = 2;
@@ -47,6 +50,12 @@ int32_t partition_scheduler(void){
     }
 
     if(relative_tick > partition_end_tick){
+        if(module_scheduler->windows_idx == module_scheduler->nbr_windows - 1){
+            return -1;
+        }
+
+        (*windows_idx)++;
+        PARTITION_ID_TYPE id = module_scheduler->windows_partition[*windows_idx].id;
         relative_tick++;
         activate_partition(id);
         partition_start_tick = 2;

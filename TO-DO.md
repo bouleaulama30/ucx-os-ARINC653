@@ -16,8 +16,7 @@
 ### static scheduler
 
 * faire scheduler pour les partitions:
-    * regarder comment fonctionne les timers
-    * faire pseudo algo
+    * regarder comment implémenter les temps idle
     * regarder comment ils font sur POK
 
 * caractéristiques:
