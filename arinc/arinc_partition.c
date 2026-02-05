@@ -103,6 +103,11 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 }
 
 
+int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
+    return 1;
+}
+
+
 void GET_PARTITION_STATUS (
     /*out*/ PARTITION_STATUS_TYPE      *PARTITION_STATUS,
     /*out*/ RETURN_CODE_TYPE           *RETURN_CODE ){

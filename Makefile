@@ -59,7 +59,7 @@ ucx: incl hal libs ddrivers network kernel arinc
 	$(AR) $(ARFLAGS) $(BUILD_TARGET_DIR)/libucxos.a \
 		$(BUILD_KERNEL_DIR)/*.o
 
-arinc: arinc_partition.o
+arinc: arinc_partition.o module_scheduler.o
 
 kernel: timer.o message.o pipe.o spinlock.o semaphore.o ecodes.o syscall.o coroutine.o ucx.o main.o
 
@@ -104,6 +104,9 @@ console.o: $(SRC_DIR)/lib/console.c
 arinc_partition.o: $(SRC_DIR)/arinc/arinc_partition.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/arinc/arinc_partition.c
 
+module_scheduler.o: $(SRC_DIR)/arinc/module_scheduler.c
+	$(CC) $(CFLAGS) $(SRC_DIR)/arinc/module_scheduler.c
+
 		
 ## kernel + application link
 link:
@@ -124,7 +127,6 @@ endif
 	$(SIZE) $(BUILD_TARGET_DIR)/image.elf
 	hexdump -v -e '4/1 "%02x" "\n"' $(BUILD_TARGET_DIR)/image.bin > $(BUILD_TARGET_DIR)/code.txt
 
-## applications
 ## applications
 arinc_test: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test.o app/arinc_test.c

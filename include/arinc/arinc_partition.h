@@ -51,8 +51,8 @@ typedef
 
 typedef 
     enum {
-        false = 0,
-        true = 1
+        yes = 0,
+        no = 1
     } SYSTEM_PARTITION_TYPE;
 
 
@@ -101,7 +101,7 @@ extern void GET_MY_PARTITION_ID (
        /*out*/ PARTITION_ID_TYPE          *PARTITION_ID,
        /*out*/ RETURN_CODE_TYPE           *RETURN_CODE );
 
-int32_t partition_init(SYSTEM_TIME_TYPE PERIOD, 
+extern int32_t partition_init(SYSTEM_TIME_TYPE PERIOD, 
                         SYSTEM_TIME_TYPE DURATION,
                         PARTITION_ID_TYPE IDENTIFIER,
                         NUM_CORES_TYPE    NUM_ASSIGNED_CORES,
@@ -116,4 +116,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         const ACCESS_TYPE        access_data_mem,
                         SYSTEM_ADDRESS_TYPE entry_point,
                         SYSTEM_PARTITION_TYPE is_system_partition);
+
+extern int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER);
+
 #endif
