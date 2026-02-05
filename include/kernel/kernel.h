@@ -32,6 +32,7 @@ struct kcb_s {
 	struct node_s *task_current;
 	jmp_buf context;
 	int32_t (*rt_sched)(void);
+	struct mscb_s *module_scheduler;
 	struct list_s *timer_lst;
 	volatile uint32_t ticks;
 	uint16_t id_next;

@@ -13,6 +13,7 @@ struct kcb_s kernel_state = {
 	.tasks = 0,
 	.task_current = 0,
 	.rt_sched = krnl_noop_rtsched,
+	.module_scheduler = 0,
 	.timer_lst = 0,
 	.ticks = 0,
 	.id_next = 0,
