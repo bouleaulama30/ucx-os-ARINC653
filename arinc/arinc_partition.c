@@ -20,6 +20,8 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     // déclaration des structures
 	struct pcb_s *new_pcb;
 	struct node_s *new_partition;
+    struct node_s *new_partition_in_partitions;
+
     PARTITION_STATUS_TYPE* status;
     MEMORY_REGION_TYPE* code_region;
     MEMORY_REGION_TYPE* data_region;
@@ -71,15 +73,20 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 
 #ifndef MULTICORE
     new_partition = list_pushback(kcb->tasks, new_pcb);
+    new_partition_in_partitions = list_pushback(kcb->partitions, new_pcb);
+    
 #else
     new_partition = list_pushback(kcb[_cpu_id()]->tasks, new_pcb);
+    new_partition_in_partitions = list_pushback(kcb[_cpu_id()]->partitions, new_pcb);
 #endif
 
 
-    if (!new_partition)
+    if (!new_partition || !new_partition_in_partitions)
 		krnl_panic(ERR_PCB_ALLOC);
 
-	new_partition->data = new_pcb;
+
+    new_partition->data = new_pcb;
+    new_partition_in_partitions->data = new_pcb;
     new_pcb->status = status;
     strcpy(new_pcb->name, name);
     new_pcb->memory_requirements = memory_requirements;
@@ -104,6 +111,9 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 
 
 int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
+    // trouver la partition avec son id dans la liste des partitions tenu par kcb
+    // mettre la partition en current dans la tache du kcb
+    // vérifier si idle car sinon il ne faut pas la mettre et mettre idle à la place
     return 1;
 }
 
