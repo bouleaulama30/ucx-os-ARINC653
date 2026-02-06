@@ -386,6 +386,7 @@ multiarch-gdb:
 	gdb-multiarch -x ./debug/.gdbinit ./build/target/image.elf
 
 all:
+	$(MAKE) veryclean
 	$(MAKE) ucx ARCH=riscv/riscv32-qemu
 	$(MAKE) arinc_test
 	-timeout 0.5 qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:./debug/test.txt
