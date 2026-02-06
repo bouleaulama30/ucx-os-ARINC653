@@ -85,8 +85,6 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 		krnl_panic(ERR_PCB_ALLOC);
 
 
-    new_partition->data = new_pcb;
-    new_partition_in_partitions->data = new_pcb;
     new_pcb->status = status;
     strcpy(new_pcb->name, name);
     new_pcb->memory_requirements = memory_requirements;

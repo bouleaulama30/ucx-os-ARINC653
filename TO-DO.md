@@ -7,8 +7,9 @@
     * inhibit process scheduling and switch back to initialization mode;
     * faire les actions quand elle passe en normal (set to READY processes, activate process scheduling etc..)
 
-* refractor code:
+* refractor / formatage code:
     * regarder pok pour s'inspirer
+    
 
 * fixe pb corruption mémoire une fois que la soumission de l'article est passée
     * faire en sorte de lever exeption si écriture interdite ou débordement

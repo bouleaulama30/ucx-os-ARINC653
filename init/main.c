@@ -49,16 +49,6 @@ int main(void)
 
 	pr = app_main();
 
-	printf("DEBUG: partitions->length = %d\n", kcb->partitions->length);
-	printf("DEBUG: partitions->head = %p\n", kcb->partitions->head);
-	
-	if (kcb->partitions->head) {
-	struct pcb_s* first_partition = kcb->partitions->head->data;
-	printf("test liste partition id %d \n", first_partition->status->IDENTIFIER);
-	} else {
-		printf("ERROR: partitions list is empty!\n");
-	}
-
 	setjmp(kcb->context);
 	
 	if (!kcb->tasks->length)
@@ -81,18 +71,6 @@ int main(void)
 
 	pr = app_main();
 
-	printf("DEBUG: partitions->length = %d\n", kcb[0]->partitions->length);
-	printf("DEBUG: partitions->head = %p\n", kcb[0]->partitions->head);
-	
-	if (kcb[0]->partitions->head) {
-		struct pcb_s* first_partition = kcb[0]->partitions->head->data;
-		printf("test liste partition id %d \n", first_partition->status->IDENTIFIER);
-	} else {
-		printf("ERROR: partitions list is empty!\n");
-	}
-
-
-	
 	setjmp(kcb[0]->context);
 	
 	if (!kcb[0]->tasks->length)
