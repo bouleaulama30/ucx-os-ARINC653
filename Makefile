@@ -382,6 +382,9 @@ qemu_debug:
 gdb:
 	gdb -x ./debug/.gdbinit ./build/target/image.elf
 
+multiarch-gdb:
+	gdb-multiarch -x ./debug/.gdbinit ./build/target/image.elf
+
 all:
 	$(MAKE) ucx ARCH=riscv/riscv32-qemu
 	$(MAKE) arinc_test
