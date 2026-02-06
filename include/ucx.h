@@ -21,7 +21,7 @@
 #include <arinc/arinc_interpartition_communication.h>
 #include <arinc/arinc_intrapartition_communication.h>
 #include <arinc/arinc_partition.h>
-#include <arinc/arinc_partition_conf.h>
+#include <arinc/static_conf.h>
 #include <arinc/arinc_process.h>
 #include <arinc/arinc_time.h>
 #include <arinc/module_scheduler.h>

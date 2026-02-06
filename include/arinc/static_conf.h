@@ -2,6 +2,7 @@
 #define ARINC_PARTITIONS_CONF_H
 
 #include "arinc/arinc_partition.h"
+#include "arinc/module_scheduler.h"
 
 
 // Hardcoded partition configuration
@@ -49,5 +50,29 @@ static const struct PartitionConfig P2_CONFIG = {
     .access_data_mem = "RW",
     .is_system_partition = (SYSTEM_PARTITION_TYPE)yes,
 };
+
+// Static module scheduler configuration
+static char const DEFAULT_MODULE_NAME[] = "DefaultModule";
+#define DEFAULT_MAJOR_FRAME_TICK MS_TO_TICKS(1000)
+
+static const window_partition_type DEFAULT_WINDOWS[] = {
+    {
+        .name = "DefaultPartition",
+        .id = 1,
+        .start_tick = MS_TO_TICKS(0),
+        .duration_tick = MS_TO_TICKS(500),
+    },
+    {
+            .name = "P2",
+            .id = 2,
+            .start_tick = MS_TO_TICKS(500),
+            .duration_tick = MS_TO_TICKS(500),
+        },
+    };
+    
+static const uint32_t DEFAULT_WINDOWS_COUNT = sizeof(DEFAULT_WINDOWS) / sizeof(DEFAULT_WINDOWS[0]);
+
+
+
 
 #endif // ARINC_PARTITIONS_CONF_H

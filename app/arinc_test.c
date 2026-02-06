@@ -147,21 +147,21 @@ int app_main(void)
 				   task0,
 				   DEFAULT_PARTITION_CONFIG.is_system_partition);
 
-	// partition_init(P2_CONFIG.period,
-	// 			   P2_CONFIG.duration,
-	// 			   P2_CONFIG.identifier,
-	// 			   P2_CONFIG.num_assigned_cores,
-	// 			   P2_CONFIG.name,
-	// 			   P2_CONFIG.region_name_code_mem,
-	// 			   (void*)_p2_code_start,
-	// 			   (size_t)p2_code_size,
-	// 			   P2_CONFIG.access_code_mem,
-	// 			   P2_CONFIG.region_name_data_mem,
-	// 			   (void*)_p2_data_start,
-	// 			   p2_data_size,
-	// 			   P2_CONFIG.access_data_mem,
-	// 			   task1,
-	// 			   P2_CONFIG.is_system_partition);
+	partition_init(P2_CONFIG.period,
+				   P2_CONFIG.duration,
+				   P2_CONFIG.identifier,
+				   P2_CONFIG.num_assigned_cores,
+				   P2_CONFIG.name,
+				   P2_CONFIG.region_name_code_mem,
+				   (void*)_p2_code_start,
+				   (size_t)p2_code_size,
+				   P2_CONFIG.access_code_mem,
+				   P2_CONFIG.region_name_data_mem,
+				   (void*)_p2_data_start,
+				   p2_data_size,
+				   P2_CONFIG.access_data_mem,
+				   task1,
+				   P2_CONFIG.is_system_partition);
 
 	return 1;
 }
