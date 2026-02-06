@@ -31,38 +31,29 @@ int32_t partition_scheduler(void){
 #endif
     static uint32_t relative_tick = 0;
     int32_t* windows_idx = &module_scheduler->windows_idx;
-
-    uint32_t partition_start_tick = module_scheduler->windows_partition[*windows_idx].start_tick;
+    
     uint32_t partition_duration_tick = module_scheduler->windows_partition[*windows_idx].duration_tick;
+    uint32_t partition_start_tick = module_scheduler->windows_partition[*windows_idx].start_tick;
     uint32_t partition_end_tick = partition_start_tick + partition_duration_tick;
+    PARTITION_ID_TYPE partition_id = module_scheduler->windows_partition[*windows_idx].id;
     
     if(relative_tick == module_scheduler->major_frame_tick){
-        if(module_scheduler->windows_idx == module_scheduler->nbr_windows - 1){
-            return -1;
-        }
-        
-        (*windows_idx)++;
-        PARTITION_ID_TYPE id = module_scheduler->windows_partition[*windows_idx].id;
         relative_tick = 0;
-        partition_start_tick = 2;
-        partition_duration_tick = 2;
-        activate_partition(id);
+        (*windows_idx) = 0;
+        partition_id = module_scheduler->windows_partition[*windows_idx].id;
+        activate_partition(partition_id);
+        return partition_id;
     }
 
     if(relative_tick > partition_end_tick){
-        if(module_scheduler->windows_idx == module_scheduler->nbr_windows - 1){
+        if(*windows_idx == module_scheduler->nbr_windows - 1){
             return -1;
         }
-
         (*windows_idx)++;
-        PARTITION_ID_TYPE id = module_scheduler->windows_partition[*windows_idx].id;
-        relative_tick++;
-        activate_partition(id);
-        partition_start_tick = 2;
-        partition_duration_tick = 2;
-        return id;
+        partition_id = module_scheduler->windows_partition[*windows_idx].id;
+        activate_partition(partition_id);
     }
-
+    
     relative_tick++;
-    return -1;
+    return partition_id;
 }

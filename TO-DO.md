@@ -16,6 +16,13 @@
 ### static scheduler
 
 * faire scheduler pour les partitions:
+    * faire activate partition:
+        * ajouter une liste de partition au kcb
+        * suivre commentaire sur la fonction
+    * faire du contrôle d'erreur sur les fonctions:
+        * module_scheduler_init
+        * partition_scheduler
+        * activate partition
     * regarder comment implémenter les temps idle
     * regarder comment ils font sur POK
 
