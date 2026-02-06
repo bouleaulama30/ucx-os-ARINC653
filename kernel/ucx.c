@@ -201,6 +201,7 @@ uint16_t krnl_schedule(void)
 
 uint16_t krnl_schedule(void)
 {
+	printf("scheduler native\n");
 #ifndef MULTICORE
 	struct tcb_s *task = kcb->task_current->data;
 #else

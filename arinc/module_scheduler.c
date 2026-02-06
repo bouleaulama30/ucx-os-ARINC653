@@ -24,7 +24,7 @@ void module_scheduler_init(const char* name, uint32_t major_frame_tick, const wi
 }
 
 int32_t partition_scheduler(void){
-    printf("test\n");
+    printf("scheduler perso\n");
     
 #ifndef MULTICORE
     struct mscb_s* module_scheduler = kcb->module_scheduler;
@@ -58,4 +58,5 @@ int32_t partition_scheduler(void){
     
     relative_tick++;
     return partition_id;
+
 }

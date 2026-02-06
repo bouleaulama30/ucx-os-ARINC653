@@ -17,7 +17,7 @@
 ### static scheduler
 
 * faire scheduler pour les partitions:
-    * faire activate partition:
+    * faire activate partition (voir pour changer le nom):
 s        * suivre commentaire sur la fonction
     * faire du contrôle d'erreur sur les fonctions:
         * module_scheduler_init
@@ -25,6 +25,7 @@ s        * suivre commentaire sur la fonction
         * activate partition
     * regarder comment implémenter les temps idle
     * regarder comment ils font sur POK
+    * faire test plus violents
 
 * caractéristiques:
     * si partition is IDLE alors elle ne peut pas être schedulé

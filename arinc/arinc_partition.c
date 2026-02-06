@@ -198,20 +198,20 @@ void SET_PARTITION_MODE (
     
     if (OPERATING_MODE == IDLE)
     {
-        printf("OPERATING MODE is IDLE");
+        printf("OPERATING MODE is IDLE\n");
         // shut down the partition
     }
 
     if (OPERATING_MODE == WARM_START || OPERATING_MODE == COLD_START)
     {
         // inhibit process scheduling and switch back to initialization mode
-        printf("OPERATING MODE is WARM START or COLD START");
+        printf("OPERATING MODE is WARM START or COLD START\n");
     }
     
     if (OPERATING_MODE == NORMAL)
     {
         // cf norme
-        printf("OPERATING MODE is NORMAL");
+        printf("OPERATING MODE is NORMAL\n");
     }
     
     *RETURN_CODE = NO_ERROR;

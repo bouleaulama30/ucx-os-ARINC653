@@ -14,6 +14,17 @@ extern uint8_t _p2_code_end[];
 extern uint8_t _p2_data_start[];
 extern uint8_t _p2_data_end[];
 
+void print_time()
+{
+	uint32_t secs, msecs, time;
+	
+	time = ucx_uptime();
+	secs = time / 1000;
+	msecs = time - secs * 1000;
+	
+	printf("%ld.%03lds\n", secs, msecs);
+}
+
 
 __attribute__((section(".p1_code")))
 void test_spatial_violation_p2(void) {
@@ -70,7 +81,7 @@ void test_id_2(void)
 // on met la tache dans la section code de la p1
 __attribute__((section(".p1_code")))
 void task0(void)
-{
+{   
 	int32_t cnt = 100000;
 
 	APEX_INTEGER id;
@@ -80,10 +91,11 @@ void task0(void)
 
 	while (1) {
 		printf("[task %d %ld, partition %d, address cnt: 0x%p]\n", ucx_task_id(), cnt++, id, &cnt);
+		print_time();
 		ucx_task_yield();
 	}
 }
-	
+
 // on met la tache dans la section code de la p2
 __attribute__((section(".p2_code")))
 void task1(void)
@@ -98,10 +110,11 @@ void task1(void)
 	GET_MY_PARTITION_ID(&id, &return_code);
 	SET_PARTITION_MODE(NORMAL, &return_code);
 	GET_PARTITION_STATUS(&status, &return_code);
-
+	
 	while (1) {
 		printf("[task %d %ld, address cnt: 0x%p ,period=%ld duration=%ld, mode=%d]\n", ucx_task_id(), cnt++, &cnt,(long)status.PERIOD, (long)status.DURATION, status.OPERATING_MODE);
-	ucx_task_yield();
+		print_time();
+		ucx_task_yield();
 	}
 }
 
