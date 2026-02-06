@@ -66,7 +66,8 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->tcb.stack = data_region->base;         
     new_pcb->tcb.stack_sz = data_region->size;
     new_pcb->tcb.state = TASK_READY;                
-    new_pcb->tcb.priority = TASK_NORMAL_PRIO;       
+    new_pcb->tcb.priority = TASK_NORMAL_PRIO;
+    new_pcb->tcb.rt_prio = 0;
     new_pcb->tcb.delay = 0;
 
     CRITICAL_ENTER();
@@ -107,10 +108,42 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     return new_pcb->status->IDENTIFIER;
 }
 
+static struct node_s *find_partition(struct node_s *node, void *arg){
+    struct pcb_s *partition = node->data;
+    PARTITION_ID_TYPE id = (PARTITION_ID_TYPE) arg;
+    
+    if(partition->status->IDENTIFIER == id){
+        return node;
+    }
+    
+    return 0;
+}
+
 
 int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
-    // trouver la partition avec son id dans la liste des partitions tenu par kcb
-    // mettre la partition en current dans la tache du kcb
+    // struct pcb_s *partition;
+#ifndef MULTICORE
+    struct node_s *partition_node = list_foreach(kcb->partitions, find_partition, (void *)IDENTIFIER);
+    
+    if(!partition_node){
+        krnl_panic(ERR_FAIL);
+    }
+
+    // partition = partition_node->data;
+
+
+    kcb->task_current = partition_node;
+#else
+    struct node_s *partition_node = list_foreach(kcb[_cpu_id()]->partitions, find_partition, (void *)IDENTIFIER);
+
+    if(!partition_node){
+        krnl_panic(ERR_FAIL);
+    }
+    kcb[_cpu_id()]->task_current = partition_node;
+    
+#endif
+
+    
     // vérifier si idle car sinon il ne faut pas la mettre et mettre idle à la place
     return 1;
 }
