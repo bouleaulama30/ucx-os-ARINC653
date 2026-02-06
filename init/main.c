@@ -34,9 +34,10 @@ int main(void)
 	((size_t)&__stack - (size_t)&__bss_end - DEFAULT_STACK_SIZE));
 #endif
 
+	module_scheduler_init(DEFAULT_MODULE_NAME, DEFAULT_MAJOR_FRAME_TICK, DEFAULT_WINDOWS, DEFAULT_WINDOWS_COUNT);
+
 #ifndef MULTICORE
 	kcb->tasks = list_create();
-	
 	if (!kcb->tasks)
 		krnl_panic(ERR_KCB_ALLOC);
 		
