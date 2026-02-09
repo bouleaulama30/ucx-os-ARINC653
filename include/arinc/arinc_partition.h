@@ -103,6 +103,8 @@ extern void GET_MY_PARTITION_ID (
        /*out*/ PARTITION_ID_TYPE          *PARTITION_ID,
        /*out*/ RETURN_CODE_TYPE           *RETURN_CODE );
 
+extern void idle_task(void);
+
 extern int32_t partition_init(SYSTEM_TIME_TYPE PERIOD, 
                         SYSTEM_TIME_TYPE DURATION,
                         PARTITION_ID_TYPE IDENTIFIER,

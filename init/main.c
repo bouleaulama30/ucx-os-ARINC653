@@ -46,7 +46,10 @@ int main(void)
 
 	if (!kcb->partitions)
 		krnl_panic(ERR_KCB_ALLOC);
-		
+	
+	// initialisation de la partition IDLE dans la ram
+	SYSTEM_ADDRESS_TYPE idle_stack = malloc(DEFAULT_STACK_SIZE);
+	partition_init(0, 0, IDLE_PARTITION_ID, 1, "IDLE Partition", "IDLE code", idle_task, 0, "RX", "IDLE data", idle_stack, DEFAULT_STACK_SIZE, "RW", idle_task, false);
 
 	pr = app_main();
 
@@ -68,6 +71,10 @@ int main(void)
 	
 	if (!kcb[0]->partitions)
 		krnl_panic(ERR_KCB_ALLOC);
+
+	// initialisation de la partition IDLE dans la ram
+	SYSTEM_ADDRESS_TYPE idle_stack = malloc(DEFAULT_STACK_SIZE);
+	partition_init(0, 0, IDLE_PARTITION_ID, 1, "IDLE Partition", "IDLE code", idle_task, 0, "RX", "IDLE data", idle_stack, DEFAULT_STACK_SIZE, "RW", idle_task, false);
 
 	pr = app_main();
 

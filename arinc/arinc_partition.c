@@ -1,5 +1,26 @@
 #include <ucx.h>
 
+void print_time_idle()
+{
+	uint32_t secs, msecs, time;
+	
+	time = ucx_uptime();
+	secs = time / 1000;
+	msecs = time - secs * 1000;
+	
+	printf("%ld.%03lds\n", secs, msecs);
+}
+
+void idle_task(void)
+{   
+
+	while (1) {
+		printf("[Partition IDLE]\n");
+        print_time_idle();
+
+		ucx_task_yield();
+	}
+}
 
 int32_t partition_init(SYSTEM_TIME_TYPE PERIOD, 
                         SYSTEM_TIME_TYPE DURATION,
