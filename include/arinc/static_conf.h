@@ -35,7 +35,7 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
     .access_code_mem = "RX",
     .region_name_data_mem = "p1_data",
     .access_data_mem = "RW",
-    .is_system_partition = (SYSTEM_PARTITION_TYPE)no,
+    .is_system_partition = (SYSTEM_PARTITION_TYPE)false,
 };
 
 static const struct PartitionConfig P2_CONFIG = {
@@ -48,7 +48,7 @@ static const struct PartitionConfig P2_CONFIG = {
     .access_code_mem = "RX",
     .region_name_data_mem = "p2_data",
     .access_data_mem = "RW",
-    .is_system_partition = (SYSTEM_PARTITION_TYPE)yes,
+    .is_system_partition = (SYSTEM_PARTITION_TYPE)true,
 };
 
 // Static module scheduler configuration

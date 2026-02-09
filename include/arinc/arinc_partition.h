@@ -13,6 +13,8 @@
 
 #define  MAX_NUMBER_OF_PARTITIONS  SYSTEM_LIMIT_NUMBER_OF_PARTITIONS
 
+#define IDLE_PARTITION_ID 0
+
 typedef
    enum {
         IDLE       = 0,
@@ -51,8 +53,8 @@ typedef
 
 typedef 
     enum {
-        yes = 0,
-        no = 1
+        true = 0,
+        false = 1
     } SYSTEM_PARTITION_TYPE;
 
 

@@ -8,7 +8,9 @@
     * faire les actions quand elle passe en normal (set to READY processes, activate process scheduling etc..)
 
 * refractor / formatage code:
+    * trouver des noms plus accurate pour activate partition et les variables dedans
     * regarder pok pour s'inspirer
+        * utiliser le modulo pour les indices dans le module scheduler
     
 
 * fixe pb corruption mémoire une fois que la soumission de l'article est passée
@@ -18,10 +20,13 @@
 
 * faire scheduler pour les partitions:
     * faire activate partition (voir pour changer le nom):
-        * suivre commentaire sur la fonction
+        * regarder si la partition est idle retourner l id idle si cest le cas
+        * creer une partition idle avec une seule tache idle dedans dans l initialisation
     * faire du contrôle d'erreur sur les fonctions:
         * module_scheduler_init
         * partition_scheduler
+            * regarder si la current partition est idle
+                * faire une fonction deactivate partition ?
         * activate partition
     * regarder comment implémenter les temps idle
     * regarder comment ils font sur POK

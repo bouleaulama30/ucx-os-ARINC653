@@ -39,12 +39,12 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     status->DURATION = DURATION;
     status->IDENTIFIER = IDENTIFIER;
     status->NUM_ASSIGNED_CORES = NUM_ASSIGNED_CORES;
-    status->LOCK_LEVEL = 0; // TODO -Q définir lock level
-    status->OPERATING_MODE = IDLE; // TODO -Q définir operating mode
-    status->START_CONDITION = NORMAL_START; // TODO -Q définir start condition
+    status->LOCK_LEVEL = 0; 
+    status->OPERATING_MODE = NORMAL; 
+    status->START_CONDITION = NORMAL_START;
 
     strcpy(code_region->region_name, region_name_code_mem);
-    code_region->base = base_code_mem; // TODO -Q définir base code mem
+    code_region->base = base_code_mem; 
     code_region->size = size_code_mem;
     strcpy(code_region->access, access_code_mem);
 
@@ -121,16 +121,21 @@ static struct node_s *find_partition(struct node_s *node, void *arg){
 
 
 int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
-    // struct pcb_s *partition;
 #ifndef MULTICORE
+
     struct node_s *partition_node = list_foreach(kcb->partitions, find_partition, (void *)IDENTIFIER);
     
     if(!partition_node){
         krnl_panic(ERR_FAIL);
     }
 
-    // partition = partition_node->data;
+    
+    struct pcb_s *partition = partition_node->data;
 
+    if(partition->status->OPERATING_MODE == IDLE){
+        int32_t id = activate_partition(IDLE_PARTITION_ID);
+        return id;
+    }
 
     kcb->task_current = partition_node;
 #else
@@ -139,13 +144,20 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
     if(!partition_node){
         krnl_panic(ERR_FAIL);
     }
+
+    struct pcb_s *partition = partition_node->data;
+    if(partition->status->OPERATING_MODE == IDLE){
+        int32_t id = activate_partition(IDLE_PARTITION_ID);
+        return id;
+    }
+
     kcb[_cpu_id()]->task_current = partition_node;
     
 #endif
 
     
     // vérifier si idle car sinon il ne faut pas la mettre et mettre idle à la place
-    return 1;
+    return IDENTIFIER;
 }
 
 
