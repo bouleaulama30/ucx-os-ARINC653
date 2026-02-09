@@ -56,8 +56,7 @@ int main(void)
 		krnl_panic(ERR_NO_TASKS);
 
 	kcb->preemptive = pr ? 'y' : 'n';
-	kcb->task_current = kcb->tasks->head->next;
-	task = kcb->task_current->data;
+	arinc_start_scheduling();
 #else
 	kcb[0]->tasks = list_create();
 	
@@ -78,17 +77,14 @@ int main(void)
 		krnl_panic(ERR_NO_TASKS);
 
 	kcb[0]->preemptive = pr ? 'y' : 'n';
-	kcb[0]->task_current = kcb[0]->tasks->head->next;
-	task = kcb[0]->task_current->data;
 
 	printf("core %d ready (%s).\n", _cpu_id(), pr ? "preempt" : "coop");
 	
 	boot = 1;
+	arinc_start_scheduling();
 #endif
 
-	t_end_main = ucx_uptime();
-	printf("[PERF] main() init time: %lu ms\n", (unsigned long)(t_end_main - t_start_main));
-	_dispatch_init(task->context);
+
 	
 	/* never reached */
 	return 0;
