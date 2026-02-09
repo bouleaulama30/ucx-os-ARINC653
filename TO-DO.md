@@ -18,7 +18,7 @@
 
 * faire scheduler pour les partitions:
     * faire activate partition (voir pour changer le nom):
-s        * suivre commentaire sur la fonction
+        * suivre commentaire sur la fonction
     * faire du contrôle d'erreur sur les fonctions:
         * module_scheduler_init
         * partition_scheduler
