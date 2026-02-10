@@ -10,8 +10,9 @@
 
 * refractor / formatage code:
     * trouver des noms plus accurate pour activate partition et les variables dedans
+    * refractor de partionnement spatial
+    * refractor de partionnement temporelle
     * regarder pok pour s'inspirer
-        * utiliser le modulo pour les indices dans le module scheduler
     
 
 * fixe pb corruption mémoire une fois que la soumission de l'article est passée
@@ -24,14 +25,14 @@
 ### static scheduler
 
 * faire scheduler pour les partitions:
-    * faire activate partition (voir pour changer le nom):
+    * regarder comment implémenter les temps idle
     * faire du contrôle d'erreur sur les fonctions:
         * module_scheduler_init
         * partition_scheduler
             * regarder si la current partition est idle
                 * faire une fonction deactivate partition ?
         * activate partition
-    * regarder comment implémenter les temps idle
+        * signal partition
     * regarder comment ils font sur POK
     * faire test plus violents
 
