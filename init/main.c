@@ -12,6 +12,12 @@
 static volatile int boot = 0;
 #endif
 
+static const PARTITION_NAME_TYPE idle_partition_name = "IDLE Partition";
+static const REGION_NAME_TYPE idle_code_region_name = "IDLE code";
+static const ACCESS_TYPE idle_code_access = "RX";
+static const REGION_NAME_TYPE idle_data_region_name = "IDLE data";
+static const ACCESS_TYPE idle_data_access = "RW";
+
 int main(void)
 {
 	uint64_t t_end_main = 0;
@@ -49,7 +55,7 @@ int main(void)
 	
 	// initialisation de la partition IDLE dans la ram
 	SYSTEM_ADDRESS_TYPE idle_stack = malloc(DEFAULT_STACK_SIZE);
-	partition_init(0, 0, IDLE_PARTITION_ID, 1, "IDLE Partition", "IDLE code", idle_task, 0, "RX", "IDLE data", idle_stack, DEFAULT_STACK_SIZE, "RW", idle_task, false);
+	partition_init(0, 0, IDLE_PARTITION_ID, 1, idle_partition_name, idle_code_region_name, idle_task, 0, idle_code_access, idle_data_region_name, idle_stack, DEFAULT_STACK_SIZE, idle_data_access, idle_task, false);
 
 	pr = app_main();
 
@@ -74,7 +80,7 @@ int main(void)
 
 	// initialisation de la partition IDLE dans la ram
 	SYSTEM_ADDRESS_TYPE idle_stack = malloc(DEFAULT_STACK_SIZE);
-	partition_init(0, 0, IDLE_PARTITION_ID, 1, "IDLE Partition", "IDLE code", idle_task, 0, "RX", "IDLE data", idle_stack, DEFAULT_STACK_SIZE, "RW", idle_task, false);
+	partition_init(0, 0, IDLE_PARTITION_ID, 1, idle_partition_name, idle_code_region_name, idle_task, 0, idle_code_access, idle_data_region_name, idle_stack, DEFAULT_STACK_SIZE, idle_data_access, idle_task, false);
 
 	pr = app_main();
 

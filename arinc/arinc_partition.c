@@ -61,7 +61,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     status->IDENTIFIER = IDENTIFIER;
     status->NUM_ASSIGNED_CORES = NUM_ASSIGNED_CORES;
     status->LOCK_LEVEL = 0; 
-    status->OPERATING_MODE = NORMAL; 
+    status->OPERATING_MODE = (IDENTIFIER == IDLE_PARTITION_ID) ? NORMAL : (IDENTIFIER == 2 ? NORMAL : IDLE); 
     status->START_CONDITION = NORMAL_START;
 
     strcpy(code_region->region_name, region_name_code_mem);
@@ -177,7 +177,6 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
 #endif
 
     
-    // vérifier si idle car sinon il ne faut pas la mettre et mettre idle à la place
     return IDENTIFIER;
 }
 

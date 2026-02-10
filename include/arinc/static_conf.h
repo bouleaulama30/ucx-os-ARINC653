@@ -58,7 +58,7 @@ static char const DEFAULT_MODULE_NAME[] = "DefaultModule";
 static const window_partition_type DEFAULT_WINDOWS[] = {
     {
         .name = "DefaultPartition",
-        .id = IDLE_PARTITION_ID,
+        .id = 1,
         .start_tick = MS_TO_TICKS(0),
         .duration_tick = MS_TO_TICKS(50),
     },

@@ -15,13 +15,15 @@
 
 * fixe pb corruption mémoire une fois que la soumission de l'article est passée
     * faire en sorte de lever exeption si écriture interdite ou débordement
+    * memory violation (MMU, MPU)
+    * CPU exception/fault
+    * Kernel exception handler
+    * routine dumb qui affiche pb de memory
 
 ### static scheduler
 
 * faire scheduler pour les partitions:
     * faire activate partition (voir pour changer le nom):
-        * regarder si la partition est idle retourner l id idle si cest le cas
-        * creer une partition idle avec une seule tache idle dedans dans l initialisation
     * faire du contrôle d'erreur sur les fonctions:
         * module_scheduler_init
         * partition_scheduler

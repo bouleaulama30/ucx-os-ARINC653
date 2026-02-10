@@ -44,10 +44,6 @@ void arinc_start_scheduling(void) {
     kcb[_cpu_id()]->ticks = 0;
 #endif
 
-    // IMPORTANT: Ici, il faudrait idéalement redémarrer le timer matériel 
-    // pour que la prochaine interruption tombe exactement dans 1 tick.
-    // _timer_start(); // À décommenter si vous avez cette fonction dans votre HAL
-
     printf("[SCHED] Starting ARINC schedule with Partition %d\n", first_id);
 
 #ifndef MULTICORE
