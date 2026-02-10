@@ -51,12 +51,6 @@ typedef
       MEMORY_REGION_TYPE memory[2];
    } MEMORY_REQUIREMENTS_TYPE;
 
-typedef 
-    enum {
-        true = 0,
-        false = 1
-    } SYSTEM_PARTITION_TYPE;
-
 
 typedef
    enum {
@@ -86,7 +80,7 @@ struct pcb_s {
    // interpartition_communication_type communication_ports;
    // Partion HM Table
    SYSTEM_ADDRESS_TYPE entry_point;
-   SYSTEM_PARTITION_TYPE is_system_partition;
+   BOOLEAN_TYPE is_system_partition;
 
 };
 
@@ -119,7 +113,7 @@ extern int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         APEX_UNSIGNED      size_data_mem,
                         const ACCESS_TYPE        access_data_mem,
                         SYSTEM_ADDRESS_TYPE entry_point,
-                        SYSTEM_PARTITION_TYPE is_system_partition);
+                        BOOLEAN_TYPE is_system_partition);
 
 extern int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER);
 

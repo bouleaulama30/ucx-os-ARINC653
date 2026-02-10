@@ -131,4 +131,10 @@ typedef  APEX_LONG_INTEGER   SYSTEM_TIME_TYPE;
 typedef  APEX_INTEGER           PROCESSOR_CORE_ID_TYPE; 
 #define  CORE_AFFINITY_NO_PREFERENCE       <implementation dependent> 
 
+typedef 
+    enum {
+        false,
+        true
+    } BOOLEAN_TYPE;
+
 #endif

@@ -83,13 +83,14 @@ __attribute__((section(".p1_code")))
 void task0(void)
 {   
 	int32_t cnt = 100000;
-
+    RETURN_CODE_TYPE return_code;
 	APEX_INTEGER id;
-	RETURN_CODE_TYPE return_code;
-
 	GET_MY_PARTITION_ID(&id, &return_code);
 
 	while (1) {
+		if(cnt == 100002){
+			SET_PARTITION_MODE(IDLE, &return_code);
+		}
 		printf("[task %d %ld, partition %d, address cnt: 0x%p]\n", ucx_task_id(), cnt++, id, &cnt);
 		print_time();
 		ucx_task_yield();

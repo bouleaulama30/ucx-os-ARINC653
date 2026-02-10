@@ -20,10 +20,12 @@ struct mscb_s {
     const window_partition_type* windows_partition;
     uint32_t nbr_windows;
     int32_t windows_idx;
+    BOOLEAN_TYPE idle_current_partition;
 };
 
 extern void  module_scheduler_init(const char* name, uint32_t major_frame_tick, const window_partition_type* windows_partition, uint32_t nbr_windows);
-void arinc_start_scheduling(void);
+extern void arinc_start_scheduling(void);
+extern void signal_idle_current_partition(void);
 extern int32_t partition_scheduler(void);
 
 #endif

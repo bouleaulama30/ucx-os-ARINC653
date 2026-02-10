@@ -36,7 +36,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         APEX_UNSIGNED      size_data_mem,
                         const ACCESS_TYPE        access_data_mem,
                         SYSTEM_ADDRESS_TYPE entry_point,
-                        SYSTEM_PARTITION_TYPE is_system_partition)
+                        BOOLEAN_TYPE is_system_partition)
 {
     // déclaration des structures
 	struct pcb_s *new_pcb;
@@ -61,7 +61,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     status->IDENTIFIER = IDENTIFIER;
     status->NUM_ASSIGNED_CORES = NUM_ASSIGNED_CORES;
     status->LOCK_LEVEL = 0; 
-    status->OPERATING_MODE = (IDENTIFIER == IDLE_PARTITION_ID) ? NORMAL : (IDENTIFIER == 2 ? NORMAL : IDLE); 
+    status->OPERATING_MODE = (IDENTIFIER == IDLE_PARTITION_ID) ? NORMAL : (IDENTIFIER == 1 ? NORMAL : NORMAL); 
     status->START_CONDITION = NORMAL_START;
 
     strcpy(code_region->region_name, region_name_code_mem);
@@ -229,9 +229,10 @@ void SET_PARTITION_MODE (
     my_partition->status->OPERATING_MODE = OPERATING_MODE;
     
     if (OPERATING_MODE == IDLE)
-    {
+    {   
         printf("OPERATING MODE is IDLE\n");
-        // shut down the partition
+        signal_idle_current_partition();
+        ucx_task_yield();
     }
 
     if (OPERATING_MODE == WARM_START || OPERATING_MODE == COLD_START)

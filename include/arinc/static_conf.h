@@ -21,7 +21,7 @@ struct PartitionConfig {
     APEX_UNSIGNED size_data_mem;
     ACCESS_TYPE access_data_mem;
     SYSTEM_ADDRESS_TYPE entry_point;
-    SYSTEM_PARTITION_TYPE is_system_partition;
+    BOOLEAN_TYPE is_system_partition;
 };
 
 // Default hardcoded partition configuration et voir le ldscript pour la conf mémoire
@@ -35,7 +35,7 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
     .access_code_mem = "RX",
     .region_name_data_mem = "p1_data",
     .access_data_mem = "RW",
-    .is_system_partition = (SYSTEM_PARTITION_TYPE)false,
+    .is_system_partition = (BOOLEAN_TYPE)false,
 };
 
 static const struct PartitionConfig P2_CONFIG = {
@@ -48,7 +48,7 @@ static const struct PartitionConfig P2_CONFIG = {
     .access_code_mem = "RX",
     .region_name_data_mem = "p2_data",
     .access_data_mem = "RW",
-    .is_system_partition = (SYSTEM_PARTITION_TYPE)true,
+    .is_system_partition = (BOOLEAN_TYPE)true,
 };
 
 // Static module scheduler configuration

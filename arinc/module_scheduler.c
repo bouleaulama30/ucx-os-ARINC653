@@ -11,6 +11,7 @@ void module_scheduler_init(const char* name, uint32_t major_frame_tick, const wi
     ms->windows_partition = windows_partition;
     ms->nbr_windows = nbr_windows;
     ms->windows_idx = 0;
+    ms->idle_current_partition = false;
 
     
     // on associe le module scheduler et le scheduler au kernel
@@ -55,6 +56,16 @@ void arinc_start_scheduling(void) {
     _dispatch_init(first_pcb->tcb.context);
 }
 
+void signal_idle_current_partition(void){
+#ifndef MULTICORE
+    struct mscb_s* ms = kcb->module_scheduler;
+#else
+    struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
+#endif
+    ms->idle_current_partition = true;
+}
+
+
 int32_t partition_scheduler(void){
     
 #ifndef MULTICORE
@@ -73,6 +84,11 @@ int32_t partition_scheduler(void){
     PARTITION_ID_TYPE partition_id = ms->windows_partition[*windows_idx].id;
 
     printf("scheduler perso, relative tick %d, partition end tick %d, major frame tick %d\n", relative_tick, partition_end_tick, ms->major_frame_tick);
+
+    if(ms->idle_current_partition){
+        activate_partition(IDLE_PARTITION_ID);
+        ms->idle_current_partition = false;
+    }
 
     if(relative_tick >= ms->major_frame_tick){
         relative_tick = 1;
