@@ -147,6 +147,12 @@ int32_t partition_scheduler(void){
         if(*windows_idx == ms->nbr_windows - 1){
             return activate_partition(IDLE_PARTITION_ID);
         }
+        
+        // s'il y a des trous entre les partitions, on idle
+        if(position_in_frame < ms->windows_partition[*windows_idx+1].start_tick){
+            return activate_partition(IDLE_PARTITION_ID);
+        }
+
         (*windows_idx)++;
         partition_id = ms->windows_partition[*windows_idx].id;
         activate_partition(partition_id);

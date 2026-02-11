@@ -66,13 +66,13 @@ static const window_partition_type DEFAULT_WINDOWS[] = {
             .name = "P2",
             .id = 2,
             .start_tick = MS_TO_TICKS(30),
-            .duration_tick = MS_TO_TICKS(30),
+            .duration_tick = MS_TO_TICKS(10),
         },
     {
         .name = "DefaultPartition",
         .id = 1,
         .start_tick = MS_TO_TICKS(60),
-        .duration_tick = MS_TO_TICKS(30),
+        .duration_tick = MS_TO_TICKS(10),
     },
     {
             .name = "P2",
