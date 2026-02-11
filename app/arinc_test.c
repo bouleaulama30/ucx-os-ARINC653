@@ -14,19 +14,19 @@ extern uint8_t _p2_code_end[];
 extern uint8_t _p2_data_start[];
 extern uint8_t _p2_data_end[];
 
-extern uint32_t start_time;
-extern int time_initialized;
+// extern uint32_t start_time;
+// extern int time_initialized;
 
 void print_time()
 {
 	uint32_t secs, msecs, time;
 	
 	time = ucx_uptime();
-	if (!time_initialized) {
-        start_time = time;
-        time_initialized = 1;
-    }
-	time -= start_time;
+	// if (!time_initialized) {
+    //     start_time = time;
+    //     time_initialized = 1;
+    // }
+	// time -= start_time;
 	secs = time / 1000;
 	msecs = time - secs * 1000;
 	
@@ -100,8 +100,8 @@ void task0(void)
 		if(cnt == 100002){
 			// SET_PARTITION_MODE(IDLE, &return_code);
 		}
-		printf("[task %d %ld, partition %d, address cnt: 0x%p]\n", ucx_task_id(), cnt++, id, &cnt);
-		print_time();
+		printf("[task %d %ld, partition %d, address cnt: 0x%p]\n\n", ucx_task_id(), cnt++, id, &cnt);
+		// print_time();
 		ucx_task_yield();
 	}
 }
@@ -122,8 +122,8 @@ void task1(void)
 	GET_PARTITION_STATUS(&status, &return_code);
 	
 	while (1) {
-		printf("[task %d %ld, address cnt: 0x%p ,period=%ld duration=%ld, mode=%d]\n", ucx_task_id(), cnt++, &cnt,(long)status.PERIOD, (long)status.DURATION, status.OPERATING_MODE);
-		print_time();
+		printf("[task %d %ld, address cnt: 0x%p ,period=%ld duration=%ld, mode=%d]\n\n", ucx_task_id(), cnt++, &cnt,(long)status.PERIOD, (long)status.DURATION, status.OPERATING_MODE);
+		// print_time();
 		ucx_task_yield();
 	}
 }

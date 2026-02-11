@@ -1,18 +1,18 @@
 #include <ucx.h>
 
-uint32_t start_time;
-int time_initialized = 0;
+// uint32_t start_time;
+// int time_initialized = 0;
 
 void print_time_idle()
 {
 	uint32_t secs, msecs, time;
 	time = ucx_uptime();
 
-    if(!time_initialized){
-        start_time = time;
-        time_initialized = 1;
-    }
-    time -= start_time;
+    // if(!time_initialized){
+    //     start_time = time;
+    //     time_initialized = 1;
+    // }
+    // time -= start_time;
 	secs = time / 1000;
 	msecs = time - secs * 1000;
 	
@@ -23,8 +23,8 @@ void idle_task(void)
 {   
 
 	while (1) {
-		printf("[Partition IDLE]\n");
-        print_time_idle();
+		printf("[Partition IDLE]\n\n");
+        // print_time_idle();
 
 		ucx_task_yield();
 	}

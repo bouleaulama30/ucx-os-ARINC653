@@ -27,6 +27,7 @@
 
 * faire scheduler pour les partitions:
     * regarder comment ils font sur POK
+    * comprendre la derive du timer et la solutionner
     * faire test plus violents
 
 ## remind debug

@@ -1,5 +1,20 @@
 #include <ucx.h>
 
+void print_time_sched()
+{
+	uint32_t secs, msecs, time;
+	
+	time = ucx_uptime();
+	// if (!time_initialized) {
+    //     start_time = time;
+    //     time_initialized = 1;
+    // }
+	// time -= start_time;
+	secs = time / 1000;
+	msecs = time - secs * 1000;
+	
+	printf("[Uptime %ld.%03lds]\n", secs, msecs);
+}
 
 void module_scheduler_init(const char* name, uint32_t major_frame_tick, const window_partition_type* windows_partition, uint32_t nbr_windows){
     
@@ -87,6 +102,9 @@ void signal_idle_current_partition(void){
 
 
 int32_t partition_scheduler(void){
+    uint32_t current_time = ucx_uptime();
+    uint32_t current_tick = MS_TO_TICKS(current_time);
+    // uint32_t current_tick = ucx_ticks();
     
 #ifndef MULTICORE
     struct mscb_s* ms = kcb->module_scheduler;
@@ -101,32 +119,32 @@ int32_t partition_scheduler(void){
         krnl_panic(ERR_SCHED_CONFIG);
     }
 
-    // il vaut 1 car la tache est lancee via main durant l'init
-    static uint32_t relative_tick = 1;
-    
+    static uint32_t frame_cnt = 0;
+    uint32_t position_in_frame = current_tick - frame_cnt*ms->major_frame_tick;
     int32_t* windows_idx = &ms->windows_idx;
     uint32_t partition_duration_tick = ms->windows_partition[*windows_idx].duration_tick;
     uint32_t partition_start_tick = ms->windows_partition[*windows_idx].start_tick;
     uint32_t partition_end_tick = partition_start_tick + partition_duration_tick;
     PARTITION_ID_TYPE partition_id = ms->windows_partition[*windows_idx].id;
 
-    printf("scheduler perso, relative tick %d, partition end tick %d, major frame tick %d\n", relative_tick, partition_end_tick, ms->major_frame_tick);
+    print_time_sched();
+    printf("[SCHED partition] Position tick: %d, Partition end tick: %d, Major frame tick: %d\n", position_in_frame, partition_end_tick, ms->major_frame_tick);
 
     if(ms->idle_current_partition){
         partition_id = activate_partition(IDLE_PARTITION_ID);
         ms->idle_current_partition = false;
     }
 
-    if(relative_tick >= ms->major_frame_tick){
-        relative_tick = 1;
+    if(position_in_frame >= ms->major_frame_tick){
         (*windows_idx) = 0;
         partition_id = ms->windows_partition[*windows_idx].id;
+        // position_in_frame = current_tick % ms->major_frame_tick;
+        frame_cnt += 1;
         return activate_partition(partition_id);
     }
 
-    if(relative_tick >= partition_end_tick){
+    if(position_in_frame >= partition_end_tick){
         if(*windows_idx == ms->nbr_windows - 1){
-            relative_tick++;
             return activate_partition(IDLE_PARTITION_ID);
         }
         (*windows_idx)++;
@@ -134,6 +152,5 @@ int32_t partition_scheduler(void){
         activate_partition(partition_id);
     }
     
-    relative_tick++;
     return partition_id;
 }
