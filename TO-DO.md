@@ -25,23 +25,13 @@
 ### static scheduler
 
 * faire scheduler pour les partitions:
-    * regarder comment implémenter les temps idle
     * faire du contrôle d'erreur sur les fonctions:
         * module_scheduler_init
         * partition_scheduler
-            * regarder si la current partition est idle
-                * faire une fonction deactivate partition ?
         * activate partition
         * signal partition
     * regarder comment ils font sur POK
     * faire test plus violents
-
-* caractéristiques:
-    * si partition is IDLE alors elle ne peut pas être schedulé
-    * module schedule doit suivre la conf XML pour l'ordre, le début et la durée des partitions
-    * il doit satisfaire les attributs comme partition period, duration...
-    * la somme des partitions times windows doit être sup ou égale à la duration pendant une partition period
-
 
 ## remind debug
 

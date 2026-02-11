@@ -14,16 +14,25 @@ extern uint8_t _p2_code_end[];
 extern uint8_t _p2_data_start[];
 extern uint8_t _p2_data_end[];
 
+extern uint32_t start_time;
+extern int time_initialized;
+
 void print_time()
 {
 	uint32_t secs, msecs, time;
 	
 	time = ucx_uptime();
+	if (!time_initialized) {
+        start_time = time;
+        time_initialized = 1;
+    }
+	time -= start_time;
 	secs = time / 1000;
 	msecs = time - secs * 1000;
 	
 	printf("%ld.%03lds\n", secs, msecs);
 }
+
 
 
 __attribute__((section(".p1_code")))
@@ -89,7 +98,7 @@ void task0(void)
 
 	while (1) {
 		if(cnt == 100002){
-			SET_PARTITION_MODE(IDLE, &return_code);
+			// SET_PARTITION_MODE(IDLE, &return_code);
 		}
 		printf("[task %d %ld, partition %d, address cnt: 0x%p]\n", ucx_task_id(), cnt++, id, &cnt);
 		print_time();

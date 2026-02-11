@@ -100,7 +100,9 @@ int32_t partition_scheduler(void){
 
     if(relative_tick >= partition_end_tick){
         if(*windows_idx == ms->nbr_windows - 1){
-            return -1;
+            activate_partition(IDLE_PARTITION_ID);
+            relative_tick++;
+            return IDLE_PARTITION_ID;
         }
         (*windows_idx)++;
         partition_id = ms->windows_partition[*windows_idx].id;

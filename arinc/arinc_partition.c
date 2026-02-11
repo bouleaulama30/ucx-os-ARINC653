@@ -1,10 +1,18 @@
 #include <ucx.h>
 
+uint32_t start_time;
+int time_initialized = 0;
+
 void print_time_idle()
 {
 	uint32_t secs, msecs, time;
-	
 	time = ucx_uptime();
+
+    if(!time_initialized){
+        start_time = time;
+        time_initialized = 1;
+    }
+    time -= start_time;
 	secs = time / 1000;
 	msecs = time - secs * 1000;
 	
@@ -61,7 +69,8 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     status->IDENTIFIER = IDENTIFIER;
     status->NUM_ASSIGNED_CORES = NUM_ASSIGNED_CORES;
     status->LOCK_LEVEL = 0; 
-    status->OPERATING_MODE = (IDENTIFIER == IDLE_PARTITION_ID) ? NORMAL : (IDENTIFIER == 1 ? NORMAL : NORMAL); 
+    // status->OPERATING_MODE = (IDENTIFIER == IDLE_PARTITION_ID) ? NORMAL : (IDENTIFIER == 1 ? NORMAL : NORMAL); 
+    status->OPERATING_MODE = NORMAL;
     status->START_CONDITION = NORMAL_START;
 
     strcpy(code_region->region_name, region_name_code_mem);
