@@ -10,6 +10,7 @@ TARGET_LIST = \
 	'riscv/riscv64-qemu' 'riscv/riscv64-qemu-llvm'
 
 #ARCH = none
+DURATION = 1
 
 SERIAL_BAUD=57600
 SERIAL_DEVICE=/dev/ttyUSB0
@@ -389,5 +390,5 @@ all:
 	$(MAKE) veryclean
 	$(MAKE) ucx ARCH=riscv/riscv32-qemu
 	$(MAKE) arinc_test
-	-timeout 0.5 qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:./debug/test.txt
+	-timeout $(DURATION) qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:./debug/test.txt
 	head -n30 ./debug/test.txt
