@@ -53,32 +53,32 @@ static const struct PartitionConfig P2_CONFIG = {
 
 // Static module scheduler configuration
 static char const DEFAULT_MODULE_NAME[] = "DefaultModule";
-#define DEFAULT_MAJOR_FRAME_TICK MS_TO_TICKS(150)
+#define DEFAULT_MAJOR_FRAME_TICK MS_TO_TICKS(100)
 
 static const window_partition_type DEFAULT_WINDOWS[] = {
     {
         .name = "DefaultPartition",
         .id = 1,
         .start_tick = MS_TO_TICKS(0),
-        .duration_tick = MS_TO_TICKS(30),
-    },
-    {
-            .name = "P2",
-            .id = 2,
-            .start_tick = MS_TO_TICKS(30),
-            .duration_tick = MS_TO_TICKS(10),
-        },
-    {
-        .name = "DefaultPartition",
-        .id = 1,
-        .start_tick = MS_TO_TICKS(60),
         .duration_tick = MS_TO_TICKS(10),
     },
     {
             .name = "P2",
             .id = 2,
-            .start_tick = MS_TO_TICKS(90),
-            .duration_tick = MS_TO_TICKS(30),
+            .start_tick = MS_TO_TICKS(10),
+            .duration_tick = MS_TO_TICKS(10),
+        },
+    {
+        .name = "DefaultPartition",
+        .id = 1,
+        .start_tick = MS_TO_TICKS(30),
+        .duration_tick = MS_TO_TICKS(30),
+    },
+    {
+            .name = "P2",
+            .id = 2,
+            .start_tick = MS_TO_TICKS(60),
+            .duration_tick = MS_TO_TICKS(20),
         },
     };
     
