@@ -17,16 +17,16 @@
     
 
 * fixe pb corruption mémoire une fois que la soumission de l'article est passée
+    * lire la ISA pour comprendre le fonctionnement de la PMP et du MPRV
+    * test configuration de la PMP pour P1 et P2 avec le MPRV:
+        * faire une fonction generique qui sera appele par le scheduler pour programmer dynamiquement les acces aux partitions
+    * faire attention au bit MPRV qui ne va pas etre conserver pour traiter une interruption du timer par exemple
+    * modifier le handler pour faire les etapes suivantes
     * faire en sorte de lever exeption si écriture interdite ou débordement
-    * memory violation (MMU, MPU)
-    * CPU exception/fault
     * Kernel exception handler
     * routine dumb qui affiche pb de memory
 
-### static scheduler
-
-* faire scheduler pour les partitions:
-    * faire test plus violents
+* faire rouler sur la carte en materielle une fois que c'est bon pour les partitions
 
 ## remind debug
 
