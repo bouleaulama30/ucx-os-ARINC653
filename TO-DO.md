@@ -13,6 +13,7 @@
     * refractor de partionnement spatial
     * refractor de partionnement temporelle
     * regarder pok pour s'inspirer
+    * remplacer malloc par ucx_malloc
     
 
 * fixe pb corruption mémoire une fois que la soumission de l'article est passée
@@ -25,11 +26,6 @@
 ### static scheduler
 
 * faire scheduler pour les partitions:
-    * faire du contrôle d'erreur sur les fonctions:
-        * module_scheduler_init
-        * partition_scheduler
-        * activate partition
-        * signal partition
     * regarder comment ils font sur POK
     * faire test plus violents
 

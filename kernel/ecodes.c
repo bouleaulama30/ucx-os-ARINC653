@@ -7,6 +7,8 @@ static struct ecode_s edatadesc[] = {
 	{ERR_NO_TASKS,			"no tasks to run"},
 	{ERR_KCB_ALLOC,			"kcb alloc failed"},
 	{ERR_TCB_ALLOC,			"tcb alloc failed"},
+	{ERR_PCB_ALLOC,			"pcb alloc failed"},
+	{ERR_MSCB_ALLOC,			"mscb alloc failed"},
 	{ERR_STACK_ALLOC,		"stack alloc failed"},
 	{ERR_TASK_NOT_FOUND,		"task not found"},
 	{ERR_TASK_CANT_SUSPEND,		"task suspend failed"},
@@ -19,6 +21,7 @@ static struct ecode_s edatadesc[] = {
 	{ERR_SEM_DEALLOC,		"sema dealloc failed"},
 	{ERR_SEM_OPERATION,		"sema operation failed"},
 	{ERR_MQ_NOTEMPTY,		"message queue not empty"},
+	{ERR_SCHED_CONFIG,		"scheduler configuration invalid"},
 	{ERR_UNKNOWN,			"unknown reason"}
 #endif
 };

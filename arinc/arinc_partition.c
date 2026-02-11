@@ -154,7 +154,6 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
 #ifndef MULTICORE
 
     struct node_s *partition_node = list_foreach(kcb->partitions, find_partition, (void *)IDENTIFIER);
-    
     if(!partition_node){
         krnl_panic(ERR_FAIL);
     }
@@ -185,7 +184,6 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
     
 #endif
 
-    
     return IDENTIFIER;
 }
 

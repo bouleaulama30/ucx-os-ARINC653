@@ -6,6 +6,10 @@ void module_scheduler_init(const char* name, uint32_t major_frame_tick, const wi
     struct mscb_s* ms;
     
     ms = ucx_malloc(sizeof(struct mscb_s));
+    if (!ms){
+        krnl_panic(ERR_MSCB_ALLOC);
+    }
+
     ms->name = name;
     ms->major_frame_tick = major_frame_tick;
     ms->windows_partition = windows_partition;
@@ -31,6 +35,15 @@ void arinc_start_scheduling(void) {
 #else
     struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
 #endif
+
+    if(ms == NULL){
+        krnl_panic(ERR_SCHED_CONFIG); 
+    }
+
+    if (ms->windows_partition == NULL || ms->nbr_windows == 0) {
+        krnl_panic(ERR_SCHED_CONFIG);
+    }
+
     int32_t first_window_idx = 0;
     PARTITION_ID_TYPE first_id = ms->windows_partition[first_window_idx].id;
 
@@ -53,6 +66,10 @@ void arinc_start_scheduling(void) {
     struct pcb_s* first_pcb = (struct pcb_s*)kcb[_cpu_id()]->task_current->data;
 #endif
 
+    if (first_pcb == NULL){
+        krnl_panic(ERR_FAIL);
+    }
+
     _dispatch_init(first_pcb->tcb.context);
 }
 
@@ -62,6 +79,9 @@ void signal_idle_current_partition(void){
 #else
     struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
 #endif
+    if(ms == NULL){
+        krnl_panic(ERR_SCHED_CONFIG); 
+    }
     ms->idle_current_partition = true;
 }
 
@@ -73,6 +93,13 @@ int32_t partition_scheduler(void){
 #else
     struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
 #endif
+    if (ms == NULL) {
+        krnl_panic((uint32_t)ERR_FAIL);
+    }
+
+    if (ms->windows_partition == NULL || ms->nbr_windows == 0) {
+        krnl_panic(ERR_SCHED_CONFIG);
+    }
 
     // il vaut 1 car la tache est lancee via main durant l'init
     static uint32_t relative_tick = 1;
@@ -86,7 +113,7 @@ int32_t partition_scheduler(void){
     printf("scheduler perso, relative tick %d, partition end tick %d, major frame tick %d\n", relative_tick, partition_end_tick, ms->major_frame_tick);
 
     if(ms->idle_current_partition){
-        activate_partition(IDLE_PARTITION_ID);
+        partition_id = activate_partition(IDLE_PARTITION_ID);
         ms->idle_current_partition = false;
     }
 
@@ -94,15 +121,13 @@ int32_t partition_scheduler(void){
         relative_tick = 1;
         (*windows_idx) = 0;
         partition_id = ms->windows_partition[*windows_idx].id;
-        activate_partition(partition_id);
-        return partition_id;
+        return activate_partition(partition_id);
     }
 
     if(relative_tick >= partition_end_tick){
         if(*windows_idx == ms->nbr_windows - 1){
-            activate_partition(IDLE_PARTITION_ID);
             relative_tick++;
-            return IDLE_PARTITION_ID;
+            return activate_partition(IDLE_PARTITION_ID);
         }
         (*windows_idx)++;
         partition_id = ms->windows_partition[*windows_idx].id;
@@ -111,5 +136,4 @@ int32_t partition_scheduler(void){
     
     relative_tick++;
     return partition_id;
-
 }
