@@ -27,6 +27,9 @@ int main(void)
 	int pr;
 	
 	_hardware_init();
+
+	//test init pmp
+	_pmp_init();
 	
 	printf("UCX/OS v%s\n", __VER__);
 #ifndef UNKNOWN_HEAP

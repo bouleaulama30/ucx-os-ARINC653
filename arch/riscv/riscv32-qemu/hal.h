@@ -91,6 +91,7 @@ void _timer_enable(void);
 void _timer_disable(void);
 void _interrupt_tick(void);
 void _context_init(jmp_buf *ctx, size_t sp, size_t ss, size_t ra);
+void _pmp_init();
 
 uint64_t mtime_r(void);
 void mtime_w(uint64_t val);
