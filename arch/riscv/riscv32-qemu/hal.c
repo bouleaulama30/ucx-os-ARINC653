@@ -280,25 +280,41 @@ void _context_init(jmp_buf *ctx, size_t sp, size_t ss, size_t ra)
 	ctx_p[CONTEXT_RA] = ra;
 }
 
-void _pmp_init(){
+void _pmp_init(uint32_t end_addr){
 
-	uint32_t pmpaddr0 = 0x80000000 >> 2;
-	uint32_t pmpaddr1 = 0x81000000 >> 2;
+	uint32_t pmpaddr0 = end_addr >> 2;
 
 	w_pmpaddr0(pmpaddr0);
-	w_pmpaddr1(pmpaddr1);
 
-	uint8_t pmp1cfg = 0b00001111;
-	uint32_t pmpcfg0 = pmp1cfg << 8;
+	uint8_t pmp0cfg = 0b00001111;
+	uint32_t pmpcfg0 = pmp0cfg;
 	w_pmpcfg0(pmpcfg0);
 }
 
-void _activate_MPRV(){
+void _pmp_partition_activate(uint32_t kernel_end_addr, uint32_t partition_start_addr, uint32_t partition_end_addr){
+
+	uint32_t pmpaddr0 = kernel_end_addr >> 2;
+	uint32_t pmpaddr1 = partition_start_addr >> 2;
+	uint32_t pmpaddr2 = partition_end_addr >> 2;
+
+	w_pmpaddr0(pmpaddr0);
+	w_pmpaddr1(pmpaddr1);
+	w_pmpaddr2(pmpaddr2);
+
+
+
+	uint8_t pmp0cfg = 0b00001111;
+	uint8_t pmp2cfg = 0b00001111;
+	uint32_t pmpcfg0 = (pmp2cfg << 16) | pmp0cfg;
+	w_pmpcfg0(pmpcfg0);
+}
+
+void _mprv_activate(){
 	uint32_t mstatus = r_mstatus();
 
 	// mettre MPP en mode user
 	mstatus &= ~0x1800;
-
 	mstatus |= (1 << 17);
+
 	w_mstatus(mstatus);
 }

@@ -205,6 +205,11 @@ static inline void w_pmpaddr1(uint32_t x)
 	asm volatile("csrw pmpaddr1, %0" : : "r" (x));
 }
 
+static inline void w_pmpaddr2(uint32_t x)
+{
+	asm volatile("csrw pmpaddr2, %0" : : "r" (x));
+}
+
 /* use riscv's sv39 page table scheme. */
 #define SATP_SV39 (8L << 60)
 #define MAKE_SATP(pagetable) (SATP_SV39 | (((uint32_t)pagetable) >> 12))

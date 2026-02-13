@@ -29,8 +29,8 @@ int main(void)
 	_hardware_init();
 
 	//test init pmp
-	_pmp_init();
-	_activate_MPRV();
+	_pmp_partition_activate((uint32_t)_kernel_end, (uint32_t)_p2_code_start, (uint32_t)_p2_data_end);
+	_mprv_activate();
 	
 	printf("UCX/OS v%s\n", __VER__);
 #ifndef UNKNOWN_HEAP

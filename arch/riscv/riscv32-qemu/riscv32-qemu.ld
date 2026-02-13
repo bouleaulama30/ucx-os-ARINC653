@@ -72,6 +72,8 @@ SECTIONS
 	
 	_end = .;
 
+	_kernel_end = ORIGIN(ram) + LENGTH(ram);
+
     .p1_code : {
         _p1_code_start = .;  
 

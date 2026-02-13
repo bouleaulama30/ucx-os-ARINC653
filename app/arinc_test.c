@@ -1,19 +1,5 @@
 #include <ucx.h>
 
-// Déclaration des symboles du linker script de la p1
-extern uint8_t _p1_code_start[];
-extern uint8_t _p1_code_end[];
-
-extern uint8_t _p1_data_start[];
-extern uint8_t _p1_data_end[];
-
-// Déclaration des symboles du linker script de la p2
-extern uint8_t _p2_code_start[];
-extern uint8_t _p2_code_end[];
-
-extern uint8_t _p2_data_start[];
-extern uint8_t _p2_data_end[];
-
 // extern uint32_t start_time;
 // extern int time_initialized;
 
@@ -37,16 +23,30 @@ void print_time()
 
 __attribute__((section(".p1_code")))
 void test_spatial_violation_p2(void) {
-    printf("--- Test 2: Tentative d'ecriture sur P2 (0x%08x) ---\n", (unsigned int)_p2_data_start);
+    printf("--- Test 2: Tentative d'ecriture sur P2 (0x%08x) ---\n", (unsigned int)_p2_code_start);
     printf("ATTENTION: Le systeme DOIT crasher ou lever une exception maintenant.\n");
     
-    volatile int *ptr = (int *)_p2_data_start;
+    volatile int *ptr = (int *)_p2_code_start;
     
     // Si l'isolation matérielle est active, cette ligne stoppe l'exécution
     *ptr = 0xDEADBEEF; 
 
     // Si on arrive ici, c'est un échec de l'isolation
     printf("[CRITICAL FAIL] P1 a reussi a ecrire dans P2 !\n");
+}
+
+__attribute__((section(".p2_code")))
+void test_spatial_violation_p1(void) {
+    printf("--- Test 2: Tentative d'ecriture sur P1 (0x%08x) ---\n", (unsigned int)_p1_data_start);
+    printf("ATTENTION: Le systeme DOIT crasher ou lever une exception maintenant.\n");
+    
+    volatile int *ptr = (int *)_p1_data_start;
+    
+    // Si l'isolation matérielle est active, cette ligne stoppe l'exécution
+    *ptr = 0xDEADBEEF; 
+
+    // Si on arrive ici, c'est un échec de l'isolation
+    printf("[CRITICAL FAIL] P2 a reussi a ecrire dans P1 !\n");
 }
 
 
@@ -167,7 +167,7 @@ int app_main(void)
 				   (void*)_p1_data_start,
 				   p1_data_size,
 				   DEFAULT_PARTITION_CONFIG.access_data_mem,
-				   task0,
+				   test_spatial_violation_p2,
 				   DEFAULT_PARTITION_CONFIG.is_system_partition);
 
 	partition_init(P2_CONFIG.period,
@@ -183,7 +183,7 @@ int app_main(void)
 				   (void*)_p2_data_start,
 				   p2_data_size,
 				   P2_CONFIG.access_data_mem,
-				   task1,
+				   test_spatial_violation_p1,
 				   P2_CONFIG.is_system_partition);
 
 	return 1;

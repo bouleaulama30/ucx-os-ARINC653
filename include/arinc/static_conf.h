@@ -4,6 +4,23 @@
 #include "arinc/arinc_partition.h"
 #include "arinc/module_scheduler.h"
 
+// Déclaration des symboles du linker script du kernel
+extern uint8_t _kernel_end[];
+
+// Déclaration des symboles du linker script de la p1
+extern uint8_t _p1_code_start[];
+extern uint8_t _p1_code_end[];
+
+extern uint8_t _p1_data_start[];
+extern uint8_t _p1_data_end[];
+
+// Déclaration des symboles du linker script de la p2
+extern uint8_t _p2_code_start[];
+extern uint8_t _p2_code_end[];
+
+extern uint8_t _p2_data_start[];
+extern uint8_t _p2_data_end[];
+
 
 // Hardcoded partition configuration
 struct PartitionConfig {
