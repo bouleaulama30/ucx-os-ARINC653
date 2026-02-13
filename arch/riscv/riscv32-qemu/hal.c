@@ -282,13 +282,23 @@ void _context_init(jmp_buf *ctx, size_t sp, size_t ss, size_t ra)
 
 void _pmp_init(){
 
-	uint32_t pmpaddr0 = 0x83000000 >> 2;
-	uint32_t pmpaddr1 = 0x85000000 >> 2;
+	uint32_t pmpaddr0 = 0x80000000 >> 2;
+	uint32_t pmpaddr1 = 0x81000000 >> 2;
 
 	w_pmpaddr0(pmpaddr0);
 	w_pmpaddr1(pmpaddr1);
 
-	uint8_t pmp1cfg = 0b10001000;
+	uint8_t pmp1cfg = 0b00001111;
 	uint32_t pmpcfg0 = pmp1cfg << 8;
 	w_pmpcfg0(pmpcfg0);
+}
+
+void _activate_MPRV(){
+	uint32_t mstatus = r_mstatus();
+
+	// mettre MPP en mode user
+	mstatus &= ~0x1800;
+
+	mstatus |= (1 << 17);
+	w_mstatus(mstatus);
 }

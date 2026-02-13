@@ -30,6 +30,7 @@ int main(void)
 
 	//test init pmp
 	_pmp_init();
+	_activate_MPRV();
 	
 	printf("UCX/OS v%s\n", __VER__);
 #ifndef UNKNOWN_HEAP
