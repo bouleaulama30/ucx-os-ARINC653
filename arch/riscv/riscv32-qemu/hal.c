@@ -106,14 +106,34 @@ void _panic(void)
 
 void _irq_handler(uint32_t cause, uint32_t epc)
 {
-	uint32_t val;
+	uint32_t val, mepc, mtval, mstatus;
+	
+	/* Désactiver MPRV au début de l'ISR pour que le kernel s'exécute normalement */
+	mstatus = r_mstatus();
+	mstatus &= ~(1 << 17);  // clear MPRV
+	w_mstatus(mstatus);
 	
 	val = read_csr(mcause);
 	if (mtime_r() > mtimecmp_r()) {
 		mtimecmp_w(mtime_r() + (F_CPU / F_TIMER));
 		krnl_dispatcher();
 	} else {
-		printf("[%x]\n", val);
+		mepc = read_csr(mepc);
+		mtval = read_csr(mtval);
+		mstatus = read_csr(mstatus);
+		printf("[FAULT] mcause=%x, mepc=%x, mtval=%x, mstatus=%x\n", val, mepc, mtval, mstatus);
+		printf("  mcause: %s\n", 
+			val == 0 ? "Instruction address misaligned" :
+			val == 1 ? "Instruction access fault" :
+			val == 2 ? "Illegal instruction" :
+			val == 3 ? "Breakpoint" :
+			val == 4 ? "Load address misaligned" :
+			val == 5 ? "Load access fault" :
+			val == 6 ? "Store address misaligned" :
+			val == 7 ? "Store access fault" :
+			"Unknown");
+		printf("  MPRV=%d, MPP=%d\n", (mstatus >> 17) & 1, (mstatus >> 11) & 3);
+		while(1);
 		_panic();
 	}
 
@@ -307,14 +327,33 @@ void _pmp_partition_activate(uint32_t kernel_end_addr, uint32_t partition_start_
 	uint8_t pmp2cfg = 0b00001111;
 	uint32_t pmpcfg0 = (pmp2cfg << 16) | pmp0cfg;
 	w_pmpcfg0(pmpcfg0);
+	printf("start partition addr: %x, end partition addr: %x\n", partition_start_addr, partition_end_addr);
+
 }
 
+// void _pmp_partition_activate(uint32_t kernel_end_addr, uint32_t partition_start_addr, uint32_t partition_end_addr){
+
+// 	uint32_t pmpaddr1 = kernel_end_addr >> 2;
+// 	uint32_t pmpaddr2 = partition_start_addr >> 2;
+// 	uint32_t pmpaddr3 = partition_end_addr >> 2;
+
+// 	w_pmpaddr0(0);
+// 	w_pmpaddr1(pmpaddr1);
+// 	w_pmpaddr2(pmpaddr2);
+// 	w_pmpaddr3(pmpaddr3);
+
+
+
+// 	uint8_t pmp0cfg = 0b00001111;
+// 	uint8_t pmp3cfg = 0b00001111;
+// 	uint32_t pmpcfg0 = (pmp3cfg << 24) | pmp0cfg;
+// 	w_pmpcfg0(pmpcfg0);
+// 	printf("start partition addr: %x, end partition addr: %x\n", partition_start_addr, partition_end_addr);
+
+// }
+
 void _mprv_activate(){
-	uint32_t mstatus = r_mstatus();
-
-	// mettre MPP en mode user
-	mstatus &= ~0x1800;
-	mstatus |= (1 << 17);
-
-	w_mstatus(mstatus);
+	uint32_t new_mstatus = (r_mstatus() & ~0x1800) | (1 << 17);
+	w_mstatus(new_mstatus);
+	// printf("[MPRV] activated: mstatus=%x, MPRV=%d, MPP=%d\n", new_mstatus, (new_mstatus >> 17) & 1, (new_mstatus >> 11) & 3);
 }
