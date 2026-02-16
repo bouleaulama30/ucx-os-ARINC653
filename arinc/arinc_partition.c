@@ -30,23 +30,23 @@ void idle_task(void)
 	}
 }
 
-static void partition_trampoline(void)
-{
-    struct pcb_s *partition;
+// static void partition_trampoline(void)
+// {
+//     struct pcb_s *partition;
 
-#ifndef MULTICORE
-    partition = kcb->task_current->data;
-#else
-    partition = kcb[_cpu_id()]->task_current->data;
-#endif
+// #ifndef MULTICORE
+//     partition = kcb->task_current->data;
+// #else
+//     partition = kcb[_cpu_id()]->task_current->data;
+// #endif
 
-    // _mprv_activate();
-    ((void (*)(void))partition->entry_point)();
+//     // _mprv_activate();
+//     ((void (*)(void))partition->entry_point)();
 
-    while (1) {
-        ucx_task_yield();
-    }
-}
+//     while (1) {
+//         ucx_task_yield();
+//     }
+// }
 
 int32_t partition_init(SYSTEM_TIME_TYPE PERIOD, 
                         SYSTEM_TIME_TYPE DURATION,
@@ -110,7 +110,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 
     /* --- INITIALISATION DE LA PARTIE TCB (POUR LE KERNEL) --- */
     new_pcb->tcb.id = (uint16_t)IDENTIFIER;         
-    new_pcb->tcb.task = partition_trampoline;
+    new_pcb->tcb.task = (void (*)(void))entry_point;
     new_pcb->tcb.stack = data_region->base;         
     new_pcb->tcb.stack_sz = data_region->size;
     new_pcb->tcb.state = TASK_READY;                
@@ -149,7 +149,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 	// memset((code_region->base) + code_region->size - 4, 0x33, 4);
 
     _context_init(&new_pcb->tcb.context, (size_t)new_pcb->tcb.stack,
-        new_pcb->tcb.stack_sz, (size_t)new_pcb->tcb.task);
+        new_pcb->tcb.stack_sz, (size_t)new_pcb->entry_point);
 
 	printf("core %d, partition %d: 0x%p, memory code: 0x%p, memory code size: %d, memory data: 0x%p, memory data size %d\n", _cpu_id(),
 		new_pcb->status->IDENTIFIER, new_pcb->entry_point ,new_pcb->memory_requirements->memory[CODE].base, new_pcb->memory_requirements->memory[CODE].size, new_pcb->memory_requirements->memory[DATA].base, new_pcb->memory_requirements->memory[DATA].size);
@@ -206,9 +206,7 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
         int32_t id = activate_partition(IDLE_PARTITION_ID);
         return id;
     }
-
-    kcb[_cpu_id()]->task_current = partition_node;
-    
+    kcb[_cpu_id()]->task_current = partition_node;    
 #endif
     
     return IDENTIFIER;

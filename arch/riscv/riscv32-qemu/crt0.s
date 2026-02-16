@@ -6,6 +6,12 @@ _entry:
         csrr	a1, mhartid
         mul	a0, a0, a1
         sub	sp, sp, a0
+
+		# --- AJOUT ---
+        # Sauvegarder le SP du Kernel dans mscratch pour usage futur
+        csrw    mscratch, sp
+        # -------------
+
 	la	gp, _gp
 	la	tp, _end + 63
 	and	tp, tp, -64
@@ -63,6 +69,13 @@ L0:
 	.org 0x100
 	.global _isr
 _isr:
+
+# 1. Échanger SP (User) avec mscratch (Kernel Stack)
+    # Après cette instruction : 
+    #   sp contient le pointeur de pile du Kernel
+    #   mscratch contient le pointeur de pile de l'Utilisateur
+	csrrw	sp, mscratch, sp
+
 	addi	sp, sp, -80
 	sw	ra, 0(sp)
 	sw	t0, 4(sp)
@@ -81,6 +94,11 @@ _isr:
 	sw	t5, 56(sp)
 	sw	t6, 60(sp)
 
+# 4. Sauvegarder le pointeur de pile de l'UTILISATEUR
+    # Il est actuellement stocké dans mscratch (suite au swap)
+	csrr	t0, mscratch
+	sw	t0, 72(sp)     # On le sauve en position 72 (qui était libre)
+
 	csrr    a0, mcause
 	csrr    a1, mepc
 	sw	a0, 64(sp)
@@ -92,6 +110,10 @@ _isr:
 	lw	a0, 64(sp)
 	csrw	mepc, a1
 	csrw	mcause, a0
+
+	# 8. Restaurer le pointeur de pile UTILISATEUR dans mscratch
+	lw	t0, 72(sp)
+	csrw	mscratch, t0
 
 	lw	ra, 0(sp)
 	lw	t0, 4(sp)
@@ -110,6 +132,9 @@ _isr:
 	lw	t5, 56(sp)
 	lw	t6, 60(sp)
 	addi	sp, sp, 80
+
+	# 10. Échange final : remettre SP User dans sp, remettre SP Kernel dans mscratch
+	csrrw	sp, mscratch, sp
 	mret
 
 	.global   setjmp

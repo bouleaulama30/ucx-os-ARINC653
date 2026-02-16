@@ -30,7 +30,7 @@ int main(void)
 
 	//test init pmp
 	_pmp_partition_activate((uint32_t)_kernel_end, (uint32_t)0, (uint32_t)0);
-	// _mprv_activate();
+	_mprv_activate();
 	
 	printf("UCX/OS v%s\n", __VER__);
 #ifndef UNKNOWN_HEAP

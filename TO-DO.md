@@ -25,6 +25,8 @@
     * faire en sorte de lever exeption si écriture interdite ou débordement
     * Kernel exception handler
     * routine dumb qui affiche pb de memory
+    * enlever truc du commit avant pour la fonction de transition
+    * comprendre ajout crt0
 
 * faire rouler sur la carte en materielle une fois que c'est bon pour les partitions
 
