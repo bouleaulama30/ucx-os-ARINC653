@@ -15,18 +15,9 @@
     * regarder pok pour s'inspirer
     * remplacer malloc par ucx_malloc
     
-
-* fixe pb corruption mémoire une fois que la soumission de l'article est passée
-    * lire la ISA pour comprendre le fonctionnement de la PMP et du MPRV
-    * test configuration de la PMP pour P1 et P2 avec le MPRV:
-        * faire une fonction generique qui sera appele par le scheduler pour programmer dynamiquement les acces aux partitions
-    * faire attention au bit MPRV qui ne va pas etre conserver pour traiter une interruption du timer par exemple
-    * modifier le handler pour faire les etapes suivantes
-    * faire en sorte de lever exeption si écriture interdite ou débordement
-    * Kernel exception handler
-    * routine dumb qui affiche pb de memory
-    * enlever truc du commit avant pour la fonction de transition
-    * comprendre ajout crt0
+* pb1: Chaque interruption timer fonction de l'os (krnl_dispatcher, krnl_scheduler, activate_partition) utilisent la stack de l'OS et de maniere general pour toutes fonction de l os ca ce fera dans la partition qui la call 
+* pb2: OS tourne en mode Machine pour riscv, pas design pour mode user, donc utilisation du MPRV+MPP donc techniquement partitions pas faire acces memoire mais peuvent call une fonctions.
+* pb3: Partition peuvent faire lecture et ecriture au kernel, c est le pb qu il n y a pas de syscall qui font un contexte switch et qui delegue tout au kernel
 
 * faire rouler sur la carte en materielle une fois que c'est bon pour les partitions
 
