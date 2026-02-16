@@ -184,8 +184,8 @@ int app_main(void)
 				   (void*)_p2_data_start,
 				   p2_data_size,
 				   P2_CONFIG.access_data_mem,
-				//    test_spatial_violation_p1,
-				   task1,
+				   test_spatial_violation_p1,
+				//    task1,
 				   P2_CONFIG.is_system_partition);
 
 	return 1;

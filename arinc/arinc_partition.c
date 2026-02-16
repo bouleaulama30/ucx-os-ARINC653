@@ -40,7 +40,7 @@ static void partition_trampoline(void)
     partition = kcb[_cpu_id()]->task_current->data;
 #endif
 
-    // _mprv_activate();
+    _mprv_activate();
     ((void (*)(void))partition->entry_point)();
 
     while (1) {
