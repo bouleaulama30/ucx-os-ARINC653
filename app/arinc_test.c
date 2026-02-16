@@ -167,8 +167,8 @@ int app_main(void)
 				   (void*)_p1_data_start,
 				   p1_data_size,
 				   DEFAULT_PARTITION_CONFIG.access_data_mem,
-				   task0,
 				//    test_spatial_violation_p2,
+				   task0,
 				   DEFAULT_PARTITION_CONFIG.is_system_partition);
 
 	partition_init(P2_CONFIG.period,

@@ -133,6 +133,7 @@ void _irq_handler(uint32_t cause, uint32_t epc)
 			val == 7 ? "Store access fault" :
 			"Unknown");
 		printf("  MPRV=%d, MPP=%d\n", (mstatus >> 17) & 1, (mstatus >> 11) & 3);
+		while(1);
 		_panic();
 	}
 
@@ -326,33 +327,14 @@ void _pmp_partition_activate(uint32_t kernel_end_addr, uint32_t partition_start_
 	uint8_t pmp2cfg = 0b00001111;
 	uint32_t pmpcfg0 = (pmp2cfg << 16) | pmp0cfg;
 	w_pmpcfg0(pmpcfg0);
-	printf("start partition addr: %x, end partition addr: %x\n", partition_start_addr, partition_end_addr);
-
 }
 
-// void _pmp_partition_activate(uint32_t kernel_end_addr, uint32_t partition_start_addr, uint32_t partition_end_addr){
-
-// 	uint32_t pmpaddr1 = kernel_end_addr >> 2;
-// 	uint32_t pmpaddr2 = partition_start_addr >> 2;
-// 	uint32_t pmpaddr3 = partition_end_addr >> 2;
-
-// 	w_pmpaddr0(0);
-// 	w_pmpaddr1(pmpaddr1);
-// 	w_pmpaddr2(pmpaddr2);
-// 	w_pmpaddr3(pmpaddr3);
-
-
-
-// 	uint8_t pmp0cfg = 0b00001111;
-// 	uint8_t pmp3cfg = 0b00001111;
-// 	uint32_t pmpcfg0 = (pmp3cfg << 24) | pmp0cfg;
-// 	w_pmpcfg0(pmpcfg0);
-// 	printf("start partition addr: %x, end partition addr: %x\n", partition_start_addr, partition_end_addr);
-
-// }
-
 void _mprv_activate(){
-	uint32_t new_mstatus = (r_mstatus() & ~0x1800) | (1 << 17);
-	w_mstatus(new_mstatus);
-	// printf("[MPRV] activated: mstatus=%x, MPRV=%d, MPP=%d\n", new_mstatus, (new_mstatus >> 17) & 1, (new_mstatus >> 11) & 3);
+	uint32_t mstatus = r_mstatus();
+
+	// mettre MPP en mode user
+	mstatus &= ~0x1800;
+	mstatus |= (1 << 17);
+
+	w_mstatus(mstatus);
 }
