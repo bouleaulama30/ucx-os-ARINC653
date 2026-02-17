@@ -8,6 +8,13 @@
     * inhibit process scheduling and switch back to initialization mode;
     * faire les actions quand elle passe en normal (set to READY processes, activate process scheduling etc..)
 
+
+* faire un kos qui initialise tout ce qui faut niveau du pos (partitions etc), il faut que le scheduler et les fonctions à chaque timer soient dans le kos (redemander à Felipe une description des deux) a l execution et non dans la stack des partitions
+
+* faire management process
+    * relire la partie process
+
+
 * refractor / formatage code:
     * trouver des noms plus accurate pour activate partition et les variables dedans
     * refractor de partionnement spatial
@@ -15,11 +22,7 @@
     * regarder pok pour s'inspirer
     * remplacer malloc par ucx_malloc
     
-* pb1: Chaque interruption timer fonction de l'os (krnl_dispatcher, krnl_scheduler, activate_partition) utilisent la stack de l'OS et de maniere general pour toutes fonction de l os ca ce fera dans la partition qui la call 
-* pb2: OS tourne en mode Machine pour riscv, pas design pour mode user, donc utilisation du MPRV+MPP donc techniquement partitions pas faire acces memoire mais peuvent call une fonctions.
-* pb3: Partition peuvent faire lecture et ecriture au kernel, c est le pb qu il n y a pas de syscall qui font un contexte switch et qui delegue tout au kernel
-
-* faire rouler sur la carte en materielle une fois que c'est bon pour les partitions
+* faire rouler sur la carte en materielle une fois que c'est bon pour les processus
 
 ## remind debug
 
