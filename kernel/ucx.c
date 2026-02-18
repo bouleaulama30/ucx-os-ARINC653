@@ -298,30 +298,30 @@ void dispatch(void)
 	if (!kcb->tasks->length)
 		krnl_panic(ERR_NO_TASKS);
 	
-	if (!setjmp(task->context)) {
+	// if (!setjmp(task->context)) {
 		stack_check();
 		list_foreach(kcb->tasks, delay_update, (void *)0);
 		if (kcb->rt_sched() < 0)
 			krnl_schedule();
-		task = kcb->task_current->data;
+		// task = kcb->task_current->data;
 		_interrupt_tick();
-		longjmp(task->context, 1);
-	}
+		// longjmp(task->context, 1);
+	// }
 #else
 	struct tcb_s *task = kcb[_cpu_id()]->task_current->data;
 	
 	if (!kcb[_cpu_id()]->tasks->length)
 		krnl_panic(ERR_NO_TASKS);
-	
-	if (!setjmp(task->context)) {
+
+	// if (!setjmp(task->context)) {
 		stack_check();
 		list_foreach(kcb[_cpu_id()]->tasks, delay_update, (void *)0);
 		if (kcb[_cpu_id()]->rt_sched() < 0)
 			krnl_schedule();
-		task = kcb[_cpu_id()]->task_current->data;
+		// task = kcb[_cpu_id()]->task_current->data;
 		_interrupt_tick();
-		longjmp(task->context, 1);
-	}
+		// longjmp(task->context, 1);
+	// }
 #endif
 }
 

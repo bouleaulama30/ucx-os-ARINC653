@@ -12,6 +12,8 @@
 static volatile int boot = 0;
 #endif
 
+static int init = 1;
+
 static const PARTITION_NAME_TYPE idle_partition_name = "IDLE Partition";
 static const REGION_NAME_TYPE idle_code_region_name = "IDLE code";
 static const ACCESS_TYPE idle_code_access = "RX";
@@ -28,7 +30,7 @@ int main(void)
 	
 	_hardware_init();
 
-	//test init pmp
+	//init pmp
 	_pmp_partition_activate((uint32_t)_kernel_end, (uint32_t)0, (uint32_t)0);
 	_mprv_activate();
 	
@@ -62,14 +64,24 @@ int main(void)
 	partition_init(0, 0, IDLE_PARTITION_ID, 1, idle_partition_name, idle_code_region_name, idle_task, 0, idle_code_access, idle_data_region_name, idle_stack, DEFAULT_STACK_SIZE, idle_data_access, idle_task, false);
 
 	pr = app_main();
-
-	setjmp(kcb->context);
 	
 	if (!kcb->tasks->length)
 		krnl_panic(ERR_NO_TASKS);
 
 	kcb->preemptive = pr ? 'y' : 'n';
-	arinc_start_scheduling();
+
+	setjmp(kcb->context);
+	if(init){
+		init = 0;
+		arinc_start_scheduling();
+	}
+	while(1){
+		krnl_dispatcher();
+        struct tcb_s *next_task = kcb->task_current->data;
+		if (setjmp(kcb->context) == 0){
+			longjmp(next_task->context, 1);
+		}
+	}
 #else
 	kcb[0]->tasks = list_create();
 	
@@ -88,7 +100,6 @@ int main(void)
 
 	pr = app_main();
 
-	setjmp(kcb[0]->context);
 	
 	if (!kcb[0]->tasks->length)
 		krnl_panic(ERR_NO_TASKS);
@@ -98,7 +109,21 @@ int main(void)
 	printf("core %d ready (%s).\n", _cpu_id(), pr ? "preempt" : "coop");
 	
 	boot = 1;
-	arinc_start_scheduling();
+
+
+	setjmp(kcb[0]->context);
+	if(init){
+			init = 0;
+			arinc_start_scheduling();
+		}
+	while(1){
+		krnl_dispatcher();
+        struct tcb_s *next_task = kcb[_cpu_id()]->task_current->data;
+		if (setjmp(kcb[0]->context) == 0){
+			longjmp(next_task->context, 1);
+		}
+	}
+	
 #endif
 
 

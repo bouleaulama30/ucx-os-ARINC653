@@ -115,8 +115,25 @@ void _irq_handler(uint32_t cause, uint32_t epc)
 	
 	val = read_csr(mcause);
 	if (mtime_r() > mtimecmp_r()) {
+		mepc = read_csr(mepc);
+		mtval = read_csr(mtval);
+		mstatus = read_csr(mstatus);
+		// printf("[TIMER INTERRUPT] mcause=%x, mepc=%x, mtval=%x, mstatus=%x\n", val, mepc, mtval, mstatus);
 		mtimecmp_w(mtime_r() + (F_CPU / F_TIMER));
-		krnl_dispatcher();
+
+		struct tcb_s *current_task;
+	#ifndef MULTICORE
+		current_task = kcb->task_current->data;
+		if (setjmp(current_task->context) == 0) {
+			longjmp(kcb->context, 1);
+		}
+	#else
+		current_task = kcb[_cpu_id()]->task_current->data;
+		if (setjmp(current_task->context) == 0) {
+			longjmp(kcb[_cpu_id()]->context, 1);
+		}
+	#endif
+		// krnl_dispatcher();
 	} else {
 		mepc = read_csr(mepc);
 		mtval = read_csr(mtval);
@@ -133,7 +150,7 @@ void _irq_handler(uint32_t cause, uint32_t epc)
 			val == 7 ? "Store access fault" :
 			"Unknown");
 		printf("  MPRV=%d, MPP=%d\n", (mstatus >> 17) & 1, (mstatus >> 11) & 3);
-		while(1);
+		// while(1);
 		_panic();
 	}
 

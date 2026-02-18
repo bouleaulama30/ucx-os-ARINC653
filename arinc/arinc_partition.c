@@ -183,7 +183,6 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
     uint32_t partition_end_addr = (uint32_t) partition->memory_requirements->memory[DATA].base + partition->memory_requirements->memory[DATA].size;
     printf("start partition addr: %x, end partition addr: %x\n", partition_start_addr, partition_end_addr);
 	_pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
-
     if(partition->status->OPERATING_MODE == IDLE){
         int32_t id = activate_partition(IDLE_PARTITION_ID);
         return id;

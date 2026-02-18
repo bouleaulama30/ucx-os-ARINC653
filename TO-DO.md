@@ -24,6 +24,10 @@
     
 * faire rouler sur la carte en materielle une fois que c'est bon pour les processus
 
+## Choses dependante de l archi
+* protection memoire avec pmp_activate et mprv_activate (lie a riscv32)
+* logique des longjmp et setjmp dans l'irq_handler afin d'executer les fonctions de scheduling dans la stack du kernel
+
 ## remind debug
 
 * build:
