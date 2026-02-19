@@ -16,8 +16,7 @@ void CREATE_PROCESS (
     if(partition->nbr_tasks >= MAX_NUMBER_OF_PROCESSES){
         *RETURN_CODE = INVALID_CONFIG;
     } 
-    // a faire remain allocated stack
-    else if (ATTRIBUTES->STACK_SIZE)
+    else if (ATTRIBUTES->STACK_SIZE > partition->storage_capacity)
     {
         *RETURN_CODE = INVALID_CONFIG;
     }
@@ -26,7 +25,7 @@ void CREATE_PROCESS (
     {
         *RETURN_CODE = NO_ACTION;
     }
-    else if (ATTRIBUTES->STACK_SIZE >= partition->memory_requirements[DATA].memory->size){
+    else if (ATTRIBUTES->STACK_SIZE > partition->memory_requirements[DATA].memory->size){
         *RETURN_CODE = INVALID_PARAM;
     }
     else if (ATTRIBUTES->BASE_PRIORITY < MIN_PRIORITY_VALUE || ATTRIBUTES->BASE_PRIORITY > MAX_PRIORITY_VALUE)
@@ -58,6 +57,7 @@ void CREATE_PROCESS (
     }
     else{
         partition->nbr_tasks++;
+        partition->storage_capacity -= ATTRIBUTES->STACK_SIZE;
     }
 
 

@@ -141,6 +141,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->entry_point = entry_point;
     new_pcb->is_system_partition = is_system_partition;
     new_pcb->nbr_tasks = 0;
+    new_pcb->storage_capacity = size_data_mem;
 
 
     CRITICAL_LEAVE();

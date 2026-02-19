@@ -12,7 +12,7 @@
 * faire un kos qui initialise tout ce qui faut niveau du pos (partitions etc), il faut que le scheduler et les fonctions à chaque timer soient dans le kos (redemander à Felipe une description des deux) a l execution et non dans la stack des partitions
 
 * faire management process
-    * relire la partie process
+    * comment etre sur que les processus utilise pas plus que leur stack
 
 
 * refractor / formatage code:
