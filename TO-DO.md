@@ -21,6 +21,7 @@
     * refractor de partionnement temporelle
     * regarder pok pour s'inspirer
     * remplacer malloc par ucx_malloc
+    * remplacer certaines action par des fonctions get et set  (comme fonction pour get le node_s de la partition courante)
     
 * faire rouler sur la carte en materielle une fois que c'est bon pour les processus
 

@@ -41,6 +41,7 @@ static void partition_trampoline(void)
 #endif
 
     _mprv_activate();
+    CREATE_PROCESS((PROCESS_ATTRIBUTE_TYPE*)NULL, (PROCESS_ID_TYPE*)NULL, (RETURN_CODE_TYPE*)NULL);
     ((void (*)(void))partition->entry_point)();
 
     while (1) {
@@ -139,6 +140,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->memory_requirements = memory_requirements;
     new_pcb->entry_point = entry_point;
     new_pcb->is_system_partition = is_system_partition;
+    new_pcb->nbr_tasks = 0;
 
 
     CRITICAL_LEAVE();
@@ -189,6 +191,8 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
     }
 
     kcb->task_current = partition_node;
+    kcb->partition_current = partition_node;
+
 #else
     struct node_s *partition_node = list_foreach(kcb[_cpu_id()]->partitions, find_partition, (void *)IDENTIFIER);
 
@@ -207,6 +211,7 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
         return id;
     }
     kcb[_cpu_id()]->task_current = partition_node;    
+    kcb[_cpu_id()]->partition_current = partition_node;    
 #endif
     
     return IDENTIFIER;

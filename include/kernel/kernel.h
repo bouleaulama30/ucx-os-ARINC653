@@ -34,6 +34,7 @@ struct kcb_s {
 	int32_t (*rt_sched)(void);
 	struct mscb_s *module_scheduler;
 	struct list_s *partitions;
+	struct node_s *partition_current;
 	struct list_s *timer_lst;
 	volatile uint32_t ticks;
 	uint16_t id_next;

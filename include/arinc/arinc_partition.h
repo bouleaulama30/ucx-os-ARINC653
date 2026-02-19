@@ -81,7 +81,7 @@ struct pcb_s {
    // Partion HM Table
    SYSTEM_ADDRESS_TYPE entry_point;
    BOOLEAN_TYPE is_system_partition;
-
+   APEX_INTEGER nbr_tasks;
 };
 
 
