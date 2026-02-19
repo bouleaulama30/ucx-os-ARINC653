@@ -65,6 +65,13 @@ typedef
       PROCESS_ATTRIBUTE_TYPE  ATTRIBUTES;
    } PROCESS_STATUS_TYPE;
 
+struct process_s
+{
+    PROCESS_STATUS_TYPE *processus_status;
+    PROCESS_ATTRIBUTE_TYPE *attributes;
+    PROCESS_ID_TYPE process_id;
+    PROCESS_INDEX_TYPE process_index;
+};
 
 extern void CREATE_PROCESS (
        /*in */ PROCESS_ATTRIBUTE_TYPE   *ATTRIBUTES,

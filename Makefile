@@ -60,7 +60,7 @@ ucx: incl hal libs ddrivers network kernel arinc
 	$(AR) $(ARFLAGS) $(BUILD_TARGET_DIR)/libucxos.a \
 		$(BUILD_KERNEL_DIR)/*.o
 
-arinc: arinc_partition.o module_scheduler.o
+arinc: arinc_partition.o module_scheduler.o arinc_process.o
 
 kernel: timer.o message.o pipe.o spinlock.o semaphore.o ecodes.o syscall.o coroutine.o ucx.o main.o
 
@@ -108,6 +108,8 @@ arinc_partition.o: $(SRC_DIR)/arinc/arinc_partition.c
 module_scheduler.o: $(SRC_DIR)/arinc/module_scheduler.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/arinc/module_scheduler.c
 
+arinc_process.o: $(SRC_DIR)/arinc/arinc_process.c
+	$(CC) $(CFLAGS) $(SRC_DIR)/arinc/arinc_process.c
 		
 ## kernel + application link
 link:
