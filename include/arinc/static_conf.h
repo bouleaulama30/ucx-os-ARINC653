@@ -102,6 +102,15 @@ static const window_partition_type DEFAULT_WINDOWS[] = {
 static const uint32_t DEFAULT_WINDOWS_COUNT = sizeof(DEFAULT_WINDOWS) / sizeof(DEFAULT_WINDOWS[0]);
 
 
+// Default process configuration
+static const PROCESS_ATTRIBUTE_TYPE DEFAULT_PROCESS_CONFIG = {
+    .PERIOD = 20000000,              // 20ms in nanoseconds
+    .TIME_CAPACITY = 10000000,       // 10ms in nanoseconds
+    .ENTRY_POINT = NULL,             // To be set by partition initialization
+    .STACK_SIZE = 4096,              // 4KB stack
+    .BASE_PRIORITY = 128,            // Medium priority (1-239)
+    .DEADLINE = SOFT,                // Soft deadline
+    .NAME = "DefaultProcess"
+};
 
-
-#endif // ARINC_PARTITIONS_CONF_H
+#endif 

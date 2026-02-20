@@ -83,6 +83,7 @@ struct pcb_s {
    BOOLEAN_TYPE is_system_partition;
    APEX_UNSIGNED nbr_tasks;
    APEX_UNSIGNED storage_capacity;
+   struct list_s *process_names;
 };
 
 

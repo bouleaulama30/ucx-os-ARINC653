@@ -41,7 +41,14 @@ static void partition_trampoline(void)
 #endif
 
     _mprv_activate();
-    CREATE_PROCESS((PROCESS_ATTRIBUTE_TYPE*)NULL, (PROCESS_ID_TYPE*)NULL, (RETURN_CODE_TYPE*)NULL);
+
+    RETURN_CODE_TYPE return_code0;
+    RETURN_CODE_TYPE return_code1;
+    CREATE_PROCESS(&DEFAULT_PROCESS_CONFIG, 0, &return_code0);
+    CREATE_PROCESS(&DEFAULT_PROCESS_CONFIG, 0, &return_code1);
+    printf("CREATE PARTITION and Error code is %d\n", return_code0);
+    printf("CREATE PARTITION and Error code is %d\n", return_code1);
+
     ((void (*)(void))partition->entry_point)();
 
     while (1) {
@@ -142,6 +149,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->is_system_partition = is_system_partition;
     new_pcb->nbr_tasks = 0;
     new_pcb->storage_capacity = size_data_mem;
+    new_pcb->process_names = list_create();
 
 
     CRITICAL_LEAVE();
