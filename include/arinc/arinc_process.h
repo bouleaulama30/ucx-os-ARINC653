@@ -34,6 +34,7 @@ typedef  APEX_INTEGER         WAITING_RANGE_TYPE;
 typedef  APEX_INTEGER         PRIORITY_TYPE;
 
 
+
 typedef
    enum {
         DORMANT  = 0,
@@ -68,9 +69,10 @@ typedef
 struct process_s
 {
     PROCESS_STATUS_TYPE *processus_status;
-    PROCESS_ATTRIBUTE_TYPE *attributes;
     PROCESS_ID_TYPE process_id;
     PROCESS_INDEX_TYPE process_index;
+    PROCESSOR_CORE_ID_TYPE processor_core_affinity;
+
 };
 
 extern void CREATE_PROCESS (

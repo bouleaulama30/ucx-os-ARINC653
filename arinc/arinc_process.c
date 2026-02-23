@@ -1,18 +1,17 @@
 #include <ucx.h>
 
-static struct node_s *find_process_names(struct node_s *node, void *arg){
-    const char *process_name = (const char *)node->data;
+static struct node_s *find_processes(struct node_s *node, void *arg){
+    struct process_s *process = node->data;
     const char *name = (const char *) arg;
     
-    printf("process name %s, name %s \n", process_name, name);
-    if(strcmp(process_name, name) == 0){
+    if(strcmp(process->processus_status->ATTRIBUTES.NAME, name) == 0){
         return node;
     }
     return 0;
 }
 
-static int is_process_name_existed(struct pcb_s *partition ,PROCESS_NAME_TYPE process_name){
-    struct node_s *same_process_name_node = list_foreach(partition->process_names, find_process_names, (void *)process_name);
+static int is_process_name_existed(struct pcb_s *partition, PROCESS_NAME_TYPE process_name){
+    struct node_s *same_process_name_node = list_foreach(partition->processes, find_processes, (void *)process_name);
     if(same_process_name_node){
         return 1;
     }
@@ -31,7 +30,7 @@ void CREATE_PROCESS (
     struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
 #endif
     struct pcb_s *partition = partition_node->data;
-    if(partition->nbr_tasks >= MAX_NUMBER_OF_PROCESSES){
+    if(partition->nbr_processes >= MAX_NUMBER_OF_PROCESSES){
         *RETURN_CODE = INVALID_CONFIG;
     } 
     
@@ -70,9 +69,33 @@ void CREATE_PROCESS (
         *RETURN_CODE = INVALID_MODE;
     }
     else{
-        partition->nbr_tasks++;
+        // coherence de l'etat de la partition
+        partition->nbr_processes++;
         partition->storage_capacity -= ATTRIBUTES->STACK_SIZE;
-        list_pushback(partition->process_names, ATTRIBUTES->NAME);
+
+        struct process_s *new_process;
+        PROCESS_STATUS_TYPE *status;
+
+        new_process = malloc(sizeof(struct process_s));
+        status = malloc(sizeof(PROCESS_STATUS_TYPE));
+        
+        // a changer
+        status->DEADLINE_TIME = 0;
+        status->CURRENT_PRIORITY = ATTRIBUTES->BASE_PRIORITY;
+        status->PROCESS_STATE = DORMANT;
+        status->ATTRIBUTES = *ATTRIBUTES;
+
+        new_process->processus_status = status;
+        // a changer
+        new_process->process_id = 1;
+        new_process->process_index = partition->nbr_processes;
+        new_process->processor_core_affinity = 0;
+
+
+
+        list_pushback(partition->processes, new_process);
+
+        *PROCESS_ID = new_process->process_id;
         *RETURN_CODE = NO_ERROR;
     }
 

@@ -13,9 +13,7 @@
 
 * faire management process
     * comment etre sur que les processus utilise pas plus que leur stack
-    * changer liste des noms de process en liste de process et adapter la fonction pour rechercher les noms
-    * reglerr le probleme de la stack pour le process  de la partition idle
-
+    * completer les "a changer" dans la fonction create_process
 
 * refractor / formatage code:
     * trouver des noms plus accurate pour activate partition et les variables dedans

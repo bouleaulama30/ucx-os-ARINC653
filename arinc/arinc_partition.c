@@ -42,12 +42,18 @@ static void partition_trampoline(void)
 
     _mprv_activate();
 
-    RETURN_CODE_TYPE return_code0;
-    RETURN_CODE_TYPE return_code1;
-    CREATE_PROCESS(&DEFAULT_PROCESS_CONFIG, 0, &return_code0);
-    CREATE_PROCESS(&DEFAULT_PROCESS_CONFIG, 0, &return_code1);
-    printf("CREATE PARTITION and Error code is %d\n", return_code0);
-    printf("CREATE PARTITION and Error code is %d\n", return_code1);
+    if(partition->status->IDENTIFIER != IDLE_PARTITION_ID){
+        RETURN_CODE_TYPE return_code0;
+        RETURN_CODE_TYPE return_code1;
+        PROCESS_ID_TYPE process_id_0;
+        PROCESS_ID_TYPE process_id_1;
+
+        CREATE_PROCESS(&DEFAULT_PROCESS_CONFIG, &process_id_0, &return_code0);
+        CREATE_PROCESS(&DEFAULT_PROCESS_CONFIG, &process_id_1, &return_code1);
+        
+        printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
+        printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);
+    }
 
     ((void (*)(void))partition->entry_point)();
 
@@ -147,9 +153,9 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->memory_requirements = memory_requirements;
     new_pcb->entry_point = entry_point;
     new_pcb->is_system_partition = is_system_partition;
-    new_pcb->nbr_tasks = 0;
+    new_pcb->nbr_processes = 0;
     new_pcb->storage_capacity = size_data_mem;
-    new_pcb->process_names = list_create();
+    new_pcb->processes = list_create();
 
 
     CRITICAL_LEAVE();

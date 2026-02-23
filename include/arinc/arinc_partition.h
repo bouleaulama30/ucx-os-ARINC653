@@ -81,9 +81,9 @@ struct pcb_s {
    // Partion HM Table
    SYSTEM_ADDRESS_TYPE entry_point;
    BOOLEAN_TYPE is_system_partition;
-   APEX_UNSIGNED nbr_tasks;
+   APEX_UNSIGNED nbr_processes;
    APEX_UNSIGNED storage_capacity;
-   struct list_s *process_names;
+   struct list_s *processes;
 };
 
 
