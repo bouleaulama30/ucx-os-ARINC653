@@ -79,6 +79,12 @@ void CREATE_PROCESS (
         new_process = malloc(sizeof(struct process_s));
         status = malloc(sizeof(PROCESS_STATUS_TYPE));
         
+        // creation du process au niveau kernel
+        int32_t err_code = ucx_task_spawn(ATTRIBUTES->ENTRY_POINT, ATTRIBUTES->STACK_SIZE);
+        if (err_code != ERR_OK) {
+            *RETURN_CODE = NOT_AVAILABLE;
+            return;
+        }
         // a changer
         status->DEADLINE_TIME = 0;
         status->CURRENT_PRIORITY = ATTRIBUTES->BASE_PRIORITY;
@@ -87,11 +93,11 @@ void CREATE_PROCESS (
 
         new_process->processus_status = status;
         // a changer
-        new_process->process_id = 1;
+        new_process->process_id = ucx_task_idref(ATTRIBUTES->ENTRY_POINT);
         new_process->process_index = partition->nbr_processes;
         new_process->processor_core_affinity = 0;
 
-
+       
 
         list_pushback(partition->processes, new_process);
 

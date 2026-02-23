@@ -106,11 +106,22 @@ static const uint32_t DEFAULT_WINDOWS_COUNT = sizeof(DEFAULT_WINDOWS) / sizeof(D
 static const PROCESS_ATTRIBUTE_TYPE DEFAULT_PROCESS_CONFIG = {
     .PERIOD = 20000000,              // 20ms in nanoseconds
     .TIME_CAPACITY = 10000000,       // 10ms in nanoseconds
-    .ENTRY_POINT = NULL,             // To be set by partition initialization
+    .ENTRY_POINT = process_test0,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
     .BASE_PRIORITY = 1,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "DefaultProcess"
+};
+
+// process 1 configuration
+static const PROCESS_ATTRIBUTE_TYPE PROCESS_1_CONFIG = {
+    .PERIOD = 20000000,              // 20ms in nanoseconds
+    .TIME_CAPACITY = 10000000,       // 10ms in nanoseconds
+    .ENTRY_POINT = process_test1,             // To be set by partition initialization
+    .STACK_SIZE = 4096,              // 4KB stack
+    .BASE_PRIORITY = 1,            // Medium priority (1-239)
+    .DEADLINE = SOFT,                // Soft deadline
+    .NAME = "Process 1"
 };
 
 #endif 

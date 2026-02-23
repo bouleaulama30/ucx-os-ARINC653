@@ -87,6 +87,8 @@ void test_id_2(void)
 	}
 }
 
+
+
 // on met la tache dans la section code de la p1
 __attribute__((section(".p1_code")))
 void task0(void)
