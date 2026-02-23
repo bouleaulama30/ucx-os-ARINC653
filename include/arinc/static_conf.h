@@ -108,7 +108,7 @@ static const PROCESS_ATTRIBUTE_TYPE DEFAULT_PROCESS_CONFIG = {
     .TIME_CAPACITY = 10000000,       // 10ms in nanoseconds
     .ENTRY_POINT = NULL,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 128,            // Medium priority (1-239)
+    .BASE_PRIORITY = 1,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "DefaultProcess"
 };

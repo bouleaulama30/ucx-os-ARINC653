@@ -39,41 +39,36 @@ void CREATE_PROCESS (
     {
         *RETURN_CODE = INVALID_CONFIG;
     }
-    // a faire
     else if (is_process_name_existed(partition, ATTRIBUTES->NAME))
     {
         *RETURN_CODE = NO_ACTION;
     }
-    // else if (ATTRIBUTES->STACK_SIZE > partition->memory_requirements[DATA].memory->size){
-    //     *RETURN_CODE = INVALID_PARAM;
-    // }
-    // else if (ATTRIBUTES->BASE_PRIORITY < MIN_PRIORITY_VALUE || ATTRIBUTES->BASE_PRIORITY > MAX_PRIORITY_VALUE)
-    // {
-    //     *RETURN_CODE = INVALID_PARAM;
-    // }
-    // // a faire
-    // else if (ATTRIBUTES->PERIOD)
-    // {
-    //     *RETURN_CODE = INVALID_PARAM;
-    // }
-    // // a faire
-    // else if (ATTRIBUTES->PERIOD)
-    // {
-    //     *RETURN_CODE = INVALID_CONFIG;
-    // }
-    // // a faire
-    // else if (ATTRIBUTES->TIME_CAPACITY)
-    // {
-    //     *RETURN_CODE = INVALID_CONFIG;
-    // }
-    // // a faire
-    // else if (ATTRIBUTES->TIME_CAPACITY)
-    // {
-    //     *RETURN_CODE = INVALID_PARAM;
-    // }
-    // else if (partition->status->OPERATING_MODE == NORMAL){
-    //     *RETURN_CODE = INVALID_MODE;
-    // }
+    else if (ATTRIBUTES->STACK_SIZE > partition->memory_requirements->memory[DATA].size){
+        *RETURN_CODE = INVALID_PARAM;
+    }
+    else if (ATTRIBUTES->BASE_PRIORITY < MIN_PRIORITY_VALUE || ATTRIBUTES->BASE_PRIORITY > MAX_PRIORITY_VALUE)
+    {
+        *RETURN_CODE = INVALID_PARAM;
+    }
+    else if (ATTRIBUTES->PERIOD < -1)
+    {
+        *RETURN_CODE = INVALID_PARAM;
+    }
+    else if (ATTRIBUTES->PERIOD >= 0 && (ATTRIBUTES->PERIOD % partition->status->PERIOD != 0))
+    {
+        *RETURN_CODE = INVALID_CONFIG;
+    }
+    else if (ATTRIBUTES->TIME_CAPACITY < -1)
+    {
+        *RETURN_CODE = INVALID_CONFIG;
+    }
+    else if (ATTRIBUTES->PERIOD >= 0 && ATTRIBUTES->TIME_CAPACITY >= 0 && ATTRIBUTES->TIME_CAPACITY >= 0 && ATTRIBUTES->TIME_CAPACITY > ATTRIBUTES->PERIOD)
+    {
+        *RETURN_CODE = INVALID_PARAM;
+    }
+    else if (partition->status->OPERATING_MODE == NORMAL){
+        *RETURN_CODE = INVALID_MODE;
+    }
     else{
         partition->nbr_tasks++;
         partition->storage_capacity -= ATTRIBUTES->STACK_SIZE;

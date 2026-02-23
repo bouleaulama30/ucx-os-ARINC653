@@ -96,7 +96,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     status->NUM_ASSIGNED_CORES = NUM_ASSIGNED_CORES;
     status->LOCK_LEVEL = 0; 
     // status->OPERATING_MODE = (IDENTIFIER == IDLE_PARTITION_ID) ? NORMAL : (IDENTIFIER == 1 ? NORMAL : NORMAL); 
-    status->OPERATING_MODE = NORMAL;
+    status->OPERATING_MODE = COLD_START;
     status->START_CONDITION = NORMAL_START;
 
     strcpy(code_region->region_name, region_name_code_mem);
