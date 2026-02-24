@@ -97,6 +97,20 @@ void idle_task(void)
 	}
 }
 
+void update_kcb_task_list(struct list_s *tcb){
+#ifndef MULTICORE
+    kcb->tasks = tcb;
+    struct node_s *tcb_test_node = kcb->tasks->head->next;
+    //a changer mais pour test on met le premier process en tache courante
+    kcb->task_current = tcb_test_node;
+#else
+    kcb[_cpu_id()]->tasks = tcb;
+    struct node_s *tcb_test_node = kcb[_cpu_id()]->tasks->head->next;
+    kcb[_cpu_id()]->task_current = tcb_test_node;
+#endif
+    // printf("ID process test %d\n", tcb_test->id);
+}
+
 static void partition_trampoline(void)
 {
     struct pcb_s *partition;
@@ -109,6 +123,10 @@ static void partition_trampoline(void)
 
     _mprv_activate();
 
+    if(partition->status->IDENTIFIER == IDLE_PARTITION_ID){
+        ((void (*)(void))partition->entry_point)();
+    }
+
     if(partition->status->IDENTIFIER == 1){
         RETURN_CODE_TYPE return_code0;
         RETURN_CODE_TYPE return_code1;
@@ -119,9 +137,7 @@ static void partition_trampoline(void)
         CREATE_PROCESS(&PROCESS_1_CONFIG, &process_id_1, &return_code1);
 
         printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
-        printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);
-        struct tcb_s* process = partition->processes->head->next->data;
-        
+        printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);        
     }
 
     if(partition->status->IDENTIFIER == 2){
@@ -135,9 +151,13 @@ static void partition_trampoline(void)
 
         printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
         printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);
-        struct tcb_s* process = partition->processes->head->next->data;
-        
+        struct tcb_s* process = partition->processes->head->next->data;   
     }
+
+    struct list_s *processes = partition->processes;
+    update_kcb_task_list(processes);
+    krnl_schedule();
+
 
     ((void (*)(void))partition->entry_point)();
 

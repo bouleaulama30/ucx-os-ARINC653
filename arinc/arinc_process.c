@@ -92,11 +92,9 @@ void CREATE_PROCESS (
         new_process->process_id = id;
         new_process->process_index = partition->nbr_processes;
         new_process->processor_core_affinity = 0;
-
        
-
         list_pushback(partition->processes, new_process);
-
+        
         *PROCESS_ID = new_process->process_id;
         *RETURN_CODE = NO_ERROR;
     }

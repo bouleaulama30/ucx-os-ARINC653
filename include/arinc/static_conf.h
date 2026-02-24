@@ -77,24 +77,24 @@ static const window_partition_type DEFAULT_WINDOWS[] = {
         .name = "DefaultPartition",
         .id = 1,
         .start_tick = MS_TO_TICKS(0),
-        .duration_tick = MS_TO_TICKS(10),
+        .duration_tick = MS_TO_TICKS(50),
     },
     {
             .name = "P2",
             .id = 2,
-            .start_tick = MS_TO_TICKS(20),
+            .start_tick = MS_TO_TICKS(50),
             .duration_tick = MS_TO_TICKS(10),
         },
     {
         .name = "DefaultPartition",
         .id = 1,
-        .start_tick = MS_TO_TICKS(40),
+        .start_tick = MS_TO_TICKS(60),
         .duration_tick = MS_TO_TICKS(20),
     },
     {
             .name = "P2",
             .id = 2,
-            .start_tick = MS_TO_TICKS(60),
+            .start_tick = MS_TO_TICKS(80),
             .duration_tick = MS_TO_TICKS(10),
         },
     };
