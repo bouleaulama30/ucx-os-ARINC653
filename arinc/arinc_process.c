@@ -18,7 +18,6 @@ static int is_process_name_existed(struct pcb_s *partition, PROCESS_NAME_TYPE pr
     return 0;
 }
 
-
 void CREATE_PROCESS (
        /*in */ PROCESS_ATTRIBUTE_TYPE   *ATTRIBUTES,
        /*out*/ PROCESS_ID_TYPE          *PROCESS_ID,
@@ -73,37 +72,99 @@ void CREATE_PROCESS (
         partition->nbr_processes++;
         partition->storage_capacity -= ATTRIBUTES->STACK_SIZE;
 
-        struct process_s *new_process;
+        struct process_s *new_process_control;
         PROCESS_STATUS_TYPE *status;
 
-        new_process = malloc(sizeof(struct process_s));
+        new_process_control = malloc(sizeof(struct process_s));
         status = malloc(sizeof(PROCESS_STATUS_TYPE));
         
         // creation du process au niveau kernel
-        int32_t err_code = ucx_task_spawn(ATTRIBUTES->ENTRY_POINT, ATTRIBUTES->STACK_SIZE);
-        if (err_code != ERR_OK) {
-            *RETURN_CODE = NOT_AVAILABLE;
-            return;
-        }
+        int32_t id = ucx_process_spawn(ATTRIBUTES->ENTRY_POINT, ATTRIBUTES->STACK_SIZE, new_process_control);
+
         // a changer
         status->DEADLINE_TIME = 0;
         status->CURRENT_PRIORITY = ATTRIBUTES->BASE_PRIORITY;
         status->PROCESS_STATE = DORMANT;
         status->ATTRIBUTES = *ATTRIBUTES;
 
-        new_process->processus_status = status;
+        new_process_control->processus_status = status;
         // a changer
-        new_process->process_id = ucx_task_idref(ATTRIBUTES->ENTRY_POINT);
-        new_process->process_index = partition->nbr_processes;
-        new_process->processor_core_affinity = 0;
+        new_process_control->process_id = id;
+        new_process_control->process_index = partition->nbr_processes;
+        new_process_control->processor_core_affinity = 0;
 
        
 
-        list_pushback(partition->processes, new_process);
+        list_pushback(partition->processes, new_process_control);
 
-        *PROCESS_ID = new_process->process_id;
+        *PROCESS_ID = new_process_control->process_id;
         *RETURN_CODE = NO_ERROR;
     }
-
-
 }
+
+void SET_PRIORITY (
+       /*in */ PROCESS_ID_TYPE          PROCESS_ID,
+       /*in */ PRIORITY_TYPE            PRIORITY,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void SUSPEND_SELF (
+       /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void SUSPEND (
+       /*in */ PROCESS_ID_TYPE          PROCESS_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void RESUME (
+       /*in */ PROCESS_ID_TYPE          PROCESS_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void STOP_SELF (void);
+
+void STOP (
+       /*in */ PROCESS_ID_TYPE          PROCESS_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void START (
+       /*in */ PROCESS_ID_TYPE          PROCESS_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void DELAYED_START (
+       /*in */ PROCESS_ID_TYPE          PROCESS_ID,
+       /*in */ SYSTEM_TIME_TYPE         DELAY_TIME,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void LOCK_PREEMPTION (
+       /*out*/ LOCK_LEVEL_TYPE          *LOCK_LEVEL,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void UNLOCK_PREEMPTION (
+       /*out*/ LOCK_LEVEL_TYPE          *LOCK_LEVEL,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void GET_MY_ID (
+       /*out*/ PROCESS_ID_TYPE          *PROCESS_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void GET_PROCESS_ID (
+       /*in */ PROCESS_NAME_TYPE        PROCESS_NAME,
+       /*out*/ PROCESS_ID_TYPE          *PROCESS_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void GET_PROCESS_STATUS (
+       /*in */ PROCESS_ID_TYPE          PROCESS_ID,
+       /*out*/ PROCESS_STATUS_TYPE      *PROCESS_STATUS,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void INITIALIZE_PROCESS_CORE_AFFINITY (
+       /*in */ PROCESS_ID_TYPE          PROCESS_ID,
+       /*in */ PROCESSOR_CORE_ID_TYPE   PROCESSOR_CORE_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void GET_MY_PROCESSOR_CORE_ID (
+       /*out*/ PROCESSOR_CORE_ID_TYPE   *PROCESSOR_CORE_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void GET_MY_INDEX (
+       /*out*/ PROCESS_INDEX_TYPE       *PROCESS_INDEX,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );

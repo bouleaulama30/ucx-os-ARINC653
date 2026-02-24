@@ -9,13 +9,20 @@
     * faire les actions quand elle passe en normal (set to READY processes, activate process scheduling etc..)
 
 
-* faire un kos qui initialise tout ce qui faut niveau du pos (partitions etc), il faut que le scheduler et les fonctions à chaque timer soient dans le kos (redemander à Felipe une description des deux) a l execution et non dans la stack des partitions
-
 * faire management process
+    * terminer la fonction create_process
+        * tester pour le moment le workflow avec les syscall deja existant et les processes dans la stack
     * comment etre sur que les processus utilise pas plus que leur stack
-    * completer les "a changer" dans la fonction create_process
+        * demander a felipe
+        * demander comment definir statiquement la stack des processes 
+    * completer les "a changer" dans la fonction create_process et ucx_process_spawn    
+    * coder les fonctions de l'APEX sur les processes
+        * utiliser et adapter les syscall deja present comme ucx_task_id   
+    * tester les fonctions de l'APEX sur les processes
 
 * refractor / formatage code:
+    * mettre des ifndef pour les ajouts a l os de base pour maintenir le code isole:
+        * main, struct kcb, ucx.h, process.c.h
     * trouver des noms plus accurate pour activate partition et les variables dedans
     * refractor de partionnement spatial
     * refractor de partionnement temporelle

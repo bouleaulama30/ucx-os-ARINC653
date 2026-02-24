@@ -10,6 +10,7 @@
 #include <kernel/message.h>
 #include <kernel/timer.h>
 #include <kernel/kernel.h>
+#include <kernel/process.h>
 #include <kernel/coroutine.h>
 #include <kernel/errno.h>
 #include <kernel/stat.h>

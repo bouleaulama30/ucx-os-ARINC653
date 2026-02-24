@@ -14,7 +14,7 @@ void process_test0(void)
 		if(cnt == 100002){
 			// SET_PARTITION_MODE(IDLE, &return_code);
 		}
-		printf("[task %d %ld, partition %d, address cnt: 0x%p]\n\n", ucx_task_id(), cnt++, id, &cnt);
+		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", ucx_task_id(), cnt++, id, &cnt);
 		// print_time();
 		ucx_task_yield();
 	}
@@ -31,7 +31,7 @@ void process_test1(void)
 		if(cnt == 200002){
 			// SET_PARTITION_MODE(IDLE, &return_code);
 		}
-		printf("[task %d %ld, partition %d, address cnt: 0x%p]\n\n", ucx_task_id(), cnt++, id, &cnt);
+		printf("[prrocess %d %ld, partition %d, address cnt: 0x%p]\n\n", ucx_task_id(), cnt++, id, &cnt);
 		// print_time();
 		ucx_task_yield();
 	}
@@ -84,7 +84,7 @@ static void partition_trampoline(void)
 
         CREATE_PROCESS(&DEFAULT_PROCESS_CONFIG, &process_id_0, &return_code0);
         CREATE_PROCESS(&PROCESS_1_CONFIG, &process_id_1, &return_code1);
-        
+
         printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
         printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);
     }
