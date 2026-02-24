@@ -68,7 +68,7 @@ typedef
 
 struct process_s
 {
-    struct tcb_s *process;
+    struct tcb_s tcb;
     PROCESS_STATUS_TYPE *processus_status;
     PROCESS_ID_TYPE process_id;
     PROCESS_INDEX_TYPE process_index;

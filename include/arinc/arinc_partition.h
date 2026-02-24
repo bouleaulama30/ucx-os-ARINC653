@@ -121,5 +121,7 @@ extern int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER);
 
 extern void process_test0(void);
 extern void process_test1(void);
+extern void process_test2(void);
+extern void process_test3(void);
 
 #endif

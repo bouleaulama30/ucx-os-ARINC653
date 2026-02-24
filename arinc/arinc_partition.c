@@ -36,6 +36,39 @@ void process_test1(void)
 		ucx_task_yield();
 	}
 }
+void process_test2(void)
+{   
+	int32_t cnt = 300000;
+    RETURN_CODE_TYPE return_code;
+	APEX_INTEGER id;
+	GET_MY_PARTITION_ID(&id, &return_code);
+
+	while (1) {
+		if(cnt == 200002){
+			// SET_PARTITION_MODE(IDLE, &return_code);
+		}
+		printf("[prrocess %d %ld, partition %d, address cnt: 0x%p]\n\n", ucx_task_id(), cnt++, id, &cnt);
+		// print_time();
+		ucx_task_yield();
+	}
+}
+
+void process_test3(void)
+{   
+	int32_t cnt = 400000;
+    RETURN_CODE_TYPE return_code;
+	APEX_INTEGER id;
+	GET_MY_PARTITION_ID(&id, &return_code);
+
+	while (1) {
+		if(cnt == 200002){
+			// SET_PARTITION_MODE(IDLE, &return_code);
+		}
+		printf("[prrocess %d %ld, partition %d, address cnt: 0x%p]\n\n", ucx_task_id(), cnt++, id, &cnt);
+		// print_time();
+		ucx_task_yield();
+	}
+}
 
 void print_time_idle()
 {
@@ -76,7 +109,7 @@ static void partition_trampoline(void)
 
     _mprv_activate();
 
-    if(partition->status->IDENTIFIER != IDLE_PARTITION_ID){
+    if(partition->status->IDENTIFIER == 1){
         RETURN_CODE_TYPE return_code0;
         RETURN_CODE_TYPE return_code1;
         PROCESS_ID_TYPE process_id_0;
@@ -87,6 +120,23 @@ static void partition_trampoline(void)
 
         printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
         printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);
+        struct tcb_s* process = partition->processes->head->next->data;
+        
+    }
+
+    if(partition->status->IDENTIFIER == 2){
+        RETURN_CODE_TYPE return_code0;
+        RETURN_CODE_TYPE return_code1;
+        PROCESS_ID_TYPE process_id_0;
+        PROCESS_ID_TYPE process_id_1;
+
+        CREATE_PROCESS(&PROCESS_2_CONFIG, &process_id_0, &return_code0);
+        CREATE_PROCESS(&PROCESS_3_CONFIG, &process_id_1, &return_code1);
+
+        printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
+        printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);
+        struct tcb_s* process = partition->processes->head->next->data;
+        
     }
 
     ((void (*)(void))partition->entry_point)();

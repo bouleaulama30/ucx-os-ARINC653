@@ -11,10 +11,12 @@
 
 * faire management process
     * terminer la fonction create_process
+        * comprendre pourquoi la copy des structures se fait bien de cette maniere au niveau memoire
         * tester pour le moment le workflow avec les syscall deja existant et les processes dans la stack
+    * comment defini statiquement la stack des processus:
+        * faire un pointeur que l on incremente statique a partir de la section data
     * comment etre sur que les processus utilise pas plus que leur stack
-        * demander a felipe
-        * demander comment definir statiquement la stack des processes 
+        * soit utiliser le canary actuel, mais sinon adapter la conf de la pmp/MMU
     * completer les "a changer" dans la fonction create_process et ucx_process_spawn    
     * coder les fonctions de l'APEX sur les processes
         * utiliser et adapter les syscall deja present comme ucx_task_id   

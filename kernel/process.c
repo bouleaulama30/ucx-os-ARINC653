@@ -1,7 +1,7 @@
 #include "ucx.h"
 
 
-int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *process_control)
+int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *process)
 {
 	struct tcb_s *new_tcb;
 	struct node_s *new_task;
@@ -41,7 +41,7 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 	if (!new_tcb->stack)
 		krnl_panic(ERR_STACK_ALLOC);
 
-    process_control->process = new_tcb;
+    process->tcb = *new_tcb;
 
 	CRITICAL_LEAVE();
 

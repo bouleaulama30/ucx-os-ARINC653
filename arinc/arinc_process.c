@@ -72,14 +72,14 @@ void CREATE_PROCESS (
         partition->nbr_processes++;
         partition->storage_capacity -= ATTRIBUTES->STACK_SIZE;
 
-        struct process_s *new_process_control;
+        struct process_s *new_process;
         PROCESS_STATUS_TYPE *status;
 
-        new_process_control = malloc(sizeof(struct process_s));
+        new_process = malloc(sizeof(struct process_s));
         status = malloc(sizeof(PROCESS_STATUS_TYPE));
         
         // creation du process au niveau kernel
-        int32_t id = ucx_process_spawn(ATTRIBUTES->ENTRY_POINT, ATTRIBUTES->STACK_SIZE, new_process_control);
+        int32_t id = ucx_process_spawn(ATTRIBUTES->ENTRY_POINT, ATTRIBUTES->STACK_SIZE, new_process);
 
         // a changer
         status->DEADLINE_TIME = 0;
@@ -87,17 +87,17 @@ void CREATE_PROCESS (
         status->PROCESS_STATE = DORMANT;
         status->ATTRIBUTES = *ATTRIBUTES;
 
-        new_process_control->processus_status = status;
+        new_process->processus_status = status;
         // a changer
-        new_process_control->process_id = id;
-        new_process_control->process_index = partition->nbr_processes;
-        new_process_control->processor_core_affinity = 0;
+        new_process->process_id = id;
+        new_process->process_index = partition->nbr_processes;
+        new_process->processor_core_affinity = 0;
 
        
 
-        list_pushback(partition->processes, new_process_control);
+        list_pushback(partition->processes, new_process);
 
-        *PROCESS_ID = new_process_control->process_id;
+        *PROCESS_ID = new_process->process_id;
         *RETURN_CODE = NO_ERROR;
     }
 }

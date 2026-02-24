@@ -124,4 +124,26 @@ static const PROCESS_ATTRIBUTE_TYPE PROCESS_1_CONFIG = {
     .NAME = "Process 1"
 };
 
+// process 2 configuration
+static const PROCESS_ATTRIBUTE_TYPE PROCESS_2_CONFIG = {
+    .PERIOD = 20000000,              // 20ms in nanoseconds
+    .TIME_CAPACITY = 10000000,       // 10ms in nanoseconds
+    .ENTRY_POINT = process_test2,             // To be set by partition initialization
+    .STACK_SIZE = 4096,              // 4KB stack
+    .BASE_PRIORITY = 1,            // Medium priority (1-239)
+    .DEADLINE = SOFT,                // Soft deadline
+    .NAME = "Process 2"
+};
+
+// process 3 configuration
+static const PROCESS_ATTRIBUTE_TYPE PROCESS_3_CONFIG = {
+    .PERIOD = 20000000,              // 20ms in nanoseconds
+    .TIME_CAPACITY = 10000000,       // 10ms in nanoseconds
+    .ENTRY_POINT = process_test3,             // To be set by partition initialization
+    .STACK_SIZE = 4096,              // 4KB stack
+    .BASE_PRIORITY = 1,            // Medium priority (1-239)
+    .DEADLINE = SOFT,                // Soft deadline
+    .NAME = "Process 3"
+};
+
 #endif 
