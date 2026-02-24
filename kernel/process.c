@@ -41,7 +41,6 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 	if (!new_tcb->stack)
 		krnl_panic(ERR_STACK_ALLOC);
 
-    process->tcb = *new_tcb;
 
 	CRITICAL_LEAVE();
 
@@ -56,6 +55,7 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 		new_tcb->id, new_tcb->task, new_tcb->stack, new_tcb->stack_sz);
 
 	new_tcb->state = TASK_READY;
+    process->tcb = *new_tcb;
 
 	return new_tcb->id;
 }

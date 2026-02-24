@@ -10,14 +10,14 @@ void process_test0(void)
 	APEX_INTEGER id;
 	GET_MY_PARTITION_ID(&id, &return_code);
 
-	while (1) {
-		if(cnt == 100002){
-			// SET_PARTITION_MODE(IDLE, &return_code);
-		}
+	// while (1) {
+	// 	if(cnt == 100002){
+	// 		// SET_PARTITION_MODE(IDLE, &return_code);
+	// 	}
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", ucx_task_id(), cnt++, id, &cnt);
 		// print_time();
-		ucx_task_yield();
-	}
+	// 	ucx_task_yield();
+	// }
 }
 
 void process_test1(void)
@@ -27,14 +27,14 @@ void process_test1(void)
 	APEX_INTEGER id;
 	GET_MY_PARTITION_ID(&id, &return_code);
 
-	while (1) {
-		if(cnt == 200002){
-			// SET_PARTITION_MODE(IDLE, &return_code);
-		}
+	// while (1) {
+	// 	if(cnt == 200002){
+	// 		// SET_PARTITION_MODE(IDLE, &return_code);
+	// 	}
 		printf("[prrocess %d %ld, partition %d, address cnt: 0x%p]\n\n", ucx_task_id(), cnt++, id, &cnt);
 		// print_time();
-		ucx_task_yield();
-	}
+	// 	ucx_task_yield();
+	// }
 }
 void process_test2(void)
 {   
@@ -99,14 +99,52 @@ void idle_task(void)
 
 void update_kcb_task_list(struct list_s *tcb){
 #ifndef MULTICORE
+    printf("[debug] update_kcb_task_list: tcb=%p\n", tcb);
+    if (!tcb || !tcb->head || !tcb->head->next) {
+        printf("[debug] update_kcb_task_list: empty task list\n");
+        return;
+    }
     kcb->tasks = tcb;
     struct node_s *tcb_test_node = kcb->tasks->head->next;
     //a changer mais pour test on met le premier process en tache courante
     kcb->task_current = tcb_test_node;
+    printf("[debug] update_kcb_task_list: current node=%p data=%p\n",
+        (void *)kcb->task_current, kcb->task_current->data);
+    {
+        int i = 0;
+        struct node_s *node = kcb->tasks->head->next;
+        while (node && node->next && i < 3) {
+            struct process_s *proc = (struct process_s *)node->data;
+            struct tcb_s *task = &proc->tcb;
+            printf("[debug] task[%d]: node=%p data=%p id=%d state=%d\n",
+                i, (void *)node, (void *)proc, task->id, task->state);
+            node = node->next;
+            i++;
+        }
+    }
 #else
+    printf("[debug] update_kcb_task_list: tcb=%p (cpu %d)\n", tcb, _cpu_id());
+    if (!tcb || !tcb->head || !tcb->head->next) {
+        printf("[debug] update_kcb_task_list: empty task list (cpu %d)\n", _cpu_id());
+        return;
+    }
     kcb[_cpu_id()]->tasks = tcb;
     struct node_s *tcb_test_node = kcb[_cpu_id()]->tasks->head->next;
     kcb[_cpu_id()]->task_current = tcb_test_node;
+    printf("[debug] update_kcb_task_list: current node=%p data=%p (cpu %d)\n",
+        (void *)kcb[_cpu_id()]->task_current, kcb[_cpu_id()]->task_current->data, _cpu_id());
+    {
+        int i = 0;
+        struct node_s *node = kcb[_cpu_id()]->tasks->head->next;
+        while (node && node->next && i < 3) {
+            struct process_s *proc = (struct process_s *)node->data;
+            struct tcb_s *task = &proc->tcb;
+            printf("[debug] task[%d]: node=%p data=%p id=%d state=%d (cpu %d)\n",
+                i, (void *)node, (void *)proc, task->id, task->state, _cpu_id());
+            node = node->next;
+            i++;
+        }
+    }
 #endif
     // printf("ID process test %d\n", tcb_test->id);
 }
@@ -156,12 +194,24 @@ static void partition_trampoline(void)
 
     struct list_s *processes = partition->processes;
     update_kcb_task_list(processes);
-    krnl_schedule();
-
-
-    ((void (*)(void))partition->entry_point)();
+   
+    // ((void (*)(void))partition->entry_point)();
 
     while (1) {
+     krnl_schedule();
+
+#ifndef MULTICORE
+    
+        struct tcb_s *next_task = kcb->task_current->data;
+    
+#else
+    
+        struct tcb_s *next_task = kcb[_cpu_id()]->task_current->data;
+    
+#endif
+        if(setjmp(next_task->context)){
+            longjmp(next_task->context, 1);
+        }
         ucx_task_yield();
     }
 }
