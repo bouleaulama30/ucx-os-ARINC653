@@ -99,52 +99,16 @@ void idle_task(void)
 
 void update_kcb_task_list(struct list_s *tcb){
 #ifndef MULTICORE
-    printf("[debug] update_kcb_task_list: tcb=%p\n", tcb);
-    if (!tcb || !tcb->head || !tcb->head->next) {
-        printf("[debug] update_kcb_task_list: empty task list\n");
-        return;
-    }
     kcb->tasks = tcb;
     struct node_s *tcb_test_node = kcb->tasks->head->next;
     //a changer mais pour test on met le premier process en tache courante
-    kcb->task_current = tcb_test_node;
-    printf("[debug] update_kcb_task_list: current node=%p data=%p\n",
-        (void *)kcb->task_current, kcb->task_current->data);
-    {
-        int i = 0;
-        struct node_s *node = kcb->tasks->head->next;
-        while (node && node->next && i < 3) {
-            struct process_s *proc = (struct process_s *)node->data;
-            struct tcb_s *task = &proc->tcb;
-            printf("[debug] task[%d]: node=%p data=%p id=%d state=%d\n",
-                i, (void *)node, (void *)proc, task->id, task->state);
-            node = node->next;
-            i++;
-        }
-    }
+    // kcb->task_current = tcb_test_node;
+   
 #else
-    printf("[debug] update_kcb_task_list: tcb=%p (cpu %d)\n", tcb, _cpu_id());
-    if (!tcb || !tcb->head || !tcb->head->next) {
-        printf("[debug] update_kcb_task_list: empty task list (cpu %d)\n", _cpu_id());
-        return;
-    }
     kcb[_cpu_id()]->tasks = tcb;
     struct node_s *tcb_test_node = kcb[_cpu_id()]->tasks->head->next;
-    kcb[_cpu_id()]->task_current = tcb_test_node;
-    printf("[debug] update_kcb_task_list: current node=%p data=%p (cpu %d)\n",
-        (void *)kcb[_cpu_id()]->task_current, kcb[_cpu_id()]->task_current->data, _cpu_id());
-    {
-        int i = 0;
-        struct node_s *node = kcb[_cpu_id()]->tasks->head->next;
-        while (node && node->next && i < 3) {
-            struct process_s *proc = (struct process_s *)node->data;
-            struct tcb_s *task = &proc->tcb;
-            printf("[debug] task[%d]: node=%p data=%p id=%d state=%d (cpu %d)\n",
-                i, (void *)node, (void *)proc, task->id, task->state, _cpu_id());
-            node = node->next;
-            i++;
-        }
-    }
+    //a changer mais pour test on met le premier process en tache courante
+    // kcb[_cpu_id()]->task_current = tcb_test_node;
 #endif
     // printf("ID process test %d\n", tcb_test->id);
 }
@@ -189,40 +153,45 @@ static void partition_trampoline(void)
 
         printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
         printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);
-        struct tcb_s* process = partition->processes->head->next->data;   
     }
 
-    struct list_s *processes = partition->processes;
-    update_kcb_task_list(processes);
+    // a changer mais temporairement le premier process de la liste est mis en current par le main process
+    struct node_s* first_process_node = partition->processes->head->next;  
+#ifndef MULTICORE
+    kcb->task_current = first_process_node;
+#else
+    kcb[_cpu_id()]->task_current = first_process_node;
+#endif
+    
    
     // ((void (*)(void))partition->entry_point)();
 
     while (1) {
+        struct list_s *processes = partition->processes;
+        update_kcb_task_list(processes);    
 #ifndef MULTICORE
-        struct tcb_s *task = kcb->task_current->data;
         
         if (!kcb->tasks->length)
             krnl_panic(ERR_NO_TASKS);
         
-        if (!setjmp(task->context)) {
+        if (!setjmp(partition->partition_context)) {
             // stack_check();
             // list_foreach(kcb->tasks, delay_update, (void *)0);
             krnl_schedule();
-            task = kcb->task_current->data;
+            struct tcb_s *task = kcb->task_current->data;
             // _interrupt_tick();
             longjmp(task->context, 1);
         }
 #else
-        struct tcb_s *task = kcb[_cpu_id()]->task_current->data;
-        
+    
         if (!kcb[_cpu_id()]->tasks->length)
             krnl_panic(ERR_NO_TASKS);
 
-        if (!setjmp(task->context)) {
+        if (!setjmp(partition->partition_context)) {
             // stack_check();
             // list_foreach(kcb[_cpu_id()]->tasks, delay_update, (void *)0);
             krnl_schedule();
-            task = kcb[_cpu_id()]->task_current->data;
+            struct tcb_s *task = kcb[_cpu_id()]->task_current->data;
             // _interrupt_tick();
             longjmp(task->context, 1);
         }

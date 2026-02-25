@@ -83,6 +83,7 @@ struct pcb_s {
    BOOLEAN_TYPE is_system_partition;
    APEX_UNSIGNED nbr_processes;
    APEX_UNSIGNED storage_capacity;
+	jmp_buf partition_context;		/* jmp_buf is architecture specific */
    struct list_s *processes;
 };
 
