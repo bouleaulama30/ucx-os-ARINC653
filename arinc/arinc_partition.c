@@ -7,14 +7,15 @@ void process_test0(void)
 {   
 	int32_t cnt = 100000;
     RETURN_CODE_TYPE return_code;
-	APEX_INTEGER id;
-	GET_MY_PARTITION_ID(&id, &return_code);
-
+	APEX_INTEGER paritition_id;
+    APEX_INTEGER process_id;
+	GET_MY_PARTITION_ID(&paritition_id, &return_code);
+    GET_MY_ID(&process_id, &return_code);
 	while (1) {
 		if(cnt == 100002){
 			// SET_PARTITION_MODE(IDLE, &return_code);
 		}
-		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", ucx_task_id(), cnt++, id, &cnt);
+		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 		// print_time();
 		ucx_task_yield();
 	}
@@ -24,14 +25,15 @@ void process_test1(void)
 {   
 	int32_t cnt = 200000;
     RETURN_CODE_TYPE return_code;
-	APEX_INTEGER id;
-	GET_MY_PARTITION_ID(&id, &return_code);
-
+	APEX_INTEGER paritition_id;
+    APEX_INTEGER process_id;
+	GET_MY_PARTITION_ID(&paritition_id, &return_code);
+    GET_MY_ID(&process_id, &return_code);
 	while (1) {
 		if(cnt == 200002){
 			// SET_PARTITION_MODE(IDLE, &return_code);
 		}
-		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", ucx_task_id(), cnt++, id, &cnt);
+		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 		// print_time();
 		ucx_task_yield();
 	}
@@ -40,14 +42,15 @@ void process_test2(void)
 {   
 	int32_t cnt = 300000;
     RETURN_CODE_TYPE return_code;
-	APEX_INTEGER id;
-	GET_MY_PARTITION_ID(&id, &return_code);
-
+	APEX_INTEGER paritition_id;
+    APEX_INTEGER process_id;
+	GET_MY_PARTITION_ID(&paritition_id, &return_code);
+    GET_MY_ID(&process_id, &return_code);
 	while (1) {
 		if(cnt == 200002){
 			// SET_PARTITION_MODE(IDLE, &return_code);
 		}
-		printf("[prrocess %d %ld, partition %d, address cnt: 0x%p]\n\n", ucx_task_id(), cnt++, id, &cnt);
+		printf("[prrocess %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 		// print_time();
 		ucx_task_yield();
 	}
@@ -57,14 +60,15 @@ void process_test3(void)
 {   
 	int32_t cnt = 400000;
     RETURN_CODE_TYPE return_code;
-	APEX_INTEGER id;
-	GET_MY_PARTITION_ID(&id, &return_code);
-
+	APEX_INTEGER paritition_id;
+    APEX_INTEGER process_id;
+	GET_MY_PARTITION_ID(&paritition_id, &return_code);
+    GET_MY_ID(&process_id, &return_code);
 	while (1) {
 		if(cnt == 200002){
 			// SET_PARTITION_MODE(IDLE, &return_code);
 		}
-		printf("[prrocess %d %ld, partition %d, address cnt: 0x%p]\n\n", ucx_task_id(), cnt++, id, &cnt);
+		printf("[prrocess %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 		// print_time();
 		ucx_task_yield();
 	}
@@ -163,12 +167,11 @@ static void partition_trampoline(void)
     kcb[_cpu_id()]->task_current = first_process_node;
 #endif
     
-   
+   partition->last_running_process = first_process_node;
+
     // ((void (*)(void))partition->entry_point)();
 
     while (1) {
-        struct list_s *processes = partition->processes;
-        update_kcb_task_list(processes);    
 #ifndef MULTICORE
         
         if (!kcb->tasks->length)
@@ -178,7 +181,9 @@ static void partition_trampoline(void)
             // stack_check();
             // list_foreach(kcb->tasks, delay_update, (void *)0);
             krnl_schedule();
-            struct tcb_s *task = kcb->task_current->data;
+            struct node_s *task_node = kcb->task_current;
+            partition->last_running_process = task_node;
+            struct tcb_s *task = task_node->data;
             // _interrupt_tick();
             longjmp(task->context, 1);
         }
@@ -191,7 +196,9 @@ static void partition_trampoline(void)
             // stack_check();
             // list_foreach(kcb[_cpu_id()]->tasks, delay_update, (void *)0);
             krnl_schedule();
-            struct tcb_s *task = kcb[_cpu_id()]->task_current->data;
+            struct node_s *task_node = kcb[_cpu_id()]->task_current;
+            partition->last_running_process = task_node;
+            struct tcb_s *task = task_node->data;
             // _interrupt_tick();
             longjmp(task->context, 1);
         }
@@ -326,6 +333,7 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
 
 #ifndef MULTICORE
 
+
     struct node_s *partition_node = list_foreach(kcb->partitions, find_partition, (void *)IDENTIFIER);
     if(!partition_node){
         krnl_panic(ERR_FAIL);
@@ -342,8 +350,29 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
         return id;
     }
 
-    // kcb->task_current = partition_node;
+    // Forcer la tâche courante à redevenir READY
+    if (kcb->task_current != NULL) {
+        struct tcb_s *t_old = (struct tcb_s *)kcb->task_current->data;
+       if (t_old->state == TASK_RUNNING) {
+        t_old->state = TASK_READY; 
+        }
+    }
+
     kcb->partition_current = partition_node;
+
+    // On restaure le pointeur EXACT de la tâche là où elle s'était arrêtée
+    if (partition->last_running_process != NULL) {
+        kcb->task_current = partition->last_running_process;
+    } else {
+    // Premier démarrage de la partition : on pointe sur la tête de liste
+        kcb->task_current = partition->processes->head->next;
+    }
+
+    // mise a jour de la liste des processes au niveau du kernel
+    struct list_s *processes = partition->processes;
+    update_kcb_task_list(processes);
+
+
 
 #else
     struct node_s *partition_node = list_foreach(kcb[_cpu_id()]->partitions, find_partition, (void *)IDENTIFIER);
@@ -362,8 +391,27 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
         int32_t id = activate_partition(IDLE_PARTITION_ID);
         return id;
     }
-    // kcb[_cpu_id()]->task_current = partition_node;    
-    kcb[_cpu_id()]->partition_current = partition_node;    
+    // Forcer la tâche courante à redevenir READY
+    if (kcb[_cpu_id()]->task_current != NULL) {
+        struct tcb_s *t_old = (struct tcb_s *)kcb[_cpu_id()]->task_current->data;
+       if (t_old->state == TASK_RUNNING) {
+        t_old->state = TASK_READY; 
+        }
+    }
+
+    kcb[_cpu_id()]->partition_current = partition_node;
+
+    // On restaure le pointeur EXACT de la tâche là où elle s'était arrêtée
+    if (partition->last_running_process != NULL) {
+        kcb[_cpu_id()]->task_current = partition->last_running_process;
+    } else {
+    // Premier démarrage de la partition : on pointe sur la tête de liste
+        kcb[_cpu_id()]->task_current = partition->processes->head->next;
+    }
+
+    // mise a jour de la liste des processes au niveau du kernel
+    struct list_s *processes = partition->processes;
+    update_kcb_task_list(processes);
 #endif
     
     return IDENTIFIER;

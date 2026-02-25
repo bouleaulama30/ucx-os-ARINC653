@@ -84,6 +84,7 @@ struct pcb_s {
    APEX_UNSIGNED nbr_processes;
    APEX_UNSIGNED storage_capacity;
 	jmp_buf partition_context;		/* jmp_buf is architecture specific */
+   struct node_s *last_running_process;
    struct list_s *processes;
 };
 
