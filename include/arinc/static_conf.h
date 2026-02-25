@@ -83,20 +83,20 @@ static const window_partition_type DEFAULT_WINDOWS[] = {
             .name = "P2",
             .id = 2,
             .start_tick = MS_TO_TICKS(50),
-            .duration_tick = MS_TO_TICKS(10),
+            .duration_tick = MS_TO_TICKS(50),
         },
-    {
-        .name = "DefaultPartition",
-        .id = 1,
-        .start_tick = MS_TO_TICKS(60),
-        .duration_tick = MS_TO_TICKS(20),
-    },
-    {
-            .name = "P2",
-            .id = 2,
-            .start_tick = MS_TO_TICKS(80),
-            .duration_tick = MS_TO_TICKS(10),
-        },
+    // {
+    //     .name = "DefaultPartition",
+    //     .id = 1,
+    //     .start_tick = MS_TO_TICKS(60),
+    //     .duration_tick = MS_TO_TICKS(20),
+    // },
+    // {
+    //         .name = "P2",
+    //         .id = 2,
+    //         .start_tick = MS_TO_TICKS(80),
+    //         .duration_tick = MS_TO_TICKS(10),
+    //     },
     };
     
 static const uint32_t DEFAULT_WINDOWS_COUNT = sizeof(DEFAULT_WINDOWS) / sizeof(DEFAULT_WINDOWS[0]);
