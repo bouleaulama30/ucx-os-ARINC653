@@ -13,7 +13,8 @@
     * terminer la fonction create_process
         * tester pour le moment le workflow avec les syscall deja existant et les processes dans la stack
         * gerer le cas de IDLE pour le scheduling
-        * attention au interrupt tick
+        * attention au _interrupt_tick
+        * faire un une transition plus clean entre deux partitions, mettre certains element de la fonction trampoline dans activate partition, notamment ce qui touche aux structure de donnes
     * faire un main process clean
         
     * comment defini statiquement la stack des processus:
@@ -47,6 +48,10 @@
     * remplacer certaines action par des fonctions get et set  (comme fonction pour get le node_s de la partition courante)
     
 * faire rouler sur la carte en materielle une fois que c'est bon pour les processus
+
+## HM
+
+* implem is_executing_error_handler
 
 ## Choses dependante de l archi
 * protection memoire avec pmp_activate et mprv_activate (lie a riscv32)
