@@ -13,7 +13,7 @@
     * terminer la fonction create_process
         * tester pour le moment le workflow avec les syscall deja existant et les processes dans la stack
         * gerer le cas de IDLE pour le scheduling
-        * attention au _interrupt_tick
+        * attention au _interrupt_tick (voir si necessaire, en faire un sinon)
         * faire un une transition plus clean entre deux partitions, mettre certains element de la fonction trampoline dans activate partition, notamment ce qui touche aux structure de donnes
     * faire un main process clean
         
@@ -24,10 +24,11 @@
         * soit utiliser le canary actuel, mais sinon adapter la conf de la pmp/MMU
         
     * completer les "a changer" dans la fonction create_process et ucx_process_spawn
-        * garder coherence entre avec le nom des etats et des priorites dans ucx_process_spawn
+        * garder coherence entre avec le nom des etats et des priorites dans ucx_process_spawn pour fit avec la norme
 
     * faire un scheduling clean et coherent avec l'apex
         * tester avec le scheduler de base
+            * voir avec Felipe car il faut changer le scheduler de base je pense
         * voir si on passe en interne aux partitions
         
     
