@@ -334,7 +334,15 @@ void yield(void)
 	if (kcb->preemptive == 'y') {
 		s = kcb->ticks;
 		_cpu_idle();
-		while (s == kcb->ticks);
+		// while (s == kcb->ticks);
+
+		/* Sauvegarder le contexte du processus courant */
+		task = kcb->task_current->data;
+		if (setjmp(task->context) == 0) {
+			/* Retourner au contexte du kernel (partition_trampoline) */
+			struct pcb_s *partition = kcb->partition_current->data;
+			longjmp(partition->partition_context, 1);
+		}
 		
 		return;
 	}
@@ -358,7 +366,13 @@ void yield(void)
 	if (kcb[_cpu_id()]->preemptive == 'y') {
 		s = kcb[_cpu_id()]->ticks;
 		_cpu_idle();
-		while (s == kcb[_cpu_id()]->ticks);
+		// while (s == kcb[_cpu_id()]->ticks);
+		task = kcb[_cpu_id()]->task_current->data;
+		if (setjmp(task->context) == 0) {
+			/* Retourner au contexte du kernel (partition_trampoline) */
+			struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
+			longjmp(partition->partition_context, 1);
+		}
 		
 		return;
 	}
