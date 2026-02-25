@@ -140,9 +140,32 @@ void UNLOCK_PREEMPTION (
        /*out*/ LOCK_LEVEL_TYPE          *LOCK_LEVEL,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
 
+
+// to do 
+int is_executing_error_handler(){
+    return 0;
+}
 void GET_MY_ID (
        /*out*/ PROCESS_ID_TYPE          *PROCESS_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE )
+{
+#ifndef MULTICORE
+    struct tcb_s *current_process = kcb->task_current->data;
+#else
+    struct tcb_s *current_process = kcb[_cpu_id()]->task_current->data;
+#endif
+
+    // 2. Vérifier si le code actuel est le Error Handler (tâche spéciale)
+    if (is_executing_error_handler()) {
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+    
+    *PROCESS_ID = current_process->id;
+    *RETURN_CODE = NO_ERROR;
+}
+
+
 
 void GET_PROCESS_ID (
        /*in */ PROCESS_NAME_TYPE        PROCESS_NAME,
