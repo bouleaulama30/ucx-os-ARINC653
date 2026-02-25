@@ -9,6 +9,7 @@
 #include <lib/libc.h>
 #include <lib/list.h>
 #include <kernel/kernel.h>
+#include <arinc/arinc_partition.h>
 #include <riscv.h>
 
 /* hardware platform dependent stuff */
@@ -121,15 +122,15 @@ void _irq_handler(uint32_t cause, uint32_t epc)
 		// printf("[TIMER INTERRUPT] mcause=%x, mepc=%x, mtval=%x, mstatus=%x\n", val, mepc, mtval, mstatus);
 		mtimecmp_w(mtime_r() + (F_CPU / F_TIMER));
 
-		struct tcb_s *current_task;
+		struct pcb_s *current_partition;
 	#ifndef MULTICORE
-		current_task = kcb->task_current->data;
-		if (setjmp(current_task->context) == 0) {
+		current_partition = kcb->partition_current->data;
+		if (setjmp(current_partition->tcb.context) == 0) {
 			longjmp(kcb->context, 1);
 		}
 	#else
-		current_task = kcb[_cpu_id()]->task_current->data;
-		if (setjmp(current_task->context) == 0) {
+		current_partition = kcb[_cpu_id()]->partition_current->data;
+		if (setjmp(current_partition->tcb.context) == 0) {
 			longjmp(kcb[_cpu_id()]->context, 1);
 		}
 	#endif
@@ -271,15 +272,27 @@ void _timer_disable(void)
 void _interrupt_tick(void)
 {
 #ifndef MULTICORE
-	struct tcb_s *task = kcb->task_current->data;
+	struct pcb_s *partition = kcb->partition_current->data;
 #else
-	struct tcb_s *task = kcb[_cpu_id()]->task_current->data;
+	struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
 #endif
 	_read_us();
-	/* task is run for the first time */
-	if ((uint32_t)task->task == task->context[CONTEXT_RA])
+	/* partition is run for the first time */
+	if ((uint32_t)partition->tcb.task == partition->tcb.context[CONTEXT_RA])
 		asm volatile ("csrs mstatus, 8");
 }
+// void _interrupt_tick(void)
+// {
+// #ifndef MULTICORE
+// 	struct tcb_s *task = kcb->task_current->data;
+// #else
+// 	struct tcb_s *task = kcb[_cpu_id()]->task_current->data;
+// #endif
+// 	_read_us();
+// 	/* task is run for the first time */
+// 	if ((uint32_t)task->task == task->context[CONTEXT_RA])
+// 		asm volatile ("csrs mstatus, 8");
+// }
 
 extern void __dispatch_init(jmp_buf env);
 

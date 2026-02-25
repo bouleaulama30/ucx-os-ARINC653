@@ -77,9 +77,9 @@ int main(void)
 	}
 	while(1){
 		krnl_dispatcher();
-        struct tcb_s *next_task = kcb->task_current->data;
+        struct pcb_s *next_partition = kcb->partition_current->data;
 		if (setjmp(kcb->context) == 0){
-			longjmp(next_task->context, 1);
+			longjmp(next_partition->tcb.context, 1);
 		}
 	}
 #else
@@ -118,9 +118,9 @@ int main(void)
 		}
 	while(1){
 		krnl_dispatcher();
-        struct tcb_s *next_task = kcb[_cpu_id()]->task_current->data;
+        struct pcb_s *next_partition = kcb[_cpu_id()]->partition_current->data;
 		if (setjmp(kcb[0]->context) == 0){
-			longjmp(next_task->context, 1);
+			longjmp(next_partition->tcb.context, 1);
 		}
 	}
 	

@@ -10,14 +10,14 @@ void process_test0(void)
 	APEX_INTEGER id;
 	GET_MY_PARTITION_ID(&id, &return_code);
 
-	// while (1) {
-	// 	if(cnt == 100002){
-	// 		// SET_PARTITION_MODE(IDLE, &return_code);
-	// 	}
+	while (1) {
+		if(cnt == 100002){
+			// SET_PARTITION_MODE(IDLE, &return_code);
+		}
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", ucx_task_id(), cnt++, id, &cnt);
 		// print_time();
-	// 	ucx_task_yield();
-	// }
+		ucx_task_yield();
+	}
 }
 
 void process_test1(void)
@@ -27,14 +27,14 @@ void process_test1(void)
 	APEX_INTEGER id;
 	GET_MY_PARTITION_ID(&id, &return_code);
 
-	// while (1) {
-	// 	if(cnt == 200002){
-	// 		// SET_PARTITION_MODE(IDLE, &return_code);
-	// 	}
-		printf("[prrocess %d %ld, partition %d, address cnt: 0x%p]\n\n", ucx_task_id(), cnt++, id, &cnt);
+	while (1) {
+		if(cnt == 200002){
+			// SET_PARTITION_MODE(IDLE, &return_code);
+		}
+		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", ucx_task_id(), cnt++, id, &cnt);
 		// print_time();
-	// 	ucx_task_yield();
-	// }
+		ucx_task_yield();
+	}
 }
 void process_test2(void)
 {   
@@ -154,9 +154,9 @@ static void partition_trampoline(void)
     struct pcb_s *partition;
 
 #ifndef MULTICORE
-    partition = kcb->task_current->data;
+    partition = kcb->partition_current->data;
 #else
-    partition = kcb[_cpu_id()]->task_current->data;
+    partition = kcb[_cpu_id()]->partition_current->data;
 #endif
 
     _mprv_activate();
@@ -198,21 +198,35 @@ static void partition_trampoline(void)
     // ((void (*)(void))partition->entry_point)();
 
     while (1) {
-     krnl_schedule();
-
 #ifndef MULTICORE
-    
-        struct tcb_s *next_task = kcb->task_current->data;
-    
-#else
-    
-        struct tcb_s *next_task = kcb[_cpu_id()]->task_current->data;
-    
-#endif
-        if(setjmp(next_task->context)){
-            longjmp(next_task->context, 1);
+        struct tcb_s *task = kcb->task_current->data;
+        
+        if (!kcb->tasks->length)
+            krnl_panic(ERR_NO_TASKS);
+        
+        if (!setjmp(task->context)) {
+            // stack_check();
+            // list_foreach(kcb->tasks, delay_update, (void *)0);
+            krnl_schedule();
+            task = kcb->task_current->data;
+            // _interrupt_tick();
+            longjmp(task->context, 1);
         }
-        ucx_task_yield();
+#else
+        struct tcb_s *task = kcb[_cpu_id()]->task_current->data;
+        
+        if (!kcb[_cpu_id()]->tasks->length)
+            krnl_panic(ERR_NO_TASKS);
+
+        if (!setjmp(task->context)) {
+            // stack_check();
+            // list_foreach(kcb[_cpu_id()]->tasks, delay_update, (void *)0);
+            krnl_schedule();
+            task = kcb[_cpu_id()]->task_current->data;
+            // _interrupt_tick();
+            longjmp(task->context, 1);
+        }
+#endif
     }
 }
 
@@ -359,7 +373,7 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
         return id;
     }
 
-    kcb->task_current = partition_node;
+    // kcb->task_current = partition_node;
     kcb->partition_current = partition_node;
 
 #else
@@ -379,7 +393,7 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
         int32_t id = activate_partition(IDLE_PARTITION_ID);
         return id;
     }
-    kcb[_cpu_id()]->task_current = partition_node;    
+    // kcb[_cpu_id()]->task_current = partition_node;    
     kcb[_cpu_id()]->partition_current = partition_node;    
 #endif
     
@@ -391,9 +405,9 @@ void GET_PARTITION_STATUS (
     /*out*/ PARTITION_STATUS_TYPE      *PARTITION_STATUS,
     /*out*/ RETURN_CODE_TYPE           *RETURN_CODE ){
 #ifndef MULTICORE
-    struct pcb_s* my_partition = kcb->task_current->data;
+    struct pcb_s* my_partition = kcb->partition_current->data;
 #else
-    struct pcb_s* my_partition = kcb[_cpu_id()]->task_current->data;
+    struct pcb_s* my_partition = kcb[_cpu_id()]->partition_current->data;
 #endif
     
     if (!my_partition->status) {
@@ -411,9 +425,9 @@ void SET_PARTITION_MODE (
        /*in */ OPERATING_MODE_TYPE        OPERATING_MODE,
        /*out*/ RETURN_CODE_TYPE           *RETURN_CODE ){
 #ifndef MULTICORE
-    struct pcb_s* my_partition = kcb->task_current->data;
+    struct pcb_s* my_partition = kcb->partition_current->data;
 #else
-    struct pcb_s* my_partition = kcb[_cpu_id()]->task_current->data;
+    struct pcb_s* my_partition = kcb[_cpu_id()]->partition_current->data;
 #endif
     // error
     if(OPERATING_MODE != IDLE && OPERATING_MODE != COLD_START && OPERATING_MODE != WARM_START && OPERATING_MODE != NORMAL){
@@ -462,9 +476,9 @@ void GET_MY_PARTITION_ID(
               /*out*/ RETURN_CODE_TYPE           *RETURN_CODE )
 {
 #ifndef MULTICORE
-    struct pcb_s* my_partition = kcb->task_current->data;
+    struct pcb_s* my_partition = kcb->partition_current->data;
 #else
-    struct pcb_s* my_partition = kcb[_cpu_id()]->task_current->data;
+    struct pcb_s* my_partition = kcb[_cpu_id()]->partition_current->data;
 #endif
     *PARTITION_ID = my_partition->status->IDENTIFIER;
     if(*PARTITION_ID)

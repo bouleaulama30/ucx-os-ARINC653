@@ -12,6 +12,7 @@
 * faire management process
     * terminer la fonction create_process
         * tester pour le moment le workflow avec les syscall deja existant et les processes dans la stack
+        * attention au interrupt tick
         
     * comment defini statiquement la stack des processus:
         * faire un pointeur que l on incremente statique a partir de la section data
@@ -34,7 +35,7 @@
 
 * refractor / formatage code:
     * mettre des ifndef pour les ajouts a l os de base pour maintenir le code isole:
-        * main, struct kcb, ucx.h, process.c.h
+        * main, struct kcb, ucx.h, process.c.h, fonction dispatch, interrupt_tick dans le hal 
     * trouver des noms plus accurate pour activate partition et les variables dedans
     * refractor de partionnement spatial
     * refractor de partionnement temporelle

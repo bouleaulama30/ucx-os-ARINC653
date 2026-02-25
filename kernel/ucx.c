@@ -293,14 +293,14 @@ void krnl_dispatcher(void)
 void dispatch(void)
 {
 #ifndef MULTICORE
-	struct tcb_s *task = kcb->task_current->data;
+	// struct tcb_s *task = kcb->task_current->data;
 	
-	if (!kcb->tasks->length)
-		krnl_panic(ERR_NO_TASKS);
+	// if (!kcb->tasks->length)
+	// 	krnl_panic(ERR_NO_TASKS);
 	
 	// if (!setjmp(task->context)) {
-		stack_check();
-		list_foreach(kcb->tasks, delay_update, (void *)0);
+		// stack_check();
+		// list_foreach(kcb->tasks, delay_update, (void *)0);
 		if (kcb->rt_sched() < 0)
 			krnl_schedule();
 		// task = kcb->task_current->data;
@@ -308,14 +308,14 @@ void dispatch(void)
 		// longjmp(task->context, 1);
 	// }
 #else
-	struct tcb_s *task = kcb[_cpu_id()]->task_current->data;
+	// struct tcb_s *task = kcb[_cpu_id()]->task_current->data;
 	
-	if (!kcb[_cpu_id()]->tasks->length)
-		krnl_panic(ERR_NO_TASKS);
+	// if (!kcb[_cpu_id()]->tasks->length)
+	// 	krnl_panic(ERR_NO_TASKS);
 
 	// if (!setjmp(task->context)) {
-		stack_check();
-		list_foreach(kcb[_cpu_id()]->tasks, delay_update, (void *)0);
+		// stack_check();
+		// list_foreach(kcb[_cpu_id()]->tasks, delay_update, (void *)0);
 		if (kcb[_cpu_id()]->rt_sched() < 0)
 			krnl_schedule();
 		// task = kcb[_cpu_id()]->task_current->data;

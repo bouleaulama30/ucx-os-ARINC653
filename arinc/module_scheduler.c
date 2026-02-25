@@ -76,9 +76,9 @@ void arinc_start_scheduling(void) {
     printf("[SCHED] Starting ARINC schedule with Partition %d\n", first_id);
 
 #ifndef MULTICORE
-    struct pcb_s* first_pcb = (struct pcb_s*)kcb->task_current->data;
+    struct pcb_s* first_pcb = kcb->partition_current->data;
 #else
-    struct pcb_s* first_pcb = (struct pcb_s*)kcb[_cpu_id()]->task_current->data;
+    struct pcb_s* first_pcb = (struct pcb_s*)kcb[_cpu_id()]->partition_current->data;
 #endif
 
     if (first_pcb == NULL){
