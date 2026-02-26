@@ -12,10 +12,13 @@
 * faire management process
     * terminer la fonction create_process
         * tester pour le moment le workflow avec les syscall deja existant et les processes dans la stack
-        * gerer le cas de IDLE pour le scheduling
+        * gerer le cas de IDLE pour le scheduling (gerer la pmp car ce n est pas bon)
+            * demander si je peux faire un processus qui est idle si c est le cas remettre activate partition bien comme avant car plus besoin de faire des disjonction de cas
         * attention au _interrupt_tick (voir si necessaire, en faire un sinon)
         * faire un une transition plus clean entre deux partitions, mettre certains element de la fonction trampoline dans activate partition, notamment ce qui touche aux structure de donnes
     * faire un main process clean
+
+    * voir si besoin de faire un main diff pour chaque partitions
         
     * comment defini statiquement la stack des processus:
         * faire un pointeur que l on incremente statique a partir de la section data

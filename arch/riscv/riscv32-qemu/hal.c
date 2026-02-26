@@ -151,7 +151,7 @@ void _irq_handler(uint32_t cause, uint32_t epc)
 			val == 7 ? "Store access fault" :
 			"Unknown");
 		printf("  MPRV=%d, MPP=%d\n", (mstatus >> 17) & 1, (mstatus >> 11) & 3);
-		// while(1);
+		while(1);
 		_panic();
 	}
 

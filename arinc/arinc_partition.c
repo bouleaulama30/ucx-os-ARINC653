@@ -130,7 +130,10 @@ static void partition_trampoline(void)
     _mprv_activate();
 
     if(partition->status->IDENTIFIER == IDLE_PARTITION_ID){
-        ((void (*)(void))partition->entry_point)();
+        // on utilise la tache IDLE
+        printf("[Partition IDLE]\n\n");
+        while(1);
+        
     }
 
     if(partition->status->IDENTIFIER == 1){
@@ -171,6 +174,8 @@ static void partition_trampoline(void)
 
     // ((void (*)(void))partition->entry_point)();
 
+
+
     while (1) {
 #ifndef MULTICORE
         
@@ -180,6 +185,8 @@ static void partition_trampoline(void)
         if (!setjmp(partition->partition_context)) {
             // stack_check();
             // list_foreach(kcb->tasks, delay_update, (void *)0);
+            // a changer mais c'est pour traiter le cas de la partition IDLE 
+            // if(partition->status->IDENTIFIER != IDLE_PARTITION_ID)
             krnl_schedule();
             struct node_s *task_node = kcb->task_current;
             partition->last_running_process = task_node;
@@ -195,6 +202,8 @@ static void partition_trampoline(void)
         if (!setjmp(partition->partition_context)) {
             // stack_check();
             // list_foreach(kcb[_cpu_id()]->tasks, delay_update, (void *)0);
+            // a changer mais c'est pour traiter le cas de la partition IDLE 
+            // if(partition->status->IDENTIFIER != IDLE_PARTITION_ID)
             krnl_schedule();
             struct node_s *task_node = kcb[_cpu_id()]->task_current;
             partition->last_running_process = task_node;
@@ -332,19 +341,23 @@ static struct node_s *find_partition(struct node_s *node, void *arg){
 int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
 
 #ifndef MULTICORE
-
-
     struct node_s *partition_node = list_foreach(kcb->partitions, find_partition, (void *)IDENTIFIER);
     if(!partition_node){
         krnl_panic(ERR_FAIL);
     }
 
-    
     struct pcb_s *partition = partition_node->data;
     uint32_t partition_start_addr = (uint32_t) partition->memory_requirements->memory[CODE].base;
     uint32_t partition_end_addr = (uint32_t) partition->memory_requirements->memory[DATA].base + partition->memory_requirements->memory[DATA].size;
     printf("start partition addr: %x, end partition addr: %x\n", partition_start_addr, partition_end_addr);
-	_pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
+    if (partition->status->IDENTIFIER == IDLE_PARTITION_ID){
+        _pmp_partition_activate((uint32_t)_kernel_end, (uint32_t)0, (uint32_t)0);
+        kcb->partition_current = partition_node;
+        return IDLE_PARTITION_ID;
+    }
+    else {
+        _pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
+    }
     if(partition->status->OPERATING_MODE == IDLE){
         int32_t id = activate_partition(IDLE_PARTITION_ID);
         return id;
@@ -385,8 +398,14 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
     uint32_t partition_start_addr = (uint32_t) partition->memory_requirements->memory[CODE].base;
     uint32_t partition_end_addr = (uint32_t) partition->memory_requirements->memory[DATA].base + partition->memory_requirements->memory[DATA].size;
     printf("start partition addr: %x, end partition addr: %x\n", partition_start_addr, partition_end_addr);
-	_pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
-
+    if (partition->status->IDENTIFIER == IDLE_PARTITION_ID){
+        _pmp_partition_activate((uint32_t)_kernel_end, (uint32_t)0, (uint32_t)0);
+        kcb[_cpu_id()]->partition_current = partition_node;
+        return IDLE_PARTITION_ID;
+    }
+    else {
+        _pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
+    }
     if(partition->status->OPERATING_MODE == IDLE){
         int32_t id = activate_partition(IDLE_PARTITION_ID);
         return id;
@@ -394,13 +413,13 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
     // Forcer la tâche courante à redevenir READY
     if (kcb[_cpu_id()]->task_current != NULL) {
         struct tcb_s *t_old = (struct tcb_s *)kcb[_cpu_id()]->task_current->data;
-       if (t_old->state == TASK_RUNNING) {
+           if (t_old->state == TASK_RUNNING) {
         t_old->state = TASK_READY; 
         }
     }
 
-    kcb[_cpu_id()]->partition_current = partition_node;
 
+    kcb[_cpu_id()]->partition_current = partition_node;
     // On restaure le pointeur EXACT de la tâche là où elle s'était arrêtée
     if (partition->last_running_process != NULL) {
         kcb[_cpu_id()]->task_current = partition->last_running_process;
