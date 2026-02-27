@@ -339,7 +339,7 @@ void yield(void)
 		/* Sauvegarder le contexte du processus courant */
 		task = kcb->task_current->data;
 		if (setjmp(task->context) == 0) {
-			/* Retourner au contexte du kernel (partition_trampoline) */
+			/* Retourner au contexte du kernel (partition_OS) */
 			struct pcb_s *partition = kcb->partition_current->data;
 			longjmp(partition->partition_context, 1);
 		}
@@ -369,7 +369,7 @@ void yield(void)
 		// while (s == kcb[_cpu_id()]->ticks);
 		task = kcb[_cpu_id()]->task_current->data;
 		if (setjmp(task->context) == 0) {
-			/* Retourner au contexte du kernel (partition_trampoline) */
+			/* Retourner au contexte du kernel (partition_OS) */
 			struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
 			longjmp(partition->partition_context, 1);
 		}

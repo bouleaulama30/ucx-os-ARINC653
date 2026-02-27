@@ -117,17 +117,7 @@ void update_kcb_task_list(struct list_s *tcb){
     // printf("ID process test %d\n", tcb_test->id);
 }
 
-static void partition_trampoline(void)
-{
-    struct pcb_s *partition;
-
-#ifndef MULTICORE
-    partition = kcb->partition_current->data;
-#else
-    partition = kcb[_cpu_id()]->partition_current->data;
-#endif
-
-    _mprv_activate();
+void main_process(struct pcb_s *partition){
 
     if(partition->status->IDENTIFIER == IDLE_PARTITION_ID){
         // on utilise la tache IDLE
@@ -173,9 +163,20 @@ static void partition_trampoline(void)
    partition->last_running_process = first_process_node;
 
     // ((void (*)(void))partition->entry_point)();
+}
 
-
-
+static void partition_OS(void)
+{
+    struct pcb_s *partition;
+#ifndef MULTICORE
+    partition = kcb->partition_current->data;
+#else
+    partition = kcb[_cpu_id()]->partition_current->data;
+#endif
+    
+    _mprv_activate();
+    main_process(partition);
+    
     while (1) {
 #ifndef MULTICORE
         
@@ -185,8 +186,6 @@ static void partition_trampoline(void)
         if (!setjmp(partition->partition_context)) {
             // stack_check();
             // list_foreach(kcb->tasks, delay_update, (void *)0);
-            // a changer mais c'est pour traiter le cas de la partition IDLE 
-            // if(partition->status->IDENTIFIER != IDLE_PARTITION_ID)
             krnl_schedule();
             struct node_s *task_node = kcb->task_current;
             partition->last_running_process = task_node;
@@ -202,8 +201,6 @@ static void partition_trampoline(void)
         if (!setjmp(partition->partition_context)) {
             // stack_check();
             // list_foreach(kcb[_cpu_id()]->tasks, delay_update, (void *)0);
-            // a changer mais c'est pour traiter le cas de la partition IDLE 
-            // if(partition->status->IDENTIFIER != IDLE_PARTITION_ID)
             krnl_schedule();
             struct node_s *task_node = kcb[_cpu_id()]->task_current;
             partition->last_running_process = task_node;
@@ -277,7 +274,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 
     /* --- INITIALISATION DE LA PARTIE TCB (POUR LE KERNEL) --- */
     new_pcb->tcb.id = (uint16_t)IDENTIFIER;         
-    new_pcb->tcb.task = partition_trampoline;
+    new_pcb->tcb.task = partition_OS;
     new_pcb->tcb.stack = data_region->base;         
     new_pcb->tcb.stack_sz = data_region->size;
     new_pcb->tcb.state = TASK_READY;                

@@ -11,15 +11,18 @@
 
 * faire management process
     * terminer la fonction create_process
-        * tester pour le moment le workflow avec les syscall deja existant et les processes dans la stack
         * gerer le cas de IDLE pour le scheduling (gerer la pmp car ce n est pas bon)
             * demander si je peux faire un processus qui est idle si c est le cas remettre activate partition bien comme avant car plus besoin de faire des disjonction de cas
         * attention au _interrupt_tick (voir si necessaire, en faire un sinon)
-        * faire un une transition plus clean entre deux partitions, mettre certains element de la fonction trampoline dans activate partition, notamment ce qui touche aux structure de donnes
     * faire un main process clean
 
-    * voir si besoin de faire un main diff pour chaque partitions
-        
+    * faire un main diff pour chaque partition:
+        * faire en sorte que la partition trampoline fasse ce qu'il faut pour creer le main process
+        * terminer de completer le set_operating mode car c est elle qui fait basculer
+        * retirer le main process de la liste des processes
+    
+    * faire en sorte que finalement on appelle dispatch pour les processes sans repasser par le while(1) de la partition trampoline qui est enfaite un dispatch deguise (voir si c est pertinent)
+
     * comment defini statiquement la stack des processus:
         * faire un pointeur que l on incremente statique a partir de la section data
         
@@ -30,10 +33,8 @@
         * garder coherence entre avec le nom des etats et des priorites dans ucx_process_spawn pour fit avec la norme
 
     * faire un scheduling clean et coherent avec l'apex
-        * tester avec le scheduler de base
-            * voir avec Felipe car il faut changer le scheduler de base je pense
-        * voir si on passe en interne aux partitions
-        
+        * voir avec Felipe car il faut changer le scheduler de base je pense
+        * voir si on passe en interne aux partitions avec un POS (necessite de changer le paradigme et le scheduler de base)
     
     * coder les fonctions de l'APEX sur les processes
         * utiliser et adapter les syscall deja present comme ucx_task_id   
