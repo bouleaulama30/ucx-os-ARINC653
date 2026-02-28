@@ -11,7 +11,9 @@
 
 * faire management process
     * terminer la fonction create_process
-        * gerer le cas de IDLE pour le scheduling (gerer la pmp car ce n est pas bon)
+        * gerer le cas de IDLE pour le scheduling/:
+            * trouver un moyen de faire un vrai IDLE clean sans faire croire que c'est une partition
+            * faire un clean up de ce qui était relatif à la partition IDLE
             * demander si je peux faire un processus qui est idle si c est le cas remettre activate partition bien comme avant car plus besoin de faire des disjonction de cas
         * attention au _interrupt_tick (voir si necessaire, en faire un sinon)
     * faire un main process clean
@@ -35,6 +37,12 @@
     * faire un scheduling clean et coherent avec l'apex
         * voir avec Felipe car il faut changer le scheduler de base je pense
         * voir si on passe en interne aux partitions avec un POS (necessite de changer le paradigme et le scheduler de base)
+
+    * vérifier que la stack est cohérente:
+        * Dans les partitions durant les processes 
+        * Dans le kernel pendant le schedule des partitions 
+        * Regarder où c'est pendant le schedule des processes
+        * Remettre les protections mémoires en place et regarder si c'est fonctionnel
     
     * coder les fonctions de l'APEX sur les processes
         * utiliser et adapter les syscall deja present comme ucx_task_id   
