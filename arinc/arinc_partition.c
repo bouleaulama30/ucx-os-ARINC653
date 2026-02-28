@@ -107,7 +107,7 @@ void update_kcb_task_list(struct list_s *tcb){
     struct node_s *tcb_test_node = kcb->tasks->head->next;
     //a changer mais pour test on met le premier process en tache courante
     // kcb->task_current = tcb_test_node;
-   
+
 #else
     kcb[_cpu_id()]->tasks = tcb;
     struct node_s *tcb_test_node = kcb[_cpu_id()]->tasks->head->next;
@@ -119,12 +119,10 @@ void update_kcb_task_list(struct list_s *tcb){
 
 void main_process(struct pcb_s *partition){
 
-    if(partition->status->IDENTIFIER == IDLE_PARTITION_ID){
-        // on utilise la tache IDLE
-        printf("[Partition IDLE]\n\n");
-        while(1);
-        
-    }
+    // if(partition->status->IDENTIFIER == IDLE_PARTITION_ID){
+    //     // on utilise la tache IDLE
+    //     printf("[Partition IDLE]\n\n");        
+    // }
 
     if(partition->status->IDENTIFIER == 1){
         RETURN_CODE_TYPE return_code0;
@@ -162,7 +160,6 @@ void main_process(struct pcb_s *partition){
     
    partition->last_running_process = first_process_node;
 
-    // ((void (*)(void))partition->entry_point)();
 }
 
 static void partition_OS(void)
@@ -175,11 +172,10 @@ static void partition_OS(void)
 #endif
     
     _mprv_activate();
-    main_process(partition);
+    ((void (*)(struct pcb_s *))partition->entry_point)(partition);
     
     while (1) {
 #ifndef MULTICORE
-        
         if (!kcb->tasks->length)
             krnl_panic(ERR_NO_TASKS);
         
@@ -194,7 +190,7 @@ static void partition_OS(void)
             longjmp(task->context, 1);
         }
 #else
-    
+        
         if (!kcb[_cpu_id()]->tasks->length)
             krnl_panic(ERR_NO_TASKS);
 
@@ -336,7 +332,21 @@ static struct node_s *find_partition(struct node_s *node, void *arg){
 
 
 int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
+// --- 1. GESTION DU CREUX ENTRE LES PARTITIONS (IDLE) ---
+    if (IDENTIFIER == IDLE_PARTITION_ID) {
+        // On sécurise le système : le PMP bloque tous les accès aux zones mémoires usager
+        _pmp_partition_activate((uint32_t)_kernel_end, (uint32_t)0, (uint32_t)0);
 
+// L'IDLE n'est plus une vraie partition, on coupe juste le pointeur
+#ifndef MULTICORE
+        kcb->partition_current = NULL;
+#else
+        kcb[_cpu_id()]->partition_current = NULL;
+#endif
+        return IDLE_PARTITION_ID;
+    }
+
+    // --- 2. GESTION DES PARTITIONS USAGER NORMALES ---
 #ifndef MULTICORE
     struct node_s *partition_node = list_foreach(kcb->partitions, find_partition, (void *)IDENTIFIER);
     if(!partition_node){
@@ -347,14 +357,9 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
     uint32_t partition_start_addr = (uint32_t) partition->memory_requirements->memory[CODE].base;
     uint32_t partition_end_addr = (uint32_t) partition->memory_requirements->memory[DATA].base + partition->memory_requirements->memory[DATA].size;
     printf("start partition addr: %x, end partition addr: %x\n", partition_start_addr, partition_end_addr);
-    if (partition->status->IDENTIFIER == IDLE_PARTITION_ID){
-        _pmp_partition_activate((uint32_t)_kernel_end, (uint32_t)0, (uint32_t)0);
-        kcb->partition_current = partition_node;
-        return IDLE_PARTITION_ID;
-    }
-    else {
-        _pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
-    }
+
+    _pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
+
     if(partition->status->OPERATING_MODE == IDLE){
         int32_t id = activate_partition(IDLE_PARTITION_ID);
         return id;
@@ -395,14 +400,7 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
     uint32_t partition_start_addr = (uint32_t) partition->memory_requirements->memory[CODE].base;
     uint32_t partition_end_addr = (uint32_t) partition->memory_requirements->memory[DATA].base + partition->memory_requirements->memory[DATA].size;
     printf("start partition addr: %x, end partition addr: %x\n", partition_start_addr, partition_end_addr);
-    if (partition->status->IDENTIFIER == IDLE_PARTITION_ID){
-        _pmp_partition_activate((uint32_t)_kernel_end, (uint32_t)0, (uint32_t)0);
-        kcb[_cpu_id()]->partition_current = partition_node;
-        return IDLE_PARTITION_ID;
-    }
-    else {
-        _pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
-    }
+    _pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
     if(partition->status->OPERATING_MODE == IDLE){
         int32_t id = activate_partition(IDLE_PARTITION_ID);
         return id;

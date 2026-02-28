@@ -125,5 +125,7 @@ extern void process_test0(void);
 extern void process_test1(void);
 extern void process_test2(void);
 extern void process_test3(void);
+extern void main_process(struct pcb_s *partition);
+
 
 #endif
