@@ -304,7 +304,7 @@ void dispatch(void)
 		if (kcb->rt_sched() < 0)
 			krnl_schedule();
 		// task = kcb->task_current->data;
-		_interrupt_tick();
+		_interrupt_tick_partition();
 		// longjmp(task->context, 1);
 	// }
 #else
@@ -319,7 +319,7 @@ void dispatch(void)
 		if (kcb[_cpu_id()]->rt_sched() < 0)
 			krnl_schedule();
 		// task = kcb[_cpu_id()]->task_current->data;
-		_interrupt_tick();
+		_interrupt_tick_partition();
 		// longjmp(task->context, 1);
 	// }
 #endif

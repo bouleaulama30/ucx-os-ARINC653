@@ -12,9 +12,6 @@
 
 * faire management process
     * terminer la fonction create_process
-        * gerer le cas de IDLE pour le scheduling/:
-            * faire un clean up de ce qui était relatif à la partition IDLE
-            * demander si je peux faire un processus qui est idle si c est le cas remettre activate partition bien comme avant car plus besoin de faire des disjonction de cas
         * attention au _interrupt_tick (voir si necessaire, en faire un sinon)
     * faire un main process clean
 

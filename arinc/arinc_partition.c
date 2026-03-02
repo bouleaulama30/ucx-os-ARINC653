@@ -153,7 +153,7 @@ static void partition_OS(void)
             struct node_s *task_node = kcb->task_current;
             partition->last_running_process = task_node;
             struct tcb_s *task = task_node->data;
-            // _interrupt_tick();
+            _interrupt_tick();
             longjmp(task->context, 1);
         }
 #else
@@ -168,7 +168,7 @@ static void partition_OS(void)
             struct node_s *task_node = kcb[_cpu_id()]->task_current;
             partition->last_running_process = task_node;
             struct tcb_s *task = task_node->data;
-            // _interrupt_tick();
+            _interrupt_tick();
             longjmp(task->context, 1);
         }
 #endif
