@@ -15,6 +15,8 @@
 
 #define IDLE_PARTITION_ID 0
 
+#define PARTIION_OS_AND_MAIN_PROCESS_STACK_SIZE 4096
+
 typedef
    enum {
         IDLE       = 0,
@@ -83,7 +85,6 @@ struct pcb_s {
    SYSTEM_ADDRESS_TYPE entry_point;
    BOOLEAN_TYPE is_system_partition;
    APEX_UNSIGNED nbr_processes;
-   APEX_UNSIGNED storage_capacity;
 	jmp_buf partition_context;		/* jmp_buf is architecture specific */
    struct node_s *last_running_process;
    struct list_s *processes;

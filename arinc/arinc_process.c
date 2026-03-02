@@ -33,7 +33,8 @@ void CREATE_PROCESS (
         *RETURN_CODE = INVALID_CONFIG;
     } 
     
-    else if (ATTRIBUTES->STACK_SIZE > partition->storage_capacity)
+    else if ((partition->next_stack_addr + ATTRIBUTES->STACK_SIZE) > 
+        (partition->memory_requirements->memory[DATA].base + partition->memory_requirements->memory[DATA].size))
     {
         *RETURN_CODE = INVALID_CONFIG;
     }
@@ -70,7 +71,6 @@ void CREATE_PROCESS (
     else{
         // coherence de l'etat de la partition
         partition->nbr_processes++;
-        partition->storage_capacity -= ATTRIBUTES->STACK_SIZE;
 
         struct process_s *new_process;
         PROCESS_STATUS_TYPE *status;

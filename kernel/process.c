@@ -29,11 +29,12 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 	new_tcb->priority = TASK_NORMAL_PRIO;
 	new_tcb->stack = current_partition->next_stack_addr;
 	current_partition->next_stack_addr += stack_size;
+
+	// alignement de la prochaine stack adresse sur 8 octets
+	uint32_t addr = (uint32_t) current_partition->next_stack_addr;
+    addr = (addr + 7) & ~7;
+    current_partition->next_stack_addr = (uint8_t *) addr;
 		
-	if (!new_tcb->stack)
-		krnl_panic(ERR_STACK_ALLOC);
-
-
 	CRITICAL_LEAVE();
 
 	// memset(new_tcb->stack, 0x69, stack_size);

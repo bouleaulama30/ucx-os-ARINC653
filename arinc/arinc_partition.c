@@ -155,7 +155,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->tcb.id = (uint16_t)IDENTIFIER;         
     new_pcb->tcb.task = partition_OS;
     new_pcb->tcb.stack = data_region->base;         
-    new_pcb->tcb.stack_sz = 4096;
+    new_pcb->tcb.stack_sz = PARTIION_OS_AND_MAIN_PROCESS_STACK_SIZE;
     new_pcb->tcb.state = TASK_READY;                
     new_pcb->tcb.priority = TASK_NORMAL_PRIO;
     new_pcb->tcb.rt_prio = 0;
@@ -183,8 +183,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->entry_point = entry_point;
     new_pcb->is_system_partition = is_system_partition;
     new_pcb->nbr_processes = 0;
-    new_pcb->storage_capacity = size_data_mem;
-    new_pcb->next_stack_addr = memory_requirements->memory[DATA].base + new_pcb->tcb.stack_sz;
+    new_pcb->next_stack_addr = memory_requirements->memory[DATA].base + PARTIION_OS_AND_MAIN_PROCESS_STACK_SIZE;
     new_pcb->processes = list_create();
 
 
