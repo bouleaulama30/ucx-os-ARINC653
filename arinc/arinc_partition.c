@@ -74,33 +74,6 @@ void process_test3(void)
 	}
 }
 
-void print_time_idle()
-{
-	uint32_t secs, msecs, time;
-	time = ucx_uptime();
-
-    // if(!time_initialized){
-    //     start_time = time;
-    //     time_initialized = 1;
-    // }
-    // time -= start_time;
-	secs = time / 1000;
-	msecs = time - secs * 1000;
-	
-	printf("%ld.%03lds\n", secs, msecs);
-}
-
-void idle_task(void)
-{   
-
-	while (1) {
-		printf("[Partition IDLE]\n\n");
-        // print_time_idle();
-
-		ucx_task_yield();
-	}
-}
-
 void update_kcb_task_list(struct list_s *tcb){
 #ifndef MULTICORE
     kcb->tasks = tcb;
@@ -118,12 +91,6 @@ void update_kcb_task_list(struct list_s *tcb){
 }
 
 void main_process(struct pcb_s *partition){
-
-    // if(partition->status->IDENTIFIER == IDLE_PARTITION_ID){
-    //     // on utilise la tache IDLE
-    //     printf("[Partition IDLE]\n\n");        
-    // }
-
     if(partition->status->IDENTIFIER == 1){
         RETURN_CODE_TYPE return_code0;
         RETURN_CODE_TYPE return_code1;

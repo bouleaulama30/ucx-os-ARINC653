@@ -7,12 +7,12 @@
         * changer ucx_yield pour fit avec les process
     * inhibit process scheduling and switch back to initialization mode;
     * faire les actions quand elle passe en normal (set to READY processes, activate process scheduling etc..)
+    * faire de nouveau un test complet de la fonction pour savoir si c est fonctionnel apres avoir implementer la logique des processes
 
 
 * faire management process
     * terminer la fonction create_process
         * gerer le cas de IDLE pour le scheduling/:
-            * trouver un moyen de faire un vrai IDLE clean sans faire croire que c'est une partition
             * faire un clean up de ce qui était relatif à la partition IDLE
             * demander si je peux faire un processus qui est idle si c est le cas remettre activate partition bien comme avant car plus besoin de faire des disjonction de cas
         * attention au _interrupt_tick (voir si necessaire, en faire un sinon)
