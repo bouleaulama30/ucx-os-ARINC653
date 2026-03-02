@@ -90,43 +90,56 @@ void update_kcb_task_list(struct list_s *tcb){
     // printf("ID process test %d\n", tcb_test->id);
 }
 
-void main_process(struct pcb_s *partition){
-    if(partition->status->IDENTIFIER == 1){
-        RETURN_CODE_TYPE return_code0;
-        RETURN_CODE_TYPE return_code1;
-        PROCESS_ID_TYPE process_id_0;
-        PROCESS_ID_TYPE process_id_1;
-
-        CREATE_PROCESS(&DEFAULT_PROCESS_CONFIG, &process_id_0, &return_code0);
-        CREATE_PROCESS(&PROCESS_1_CONFIG, &process_id_1, &return_code1);
-
-        printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
-        printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);        
-    }
-
-    if(partition->status->IDENTIFIER == 2){
-        RETURN_CODE_TYPE return_code0;
-        RETURN_CODE_TYPE return_code1;
-        PROCESS_ID_TYPE process_id_0;
-        PROCESS_ID_TYPE process_id_1;
-
-        CREATE_PROCESS(&PROCESS_2_CONFIG, &process_id_0, &return_code0);
-        CREATE_PROCESS(&PROCESS_3_CONFIG, &process_id_1, &return_code1);
-
-        printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
-        printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);
-    }
-
-    // a changer mais temporairement le premier process de la liste est mis en current par le main process
-    struct node_s* first_process_node = partition->processes->head->next;  
+void activate_process_scheduling(){
 #ifndef MULTICORE
+    struct pcb_s *partition = kcb->partition_current->data;
+     // a changer mais temporairement le premier process de la liste est mis en current par le main process
+    struct node_s* first_process_node = partition->processes->head->next;  
     kcb->task_current = first_process_node;
 #else
+    struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
+     // a changer mais temporairement le premier process de la liste est mis en current par le main process
+    struct node_s* first_process_node = partition->processes->head->next;  
     kcb[_cpu_id()]->task_current = first_process_node;
 #endif
-    
    partition->last_running_process = first_process_node;
+      // mise a jour de la liste des processes au niveau du kernel
+    struct list_s *processes = partition->processes;
+    update_kcb_task_list(processes);
+    // ucx_task_yield();
+}
 
+__attribute__((section(".p1_code")))
+void p1_main_process(struct pcb_s *partition){
+    RETURN_CODE_TYPE return_code0;
+    RETURN_CODE_TYPE return_code1;
+    PROCESS_ID_TYPE process_id_0;
+    PROCESS_ID_TYPE process_id_1;
+
+    CREATE_PROCESS(&DEFAULT_PROCESS_CONFIG, &process_id_0, &return_code0);
+    CREATE_PROCESS(&PROCESS_1_CONFIG, &process_id_1, &return_code1);
+
+    printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
+    printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);        
+
+    SET_PARTITION_MODE(NORMAL, &return_code0);
+
+}
+
+__attribute__((section(".p2_code")))
+void p2_main_process(struct pcb_s *partition){
+    RETURN_CODE_TYPE return_code0;
+    RETURN_CODE_TYPE return_code1;
+    PROCESS_ID_TYPE process_id_0;
+    PROCESS_ID_TYPE process_id_1;
+
+    CREATE_PROCESS(&PROCESS_2_CONFIG, &process_id_0, &return_code0);
+    CREATE_PROCESS(&PROCESS_3_CONFIG, &process_id_1, &return_code1);
+
+    printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
+    printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);
+
+    SET_PARTITION_MODE(NORMAL, &return_code0);
 }
 
 static void partition_OS(void)
@@ -463,6 +476,8 @@ void SET_PARTITION_MODE (
     {
         // cf norme
         printf("OPERATING MODE is NORMAL\n");
+        *RETURN_CODE = NO_ERROR;
+        activate_process_scheduling();
     }
     
     *RETURN_CODE = NO_ERROR;

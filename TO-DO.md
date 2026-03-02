@@ -11,19 +11,18 @@
 
 
 * faire management process
-    * terminer la fonction create_process
-        * attention au _interrupt_tick (voir si necessaire, en faire un sinon)
-    * faire un main process clean
 
     * faire un main diff pour chaque partition:
         * faire en sorte que la partition trampoline fasse ce qu'il faut pour creer le main process
         * terminer de completer le set_operating mode car c est elle qui fait basculer
         * retirer le main process de la liste des processes
+        * mettre les fonctions processes et main dans un autre fichiers
     
     * faire en sorte que finalement on appelle dispatch pour les processes sans repasser par le while(1) de la partition trampoline qui est enfaite un dispatch deguise (voir si c est pertinent)
 
     * comment defini statiquement la stack des processus:
         * faire un pointeur que l on incremente statique a partir de la section data
+        * l'incrementer dans partition init pour le partition OS + main process
         
     * comment etre sur que les processus utilise pas plus que leur stack
         * soit utiliser le canary actuel, mais sinon adapter la conf de la pmp/MMU
