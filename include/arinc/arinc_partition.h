@@ -121,10 +121,7 @@ extern int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 
 extern int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER);
 
-extern void process_test0(void);
-extern void process_test1(void);
-extern void process_test2(void);
-extern void process_test3(void);
+
 extern void p1_main_process(struct pcb_s *partition);
 extern void p2_main_process(struct pcb_s *partition);
 

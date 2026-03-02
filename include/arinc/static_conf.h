@@ -4,6 +4,11 @@
 #include "arinc/arinc_partition.h"
 #include "arinc/module_scheduler.h"
 
+extern void process_test0(void);
+extern void process_test1(void);
+extern void process_test2(void);
+extern void process_test3(void);
+
 // Déclaration des symboles du linker script du kernel
 extern uint8_t _kernel_end[];
 

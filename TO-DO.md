@@ -11,10 +11,6 @@
 
 
 * faire management process
-
-    * faire un main diff pour chaque partition:
-        * mettre les fonctions processes et main dans un autre fichiers
-    
     * faire en sorte que finalement on appelle dispatch pour les processes sans repasser par le while(1) de la partition trampoline qui est enfaite un dispatch deguise (voir si c est pertinent)
 
     * comment defini statiquement la stack des processus:

@@ -3,76 +3,7 @@
 // uint32_t start_time;
 // int time_initialized = 0;
 
-void process_test0(void)
-{   
-	int32_t cnt = 100000;
-    RETURN_CODE_TYPE return_code;
-	APEX_INTEGER paritition_id;
-    APEX_INTEGER process_id;
-	GET_MY_PARTITION_ID(&paritition_id, &return_code);
-    GET_MY_ID(&process_id, &return_code);
-	while (1) {
-		if(cnt == 100002){
-			// SET_PARTITION_MODE(IDLE, &return_code);
-		}
-		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-		// print_time();
-		ucx_task_yield();
-	}
-}
 
-void process_test1(void)
-{   
-	int32_t cnt = 200000;
-    RETURN_CODE_TYPE return_code;
-	APEX_INTEGER paritition_id;
-    APEX_INTEGER process_id;
-	GET_MY_PARTITION_ID(&paritition_id, &return_code);
-    GET_MY_ID(&process_id, &return_code);
-	while (1) {
-		if(cnt == 200002){
-			// SET_PARTITION_MODE(IDLE, &return_code);
-		}
-		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-		// print_time();
-		ucx_task_yield();
-	}
-}
-void process_test2(void)
-{   
-	int32_t cnt = 300000;
-    RETURN_CODE_TYPE return_code;
-	APEX_INTEGER paritition_id;
-    APEX_INTEGER process_id;
-	GET_MY_PARTITION_ID(&paritition_id, &return_code);
-    GET_MY_ID(&process_id, &return_code);
-	while (1) {
-		if(cnt == 200002){
-			// SET_PARTITION_MODE(IDLE, &return_code);
-		}
-		printf("[prrocess %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-		// print_time();
-		ucx_task_yield();
-	}
-}
-
-void process_test3(void)
-{   
-	int32_t cnt = 400000;
-    RETURN_CODE_TYPE return_code;
-	APEX_INTEGER paritition_id;
-    APEX_INTEGER process_id;
-	GET_MY_PARTITION_ID(&paritition_id, &return_code);
-    GET_MY_ID(&process_id, &return_code);
-	while (1) {
-		if(cnt == 200002){
-			// SET_PARTITION_MODE(IDLE, &return_code);
-		}
-		printf("[prrocess %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-		// print_time();
-		ucx_task_yield();
-	}
-}
 
 void update_kcb_task_list(struct list_s *tcb){
 #ifndef MULTICORE
@@ -108,38 +39,6 @@ void activate_process_scheduling(){
     struct list_s *processes = partition->processes;
     update_kcb_task_list(processes);
     _dispatch_init(first_process->context);
-}
-
-__attribute__((section(".p1_code")))
-void p1_main_process(struct pcb_s *partition){
-    RETURN_CODE_TYPE return_code0;
-    RETURN_CODE_TYPE return_code1;
-    PROCESS_ID_TYPE process_id_0;
-    PROCESS_ID_TYPE process_id_1;
-
-    CREATE_PROCESS(&DEFAULT_PROCESS_CONFIG, &process_id_0, &return_code0);
-    CREATE_PROCESS(&PROCESS_1_CONFIG, &process_id_1, &return_code1);
-
-    printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
-    printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);        
-
-    SET_PARTITION_MODE(NORMAL, &return_code0);
-}
-
-__attribute__((section(".p2_code")))
-void p2_main_process(struct pcb_s *partition){
-    RETURN_CODE_TYPE return_code0;
-    RETURN_CODE_TYPE return_code1;
-    PROCESS_ID_TYPE process_id_0;
-    PROCESS_ID_TYPE process_id_1;
-
-    CREATE_PROCESS(&PROCESS_2_CONFIG, &process_id_0, &return_code0);
-    CREATE_PROCESS(&PROCESS_3_CONFIG, &process_id_1, &return_code1);
-
-    printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
-    printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);
-
-    SET_PARTITION_MODE(NORMAL, &return_code0);
 }
 
 static void partition_OS(void)
