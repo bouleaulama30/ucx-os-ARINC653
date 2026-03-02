@@ -79,7 +79,7 @@ void CREATE_PROCESS (
         status = malloc(sizeof(PROCESS_STATUS_TYPE));
         
         // creation du process au niveau kernel
-        int32_t id = ucx_process_spawn(ATTRIBUTES->ENTRY_POINT, ATTRIBUTES->STACK_SIZE, new_process);
+        int32_t id = ucx_process_spawn(ATTRIBUTES->ENTRY_POINT, ATTRIBUTES->STACK_SIZE, new_process, partition);
 
         // a changer
         status->DEADLINE_TIME = 0;

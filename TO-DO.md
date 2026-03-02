@@ -16,6 +16,8 @@
     * comment defini statiquement la stack des processus:
         * faire un pointeur que l on incremente statique a partir de la section data
         * l'incrementer dans partition init pour le partition OS + main process
+        * faire une variable modifiable pour la taille de la stack dans partition init
+        * voir si storage capacity n est pas redondant avec next stack addr
         
     * comment etre sur que les processus utilise pas plus que leur stack
         * soit utiliser le canary actuel, mais sinon adapter la conf de la pmp/MMU

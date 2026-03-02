@@ -1,7 +1,7 @@
 #include "ucx.h"
 
 
-int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *process)
+int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *process, struct pcb_s *current_partition)
 {
 	struct tcb_s *new_tcb;
 	struct node_s *new_task;
@@ -14,16 +14,7 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 
 	CRITICAL_ENTER();
     
-// #ifndef MULTICORE
-// 	new_task = list_pushback(kcb->tasks, new_tcb);
-// #else
-// 	new_task = list_pushback(kcb[_cpu_id()]->tasks, new_tcb);
-// #endif
-	
-	// if (!new_task)
-	// 	krnl_panic(ERR_TCB_ALLOC);
-	
-	// new_task->data = new_tcb;
+
 	new_tcb->task = task;
 	new_tcb->rt_prio = 0;
 	new_tcb->delay = 0;
@@ -36,7 +27,8 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 #endif
 	new_tcb->state = TASK_STOPPED;
 	new_tcb->priority = TASK_NORMAL_PRIO;
-	new_tcb->stack = malloc(stack_size);
+	new_tcb->stack = current_partition->next_stack_addr;
+	current_partition->next_stack_addr += stack_size;
 		
 	if (!new_tcb->stack)
 		krnl_panic(ERR_STACK_ALLOC);
@@ -44,9 +36,9 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 
 	CRITICAL_LEAVE();
 
-	memset(new_tcb->stack, 0x69, stack_size);
-	memset(new_tcb->stack, 0x33, 4);
-	memset((new_tcb->stack) + stack_size - 4, 0x33, 4);
+	// memset(new_tcb->stack, 0x69, stack_size);
+	// memset(new_tcb->stack, 0x33, 4);
+	// memset((new_tcb->stack) + stack_size - 4, 0x33, 4);
 	
 	_context_init(&new_tcb->context, (size_t)new_tcb->stack,
 		stack_size, (size_t)task);

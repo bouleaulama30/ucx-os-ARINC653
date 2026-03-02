@@ -77,6 +77,7 @@ struct pcb_s {
    PARTITION_STATUS_TYPE *status;
    PARTITION_NAME_TYPE name;
    MEMORY_REQUIREMENTS_TYPE *memory_requirements;
+   SYSTEM_ADDRESS_TYPE next_stack_addr;
    // interpartition_communication_type communication_ports;
    // Partion HM Table
    SYSTEM_ADDRESS_TYPE entry_point;

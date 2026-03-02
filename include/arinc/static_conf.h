@@ -8,6 +8,8 @@ extern void process_test0(void);
 extern void process_test1(void);
 extern void process_test2(void);
 extern void process_test3(void);
+extern void test_spatial_violation_p1(void);
+extern void test_spatial_violation_p2(void);
 
 // Déclaration des symboles du linker script du kernel
 extern uint8_t _kernel_end[];

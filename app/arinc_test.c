@@ -49,6 +49,7 @@ void test_spatial_violation_p1(void) {
     printf("[CRITICAL FAIL] P2 a reussi a ecrire dans P1 !\n");
 }
 
+__attribute__((section(".p1_code")))
 void process_test0(void)
 {   
 	int32_t cnt = 100000;
@@ -67,6 +68,7 @@ void process_test0(void)
 	}
 }
 
+__attribute__((section(".p1_code")))
 void process_test1(void)
 {   
 	int32_t cnt = 200000;
@@ -84,6 +86,8 @@ void process_test1(void)
 		ucx_task_yield();
 	}
 }
+
+__attribute__((section(".p2_code")))
 void process_test2(void)
 {   
 	int32_t cnt = 300000;
@@ -102,6 +106,7 @@ void process_test2(void)
 	}
 }
 
+__attribute__((section(".p2_code")))
 void process_test3(void)
 {   
 	int32_t cnt = 400000;
