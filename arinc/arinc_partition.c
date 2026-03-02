@@ -102,11 +102,12 @@ void activate_process_scheduling(){
     struct node_s* first_process_node = partition->processes->head->next;  
     kcb[_cpu_id()]->task_current = first_process_node;
 #endif
-   partition->last_running_process = first_process_node;
-      // mise a jour de la liste des processes au niveau du kernel
+    partition->last_running_process = first_process_node;
+    struct tcb_s* first_process = first_process_node->data;
+    // mise a jour de la liste des processes au niveau du kernel
     struct list_s *processes = partition->processes;
     update_kcb_task_list(processes);
-    // ucx_task_yield();
+    _dispatch_init(first_process->context);
 }
 
 __attribute__((section(".p1_code")))
@@ -123,7 +124,6 @@ void p1_main_process(struct pcb_s *partition){
     printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);        
 
     SET_PARTITION_MODE(NORMAL, &return_code0);
-
 }
 
 __attribute__((section(".p2_code")))
@@ -152,8 +152,12 @@ static void partition_OS(void)
 #endif
     
     _mprv_activate();
-    ((void (*)(struct pcb_s *))partition->entry_point)(partition);
     
+
+    setjmp(partition->partition_context);
+	if(partition->status->OPERATING_MODE == COLD_START || partition->status->OPERATING_MODE == WARM_START){
+        ((void (*)(struct pcb_s *))partition->entry_point)(partition);
+	}
     while (1) {
 #ifndef MULTICORE
         if (!kcb->tasks->length)

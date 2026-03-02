@@ -13,9 +13,6 @@
 * faire management process
 
     * faire un main diff pour chaque partition:
-        * faire en sorte que la partition trampoline fasse ce qu'il faut pour creer le main process
-        * terminer de completer le set_operating mode car c est elle qui fait basculer
-        * retirer le main process de la liste des processes
         * mettre les fonctions processes et main dans un autre fichiers
     
     * faire en sorte que finalement on appelle dispatch pour les processes sans repasser par le while(1) de la partition trampoline qui est enfaite un dispatch deguise (voir si c est pertinent)
