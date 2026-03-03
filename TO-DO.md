@@ -12,29 +12,17 @@
 
 * faire management process
     * faire en sorte que finalement on appelle dispatch pour les processes sans repasser par le while(1) de la partition trampoline qui est enfaite un dispatch deguise (voir si c est pertinent)
-
-
-    * verifier que la stack va bien dans le bon sens
-        
-    * comment etre sur que les processus utilise pas plus que leur stack
-        * soit utiliser le canary actuel, mais sinon adapter la conf de la pmp/MMU
-        
+                
     * completer les "a changer" dans la fonction create_process et ucx_process_spawn
         * garder coherence entre avec le nom des etats et des priorites dans ucx_process_spawn pour fit avec la norme
 
     * faire un scheduling clean et coherent avec l'apex
         * voir avec Felipe car il faut changer le scheduler de base je pense
         * voir si on passe en interne aux partitions avec un POS (necessite de changer le paradigme et le scheduler de base)
-
-    * vérifier que la stack est cohérente:
-        * Dans les partitions durant les processes 
-        * Dans le kernel pendant le schedule des partitions 
-        * Regarder où c'est pendant le schedule des processes
-        * Remettre les protections mémoires en place et regarder si c'est fonctionnel
     
     * coder les fonctions de l'APEX sur les processes
-        * utiliser et adapter les syscall deja present comme ucx_task_id   
-
+        * voir si plus simple de faire get_process_id avec id ref ou autre
+        * utiliser et adapter les syscall deja present comme ucx_task_id
     * tester les fonctions de l'APEX sur les processes
 
 * refractor / formatage code:

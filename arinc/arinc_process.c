@@ -1,6 +1,6 @@
 #include <ucx.h>
 
-static struct node_s *find_processes(struct node_s *node, void *arg){
+static struct node_s *find_processes_by_name(struct node_s *node, void *arg){
     struct process_s *process = node->data;
     const char *name = (const char *) arg;
     
@@ -10,10 +10,10 @@ static struct node_s *find_processes(struct node_s *node, void *arg){
     return 0;
 }
 
-static int is_process_name_existed(struct pcb_s *partition, PROCESS_NAME_TYPE process_name){
-    struct node_s *same_process_name_node = list_foreach(partition->processes, find_processes, (void *)process_name);
+static struct node_s *is_process_name_existed(struct pcb_s *partition, PROCESS_NAME_TYPE process_name){
+    struct node_s *same_process_name_node = list_foreach(partition->processes, find_processes_by_name, (void *)process_name);
     if(same_process_name_node){
-        return 1;
+        return same_process_name_node;
     }
     return 0;
 }
@@ -170,7 +170,22 @@ void GET_MY_ID (
 void GET_PROCESS_ID (
        /*in */ PROCESS_NAME_TYPE        PROCESS_NAME,
        /*out*/ PROCESS_ID_TYPE          *PROCESS_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+#ifndef MULTICORE
+    struct node_s *partition_node = kcb->partition_current;
+#else
+    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
+#endif
+    struct pcb_s *partition = partition_node->data;
+    struct node_s *process_node = is_process_name_existed(partition, PROCESS_NAME);
+    if(!process_node){
+        *RETURN_CODE = INVALID_CONFIG;
+        return;
+    }
+    struct process_s *process = process_node->data;
+    *PROCESS_ID = process->process_id;
+    *RETURN_CODE = NO_ERROR;
+}
 
 void GET_PROCESS_STATUS (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
