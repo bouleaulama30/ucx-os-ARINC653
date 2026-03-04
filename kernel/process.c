@@ -20,7 +20,10 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 	new_tcb->delay = 0;
 	new_tcb->stack_sz = stack_size;
 	new_tcb->id = current_partition->id_next++;
-	new_tcb->state = TASK_STOPPED;
+
+	//pas necessaire de definir l'etat car deja dans status du process
+	new_tcb->state = 0;
+
 	new_tcb->priority = TASK_NORMAL_PRIO;
 	new_tcb->stack = current_partition->next_stack_addr;
 	current_partition->next_stack_addr += stack_size;
@@ -38,7 +41,6 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 	printf("core %d, task %d: 0x%p, stack: 0x%p, size %d\n", _cpu_id(),
 		new_tcb->id, new_tcb->task, new_tcb->stack, new_tcb->stack_sz);
 
-	new_tcb->state = TASK_READY;
     process->tcb = *new_tcb;
 
 	return new_tcb->id;
@@ -59,8 +61,8 @@ uint16_t process_schedule(void)
 	struct process_s *tselect;
 	uint16_t priority;
 	
-	if (process->tcb.state == TASK_RUNNING)
-		process->tcb.state = TASK_READY;
+	if (process->processus_status->PROCESS_STATE == RUNNING)
+		process->processus_status->PROCESS_STATE = READY;
 
 	select = partition->processes->head->next;
 	node = partition->processes->head;
@@ -70,7 +72,7 @@ uint16_t process_schedule(void)
 		if (!node->next) break;
 		process = node->data;
 		if ((process->tcb.priority & 0xff) <= (tselect->tcb.priority & 0xff)) {
-			if (process->tcb.state == TASK_READY && !process->tcb.rt_prio) {
+			if (process->processus_status->PROCESS_STATE == READY && !process->tcb.rt_prio) {
 				select = node;
 				tselect = select->data;
 			}
@@ -78,7 +80,7 @@ uint16_t process_schedule(void)
 	};
 	
 	tselect = select->data;
-	if (tselect->tcb.state != TASK_READY || tselect->tcb.rt_prio)
+	if (tselect->processus_status->PROCESS_STATE != READY || tselect->tcb.rt_prio)
 		krnl_panic(ERR_NO_TASKS);
 	
 	priority = tselect->tcb.priority;
@@ -86,13 +88,13 @@ uint16_t process_schedule(void)
 	while ((node = list_next(node))) {
 		if (!node->next) break;
 		process = node->data;
-		if (process->tcb.state == TASK_READY && !process->tcb.rt_prio)
+		if (process->processus_status->PROCESS_STATE == READY && !process->tcb.rt_prio)
 			process->tcb.priority -= (priority & 0xff);
 	};
 
 	partition->process_current = select;
 	tselect->tcb.priority |= (tselect->tcb.priority >> 8) & 0xff;
-	tselect->tcb.state = TASK_RUNNING;
+	tselect->processus_status->PROCESS_STATE = RUNNING;
 
 	return tselect->tcb.id;
 }

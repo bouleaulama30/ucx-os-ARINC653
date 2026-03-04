@@ -6,7 +6,7 @@
     * shut down the partition
         * changer ucx_yield pour fit avec les process
     * inhibit process scheduling and switch back to initialization mode;
-    * faire les actions quand elle passe en normal (set to READY processes, activate process scheduling etc..)
+    * faire les actions quand elle passe en normal (set to READY processes (le faire avec l apex start), activate process scheduling etc..)
     * faire de nouveau un test complet de la fonction pour savoir si c est fonctionnel apres avoir implementer la logique des processes
 
 
@@ -34,6 +34,7 @@
     * faire un nettoyage dans les structures de donnees aussi
     * voir si on garde le dispatch dans la logique du scheduling des partitions car c est archi dependant
     * voir si c'est bien de mettre le process_scheduler dans le fichier process.c
+    voir si la structure tcb dans celle de process_s est toujours utile (etat dont on ne se sert plus comme tcb.state)
     
 * faire rouler sur la carte en materielle une fois que c'est bon pour les processus
 

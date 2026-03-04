@@ -246,7 +246,17 @@ void GET_PARTITION_STATUS (
 }
 
 
-    
+
+static struct node_s *start_process(struct node_s *node, void *arg)
+{
+	struct process_s *process = node->data;
+	
+	if (process->processus_status->PROCESS_STATE == DORMANT)
+        process->processus_status->PROCESS_STATE = READY;
+	return 0;
+}
+
+
 void SET_PARTITION_MODE (
        /*in */ OPERATING_MODE_TYPE        OPERATING_MODE,
        /*out*/ RETURN_CODE_TYPE           *RETURN_CODE ){
@@ -292,6 +302,8 @@ void SET_PARTITION_MODE (
         // cf norme
         printf("OPERATING MODE is NORMAL\n");
         *RETURN_CODE = NO_ERROR;
+        //set all processes to ready state
+        list_foreach(my_partition->processes, start_process, (void *)0);
         activate_process_scheduling();
     }
     
