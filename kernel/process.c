@@ -52,3 +52,58 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 
 	return new_tcb->id;
 }
+
+
+
+uint16_t process_schedule(void)
+{
+	printf("scheduler native\n");
+#ifndef MULTICORE
+	struct pcb_s *partition = kcb->partition_current->data;
+#else
+	struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
+#endif
+	struct process_s *process = partition->process_current->data;
+	struct node_s *node, *select;
+	struct tcb_s *tselect;
+	uint16_t priority;
+	
+	if (process->tcb.state == TASK_RUNNING)
+		process->tcb.state = TASK_READY;
+
+	select = partition->processes->head->next;
+	node = partition->processes->head;
+	tselect = select->data;
+
+	while ((node = list_next(node))) {
+		if (!node->next) break;
+		process = node->data;
+		if ((process->tcb.priority & 0xff) <= (tselect->priority & 0xff)) {
+			if (process->tcb.context == TASK_READY && !process->tcb.rt_prio) {
+				select = node;
+				tselect = select->data;
+			}
+		}
+	};
+	
+	tselect = select->data;
+	if (tselect->state != TASK_READY || tselect->rt_prio)
+		krnl_panic(ERR_NO_TASKS);
+	
+	priority = tselect->priority;
+	node = partition->processes->head;
+	while ((node = list_next(node))) {
+		if (!node->next) break;
+		process = node->data;
+		if (process->tcb.state == TASK_READY && !process->tcb.rt_prio)
+			process->tcb.priority -= (priority & 0xff);
+	};
+
+#ifndef MULTICORE
+	partition->process_current = select;
+#endif
+	tselect->priority |= (tselect->priority >> 8) & 0xff;
+	tselect->state = TASK_RUNNING;
+
+	return tselect->id;
+}

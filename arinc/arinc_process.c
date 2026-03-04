@@ -150,10 +150,11 @@ void GET_MY_ID (
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE )
 {
 #ifndef MULTICORE
-    struct tcb_s *current_process = kcb->task_current->data;
+    struct pcb_s *partition = kcb->partition_current->data;
 #else
-    struct tcb_s *current_process = kcb[_cpu_id()]->task_current->data;
+    struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
 #endif
+    struct process_s *process = partition->process_current->data;
 
     // 2. Vérifier si le code actuel est le Error Handler (tâche spéciale)
     if (is_executing_error_handler()) {
@@ -161,7 +162,7 @@ void GET_MY_ID (
         return;
     }
     
-    *PROCESS_ID = current_process->id;
+    *PROCESS_ID = process->process_id;
     *RETURN_CODE = NO_ERROR;
 }
 

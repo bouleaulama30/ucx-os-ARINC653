@@ -11,14 +11,18 @@
 
 
 * faire management process
+
+    * internaliser la logique des processes aux partitions
+        * changer algo scheduling pour que ca fit
+        * voir si toujours besoin du last_running_process
+        * voir si toujours besoin de Forcer la tâche courante à redevenir READY
+
+
     * faire en sorte que finalement on appelle dispatch pour les processes sans repasser par le while(1) de la partition trampoline qui est enfaite un dispatch deguise (voir si c est pertinent)
                 
     * completer les "a changer" dans la fonction create_process et ucx_process_spawn
         * garder coherence entre avec le nom des etats et des priorites dans ucx_process_spawn pour fit avec la norme
 
-    * faire un scheduling clean et coherent avec l'apex
-        * voir avec Felipe car il faut changer le scheduler de base je pense
-        * voir si on passe en interne aux partitions avec un POS (necessite de changer le paradigme et le scheduler de base)
     
     * coder les fonctions de l'APEX sur les processes
         * voir si plus simple de faire get_process_id avec id ref ou autre
@@ -27,7 +31,7 @@
 
 * refractor / formatage code:
     * mettre des ifndef pour les ajouts a l os de base pour maintenir le code isole:
-        * main, struct kcb, ucx.h, process.c.h, fonction dispatch, interrupt_tick dans le hal, yield
+        * main, struct kcb, ucx.h, process.c.h, fonction dispatch, interrupt_tick dans le hal, yield (enlever les doublons entre tasks et processes)
     * trouver des noms plus accurate pour activate partition et les variables dedans
         * lier les noms entre task et processes
     * refractor de partionnement spatial
@@ -35,6 +39,9 @@
     * refractor tout sur les processes
     * regarder pok pour s'inspirer
     * remplacer certaines action par des fonctions get et set  (comme fonction pour get le node_s de la partition courante)
+    * faire un nettoyage dans les structures de donnees aussi
+    * voir si on garde le dispatch dans la logique du scheduling des partitions car c est archi dependant
+    * voir si c'est bien de mettre le process_scheduler dans le fichier process.c
     
 * faire rouler sur la carte en materielle une fois que c'est bon pour les processus
 

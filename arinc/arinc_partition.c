@@ -33,6 +33,7 @@ void activate_process_scheduling(){
     struct node_s* first_process_node = partition->processes->head->next;  
     kcb[_cpu_id()]->task_current = first_process_node;
 #endif
+    partition->process_current = first_process_node;
     partition->last_running_process = first_process_node;
     struct tcb_s* first_process = first_process_node->data;
     // mise a jour de la liste des processes au niveau du kernel
@@ -65,12 +66,15 @@ static void partition_OS(void)
         if (!setjmp(partition->partition_context)) {
             // stack_check();
             // list_foreach(kcb->tasks, delay_update, (void *)0);
-            krnl_schedule();
-            struct node_s *task_node = kcb->task_current;
-            partition->last_running_process = task_node;
-            struct tcb_s *task = task_node->data;
+            // krnl_schedule();
+            process_schedule();
+            // struct node_s *task_node = kcb->task_current;
+            // partition->process_current = task_node;
+            // partition->last_running_process = task_node;
+            partition->last_running_process = partition->process_current;
+            struct process_s *process = partition->process_current->data;
             _interrupt_tick();
-            longjmp(task->context, 1);
+            longjmp(process->tcb.context, 1);
         }
 #else
         
@@ -80,12 +84,15 @@ static void partition_OS(void)
         if (!setjmp(partition->partition_context)) {
             // stack_check();
             // list_foreach(kcb[_cpu_id()]->tasks, delay_update, (void *)0);
-            krnl_schedule();
-            struct node_s *task_node = kcb[_cpu_id()]->task_current;
-            partition->last_running_process = task_node;
-            struct tcb_s *task = task_node->data;
+            // krnl_schedule();
+            process_schedule();
+            // struct node_s *task_node = kcb[_cpu_id()]->task_current;
+            // partition->process_current = task_node;
+            // partition->last_running_process = task_node;
+            partition->last_running_process = partition->process_current;
+            struct process_s *process = partition->process_current->data;
             _interrupt_tick();
-            longjmp(task->context, 1);
+            longjmp(process->tcb.context, 1);
         }
 #endif
     }
@@ -249,10 +256,10 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
     }
 
     // Forcer la tâche courante à redevenir READY
-    if (kcb->task_current != NULL) {
-        struct tcb_s *t_old = (struct tcb_s *)kcb->task_current->data;
-       if (t_old->state == TASK_RUNNING) {
-        t_old->state = TASK_READY; 
+    if (partition->process_current != NULL) {
+        struct process_s *t_old = (struct process_s *)partition->process_current->data;
+       if (t_old->tcb.state == TASK_RUNNING) {
+        t_old->tcb.state = TASK_READY; 
         }
     }
 
@@ -288,14 +295,14 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
         int32_t id = activate_partition(IDLE_PARTITION_ID);
         return id;
     }
+
     // Forcer la tâche courante à redevenir READY
-    if (kcb[_cpu_id()]->task_current != NULL) {
-        struct tcb_s *t_old = (struct tcb_s *)kcb[_cpu_id()]->task_current->data;
-           if (t_old->state == TASK_RUNNING) {
-        t_old->state = TASK_READY; 
+    if (partition->process_current != NULL) {
+        struct process_s *t_old = (struct process_s *)partition->process_current->data;
+       if (t_old->tcb.state == TASK_RUNNING) {
+        t_old->tcb.state = TASK_READY; 
         }
     }
-
 
     kcb[_cpu_id()]->partition_current = partition_node;
     // On restaure le pointeur EXACT de la tâche là où elle s'était arrêtée
