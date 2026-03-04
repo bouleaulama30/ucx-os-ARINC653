@@ -12,13 +12,13 @@
 
 * faire management process                
     * completer les "a changer" dans la fonction create_process et ucx_process_spawn
-        * garder coherence entre avec le nom des etats et des priorites dans ucx_process_spawn pour fit avec la norme
         * dans activate process scheduler a changer mais temporairement le premier process de la liste est mis en current par le main process
 
     
     * coder les fonctions de l'APEX sur les processes
         * voir si plus simple de faire get_process_id avec id ref ou autre
         * utiliser et adapter les syscall deja present comme ucx_task_id
+        * dans set pririty toujours penser a update les 8 bit de gauche de process->tcb.priority a la nouvelle current prio
     * tester les fonctions de l'APEX sur les processes
 
 * refractor / formatage code:

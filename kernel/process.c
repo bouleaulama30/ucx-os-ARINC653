@@ -24,7 +24,7 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 	//pas necessaire de definir l'etat car deja dans status du process
 	new_tcb->state = 0;
 
-	new_tcb->priority = TASK_NORMAL_PRIO;
+	new_tcb->priority = ((process->processus_status->CURRENT_PRIORITY << 8) | process->processus_status->CURRENT_PRIORITY);
 	new_tcb->stack = current_partition->next_stack_addr;
 	current_partition->next_stack_addr += stack_size;
 
