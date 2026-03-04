@@ -65,7 +65,7 @@ uint16_t process_schedule(void)
 #endif
 	struct process_s *process = partition->process_current->data;
 	struct node_s *node, *select;
-	struct tcb_s *tselect;
+	struct process_s *tselect;
 	uint16_t priority;
 	
 	if (process->tcb.state == TASK_RUNNING)
@@ -78,8 +78,8 @@ uint16_t process_schedule(void)
 	while ((node = list_next(node))) {
 		if (!node->next) break;
 		process = node->data;
-		if ((process->tcb.priority & 0xff) <= (tselect->priority & 0xff)) {
-			if (process->tcb.context == TASK_READY && !process->tcb.rt_prio) {
+		if ((process->tcb.priority & 0xff) <= (tselect->tcb.priority & 0xff)) {
+			if (process->tcb.state == TASK_READY && !process->tcb.rt_prio) {
 				select = node;
 				tselect = select->data;
 			}
@@ -87,10 +87,10 @@ uint16_t process_schedule(void)
 	};
 	
 	tselect = select->data;
-	if (tselect->state != TASK_READY || tselect->rt_prio)
+	if (tselect->tcb.state != TASK_READY || tselect->tcb.rt_prio)
 		krnl_panic(ERR_NO_TASKS);
 	
-	priority = tselect->priority;
+	priority = tselect->tcb.priority;
 	node = partition->processes->head;
 	while ((node = list_next(node))) {
 		if (!node->next) break;
@@ -99,11 +99,9 @@ uint16_t process_schedule(void)
 			process->tcb.priority -= (priority & 0xff);
 	};
 
-#ifndef MULTICORE
 	partition->process_current = select;
-#endif
-	tselect->priority |= (tselect->priority >> 8) & 0xff;
-	tselect->state = TASK_RUNNING;
+	tselect->tcb.priority |= (tselect->tcb.priority >> 8) & 0xff;
+	tselect->tcb.state = TASK_RUNNING;
 
-	return tselect->id;
+	return tselect->tcb.id;
 }
