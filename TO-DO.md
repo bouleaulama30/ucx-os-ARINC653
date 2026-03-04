@@ -10,11 +10,7 @@
     * faire de nouveau un test complet de la fonction pour savoir si c est fonctionnel apres avoir implementer la logique des processes
 
 
-* faire management process
-
-
-    * faire en sorte que finalement on appelle dispatch pour les processes sans repasser par le while(1) de la partition trampoline qui est enfaite un dispatch deguise (voir si c est pertinent)
-                
+* faire management process                
     * completer les "a changer" dans la fonction create_process et ucx_process_spawn
         * garder coherence entre avec le nom des etats et des priorites dans ucx_process_spawn pour fit avec la norme
         * dans activate process scheduler a changer mais temporairement le premier process de la liste est mis en current par le main process

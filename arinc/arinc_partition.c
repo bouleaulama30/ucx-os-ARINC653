@@ -136,6 +136,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->entry_point = entry_point;
     new_pcb->is_system_partition = is_system_partition;
     new_pcb->nbr_processes = 0;
+    new_pcb->id_next = 0;
     new_pcb->next_stack_addr = memory_requirements->memory[DATA].base + PARTIION_OS_AND_MAIN_PROCESS_STACK_SIZE;
     new_pcb->processes = list_create();
 

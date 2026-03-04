@@ -85,6 +85,7 @@ struct pcb_s {
    SYSTEM_ADDRESS_TYPE entry_point;
    BOOLEAN_TYPE is_system_partition;
    APEX_UNSIGNED nbr_processes;
+   APEX_UNSIGNED id_next;
 	jmp_buf partition_context;		/* jmp_buf is architecture specific */
    struct list_s *processes;
    struct node_s *process_current;

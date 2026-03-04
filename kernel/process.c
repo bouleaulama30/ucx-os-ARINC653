@@ -19,12 +19,7 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 	new_tcb->rt_prio = 0;
 	new_tcb->delay = 0;
 	new_tcb->stack_sz = stack_size;
-#ifndef MULTICORE
-    // a changer
-	new_tcb->id = kcb->id_next++;
-#else
-	new_tcb->id = kcb[_cpu_id()]->id_next++;
-#endif
+	new_tcb->id = current_partition->id_next++;
 	new_tcb->state = TASK_STOPPED;
 	new_tcb->priority = TASK_NORMAL_PRIO;
 	new_tcb->stack = current_partition->next_stack_addr;
@@ -36,10 +31,6 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
     current_partition->next_stack_addr = (uint8_t *) addr;
 		
 	CRITICAL_LEAVE();
-
-	// memset(new_tcb->stack, 0x69, stack_size);
-	// memset(new_tcb->stack, 0x33, 4);
-	// memset((new_tcb->stack) + stack_size - 4, 0x33, 4);
 	
 	_context_init(&new_tcb->context, (size_t)new_tcb->stack,
 		stack_size, (size_t)task);
