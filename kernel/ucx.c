@@ -334,7 +334,7 @@ void yield(void)
 	
 #ifndef MULTICORE
 	if (kcb->preemptive == 'y') {
-		s = kcb->ticks;
+		// s = kcb->ticks;
 		_cpu_idle();
 		// while (s == kcb->ticks);
 
@@ -367,7 +367,7 @@ void yield(void)
 	CRITICAL_LEAVE();
 #else
 	if (kcb[_cpu_id()]->preemptive == 'y') {
-		s = kcb[_cpu_id()]->ticks;
+		// s = kcb[_cpu_id()]->ticks;
 		_cpu_idle();
 		// while (s == kcb[_cpu_id()]->ticks);
 		partition = kcb[_cpu_id()]->partition_current->data;
@@ -377,7 +377,6 @@ void yield(void)
 			struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
 			longjmp(partition->partition_context, 1);
 		}
-		
 		return;
 	}
 	

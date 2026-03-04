@@ -294,6 +294,22 @@ void _interrupt_tick_partition(void)
 		asm volatile ("csrs mstatus, 8");
 }
 
+void _interrupt_tick_process(void)
+{
+#ifndef MULTICORE
+	if (kcb->partition_current == NULL) return;
+	struct pcb_s *partition = kcb->partition_current->data;
+#else
+	if (kcb[_cpu_id()]->partition_current == NULL) return;
+	struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
+#endif
+	_read_us();
+	/* partition is run for the first time */
+	struct process_s *process = partition->process_current->data;
+	if ((uint32_t)process->tcb.task == process->tcb.context[CONTEXT_RA])
+		asm volatile ("csrs mstatus, 8");
+}
+
 
 void _interrupt_tick(void)
 {
