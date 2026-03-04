@@ -1,16 +1,38 @@
 #include <ucx.h>
 
+static struct node_s *find_highest_priority_process(struct list_s *processes){
+	struct node_s *process_node;
+    struct node_s *highest_priority_process_node;
+	struct process_s *process;
+    struct process_s *highest_priority_process;
+
+	process_node = processes->head->next;
+    process = process_node->data;
+    highest_priority_process_node = process_node;
+    highest_priority_process = highest_priority_process_node->data;
+
+	while (process_node->next) {
+		if (process->processus_status->CURRENT_PRIORITY < highest_priority_process->processus_status->CURRENT_PRIORITY ){
+			highest_priority_process_node = process_node;
+            highest_priority_process = highest_priority_process_node->data;
+        }	
+
+		process_node = process_node->next;
+        process = process_node->data;
+	}
+	return highest_priority_process_node;
+}
+
 void activate_process_scheduling(){
 #ifndef MULTICORE
     struct pcb_s *partition = kcb->partition_current->data;
 #else
     struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
 #endif
-     // a changer mais temporairement le premier process de la liste est mis en current par le main process
-    struct node_s* first_process_node = partition->processes->head->next;  
-    partition->process_current = first_process_node;
+    struct node_s* first_process_node = find_highest_priority_process(partition->processes);  
     struct process_s* first_process = first_process_node->data;
-    struct list_s *processes = partition->processes;
+
+    partition->process_current = first_process_node;
     _dispatch_init(first_process->tcb.context);
 }
 

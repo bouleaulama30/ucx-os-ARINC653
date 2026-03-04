@@ -11,9 +11,7 @@
 
 
 * faire management process                
-    * completer les "a changer" dans la fonction create_process et ucx_process_spawn
-        * dans activate process scheduler a changer mais temporairement le premier process de la liste est mis en current par le main process
-
+    * relire la norme sur la partie process
     
     * coder les fonctions de l'APEX sur les processes
         * voir si plus simple de faire get_process_id avec id ref ou autre
@@ -35,6 +33,7 @@
     * voir si on garde le dispatch dans la logique du scheduling des partitions car c est archi dependant
     * voir si c'est bien de mettre le process_scheduler dans le fichier process.c
     voir si la structure tcb dans celle de process_s est toujours utile (etat dont on ne se sert plus comme tcb.state)
+    * revoir l ordre de declaration des fonctions dans les fichier
     
 * faire rouler sur la carte en materielle une fois que c'est bon pour les processus
 
