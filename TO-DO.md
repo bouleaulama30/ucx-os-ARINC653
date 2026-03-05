@@ -43,7 +43,8 @@
 
 ## HM
 
-* implem is_executing_error_handler
+* implem is_executing_error_handler pour get_my_id et get_my_index
+* implem is_main_process (trouver une condition necessaire et suffisante genre il n y a pas de current process) pour get_my_id et get_my_index
 
 ## Choses dependante de l archi
 * protection memoire avec pmp_activate et mprv_activate (lie a riscv32)

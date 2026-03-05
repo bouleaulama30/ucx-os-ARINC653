@@ -313,4 +313,21 @@ void GET_MY_PROCESSOR_CORE_ID (
 
 void GET_MY_INDEX (
        /*out*/ PROCESS_INDEX_TYPE       *PROCESS_INDEX,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+#ifndef MULTICORE
+    struct pcb_s *partition = kcb->partition_current->data;
+#else
+    struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
+#endif
+    struct process_s *process = partition->process_current->data;
+
+    // 2. Vérifier si le code actuel est le Error Handler (tâche spéciale) ou si le main process la appele
+    if (is_executing_error_handler()) {
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+    
+    *PROCESS_INDEX = process->process_index;
+    *RETURN_CODE = NO_ERROR;
+    
+}
