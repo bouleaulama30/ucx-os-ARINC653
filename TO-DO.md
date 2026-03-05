@@ -12,10 +12,9 @@
 
 * faire management process                    
     * coder les fonctions de l'APEX sur les processes
-        * pour get_process_status cf si le process possede le lock preemption alors renvoyer la priorite max pour la current_priority
-        * voir si le nouveau scheduler fonctionne apres avoir implem set_priority
+        * get_process_status cf si le process possede le lock preemption alors renvoyer la priorite max pour la current_priority
+        * set_priority voir dans le cas ou le process own a mutex et ne pas rescheduler s'il n a pas de preemption lock
         * utiliser et adapter les syscall deja present comme ucx_task_id
-        * dans set pririty toujours penser a update les 8 bit de gauche de process->tcb.priority a la nouvelle current prio
     * tester les fonctions de l'APEX sur les processes
 
 * refractor / formatage code:
@@ -35,6 +34,7 @@
     * revoir l ordre de declaration des fonctions dans les fichier
     * voir si find_processes_by_id et les autres fonctions on les met dans process.c ou on les laisse dans arinc_partition.c
     * ce morceau de code  pour avoir la partition courante est souvent present, voir pour faire une fonction (get_current_partition) 
+    * le morceau de code pour save la tache courante et revenir a la boucle du scheduler est souvent presente, donc faire une fonction
     * mettre/enlever des commentaires
     
 * faire une batterie de test unitaire que l'on peut test a chaque fois et qui couvre au maximum les partition et les processes

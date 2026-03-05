@@ -69,8 +69,9 @@ void process_test0(void)
 	while (1) {
 		if(cnt % 2 == 0){
 			// SET_PARTITION_MODE(IDLE, &return_code);
-			SET_PRIORITY(0, 2, &return_code);
+			printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 			SET_PRIORITY(1, 3, &return_code);
+			// SET_PRIORITY(1, 3, &return_code);
 
 		}
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
@@ -90,8 +91,9 @@ void process_test1(void)
     GET_MY_ID(&process_id, &return_code);
 	while (1) {
 		if(cnt % 2 == 0){
-			SET_PRIORITY(1, 2, &return_code);
-			SET_PRIORITY(0, 3, &return_code);
+			printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
+			SET_PRIORITY(1, 1, &return_code);
+			// SET_PRIORITY(0, 3, &return_code);
 		}
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 		// print_time();

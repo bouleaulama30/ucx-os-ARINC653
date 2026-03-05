@@ -132,9 +132,36 @@ void SET_PRIORITY (
         return;
     }
 
+    if (PRIORITY < MIN_PRIORITY_VALUE || PRIORITY > MAX_PRIORITY_VALUE)
+    {
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
     struct process_s *process = process_node->data;
+    if (process->processus_status->PROCESS_STATE == DORMANT){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+
+//     normal
+// if (the specified process owns a mutex) thenARINC SPECIFICATION 653 PART 1 – PAGE 61
+// 3.0 SERVICE REQUIREMENTS
+// -- current priority of the process cannot be modified without
+// -- impacting mutex properties
+// set the retained priority of the specified process to PRIORITY;
+// else
+
     process->processus_status->CURRENT_PRIORITY = PRIORITY;
     *RETURN_CODE = NO_ERROR;
+
+
+    // sauvegarde du context du process actuel et on reschedule
+    struct process_s *current_process = partition->process_current->data;
+    if (setjmp(current_process->tcb.context) == 0) {
+        /* Retourner au contexte du kernel (partition_OS) */
+        longjmp(partition->partition_context, 1);
+    }
 }
 
 void SUSPEND_SELF (
