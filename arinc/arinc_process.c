@@ -18,6 +18,24 @@ static struct node_s *is_process_name_existed(struct pcb_s *partition, PROCESS_N
     return 0;
 }
 
+static struct node_s *find_processes_by_id(struct node_s *node, void *arg){
+    struct process_s *process = node->data;
+    PROCESS_ID_TYPE id = (PROCESS_ID_TYPE) arg;
+    
+    if(id == process->process_id){
+        return node;
+    }
+    return 0;
+}
+
+static struct node_s *is_process_id_existed(struct pcb_s *partition, PROCESS_ID_TYPE process_id){
+    struct node_s *same_process_name_node = list_foreach(partition->processes, find_processes_by_id, (void *)process_id);
+    if(same_process_name_node){
+        return same_process_name_node;
+    }
+    return 0;
+}
+
 void CREATE_PROCESS (
        /*in */ PROCESS_ATTRIBUTE_TYPE   *ATTRIBUTES,
        /*out*/ PROCESS_ID_TYPE          *PROCESS_ID,
@@ -165,7 +183,6 @@ void GET_MY_ID (
 }
 
 
-
 void GET_PROCESS_ID (
        /*in */ PROCESS_NAME_TYPE        PROCESS_NAME,
        /*out*/ PROCESS_ID_TYPE          *PROCESS_ID,
@@ -189,7 +206,22 @@ void GET_PROCESS_ID (
 void GET_PROCESS_STATUS (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*out*/ PROCESS_STATUS_TYPE      *PROCESS_STATUS,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+#ifndef MULTICORE
+    struct node_s *partition_node = kcb->partition_current;
+#else
+    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
+#endif
+    struct pcb_s *partition = partition_node->data;
+    struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
+    if(!process_node){
+        *RETURN_CODE = INVALID_CONFIG;
+        return;
+    }
+    struct process_s *process = process_node->data;
+    *PROCESS_STATUS = *process->processus_status;
+    *RETURN_CODE = NO_ERROR;
+}
 
 void INITIALIZE_PROCESS_CORE_AFFINITY (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,

@@ -56,8 +56,16 @@ void process_test0(void)
     RETURN_CODE_TYPE return_code;
 	APEX_INTEGER paritition_id;
     APEX_INTEGER process_id;
+	
+    // APEX_INTEGER other_process_id;
+	PROCESS_STATUS_TYPE other_process_status;
 	GET_MY_PARTITION_ID(&paritition_id, &return_code);
     GET_MY_ID(&process_id, &return_code);
+	GET_PROCESS_STATUS(1, &other_process_status, &return_code);
+	
+	if(return_code == NO_ERROR){
+		printf("Le nom du process: %s, with priority %d\n", other_process_status.ATTRIBUTES.NAME, other_process_status.CURRENT_PRIORITY);
+	}
 	while (1) {
 		if(cnt == 100002){
 			// SET_PARTITION_MODE(IDLE, &return_code);
