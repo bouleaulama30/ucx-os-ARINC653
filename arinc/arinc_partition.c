@@ -12,7 +12,7 @@ static struct node_s *find_highest_priority_process(struct list_s *processes){
     highest_priority_process = highest_priority_process_node->data;
 
 	while (process_node->next) {
-		if (process->processus_status->CURRENT_PRIORITY < highest_priority_process->processus_status->CURRENT_PRIORITY ){
+		if (process->processus_status->CURRENT_PRIORITY > highest_priority_process->processus_status->CURRENT_PRIORITY ){
 			highest_priority_process_node = process_node;
             highest_priority_process = highest_priority_process_node->data;
         }	

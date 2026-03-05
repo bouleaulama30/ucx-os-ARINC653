@@ -119,7 +119,23 @@ void CREATE_PROCESS (
 void SET_PRIORITY (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*in */ PRIORITY_TYPE            PRIORITY,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+#ifndef MULTICORE
+    struct node_s *partition_node = kcb->partition_current;
+#else
+    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
+#endif
+    struct pcb_s *partition = partition_node->data;
+    struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
+    if(!process_node){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    struct process_s *process = process_node->data;
+    process->processus_status->CURRENT_PRIORITY = PRIORITY;
+    *RETURN_CODE = NO_ERROR;
+}
 
 void SUSPEND_SELF (
        /*in */ SYSTEM_TIME_TYPE         TIME_OUT,

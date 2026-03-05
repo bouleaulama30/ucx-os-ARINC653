@@ -67,8 +67,11 @@ void process_test0(void)
 		printf("Le nom du process: %s, with priority %d\n", other_process_status.ATTRIBUTES.NAME, other_process_status.CURRENT_PRIORITY);
 	}
 	while (1) {
-		if(cnt == 100002){
+		if(cnt % 2 == 0){
 			// SET_PARTITION_MODE(IDLE, &return_code);
+			SET_PRIORITY(0, 2, &return_code);
+			SET_PRIORITY(1, 3, &return_code);
+
 		}
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 		// print_time();
@@ -86,8 +89,9 @@ void process_test1(void)
 	GET_MY_PARTITION_ID(&paritition_id, &return_code);
     GET_MY_ID(&process_id, &return_code);
 	while (1) {
-		if(cnt == 200002){
-			// SET_PARTITION_MODE(IDLE, &return_code);
+		if(cnt % 2 == 0){
+			SET_PRIORITY(1, 2, &return_code);
+			SET_PRIORITY(0, 3, &return_code);
 		}
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 		// print_time();
@@ -105,8 +109,11 @@ void process_test2(void)
 	GET_MY_PARTITION_ID(&paritition_id, &return_code);
     GET_MY_ID(&process_id, &return_code);
 	while (1) {
-		if(cnt == 300002){
+		if(cnt % 2 == 0){
 			// SET_PARTITION_MODE(IDLE, &return_code);
+			SET_PRIORITY(0, 2, &return_code);
+			SET_PRIORITY(1, 3, &return_code);
+
 		}
 		printf("[prrocess %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 		// print_time();
@@ -124,8 +131,10 @@ void process_test3(void)
 	GET_MY_PARTITION_ID(&paritition_id, &return_code);
     GET_MY_ID(&process_id, &return_code);
 	while (1) {
-		if(cnt == 400002){
+		if(cnt % 2 == 0){
 			// SET_PARTITION_MODE(IDLE, &return_code);
+			SET_PRIORITY(1, 2, &return_code);
+			SET_PRIORITY(0, 3, &return_code);
 		}
 		printf("[prrocess %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 		// print_time();
