@@ -17,6 +17,9 @@
 
 #define  MAX_LOCK_LEVEL           16
 
+//on est en sigle core donc id = 0
+#define DEFAULT_PROCESS_CORE_AFFINITY 0
+
 typedef  NAME_TYPE            PROCESS_NAME_TYPE;
 
 typedef  APEX_INTEGER       PROCESS_ID_TYPE;

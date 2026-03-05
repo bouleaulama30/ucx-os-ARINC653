@@ -129,7 +129,9 @@ typedef  APEX_LONG_INTEGER   SYSTEM_TIME_TYPE;
 #define  INFINITE_TIME_VALUE    -1
 
 typedef  APEX_INTEGER           PROCESSOR_CORE_ID_TYPE; 
-#define  CORE_AFFINITY_NO_PREFERENCE       <implementation dependent> 
+//on est en sigle core donc id = 0
+// #define  CORE_AFFINITY_NO_PREFERENCE       <implementation dependent> 
+#define  CORE_AFFINITY_NO_PREFERENCE       0 
 
 typedef 
     enum {

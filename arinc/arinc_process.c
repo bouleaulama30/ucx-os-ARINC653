@@ -107,7 +107,7 @@ void CREATE_PROCESS (
         int32_t id = ucx_process_spawn(ATTRIBUTES->ENTRY_POINT, ATTRIBUTES->STACK_SIZE, new_process, partition);
         new_process->process_id = id;
         new_process->process_index = partition->nbr_processes;
-        new_process->processor_core_affinity = 0;
+        new_process->processor_core_affinity = DEFAULT_PROCESS_CORE_AFFINITY;
        
         list_pushback(partition->processes, new_process);
         
@@ -269,11 +269,47 @@ void GET_PROCESS_STATUS (
 void INITIALIZE_PROCESS_CORE_AFFINITY (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*in */ PROCESSOR_CORE_ID_TYPE   PROCESSOR_CORE_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+#ifndef MULTICORE
+    struct node_s *partition_node = kcb->partition_current;
+#else
+    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
+#endif
+    struct pcb_s *partition = partition_node->data;
+    struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
+    if(!process_node){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    // when (PROCESSOR_CORE_ID does not identify a processor core assigned to this partition) =>
+    if (PROCESSOR_CORE_ID != DEFAULT_PROCESS_CORE_AFFINITY){
+        *RETURN_CODE = INVALID_CONFIG;
+        return;
+    }
+
+    if (partition->status->OPERATING_MODE == NORMAL){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+    struct process_s *process = process_node->data;
+    process->processor_core_affinity = PROCESSOR_CORE_ID;
+    *RETURN_CODE = NO_ERROR;
+}
 
 void GET_MY_PROCESSOR_CORE_ID (
        /*out*/ PROCESSOR_CORE_ID_TYPE   *PROCESSOR_CORE_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+#ifndef MULTICORE
+    struct pcb_s *partition = kcb->partition_current->data;
+#else
+    struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
+#endif
+    struct process_s *process = partition->process_current->data;
+    
+    *PROCESSOR_CORE_ID = process->processor_core_affinity;
+    *RETURN_CODE = NO_ERROR;
+}
 
 void GET_MY_INDEX (
        /*out*/ PROCESS_INDEX_TYPE       *PROCESS_INDEX,
