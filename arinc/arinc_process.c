@@ -235,7 +235,65 @@ void STOP (
 
 void START (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+#ifndef MULTICORE
+    struct node_s *partition_node = kcb->partition_current;
+#else
+    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
+#endif
+    struct pcb_s *partition = partition_node->data;
+    struct process_s *current_process = partition->process_current->data;
+    struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
+    struct process_s *process = process_node->data;
+    
+    if(!process_node){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if (process->processus_status->PROCESS_STATE != DORMANT)
+    {
+        *RETURN_CODE = NO_ACTION;
+        return;
+    }
+//     when (DEADLINE_TIME calculation is out of range) =>
+// -- e.g., calculation causes overflow of underlying clock
+// RETURN_CODE := INVALID_CONFIG;
+
+    // le process est aperiodic
+    if (process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE){
+        process->processus_status->CURRENT_PRIORITY = process->processus_status->ATTRIBUTES.BASE_PRIORITY;
+        _context_init(&process->tcb.context, (size_t)process->tcb.stack,process->tcb.stack_sz, (size_t)process->tcb.task);
+
+        if(partition->status->OPERATING_MODE == NORMAL){
+            process->processus_status->PROCESS_STATE = READY;
+            //calculer la deadline
+            //check for rescheduling
+        }
+        else{
+            process->processus_status->PROCESS_STATE = WAITING;
+        }
+        *RETURN_CODE = NO_ACTION;
+
+    }
+    // le process est periodic
+    else{
+        process->processus_status->CURRENT_PRIORITY = process->processus_status->ATTRIBUTES.BASE_PRIORITY;
+        _context_init(&process->tcb.context, (size_t)process->tcb.stack,process->tcb.stack_sz, (size_t)process->tcb.task);
+        if(partition->status->OPERATING_MODE == NORMAL){
+            process->processus_status->PROCESS_STATE = WAITING;
+            //calculer la deadline
+            //gerer les trucs avec releases point
+        }
+        else{
+            process->processus_status->PROCESS_STATE = WAITING;
+        }
+        *RETURN_CODE = NO_ACTION;
+    }
+
+
+
+}
 
 void DELAYED_START (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,

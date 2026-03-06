@@ -6,12 +6,16 @@
     * shut down the partition
         * changer ucx_yield pour fit avec les process
     * inhibit process scheduling and switch back to initialization mode;
-    * faire les actions quand elle passe en normal (set to READY processes (le faire avec l apex start), activate process scheduling etc..)
+    * faire les actions quand elle passe en normal (set to READY processes (le faire avec l apex start), faire les autres cas, activate process scheduling etc..)
     * faire de nouveau un test complet de la fonction pour savoir si c est fonctionnel apres avoir implementer la logique des processes
 
 
 * faire management process                    
     * coder les fonctions de l'APEX sur les processes
+        * start
+            * calculer quand la deadline fait un overflow et renvoyer une erreur si c est le cas
+            * calculer la deadline pour le demarrage des processes
+            * gerer pour les process periodic les releases point
         * stop
             * gerer les mutex
             * remove process de la waiting queue s il etait dans l etat waiting

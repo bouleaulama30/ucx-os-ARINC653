@@ -75,7 +75,6 @@ void process_test0(void)
 
 		}
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-		printf("RETURN CODE %d\n", return_code);
 		ucx_task_yield();
 	}
 }

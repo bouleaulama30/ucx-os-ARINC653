@@ -11,7 +11,10 @@ void p1_main_process(struct pcb_s *partition){
     CREATE_PROCESS(&PROCESS_1_CONFIG, &process_id_1, &return_code1);
 
     printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
-    printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);        
+    printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);      
+
+    START(process_id_0, &return_code0);  
+    START(process_id_1, &return_code1);  
 
     SET_PARTITION_MODE(NORMAL, &return_code0);
 }
@@ -28,6 +31,10 @@ void p2_main_process(struct pcb_s *partition){
 
     printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
     printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);
+
+    START(process_id_0, &return_code0);  
+    START(process_id_1, &return_code1);  
+
 
     SET_PARTITION_MODE(NORMAL, &return_code0);
 }
