@@ -186,7 +186,20 @@ void RESUME (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
 
-void STOP_SELF (void);
+void STOP_SELF (void){
+#ifndef MULTICORE
+    struct node_s *partition_node = kcb->partition_current;
+#else
+    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
+#endif
+    struct pcb_s *partition = partition_node->data;
+    struct node_s *process_node = partition->process_current;
+    struct process_s *current_process = process_node->data;
+
+    current_process->processus_status->PROCESS_STATE = DORMANT;
+    // on reschedule        
+    longjmp(partition->partition_context, 1);
+}
 
 void STOP (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,

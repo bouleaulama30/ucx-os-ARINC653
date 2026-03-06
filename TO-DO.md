@@ -12,9 +12,12 @@
 
 * faire management process                    
     * coder les fonctions de l'APEX sur les processes
+        * stop self
+            * cancel le timer affilier a la tache courante pour eviter une faute plus tard
         * redistribuer les points non coder (comme preemption lock mutex) vers les autres to do
             * get_process_status cf si le process possede le lock preemption alors renvoyer la priorite max pour la current_priority
             * set_priority voir dans le cas ou le process own a mutex et ne pas rescheduler s'il n a pas de preemption lock
+            * stop self, liberer les ressources comme le mutex ou autre
 
     * tester les fonctions de l'APEX sur les processes
 
