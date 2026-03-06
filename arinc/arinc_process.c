@@ -203,7 +203,35 @@ void STOP_SELF (void){
 
 void STOP (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+#ifndef MULTICORE
+    struct node_s *partition_node = kcb->partition_current;
+#else
+    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
+#endif
+    struct pcb_s *partition = partition_node->data;
+    struct process_s *current_process = partition->process_current->data;
+    struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
+    struct process_s *process = process_node->data;
+    if(!process_node || process->process_id == current_process->process_id){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if (process->processus_status->PROCESS_STATE == DORMANT)
+    {
+        *RETURN_CODE = NO_ACTION;
+        return;
+    }
+
+    process->processus_status->PROCESS_STATE = DORMANT;
+    *RETURN_CODE = NO_ERROR;
+    
+    if (setjmp(current_process->tcb.context) == 0) {
+        /* Retourner au contexte du kernel (partition_OS) */
+        longjmp(partition->partition_context, 1);
+    }
+}
 
 void START (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,

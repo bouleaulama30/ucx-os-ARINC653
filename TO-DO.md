@@ -12,6 +12,11 @@
 
 * faire management process                    
     * coder les fonctions de l'APEX sur les processes
+        * stop
+            * gerer les mutex
+            * remove process de la waiting queue s il etait dans l etat waiting
+            * stop any time counters associated with the specified process;
+            * prevent the specified process from causing a deadline overrun fault;
         * stop self
             * cancel le timer affilier a la tache courante pour eviter une faute plus tard
         * redistribuer les points non coder (comme preemption lock mutex) vers les autres to do

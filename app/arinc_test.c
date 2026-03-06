@@ -75,7 +75,7 @@ void process_test0(void)
 
 		}
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-		// print_time();
+		printf("RETURN CODE %d\n", return_code);
 		ucx_task_yield();
 	}
 }
@@ -96,7 +96,6 @@ void process_test1(void)
 			// SET_PRIORITY(0, 3, &return_code);
 		}
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-		// print_time();
 		ucx_task_yield();
 	}
 }
