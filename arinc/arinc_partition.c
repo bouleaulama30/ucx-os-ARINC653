@@ -12,14 +12,16 @@ static struct node_s *find_highest_priority_process(struct list_s *processes){
     highest_priority_process = highest_priority_process_node->data;
 
 	while (process_node->next) {
-		if (process->processus_status->CURRENT_PRIORITY > highest_priority_process->processus_status->CURRENT_PRIORITY ){
-			highest_priority_process_node = process_node;
-            highest_priority_process = highest_priority_process_node->data;
-        }	
+        if(process->processus_status->PROCESS_STATE == READY){
+            if (process->processus_status->CURRENT_PRIORITY > highest_priority_process->processus_status->CURRENT_PRIORITY ){
+                highest_priority_process_node = process_node;
+                highest_priority_process = highest_priority_process_node->data;
+            }	
 
-		process_node = process_node->next;
+        }
+        process_node = process_node->next;
         process = process_node->data;
-	}
+    }
 	return highest_priority_process_node;
 }
 
@@ -273,7 +275,7 @@ static struct node_s *start_process(struct node_s *node, void *arg)
 {
 	struct process_s *process = node->data;
 	
-	if (process->processus_status->PROCESS_STATE == DORMANT)
+	if (process->processus_status->PROCESS_STATE == WAITING && process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE)
         process->processus_status->PROCESS_STATE = READY;
 	return 0;
 }
