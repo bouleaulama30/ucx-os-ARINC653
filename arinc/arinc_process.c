@@ -155,12 +155,22 @@ void SET_PRIORITY (
     process->processus_status->CURRENT_PRIORITY = PRIORITY;
     *RETURN_CODE = NO_ERROR;
 
-
     // sauvegarde du context du process actuel et on reschedule
-    struct process_s *current_process = partition->process_current->data;
-    if (setjmp(current_process->tcb.context) == 0) {
-        /* Retourner au contexte du kernel (partition_OS) */
-        longjmp(partition->partition_context, 1);
+    if (process->processus_status->PROCESS_STATE == READY || process->processus_status->PROCESS_STATE == RUNNING){
+        // respect the shortest elapsed time (i.e., other processes at the same priority eligible for the same processor core(s) will be selected to run before this process)
+        list_remove(partition->processes, process_node);
+        struct node_s *new_process_node = list_pushback(partition->processes, process);
+
+        // si le processus qu'on change est le processus courant alors il faut update le nouveau node au processus courant
+        struct process_s *new_process = new_process_node->data;
+        if(new_process->processus_status->PROCESS_STATE == RUNNING)
+            partition->process_current = new_process_node;
+        
+        struct process_s *current_process = partition->process_current->data;
+        if (setjmp(current_process->tcb.context) == 0) {
+            /* Retourner au contexte du kernel (partition_OS) */
+            longjmp(partition->partition_context, 1);
+        }
     }
 }
 
@@ -191,10 +201,12 @@ void DELAYED_START (
        /*in */ SYSTEM_TIME_TYPE         DELAY_TIME,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
 
+// to do pendant la partie intra communication
 void LOCK_PREEMPTION (
        /*out*/ LOCK_LEVEL_TYPE          *LOCK_LEVEL,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
 
+// to do pendant la partie intra communication
 void UNLOCK_PREEMPTION (
        /*out*/ LOCK_LEVEL_TYPE          *LOCK_LEVEL,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );

@@ -12,9 +12,10 @@
 
 * faire management process                    
     * coder les fonctions de l'APEX sur les processes
-        * get_process_status cf si le process possede le lock preemption alors renvoyer la priorite max pour la current_priority
-        * set_priority voir dans le cas ou le process own a mutex et ne pas rescheduler s'il n a pas de preemption lock
-        * utiliser et adapter les syscall deja present comme ucx_task_id
+        * redistribuer les points non coder (comme preemption lock mutex) vers les autres to do
+            * get_process_status cf si le process possede le lock preemption alors renvoyer la priorite max pour la current_priority
+            * set_priority voir dans le cas ou le process own a mutex et ne pas rescheduler s'il n a pas de preemption lock
+
     * tester les fonctions de l'APEX sur les processes
 
 * refractor / formatage code:
@@ -40,6 +41,9 @@
 * faire une batterie de test unitaire que l'on peut test a chaque fois et qui couvre au maximum les partition et les processes
 
 * faire rouler sur la carte en materielle une fois que c'est bon pour les processus
+
+## intra partition communication
+* coder tout ce qui est relatif au lock preemption mutex pour les process
 
 ## HM
 
