@@ -97,7 +97,7 @@ void CREATE_PROCESS (
         status = malloc(sizeof(PROCESS_STATUS_TYPE));
         
         // a changer
-        status->DEADLINE_TIME = 0;
+        status->DEADLINE_TIME = ATTRIBUTES->TIME_CAPACITY;
         status->CURRENT_PRIORITY = ATTRIBUTES->BASE_PRIORITY;
         status->PROCESS_STATE = DORMANT;
         status->ATTRIBUTES = *ATTRIBUTES;
@@ -256,9 +256,15 @@ void START (
         *RETURN_CODE = NO_ACTION;
         return;
     }
-//     when (DEADLINE_TIME calculation is out of range) =>
-// -- e.g., calculation causes overflow of underlying clock
-// RETURN_CODE := INVALID_CONFIG;
+
+    // when (DEADLINE_TIME calculation is out of range) => INVALID_CONFIG
+    SYSTEM_TIME_TYPE time_capacity = process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+    uint64_t uptime = ucx_uptime();
+    uint64_t max_system_time = 0x7fffffffffffffffULL;
+    if (time_capacity < 0 || uptime > (max_system_time - (uint64_t)time_capacity)){
+        *RETURN_CODE = INVALID_CONFIG;
+        return;
+    }
 
     // le process est aperiodic
     if (process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE){
@@ -266,10 +272,16 @@ void START (
         _context_init(&process->tcb.context, (size_t)process->tcb.stack,process->tcb.stack_sz, (size_t)process->tcb.task);
 
         if(partition->status->OPERATING_MODE == NORMAL){
+
+
             process->processus_status->PROCESS_STATE = READY;
             //calculer la deadline et verifier l overflow
             process->processus_status->DEADLINE_TIME = ucx_uptime() + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
             //check for rescheduling
+            if (setjmp(current_process->tcb.context) == 0) {
+                /* Retourner au contexte du kernel (partition_OS) */
+                longjmp(partition->partition_context, 1);
+            }
         }
         else{
             process->processus_status->PROCESS_STATE = WAITING;

@@ -10,12 +10,13 @@
     * faire de nouveau un test complet de la fonction pour savoir si c est fonctionnel apres avoir implementer la logique des processes
 
 
-* faire management process                    
+* faire management process     
+    * ajouter un flag periodic processing start dans la pcb et predef dans le xml               
     * coder les fonctions de l'APEX sur les processes
         * start
-            * calculer quand la deadline fait un overflow et renvoyer une erreur si c est le cas
-            * calculer la deadline pour le demarrage des processes
-            * gerer pour les process periodic les releases point
+            * gerer pour les process periodic les releases point (cf section scheduling des process de la norme)
+            * calculer la deadline des processes periodiques
+            * tester la fonction
         * stop
             * gerer les mutex
             * remove process de la waiting queue s il etait dans l etat waiting
