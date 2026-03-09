@@ -267,7 +267,8 @@ void START (
 
         if(partition->status->OPERATING_MODE == NORMAL){
             process->processus_status->PROCESS_STATE = READY;
-            //calculer la deadline
+            //calculer la deadline et verifier l overflow
+            process->processus_status->DEADLINE_TIME = ucx_uptime() + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
             //check for rescheduling
         }
         else{
