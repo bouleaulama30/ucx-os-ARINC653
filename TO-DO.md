@@ -15,7 +15,8 @@
         * calculer le next release point en ajoutant la period du process
     * coder les fonctions de l'APEX sur les processes
         * start
-            * tester la fonction
+            * tester la fonction pour les processes periodic
+                * faire dans le set_partition_mode avant
         * stop
             * gerer les mutex
             * remove process de la waiting queue s il etait dans l etat waiting

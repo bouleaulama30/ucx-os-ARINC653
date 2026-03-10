@@ -74,7 +74,13 @@ void process_test0(void)
 			// SET_PRIORITY(1, 3, &return_code);
 
 		}
+		
+		if(cnt == 100001)
+			STOP(1, &return_code);
+		if(cnt == 100005)
+			START(1, &return_code);
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
+
 		ucx_task_yield();
 	}
 }
