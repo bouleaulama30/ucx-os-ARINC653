@@ -11,11 +11,10 @@
 
 
 * faire management process     
-    * ajouter un flag periodic processing start dans la pcb et predef dans le xml               
+    * dans le pos gerer le reveil des processes periodic si le release point est atteint (current-time > process next release point)
+        * calculer le next release point en ajoutant la period du process
     * coder les fonctions de l'APEX sur les processes
         * start
-            * gerer pour les process periodic les releases point (cf section scheduling des process de la norme)
-            * calculer la deadline des processes periodiques
             * tester la fonction
         * stop
             * gerer les mutex
@@ -50,6 +49,7 @@
     * ce morceau de code  pour avoir la partition courante est souvent present, voir pour faire une fonction (get_current_partition) 
     * le morceau de code pour save la tache courante et revenir a la boucle du scheduler est souvent presente, donc faire une fonction
     * mettre/enlever des commentaires
+    * replacer les fonctions utilent pour faire l apex comme find_first_release_point a des endroits plus coherent dans le code
     
 * faire une batterie de test unitaire que l'on peut test a chaque fois et qui couvre au maximum les partition et les processes
 
@@ -77,3 +77,5 @@
 * qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -nographic -s -S
 * gdb ./build/target/image.elf
 * target remote :1234
+
+* penser a retirer le -g (mode debug) des cflags dans le make 

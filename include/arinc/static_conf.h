@@ -87,12 +87,14 @@ static const window_partition_type DEFAULT_WINDOWS[] = {
         .id = 1,
         .start_tick = MS_TO_TICKS(0),
         .duration_tick = MS_TO_TICKS(50),
+        .is_periodic_processes_start = (BOOLEAN_TYPE)true,
     },
     {
-            .name = "P2",
-            .id = 2,
-            .start_tick = MS_TO_TICKS(50),
-            .duration_tick = MS_TO_TICKS(30),
+        .name = "P2",
+        .id = 2,
+        .start_tick = MS_TO_TICKS(50),
+        .duration_tick = MS_TO_TICKS(30),
+        .is_periodic_processes_start = (BOOLEAN_TYPE)true,
         },
     // {
     //     .name = "DefaultPartition",

@@ -33,6 +33,7 @@ INC_DIRS += -I $(SRC_DIR)/include -I $(SRC_DIR)/include/lib \
 	-I $(SRC_DIR)/drivers/bus/include -I $(SRC_DIR)/drivers/device/include \
 	-I $(SRC_DIR)/net/include -I $(SRC_DIR)/arch/common
 CFLAGS += -D__VER__=\"$(VERSION)\" \
+-g \
 #-DCONFIG_POWER_ALLOC \
 #-DCONFIG_ALT_ALLOCATOR \
 #-DCONFIG_SCHED_SIMPLE

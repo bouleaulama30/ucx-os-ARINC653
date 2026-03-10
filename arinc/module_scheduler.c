@@ -31,6 +31,7 @@ void module_scheduler_init(const char* name, uint32_t major_frame_tick, const wi
     ms->nbr_windows = nbr_windows;
     ms->windows_idx = 0;
     ms->idle_current_partition = false;
+    ms->major_frame_count = 0;
 
     
     // on associe le module scheduler et le scheduler au kernel
@@ -119,8 +120,7 @@ int32_t partition_scheduler(void){
         krnl_panic(ERR_SCHED_CONFIG);
     }
 
-    static uint32_t frame_cnt = 0;
-    uint32_t position_in_frame = current_tick - frame_cnt*ms->major_frame_tick;
+    uint32_t position_in_frame = current_tick - ms->major_frame_count * ms->major_frame_tick;
     int32_t* windows_idx = &ms->windows_idx;
     uint32_t partition_duration_tick = ms->windows_partition[*windows_idx].duration_tick;
     uint32_t partition_start_tick = ms->windows_partition[*windows_idx].start_tick;
@@ -139,7 +139,7 @@ int32_t partition_scheduler(void){
         (*windows_idx) = 0;
         partition_id = ms->windows_partition[*windows_idx].id;
         // position_in_frame = current_tick % ms->major_frame_tick;
-        frame_cnt += 1;
+        ms->major_frame_count += 1;
         return activate_partition(partition_id);
     }
 

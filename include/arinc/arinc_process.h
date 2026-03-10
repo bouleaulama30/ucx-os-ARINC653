@@ -76,6 +76,7 @@ struct process_s
     PROCESS_ID_TYPE process_id;
     PROCESS_INDEX_TYPE process_index;
     PROCESSOR_CORE_ID_TYPE processor_core_affinity;
+    SYSTEM_TIME_TYPE release_point_time;
 };
 
 extern void CREATE_PROCESS (

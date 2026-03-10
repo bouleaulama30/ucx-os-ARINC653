@@ -108,6 +108,7 @@ void CREATE_PROCESS (
         new_process->process_id = id;
         new_process->process_index = partition->nbr_processes;
         new_process->processor_core_affinity = DEFAULT_PROCESS_CORE_AFFINITY;
+        new_process->release_point_time = 0; 
        
         list_pushback(partition->processes, new_process);
         
@@ -233,6 +234,36 @@ void STOP (
     }
 }
 
+SYSTEM_TIME_TYPE find_first_release_point(struct pcb_s *current_partition){
+#ifndef MULTICORE
+    struct mscb_s* ms = kcb->module_scheduler;
+#else
+    struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
+#endif
+    window_partition_type window_partition ;
+    SYSTEM_TIME_TYPE first_release_point;
+    int windows_idx = (int) ms->windows_idx;
+    int nbr_windows = (int) ms->nbr_windows;
+    for(int i = windows_idx; i < nbr_windows; i++ ){
+        window_partition = ms->windows_partition[i];
+        if(current_partition->status->IDENTIFIER == window_partition.id){
+            if(window_partition.is_periodic_processes_start){
+                first_release_point = ms->major_frame_count*TICKS_TO_MS(ms->major_frame_tick) + TICKS_TO_MS(window_partition.start_tick);
+                return first_release_point;
+            }
+        }
+    }
+    for(int i = 0; i < windows_idx; i++ ){
+        window_partition = ms->windows_partition[i];
+        if(current_partition->status->IDENTIFIER == window_partition.id){
+            if(window_partition.is_periodic_processes_start){
+                first_release_point = (ms->major_frame_count+1)*TICKS_TO_MS(ms->major_frame_tick) + TICKS_TO_MS(window_partition.start_tick);
+                return first_release_point;
+            }
+        }
+    }
+}
+
 void START (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
@@ -242,7 +273,6 @@ void START (
     struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
 #endif
     struct pcb_s *partition = partition_node->data;
-    struct process_s *current_process = partition->process_current->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
     struct process_s *process = process_node->data;
     
@@ -273,11 +303,11 @@ void START (
 
         if(partition->status->OPERATING_MODE == NORMAL){
 
-
             process->processus_status->PROCESS_STATE = READY;
-            //calculer la deadline et verifier l overflow
+            //calculer la deadline 
             process->processus_status->DEADLINE_TIME = ucx_uptime() + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
             //check for rescheduling
+            struct process_s *current_process = partition->process_current->data;
             if (setjmp(current_process->tcb.context) == 0) {
                 /* Retourner au contexte du kernel (partition_OS) */
                 longjmp(partition->partition_context, 1);
@@ -286,7 +316,7 @@ void START (
         else{
             process->processus_status->PROCESS_STATE = WAITING;
         }
-        *RETURN_CODE = NO_ACTION;
+        *RETURN_CODE = NO_ERROR;
 
     }
     // le process est periodic
@@ -295,13 +325,17 @@ void START (
         _context_init(&process->tcb.context, (size_t)process->tcb.stack,process->tcb.stack_sz, (size_t)process->tcb.task);
         if(partition->status->OPERATING_MODE == NORMAL){
             process->processus_status->PROCESS_STATE = WAITING;
-            //calculer la deadline
+            // trouver le fisrt release point
+            process->release_point_time = find_first_release_point(partition);
+            //calculer la deadline 
+            process->processus_status->DEADLINE_TIME = process->release_point_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+
             //gerer les trucs avec releases point
         }
         else{
             process->processus_status->PROCESS_STATE = WAITING;
         }
-        *RETURN_CODE = NO_ACTION;
+        *RETURN_CODE = NO_ERROR;
     }
 
 
