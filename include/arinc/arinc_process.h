@@ -78,6 +78,7 @@ struct process_s
     PROCESSOR_CORE_ID_TYPE processor_core_affinity;
     SYSTEM_TIME_TYPE release_point_time;
     BOOLEAN_TYPE is_suspended;
+    SYSTEM_TIME_TYPE suspend_timeout;
 };
 
 extern SYSTEM_TIME_TYPE find_first_release_point(struct pcb_s *current_partition);

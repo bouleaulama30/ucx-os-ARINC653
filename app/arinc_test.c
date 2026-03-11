@@ -79,6 +79,11 @@ void process_test0(void)
 			STOP(1, &return_code);
 		if(cnt == 100005)
 			START(1, &return_code);
+
+		if(cnt == 100011){
+			SUSPEND_SELF(50, &return_code);
+			printf("return code suspend_self %d:", return_code);
+		}
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 
 		ucx_task_yield();

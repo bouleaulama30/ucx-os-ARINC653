@@ -14,7 +14,8 @@
     * faire de nouveau un test complet de la fonction pour savoir si c est fonctionnel apres avoir implementer la logique des processes
 
 * faire management process     
-    * coder les fonctions de l'APEX sur les processes           
+    * coder les fonctions de l'APEX sur les processes    
+        * debug le suspend_self qui a l air de ne pas fonctionner   juste je ne l atteint jamais dans arinc test avec le truc des compteur  voir pour trouver un cas qui passe
         * stop
             * gerer les mutex
             * remove process de la waiting queue s il etait dans l etat waiting
@@ -23,7 +24,10 @@
         * stop self
             * cancel le timer affilier a la tache courante pour eviter une faute plus tard
         * suspend
-            * gerer le lock mutex
+            * gerer le lock mutex/mutex
+        * suspend self
+            * gerer le lock mutex/mutex
+            
         
         * resume
             * dans le cas ou le process c'etait suspend self avec un time out et qu'on le reveille avant il faut enlever le chronometre lance
@@ -63,6 +67,9 @@
     * replacer les fonctions utilent pour faire l apex comme find_first_release_point a des endroits plus coherent dans le code
     * voir s il faut mettre les flags booleen en maj   
     * placer les return error a la fin des fonctions apex 
+    * voir pour mettre les calcules d overflow dans des fonctions genre deadline overflow ou time out overflow cf apex processes
+    * voir pour faire un signal schedule needed pour eviter de reschedule a chaque fois que ce n est pas necessaire tout le temps
+    * voir si les fonctions du pos pour gerer les timer, delay etc.. voir si les mettre dans un autre fichier ou autre
 * faire une batterie de test unitaire que l'on peut test a chaque fois et qui couvre au maximum les partition et les processes
 
 * faire rouler sur la carte en materielle une fois que c'est bon pour les processus

@@ -45,6 +45,24 @@ static struct node_s *check_and_release_periodic_waiting_processes(struct node_s
 	return 0;
 }
 
+static struct node_s *check_suspended_timeouts(struct node_s *node, void *arg) {
+    struct process_s *process = node->data;
+    uint64_t current_time = (uint64_t)ucx_uptime();
+
+    // Si le processus est suspendu ET qu'il a un chronomètre actif (différent de 0)
+    if (process->is_suspended && process->suspend_timeout != 0) {
+        
+        if (current_time >= process->suspend_timeout) {
+                        
+            process->is_suspended = false;
+            process->suspend_timeout = 0;
+
+            process->processus_status->PROCESS_STATE = READY;
+        }
+    }
+    return 0;
+}
+
 void activate_process_scheduling(){
 #ifndef MULTICORE
     struct pcb_s *partition = kcb->partition_current->data;
@@ -83,6 +101,7 @@ static void partition_OS(void)
 
         //check if periodic process should start
         list_foreach(partition->processes, check_and_release_periodic_waiting_processes, (void *)0);
+        list_foreach(partition->processes, check_suspended_timeouts, (void *)0);
 
         
         if (!setjmp(partition->partition_context)) {

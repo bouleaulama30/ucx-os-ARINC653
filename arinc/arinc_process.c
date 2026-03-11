@@ -110,6 +110,7 @@ void CREATE_PROCESS (
         new_process->processor_core_affinity = DEFAULT_PROCESS_CORE_AFFINITY;
         new_process->release_point_time = 0; 
         new_process->is_suspended = false;
+        new_process->suspend_timeout = 0;
        
         list_pushback(partition->processes, new_process);
         
@@ -178,7 +179,49 @@ void SET_PRIORITY (
 
 void SUSPEND_SELF (
        /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+       
+#ifndef MULTICORE
+    struct node_s *partition_node = kcb->partition_current;
+#else
+    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
+#endif
+    struct pcb_s *partition = partition_node->data;
+    struct node_s *process_node = partition->process_current;
+    struct process_s *current_process = process_node->data;
+    
+    // when (TIME_OUT calculation is out of range) => INVALID_CONFIG
+    uint64_t uptime = ucx_uptime();
+    uint64_t max_system_time = 0x7fffffffffffffffULL;
+    if (TIME_OUT < INFINITE_TIME_VALUE || uptime > (max_system_time - (uint64_t)TIME_OUT)){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if(current_process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+
+    if(TIME_OUT == 0){
+        *RETURN_CODE = NO_ERROR;
+    }
+    else {
+        current_process->processus_status->PROCESS_STATE = WAITING;
+        current_process->is_suspended = true;
+        if (TIME_OUT != INFINITE_TIME_VALUE){
+            current_process->suspend_timeout = (SYSTEM_TIME_TYPE)uptime + TIME_OUT;
+        }
+        if (setjmp(current_process->tcb.context) == 0) {
+        /* Retourner au contexte du kernel (partition_OS) */
+        longjmp(partition->partition_context, 1);
+        }
+        if(current_process->suspend_timeout == 0)
+            *RETURN_CODE = TIMED_OUT;
+        else            
+            *RETURN_CODE = NO_ERROR;
+    }
+}
 
 void SUSPEND (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
