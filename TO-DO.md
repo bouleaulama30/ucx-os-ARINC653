@@ -24,6 +24,12 @@
             * cancel le timer affilier a la tache courante pour eviter une faute plus tard
         * suspend
             * gerer le lock mutex
+        
+        * resume
+            * dans le cas ou le process c'etait suspend self avec un time out et qu'on le reveille avant il faut enlever le chronometre lance
+            * checker s il attend avec delay start ou un time wait etc...   
+            * gerer le lock mutex et le check avec les ressources et les timer
+
 
         * faire une verification globale de toutes les fonctions code pour savoir si ca respecte bien
 
@@ -31,6 +37,7 @@
             * get_process_status cf si le process possede le lock preemption alors renvoyer la priorite max pour la current_priority
             * set_priority voir dans le cas ou le process own a mutex et ne pas rescheduler s'il n a pas de preemption lock
             * stop self, liberer les ressources comme le mutex ou autre
+            * plus tard repassser sur toute les fonctions pour gerer les processes queue quand elles seront implem
 
     * tester les fonctions de l'APEX sur les processes
 
@@ -54,7 +61,8 @@
     * le morceau de code pour save la tache courante et revenir a la boucle du scheduler est souvent presente, donc faire une fonction
     * mettre/enlever des commentaires
     * replacer les fonctions utilent pour faire l apex comme find_first_release_point a des endroits plus coherent dans le code
-    * voir s il faut mettre les flags booleen en maj    
+    * voir s il faut mettre les flags booleen en maj   
+    * placer les return error a la fin des fonctions apex 
 * faire une batterie de test unitaire que l'on peut test a chaque fois et qui couvre au maximum les partition et les processes
 
 * faire rouler sur la carte en materielle une fois que c'est bon pour les processus

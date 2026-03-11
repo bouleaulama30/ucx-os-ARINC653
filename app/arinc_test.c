@@ -108,21 +108,35 @@ void process_test1(void)
 __attribute__((section(".p2_code")))
 void process_test2(void)
 {   
-	int32_t cnt = 300000;
+int32_t cnt = 300000;
     RETURN_CODE_TYPE return_code;
 	APEX_INTEGER paritition_id;
     APEX_INTEGER process_id;
+	
+    // APEX_INTEGER other_process_id;
+	PROCESS_STATUS_TYPE other_process_status;
 	GET_MY_PARTITION_ID(&paritition_id, &return_code);
     GET_MY_ID(&process_id, &return_code);
+	GET_PROCESS_STATUS(1, &other_process_status, &return_code);
+	
+	if(return_code == NO_ERROR){
+		printf("Le nom du process: %s, with priority %d\n", other_process_status.ATTRIBUTES.NAME, other_process_status.CURRENT_PRIORITY);
+	}
 	while (1) {
 		if(cnt % 2 == 0){
 			// SET_PARTITION_MODE(IDLE, &return_code);
-			SET_PRIORITY(0, 2, &return_code);
+			printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 			SET_PRIORITY(1, 3, &return_code);
+			// SET_PRIORITY(1, 3, &return_code);
 
 		}
-		printf("[prrocess %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-		// print_time();
+		
+		if(cnt == 300001)
+			SUSPEND(1, &return_code);
+		if(cnt == 300005)
+			RESUME(1, &return_code);
+		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
+
 		ucx_task_yield();
 	}
 }
@@ -138,12 +152,11 @@ void process_test3(void)
     GET_MY_ID(&process_id, &return_code);
 	while (1) {
 		if(cnt % 2 == 0){
-			// SET_PARTITION_MODE(IDLE, &return_code);
-			SET_PRIORITY(1, 2, &return_code);
-			SET_PRIORITY(0, 3, &return_code);
+			printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
+			SET_PRIORITY(1, 1, &return_code);
+			// SET_PRIORITY(0, 3, &return_code);
 		}
-		printf("[prrocess %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-		// print_time();
+		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 		ucx_task_yield();
 	}
 }

@@ -189,9 +189,10 @@ void SUSPEND (
     struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
 #endif
     struct pcb_s *partition = partition_node->data;
+    struct process_s *current_process = partition->process_current->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
     struct process_s *process = process_node->data;
-    if(!process_node){
+    if(!process_node || process->process_id == current_process->process_id){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -206,6 +207,7 @@ void SUSPEND (
         return;
     }
 
+
     if(process->is_suspended){
         *RETURN_CODE = NO_ACTION;
     }
@@ -219,7 +221,51 @@ void SUSPEND (
 
 void RESUME (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+#ifndef MULTICORE
+    struct node_s *partition_node = kcb->partition_current;
+#else
+    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
+#endif
+    struct pcb_s *partition = partition_node->data;
+    struct process_s *current_process = partition->process_current->data;
+    struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
+    struct process_s *process = process_node->data;
+    if(!process_node || process->process_id == current_process->process_id){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+    
+    if(process->processus_status->PROCESS_STATE == DORMANT){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+
+    if(process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE && process->processus_status->PROCESS_STATE != FAULTED){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+
+    if(!process->is_suspended && process->processus_status->PROCESS_STATE != FAULTED){
+        *RETURN_CODE = NO_ACTION;
+    }
+
+    //checker le time out avec un if
+    // if ...
+
+    // checker if (the specified process is not waiting on a process queue or TIMED_WAIT
+    // time delay or DELAYED_START time delay) then
+    process->processus_status->PROCESS_STATE = READY;
+
+    // rescheduling
+    if (setjmp(current_process->tcb.context) == 0) {
+        /* Retourner au contexte du kernel (partition_OS) */
+        longjmp(partition->partition_context, 1);
+    }
+    
+    *RETURN_CODE = NO_ERROR;
+
+}
 
 void STOP_SELF (void){
 #ifndef MULTICORE
