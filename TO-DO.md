@@ -7,16 +7,14 @@
         * changer ucx_yield pour fit avec les process
     * inhibit process scheduling and switch back to initialization mode;
     * faire les actions quand elle passe en normal (set to READY processes (le faire avec l apex start), faire les autres cas, activate process scheduling etc..)
+        * penser au delay process
+        * -- a DEADLINE_TIME calculation may cause an overflow of the underlying -- clock. If this occurs, HM is invoked with an illegal request error code set the partition’s lock level to zero;
+        * if (an error handler process has been created) then enable the error handler process for execution and fault processing;
+
     * faire de nouveau un test complet de la fonction pour savoir si c est fonctionnel apres avoir implementer la logique des processes
 
-
 * faire management process     
-    * dans le pos gerer le reveil des processes periodic si le release point est atteint (current-time > process next release point)
-        * calculer le next release point en ajoutant la period du process
-    * coder les fonctions de l'APEX sur les processes
-        * start
-            * tester la fonction pour les processes periodic
-                * faire dans le set_partition_mode avant
+    * coder les fonctions de l'APEX sur les processes           
         * stop
             * gerer les mutex
             * remove process de la waiting queue s il etait dans l etat waiting

@@ -234,7 +234,7 @@ void STOP (
     }
 }
 
-SYSTEM_TIME_TYPE find_first_release_point(struct pcb_s *current_partition){
+SYSTEM_TIME_TYPE  find_first_release_point(struct pcb_s *current_partition){
 #ifndef MULTICORE
     struct mscb_s* ms = kcb->module_scheduler;
 #else

@@ -24,6 +24,26 @@ static struct node_s *find_highest_priority_process(struct list_s *processes){
     }
 	return highest_priority_process_node;
 }
+static struct node_s *check_and_release_periodic_waiting_processes(struct node_s *node, void *arg)
+{
+	struct process_s *process = node->data;
+    //periodic waiting processes
+    if (process->processus_status->PROCESS_STATE == WAITING && process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE){
+        uint64_t current_time = (uint64_t)ucx_uptime();
+        uint64_t rp_time = (uint64_t)process->release_point_time;
+        printf("check_periodic proc: %d, uptime: %u, release point: %u\n", 
+                process->process_id, 
+                (unsigned)current_time, 
+                (unsigned)rp_time);        
+        if(current_time >= rp_time){
+            printf("=> REVEIL ! release point time: %u\n", (unsigned)rp_time);
+            process->processus_status->PROCESS_STATE = READY;
+            process->processus_status->DEADLINE_TIME = process->release_point_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+            process->release_point_time += process->processus_status->ATTRIBUTES.PERIOD;
+        }
+    }
+	return 0;
+}
 
 void activate_process_scheduling(){
 #ifndef MULTICORE
@@ -31,12 +51,15 @@ void activate_process_scheduling(){
 #else
     struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
 #endif
+    list_foreach(partition->processes, check_and_release_periodic_waiting_processes, (void *)0);
     struct node_s* first_process_node = find_highest_priority_process(partition->processes);  
     struct process_s* first_process = first_process_node->data;
 
     partition->process_current = first_process_node;
     _dispatch_init(first_process->tcb.context);
 }
+
+
 
 static void partition_OS(void)
 {
@@ -57,6 +80,10 @@ static void partition_OS(void)
     while (1) {
         if (!partition->processes->length)
             krnl_panic(ERR_NO_TASKS);
+
+        //check if periodic process should start
+        list_foreach(partition->processes, check_and_release_periodic_waiting_processes, (void *)0);
+
         
         if (!setjmp(partition->partition_context)) {
             // list_foreach(kcb->tasks, delay_update, (void *)0);
@@ -274,9 +301,17 @@ void GET_PARTITION_STATUS (
 static struct node_s *start_process(struct node_s *node, void *arg)
 {
 	struct process_s *process = node->data;
-	
-	if (process->processus_status->PROCESS_STATE == WAITING && process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE)
+	SYSTEM_TIME_TYPE first_release_point = (SYSTEM_TIME_TYPE) arg;
+    //aperiodic not delayed processes
+	if (process->processus_status->PROCESS_STATE == WAITING && process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE){
         process->processus_status->PROCESS_STATE = READY;
+        process->processus_status->DEADLINE_TIME = ucx_uptime() + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+    }
+    //periodic not delayed processes
+    else if (process->processus_status->PROCESS_STATE == WAITING && process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE){
+        process->release_point_time = first_release_point;
+        process->processus_status->DEADLINE_TIME =  process->release_point_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+    }
 	return 0;
 }
 
@@ -327,7 +362,9 @@ void SET_PARTITION_MODE (
         printf("OPERATING MODE is NORMAL\n");
         *RETURN_CODE = NO_ERROR;
         //set all processes to ready state
-        list_foreach(my_partition->processes, start_process, (void *)0);
+
+        SYSTEM_TIME_TYPE first_release_point = find_first_release_point(my_partition);
+        list_foreach(my_partition->processes, start_process, (void *)first_release_point);
         activate_process_scheduling();
     }
     

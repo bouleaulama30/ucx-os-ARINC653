@@ -52,8 +52,8 @@ struct PartitionConfig {
 
 // Default hardcoded partition configuration et voir le ldscript pour la conf mémoire
 static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
-    .period = 1000000,                    // 1 second in nanoseconds
-    .duration = 500000,                   // 500ms
+    .period = 50,                    // 1 second in nanoseconds
+    .duration = 20,                   // 500ms
     .identifier = 1,
     .num_assigned_cores = 1,
     .name = "DefaultPartition",
@@ -65,8 +65,8 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
 };
 
 static const struct PartitionConfig P2_CONFIG = {
-    .period = 1000000,                    // 1 second in nanoseconds
-    .duration = 500000,                   // 500ms
+    .period = 50,                    // 1 second in nanoseconds
+    .duration = 20,                   // 500ms
     .identifier = 2,
     .num_assigned_cores = 1,
     .name = "P2",
@@ -87,7 +87,8 @@ static const window_partition_type DEFAULT_WINDOWS[] = {
         .id = 1,
         .start_tick = MS_TO_TICKS(0),
         .duration_tick = MS_TO_TICKS(30),
-        .is_periodic_processes_start = (BOOLEAN_TYPE)false,
+        .is_periodic_processes_start = (BOOLEAN_TYPE)true,
+        // .is_periodic_processes_start = (BOOLEAN_TYPE)false,
     },
     {
         .name = "P2",
@@ -101,7 +102,8 @@ static const window_partition_type DEFAULT_WINDOWS[] = {
         .id = 1,
         .start_tick = MS_TO_TICKS(60),
         .duration_tick = MS_TO_TICKS(20),
-        .is_periodic_processes_start = (BOOLEAN_TYPE)true,
+        .is_periodic_processes_start = (BOOLEAN_TYPE)false,
+        // .is_periodic_processes_start = (BOOLEAN_TYPE)true,
     },
     {
             .name = "P2",
@@ -118,7 +120,7 @@ static const uint32_t DEFAULT_WINDOWS_COUNT = sizeof(DEFAULT_WINDOWS) / sizeof(D
 // Default process configuration
 static const PROCESS_ATTRIBUTE_TYPE DEFAULT_PROCESS_CONFIG = {
     .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 10000000,       // 10ms in nanoseconds
+    .TIME_CAPACITY = 50,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test0,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
     .BASE_PRIORITY = 2,            // Medium priority (1-239)
@@ -128,8 +130,8 @@ static const PROCESS_ATTRIBUTE_TYPE DEFAULT_PROCESS_CONFIG = {
 
 // process 1 configuration
 static const PROCESS_ATTRIBUTE_TYPE PROCESS_1_CONFIG = {
-    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 10000000,       // 10ms in nanoseconds
+    .PERIOD = 100,              // 20ms in nanoseconds
+    .TIME_CAPACITY = 50,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test1,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
     .BASE_PRIORITY = 3,            // Medium priority (1-239)
