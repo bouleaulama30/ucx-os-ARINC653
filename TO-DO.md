@@ -22,6 +22,11 @@
             * prevent the specified process from causing a deadline overrun fault;
         * stop self
             * cancel le timer affilier a la tache courante pour eviter une faute plus tard
+        * suspend
+            * gerer le lock mutex
+
+        * faire une verification globale de toutes les fonctions code pour savoir si ca respecte bien
+
         * redistribuer les points non coder (comme preemption lock mutex) vers les autres to do
             * get_process_status cf si le process possede le lock preemption alors renvoyer la priorite max pour la current_priority
             * set_priority voir dans le cas ou le process own a mutex et ne pas rescheduler s'il n a pas de preemption lock
@@ -49,7 +54,7 @@
     * le morceau de code pour save la tache courante et revenir a la boucle du scheduler est souvent presente, donc faire une fonction
     * mettre/enlever des commentaires
     * replacer les fonctions utilent pour faire l apex comme find_first_release_point a des endroits plus coherent dans le code
-    
+    * voir s il faut mettre les flags booleen en maj    
 * faire une batterie de test unitaire que l'on peut test a chaque fois et qui couvre au maximum les partition et les processes
 
 * faire rouler sur la carte en materielle une fois que c'est bon pour les processus

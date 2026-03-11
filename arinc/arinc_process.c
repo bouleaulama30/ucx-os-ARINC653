@@ -109,6 +109,7 @@ void CREATE_PROCESS (
         new_process->process_index = partition->nbr_processes;
         new_process->processor_core_affinity = DEFAULT_PROCESS_CORE_AFFINITY;
         new_process->release_point_time = 0; 
+        new_process->is_suspended = false;
        
         list_pushback(partition->processes, new_process);
         
@@ -181,7 +182,40 @@ void SUSPEND_SELF (
 
 void SUSPEND (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+#ifndef MULTICORE
+    struct node_s *partition_node = kcb->partition_current;
+#else
+    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
+#endif
+    struct pcb_s *partition = partition_node->data;
+    struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
+    struct process_s *process = process_node->data;
+    if(!process_node){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if(process->processus_status->PROCESS_STATE == DORMANT || process->processus_status->PROCESS_STATE == FAULTED){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+
+    if(process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+
+    if(process->is_suspended){
+        *RETURN_CODE = NO_ACTION;
+    }
+    else {
+        process->is_suspended = true;
+        process->processus_status->PROCESS_STATE = WAITING;
+        *RETURN_CODE = NO_ERROR;
+    }
+}
+
 
 void RESUME (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
