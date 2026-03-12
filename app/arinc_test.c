@@ -81,6 +81,7 @@ void process_test0(void)
 			START(1, &return_code);
 
 		if(cnt == 100011){
+			printf("SUSPEND TIME %d\n", ucx_uptime());
 			SUSPEND_SELF(50, &return_code);
 			printf("return code suspend_self %d:", return_code);
 		}

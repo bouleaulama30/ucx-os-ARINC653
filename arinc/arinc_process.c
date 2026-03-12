@@ -110,7 +110,7 @@ void CREATE_PROCESS (
         new_process->processor_core_affinity = DEFAULT_PROCESS_CORE_AFFINITY;
         new_process->release_point_time = 0; 
         new_process->is_suspended = false;
-        new_process->suspend_timeout = 0;
+        new_process->time_counter = 0;
        
         list_pushback(partition->processes, new_process);
         
@@ -210,13 +210,13 @@ void SUSPEND_SELF (
         current_process->processus_status->PROCESS_STATE = WAITING;
         current_process->is_suspended = true;
         if (TIME_OUT != INFINITE_TIME_VALUE){
-            current_process->suspend_timeout = (SYSTEM_TIME_TYPE)uptime + TIME_OUT;
+            current_process->time_counter = (SYSTEM_TIME_TYPE)uptime + TIME_OUT;
         }
         if (setjmp(current_process->tcb.context) == 0) {
         /* Retourner au contexte du kernel (partition_OS) */
         longjmp(partition->partition_context, 1);
         }
-        if(current_process->suspend_timeout == 0)
+        if(current_process->time_counter == 0)
             *RETURN_CODE = TIMED_OUT;
         else            
             *RETURN_CODE = NO_ERROR;
@@ -468,7 +468,99 @@ void START (
 void DELAYED_START (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*in */ SYSTEM_TIME_TYPE         DELAY_TIME,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+#ifndef MULTICORE
+    struct node_s *partition_node = kcb->partition_current;
+#else
+    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
+#endif
+    struct pcb_s *partition = partition_node->data;
+    struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
+    struct process_s *process = process_node->data;
+    
+    if(!process_node){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if (process->processus_status->PROCESS_STATE != DORMANT)
+    {
+        *RETURN_CODE = NO_ACTION;
+        return;
+    }
+
+    uint64_t uptime = ucx_uptime();
+    uint64_t max_system_time = 0x7fffffffffffffffULL;
+    if (DELAY_TIME < -1 || uptime > (max_system_time - (uint64_t)DELAY_TIME)){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if (DELAY_TIME == INFINITE_TIME_VALUE){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if(process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE && DELAY_TIME >= process->processus_status->ATTRIBUTES.PERIOD){
+        *RETURN_CODE = INVALID_PARAM;
+        return;    
+    }
+    
+    // when (DEADLINE_TIME calculation is out of range) => INVALID_CONFIG
+    SYSTEM_TIME_TYPE time_capacity = process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+    if (time_capacity < 0 || uptime + (uint64_t)time_capacity + DELAY_TIME > (max_system_time)){
+        *RETURN_CODE = INVALID_CONFIG;
+        return;
+    }
+
+    // le process est aperiodic
+    if (process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE){
+        process->processus_status->CURRENT_PRIORITY = process->processus_status->ATTRIBUTES.BASE_PRIORITY;
+        _context_init(&process->tcb.context, (size_t)process->tcb.stack,process->tcb.stack_sz, (size_t)process->tcb.task);
+
+        if(partition->status->OPERATING_MODE == NORMAL){
+            if (!DELAY_TIME){
+                process->processus_status->PROCESS_STATE = READY;
+                process->processus_status->DEADLINE_TIME = ucx_uptime() + process->processus_status->ATTRIBUTES.TIME_CAPACITY;            
+            }
+            else {            
+                process->processus_status->PROCESS_STATE = WAITING;
+                //calculer la deadline 
+                process->processus_status->DEADLINE_TIME = ucx_uptime() + process->processus_status->ATTRIBUTES.TIME_CAPACITY + DELAY_TIME;
+                process->time_counter =  DELAY_TIME;
+            }
+            //check for rescheduling
+            struct process_s *current_process = partition->process_current->data;
+            if (setjmp(current_process->tcb.context) == 0) {
+                /* Retourner au contexte du kernel (partition_OS) */
+                longjmp(partition->partition_context, 1);
+            }
+        }
+        else{
+            process->processus_status->PROCESS_STATE = WAITING;
+        }
+        *RETURN_CODE = NO_ERROR;
+
+    }
+    // le process est periodic
+    else{
+        process->processus_status->CURRENT_PRIORITY = process->processus_status->ATTRIBUTES.BASE_PRIORITY;
+        _context_init(&process->tcb.context, (size_t)process->tcb.stack,process->tcb.stack_sz, (size_t)process->tcb.task);
+        if(partition->status->OPERATING_MODE == NORMAL){
+            process->processus_status->PROCESS_STATE = WAITING;
+            // trouver le fisrt release point
+            process->release_point_time = find_first_release_point(partition);
+            //calculer la deadline 
+            process->processus_status->DEADLINE_TIME = process->release_point_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+
+            //gerer les trucs avec releases point
+        }
+        else{
+            process->processus_status->PROCESS_STATE = WAITING;
+        }
+        *RETURN_CODE = NO_ERROR;
+    }
+}
 
 // to do pendant la partie intra communication
 void LOCK_PREEMPTION (

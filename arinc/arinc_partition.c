@@ -50,12 +50,12 @@ static struct node_s *check_suspended_timeouts(struct node_s *node, void *arg) {
     uint64_t current_time = (uint64_t)ucx_uptime();
 
     // Si le processus est suspendu ET qu'il a un chronomètre actif (différent de 0)
-    if (process->is_suspended && process->suspend_timeout != 0) {
+    if (process->is_suspended && process->time_counter != 0) {
         
-        if (current_time >= process->suspend_timeout) {
+        if (current_time >= process->time_counter) {
                         
             process->is_suspended = false;
-            process->suspend_timeout = 0;
+            process->time_counter = 0;
 
             process->processus_status->PROCESS_STATE = READY;
         }
