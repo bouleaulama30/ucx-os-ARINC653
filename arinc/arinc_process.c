@@ -294,17 +294,22 @@ void RESUME (
     }
 
     //checker le time out avec un if
-    // if ...
+    if(process->is_suspended){
+        process->is_suspended = false;
+        process->time_counter = 0;
+    }
 
     // checker if (the specified process is not waiting on a process queue or TIMED_WAIT
     // time delay or DELAYED_START time delay) then
-    process->processus_status->PROCESS_STATE = READY;
-
-    // rescheduling
-    if (setjmp(current_process->tcb.context) == 0) {
-        /* Retourner au contexte du kernel (partition_OS) */
-        longjmp(partition->partition_context, 1);
+    if(!process->time_counter){
+        process->processus_status->PROCESS_STATE = READY;
+        // rescheduling
+        if (setjmp(current_process->tcb.context) == 0) {
+            /* Retourner au contexte du kernel (partition_OS) */
+            longjmp(partition->partition_context, 1);
+        }
     }
+
     
     *RETURN_CODE = NO_ERROR;
 
@@ -321,6 +326,9 @@ void STOP_SELF (void){
     struct process_s *current_process = process_node->data;
 
     current_process->processus_status->PROCESS_STATE = DORMANT;
+    current_process->time_counter = 0;
+    current_process->is_suspended = false;
+    current_process->processus_status->DEADLINE_TIME = INFINITE_TIME_VALUE;
     // on reschedule        
     longjmp(partition->partition_context, 1);
 }
@@ -349,12 +357,15 @@ void STOP (
     }
 
     process->processus_status->PROCESS_STATE = DORMANT;
-    *RETURN_CODE = NO_ERROR;
+    process->time_counter = 0;
+    process->is_suspended = false;
+    process->processus_status->DEADLINE_TIME = INFINITE_TIME_VALUE;
     
     if (setjmp(current_process->tcb.context) == 0) {
         /* Retourner au contexte du kernel (partition_OS) */
         longjmp(partition->partition_context, 1);
     }
+    *RETURN_CODE = NO_ERROR;
 }
 
 SYSTEM_TIME_TYPE  find_first_release_point(struct pcb_s *current_partition){
@@ -527,7 +538,7 @@ void DELAYED_START (
                 process->processus_status->PROCESS_STATE = WAITING;
                 //calculer la deadline 
                 process->processus_status->DEADLINE_TIME = ucx_uptime() + process->processus_status->ATTRIBUTES.TIME_CAPACITY + DELAY_TIME;
-                process->time_counter =  DELAY_TIME;
+                process->time_counter = ucx_uptime() + DELAY_TIME;
             }
             //check for rescheduling
             struct process_s *current_process = partition->process_current->data;
@@ -549,11 +560,9 @@ void DELAYED_START (
         if(partition->status->OPERATING_MODE == NORMAL){
             process->processus_status->PROCESS_STATE = WAITING;
             // trouver le fisrt release point
-            process->release_point_time = find_first_release_point(partition);
+            process->release_point_time = find_first_release_point(partition) + DELAY_TIME;
             //calculer la deadline 
             process->processus_status->DEADLINE_TIME = process->release_point_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
-
-            //gerer les trucs avec releases point
         }
         else{
             process->processus_status->PROCESS_STATE = WAITING;

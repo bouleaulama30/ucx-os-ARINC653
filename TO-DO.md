@@ -14,37 +14,25 @@
     * faire de nouveau un test complet de la fonction pour savoir si c est fonctionnel apres avoir implementer la logique des processes
 
 * faire management process     
-    * coder les fonctions de l'APEX sur les processes    
-        * stop
-            * gerer les mutex
-            * remove process de la waiting queue s il etait dans l etat waiting
-            * stop any time counters associated with the specified process;
-            * prevent the specified process from causing a deadline overrun fault;
-        * stop self
-            * cancel le timer affilier a la tache courante pour eviter une faute plus tard
-        * suspend
-            * gerer le lock mutex/mutex
-        * suspend self
-            * gerer le lock mutex/mutex
+    * coder les fonctions de l'APEX sur les processes            
         
-        * delay_start:
-            * set the first release point (see Section 2.3.1) of the specified process including the delay time;
-        
-        * resume
-            * dans le cas ou le process c'etait suspend self avec un time out et qu'on le reveille avant il faut enlever le chronometre lance
-            * checker s il attend avec delay start ou un time wait etc...   
-            * gerer le lock mutex et le check avec les ressources et les timer
-
-
         * faire une verification globale de toutes les fonctions code pour savoir si ca respecte bien
 
         * redistribuer les points non coder (comme preemption lock mutex) vers les autres to do
             * get_process_status cf si le process possede le lock preemption alors renvoyer la priorite max pour la current_priority
             * set_priority voir dans le cas ou le process own a mutex et ne pas rescheduler s'il n a pas de preemption lock
             * stop self, liberer les ressources comme le mutex ou autre
+            * stop  gerer les mutex, remove process de la waiting queue s il etait dans l etat waiting
+            * suspend  gerer le lock mutex/mutex
+            * suspend self  gerer le lock mutex/mutex
+            * resume  checker s il attend avec un time wait etc..., gerer le lock mutex et le check avec les ressources et les timer
             * plus tard repassser sur toute les fonctions pour gerer les processes queue quand elles seront implem
-
+            
     * tester les fonctions de l'APEX sur les processes
+    * implem la waiting queue (quand on aura implem la partie intra et inter communication)
+
+    * ATTENTION des qu'on ajoute un nouveau time count dans la struct du process il faut penser a gerer son etat dans les differentes fonction de l'apex
+
 
 * refractor / formatage code:
     * mettre des ifndef pour les ajouts a l os de base pour maintenir le code isole:
@@ -72,6 +60,7 @@
     * voir pour faire un signal schedule needed pour eviter de reschedule a chaque fois que ce n est pas necessaire tout le temps
     * voir si les fonctions du pos pour gerer les timer, delay etc.. voir si les mettre dans un autre fichier ou autre
     * faire en sorte d appeler les fonctions de check des delay et des timeout uniquement a chaque tick et non a chaque appel au scheduler car on fait du temps de calcul inutil
+    * a la place de call ucx_uptime a chaque fois dans l'apex des processes voir pour get une seule fois le current time au debut de la fonction et ensuite l'utiliser pour toute la fonction
 * faire une batterie de test unitaire que l'on peut test a chaque fois et qui couvre au maximum les partition et les processes
 
 * faire rouler sur la carte en materielle une fois que c'est bon pour les processus
