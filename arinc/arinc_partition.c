@@ -321,17 +321,35 @@ static struct node_s *start_process(struct node_s *node, void *arg)
 {
 	struct process_s *process = node->data;
 	SYSTEM_TIME_TYPE first_release_point = (SYSTEM_TIME_TYPE) arg;
-    //aperiodic not delayed processes
-	if (process->processus_status->PROCESS_STATE == WAITING && process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE){
+
+    // set to READY all previously started (not delayed) aperiodic processes (unless the process was suspended)
+	if (process->processus_status->PROCESS_STATE == WAITING && !process->saved_init_delay && process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE && !process->is_suspended){
         process->processus_status->PROCESS_STATE = READY;
+        // calculate the DEADLINE_TIME of all non-dormant processes in the partition;
         process->processus_status->DEADLINE_TIME = ucx_uptime() + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+        return 0;
     }
-    //periodic not delayed processes
+
+    // set release point of all previously delay started aperiodic processes to the system clock time plus their delay times;
+	else if (process->processus_status->PROCESS_STATE == WAITING && process->saved_init_delay && process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE){
+        process->release_point_time = ucx_uptime() + process->saved_init_delay;
+    }
+
+    // set first release points of all previously started (not delayed) periodic processes to the partition’s next periodic processing start
     else if (process->processus_status->PROCESS_STATE == WAITING && process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE){
         process->release_point_time = first_release_point;
-        process->processus_status->DEADLINE_TIME =  process->release_point_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
     }
-	return 0;
+
+    // set first release points of all previously delay started periodic processes to the partition’s next periodic processing start plus their delay times;
+    else if (process->processus_status->PROCESS_STATE == WAITING && process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE){
+        process->release_point_time = first_release_point + process->saved_init_delay;
+    }
+
+    // calculate the DEADLINE_TIME of all non-dormant processes in the partition;
+    if(process->processus_status->PROCESS_STATE != DORMANT){    
+        process->processus_status->DEADLINE_TIME =  process->release_point_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+        return 0;
+    }
 }
 
 
@@ -379,8 +397,8 @@ void SET_PARTITION_MODE (
     {
         // cf norme
         printf("OPERATING MODE is NORMAL\n");
-        *RETURN_CODE = NO_ERROR;
         //set all processes to ready state
+        *RETURN_CODE = NO_ERROR;
 
         SYSTEM_TIME_TYPE first_release_point = find_first_release_point(my_partition);
         list_foreach(my_partition->processes, start_process, (void *)first_release_point);

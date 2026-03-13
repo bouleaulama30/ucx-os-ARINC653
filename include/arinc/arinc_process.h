@@ -79,6 +79,7 @@ struct process_s
     SYSTEM_TIME_TYPE release_point_time;
     BOOLEAN_TYPE is_suspended;
     SYSTEM_TIME_TYPE time_counter;
+    SYSTEM_TIME_TYPE saved_init_delay;
 };
 
 extern SYSTEM_TIME_TYPE find_first_release_point(struct pcb_s *current_partition);

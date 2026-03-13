@@ -111,6 +111,8 @@ void CREATE_PROCESS (
         new_process->release_point_time = 0; 
         new_process->is_suspended = false;
         new_process->time_counter = 0;
+        new_process->saved_init_delay = 0;
+
        
         list_pushback(partition->processes, new_process);
         
@@ -549,6 +551,7 @@ void DELAYED_START (
         }
         else{
             process->processus_status->PROCESS_STATE = WAITING;
+            process->saved_init_delay = DELAY_TIME;
         }
         *RETURN_CODE = NO_ERROR;
 
@@ -566,6 +569,7 @@ void DELAYED_START (
         }
         else{
             process->processus_status->PROCESS_STATE = WAITING;
+            process->saved_init_delay = DELAY_TIME;
         }
         *RETURN_CODE = NO_ERROR;
     }

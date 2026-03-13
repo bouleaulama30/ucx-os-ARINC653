@@ -6,8 +6,7 @@
     * shut down the partition
         * changer ucx_yield pour fit avec les process
     * inhibit process scheduling and switch back to initialization mode;
-    * faire les actions quand elle passe en normal (set to READY processes (le faire avec l apex start), faire les autres cas, activate process scheduling etc..)
-        * penser au delay process
+    * faire les actions quand elle passe en normal
         * -- a DEADLINE_TIME calculation may cause an overflow of the underlying -- clock. If this occurs, HM is invoked with an illegal request error code set the partition’s lock level to zero;
         * if (an error handler process has been created) then enable the error handler process for execution and fault processing;
 
@@ -27,7 +26,7 @@
             * suspend self  gerer le lock mutex/mutex
             * resume  checker s il attend avec un time wait etc..., gerer le lock mutex et le check avec les ressources et les timer
             * plus tard repassser sur toute les fonctions pour gerer les processes queue quand elles seront implem
-            
+
     * tester les fonctions de l'APEX sur les processes
     * implem la waiting queue (quand on aura implem la partie intra et inter communication)
 
@@ -61,6 +60,7 @@
     * voir si les fonctions du pos pour gerer les timer, delay etc.. voir si les mettre dans un autre fichier ou autre
     * faire en sorte d appeler les fonctions de check des delay et des timeout uniquement a chaque tick et non a chaque appel au scheduler car on fait du temps de calcul inutil
     * a la place de call ucx_uptime a chaque fois dans l'apex des processes voir pour get une seule fois le current time au debut de la fonction et ensuite l'utiliser pour toute la fonction
+    * notamment dans set_partition_mode voir pour faire des fonctions pour voir si les processes sont aperiodic not delay not suspend ou aperiodic delay ou periodic not delay etc...
 * faire une batterie de test unitaire que l'on peut test a chaque fois et qui couvre au maximum les partition et les processes
 
 * faire rouler sur la carte en materielle une fois que c'est bon pour les processus
