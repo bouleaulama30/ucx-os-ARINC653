@@ -14,7 +14,9 @@ void p1_main_process(struct pcb_s *partition){
     printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);      
 
     START(process_id_0, &return_code0);  
-    START(process_id_1, &return_code1);  
+    START(process_id_1, &return_code0);  
+    // DELAYED_START(process_id_1, 20 ,&return_code0); 
+    // printf("return code delayed start %d\n", return_code0); 
 
     SET_PARTITION_MODE(NORMAL, &return_code0);
 }

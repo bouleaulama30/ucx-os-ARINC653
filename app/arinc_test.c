@@ -75,16 +75,16 @@ void process_test0(void)
 
 		}
 		
-		if(cnt == 100001)
-			STOP(1, &return_code);
-		if(cnt == 100005)
-			START(1, &return_code);
+		// if(cnt == 100001)
+		// 	STOP(1, &return_code);
+		// if(cnt == 100005)
+		// 	DELAYED_START(1, 50 ,&return_code);
 
-		if(cnt == 100011){
-			printf("SUSPEND TIME %d\n", ucx_uptime());
-			SUSPEND_SELF(50, &return_code);
-			printf("return code suspend_self %d:", return_code);
-		}
+		// if(cnt == 100011){
+		// 	printf("SUSPEND TIME %d\n", ucx_uptime());
+		// 	SUSPEND_SELF(50, &return_code);
+		// 	printf("return code suspend_self %d:", return_code);
+		// }
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 
 		ucx_task_yield();
@@ -106,6 +106,12 @@ void process_test1(void)
 			SET_PRIORITY(1, 1, &return_code);
 			// SET_PRIORITY(0, 3, &return_code);
 		}
+
+		if(cnt == 200001)
+			STOP(0, &return_code);
+		if(cnt == 200003)
+			DELAYED_START(0, 90 ,&return_code);
+
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 		ucx_task_yield();
 	}

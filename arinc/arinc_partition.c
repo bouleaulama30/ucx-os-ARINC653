@@ -27,8 +27,8 @@ static struct node_s *find_highest_priority_process(struct list_s *processes){
 static struct node_s *check_and_release_periodic_waiting_processes(struct node_s *node, void *arg)
 {
 	struct process_s *process = node->data;
-    //periodic waiting processes
-    if (process->processus_status->PROCESS_STATE == WAITING && process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE){
+    //periodic waiting processes 
+    if ((process->processus_status->PROCESS_STATE == WAITING && process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE)){
         uint64_t current_time = (uint64_t)ucx_uptime();
         uint64_t rp_time = (uint64_t)process->release_point_time;
         printf("check_periodic proc: %d, uptime: %u, release point: %u\n", 
@@ -42,10 +42,25 @@ static struct node_s *check_and_release_periodic_waiting_processes(struct node_s
             process->release_point_time += process->processus_status->ATTRIBUTES.PERIOD;
         }
     }
+    // aperiodic delayed processes started during cold start
+    else if(process->processus_status->PROCESS_STATE == WAITING && process->saved_init_delay && process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE){
+        uint64_t current_time = (uint64_t)ucx_uptime();
+        uint64_t rp_time = (uint64_t)process->release_point_time;
+        printf("check_periodic proc: %d, uptime: %u, release point: %u\n", 
+                process->process_id, 
+                (unsigned)current_time, 
+                (unsigned)rp_time);        
+        if(current_time >= rp_time){
+            printf("=> REVEIL ! release point time: %u\n", (unsigned)rp_time);
+            process->processus_status->PROCESS_STATE = READY;
+            process->release_point_time = 0;
+            process->saved_init_delay = 0;
+        }
+    }
 	return 0;
 }
 
-static struct node_s *check_suspended_timeouts(struct node_s *node, void *arg) {
+static struct node_s *check_timeouts(struct node_s *node, void *arg) {
     struct process_s *process = node->data;
     uint64_t current_time = (uint64_t)ucx_uptime();
 
@@ -101,7 +116,7 @@ static void partition_OS(void)
 
         //check if periodic process should start
         list_foreach(partition->processes, check_and_release_periodic_waiting_processes, (void *)0);
-        list_foreach(partition->processes, check_suspended_timeouts, (void *)0);
+        list_foreach(partition->processes, check_timeouts, (void *)0);
 
         
         if (!setjmp(partition->partition_context)) {
@@ -336,12 +351,12 @@ static struct node_s *start_process(struct node_s *node, void *arg)
     }
 
     // set first release points of all previously started (not delayed) periodic processes to the partition’s next periodic processing start
-    else if (process->processus_status->PROCESS_STATE == WAITING && process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE){
+    else if (process->processus_status->PROCESS_STATE == WAITING && !process->saved_init_delay &&process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE){
         process->release_point_time = first_release_point;
     }
 
     // set first release points of all previously delay started periodic processes to the partition’s next periodic processing start plus their delay times;
-    else if (process->processus_status->PROCESS_STATE == WAITING && process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE){
+    else if (process->processus_status->PROCESS_STATE == WAITING && process->saved_init_delay && process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE){
         process->release_point_time = first_release_point + process->saved_init_delay;
     }
 

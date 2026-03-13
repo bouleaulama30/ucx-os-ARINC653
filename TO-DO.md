@@ -12,9 +12,13 @@
 
     * faire de nouveau un test complet de la fonction pour savoir si c est fonctionnel apres avoir implementer la logique des processes
 
-* faire management process     
+* faire management process    
+    * voir pour fixe le no task run dans le cas ou il n y a pas de process pour la fenetre d'exec de la partition
     * coder les fonctions de l'APEX sur les processes            
-        
+        * test delay start:
+            * faire un test quand on est en mode normal
+                * Pour une periodic process
+                * Pour une aperiodic process
         * faire une verification globale de toutes les fonctions code pour savoir si ca respecte bien
 
         * redistribuer les points non coder (comme preemption lock mutex) vers les autres to do
@@ -61,6 +65,8 @@
     * faire en sorte d appeler les fonctions de check des delay et des timeout uniquement a chaque tick et non a chaque appel au scheduler car on fait du temps de calcul inutil
     * a la place de call ucx_uptime a chaque fois dans l'apex des processes voir pour get une seule fois le current time au debut de la fonction et ensuite l'utiliser pour toute la fonction
     * notamment dans set_partition_mode voir pour faire des fonctions pour voir si les processes sont aperiodic not delay not suspend ou aperiodic delay ou periodic not delay etc...
+    * mettre un linter C en place
+    * enlever repetition check_and_release_periodic_waiting_processes
 * faire une batterie de test unitaire que l'on peut test a chaque fois et qui couvre au maximum les partition et les processes
 
 * faire rouler sur la carte en materielle une fois que c'est bon pour les processus
