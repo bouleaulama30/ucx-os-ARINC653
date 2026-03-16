@@ -52,24 +52,27 @@ uint16_t process_schedule(void)
     struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
 #endif
 
-    struct process_s *process = partition->process_current->data;
+    // struct process_s *process = partition->process_current->data;
     struct node_s *node;
     
     struct node_s *select = NULL;
     struct process_s *pselect = NULL;
     int32_t highest_priority = -1; // On part de la priorité la plus basse possible
     
-    // 1. Le processus courant (s'il existe) repasse en READY
-    if (process->processus_status->PROCESS_STATE == RUNNING)
-        process->processus_status->PROCESS_STATE = READY;
+    if (partition->process_current != NULL) {
+        struct process_s *current_process = partition->process_current->data;
+        if (current_process->processus_status->PROCESS_STATE == RUNNING) {
+            current_process->processus_status->PROCESS_STATE = READY;
+        }
+    }
 
     // 2. PARCOURS UNIQUE : On cherche strictement le processus READY avec le plus grand chiffre
     node = partition->processes->head;
     while ((node = list_next(node))) {
         if (!node->next) break; // Sécurité pour la liste UCX-OS
         
-        process = node->data;
-        
+        struct process_s *process = node->data;        
+
         // Si le processus est prêt à s'exécuter
         if (process->processus_status->PROCESS_STATE == READY && !process->tcb.rt_prio) {
             
@@ -88,7 +91,8 @@ uint16_t process_schedule(void)
     if (select == NULL || pselect == NULL) {
         // En vrai ARINC 653, s'il n'y a rien, on devrait exécuter le processus "IDLE" de la partition.
         // Pour l'instant, on laisse le panic.
-        krnl_panic(ERR_NO_TASKS);
+        partition->process_current = NULL;
+        return 0;
     }
     
     // SUPPRESSION DE LA 2EME BOUCLE : 

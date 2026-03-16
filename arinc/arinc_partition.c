@@ -78,6 +78,15 @@ static struct node_s *check_timeouts(struct node_s *node, void *arg) {
     return 0;
 }
 
+static struct node_s *is_at_least_one_ready_process(struct node_s *node, void *arg) {
+    struct process_s *process = node->data;
+    // Si le processus  a un chronomètre actif (différent de 0)
+    if (process->processus_status->PROCESS_STATE == READY || process->processus_status->PROCESS_STATE == RUNNING) {
+        return node;
+    }
+    return 0;
+}
+
 void activate_process_scheduling(){
 #ifndef MULTICORE
     struct pcb_s *partition = kcb->partition_current->data;
@@ -85,11 +94,19 @@ void activate_process_scheduling(){
     struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
 #endif
     list_foreach(partition->processes, check_and_release_periodic_waiting_processes, (void *)0);
-    struct node_s* first_process_node = find_highest_priority_process(partition->processes);  
-    struct process_s* first_process = first_process_node->data;
+    if (list_foreach(partition->processes, is_at_least_one_ready_process, (void *)0) == NULL) {
+        printf("[AUCUN PROCESSES READY]\n");
+        partition->process_current = NULL;
+        longjmp(partition->partition_context, 1); 
+    }
+    else{
 
-    partition->process_current = first_process_node;
-    _dispatch_init(first_process->tcb.context);
+        struct node_s* first_process_node = find_highest_priority_process(partition->processes);  
+        struct process_s* first_process = first_process_node->data;
+
+        partition->process_current = first_process_node;
+        _dispatch_init(first_process->tcb.context);
+    }
 }
 
 
@@ -111,20 +128,40 @@ static void partition_OS(void)
         ((void (*)(struct pcb_s *))partition->entry_point)(partition);
 	}
     while (1) {
-        if (!partition->processes->length)
-            krnl_panic(ERR_NO_TASKS);
-
-        //check if periodic process should start
         list_foreach(partition->processes, check_and_release_periodic_waiting_processes, (void *)0);
         list_foreach(partition->processes, check_timeouts, (void *)0);
-
-        
+    
         if (!setjmp(partition->partition_context)) {
-            // list_foreach(kcb->tasks, delay_update, (void *)0);
+            
+            // 3. Appel de l'ordonnanceur
             process_schedule();
-            struct process_s *process = partition->process_current->data;
-            _interrupt_tick_process();
-            longjmp(process->tcb.context, 1);
+
+            // 4. A-t-on un processus à exécuter ?
+            if (partition->process_current != NULL) {
+                // OUI : On a trouvé un processus READY, on lui donne le CPU !
+                struct process_s *process = partition->process_current->data;
+                _interrupt_tick_process();
+                longjmp(process->tcb.context, 1); // <-- Saute vers le process
+            } 
+            else {
+                // NON : SLACK TIME ! Tous les processus dorment.
+                // On NE FAIT PAS de longjmp. On s'endort ici, dans le Kernel.
+                
+                // printf("[SLACK TIME] wfi...\n"); // Décommentez pour débugger
+                
+                // On s'assure que les interruptions matérielles sont actives 
+                // pour que le Timer Tick puisse nous réveiller
+                asm volatile ("csrs mstatus, 8"); 
+                
+                // Met le CPU RISC-V en basse consommation
+                _cpu_idle(); 
+
+                // --- BIIIP (Timer Tick Interrupt) ---
+                // Quand l'interruption se termine, le code reprend ici.
+                // La boucle while(1) va recommencer, mettre à jour l'Uptime,
+                // vérifier les timeouts, et si quelqu'un s'est réveillé, 
+                // le prochain process_schedule() le trouvera !
+            }
         }
     }
 }
