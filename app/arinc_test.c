@@ -68,14 +68,14 @@ void process_test0(void)
 	}
 	while (1) {
 		if(cnt % 2 == 0){
-			// SET_PARTITION_MODE(IDLE, &return_code);
 			printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 			SET_PRIORITY(1, 3, &return_code);
 			// SET_PRIORITY(1, 3, &return_code);
 
 		}
 		
-		// if(cnt == 100001)
+		if(cnt == 100001)
+			SET_PARTITION_MODE(IDLE, &return_code);
 		// 	STOP(1, &return_code);
 		// if(cnt == 100005)
 		// 	DELAYED_START(1, 50 ,&return_code);
@@ -107,10 +107,10 @@ void process_test1(void)
 			// SET_PRIORITY(0, 3, &return_code);
 		}
 
-		if(cnt == 200001)
-			STOP(0, &return_code);
-		if(cnt == 200003)
-			DELAYED_START(0, 90 ,&return_code);
+		// if(cnt == 200001)
+		// 	STOP(0, &return_code);
+		// if(cnt == 200003)
+		// 	DELAYED_START(0, 90 ,&return_code);
 
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 		ucx_task_yield();

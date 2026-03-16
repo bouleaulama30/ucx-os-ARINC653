@@ -3,8 +3,6 @@
 ## Partition implem
 
 * implémentation set_operating_mode:
-    * shut down the partition
-        * changer ucx_yield pour fit avec les process
     * inhibit process scheduling and switch back to initialization mode;
     * faire les actions quand elle passe en normal
         * -- a DEADLINE_TIME calculation may cause an overflow of the underlying -- clock. If this occurs, HM is invoked with an illegal request error code set the partition’s lock level to zero;

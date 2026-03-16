@@ -435,6 +435,7 @@ void SET_PARTITION_MODE (
     if (OPERATING_MODE == IDLE)
     {   
         printf("OPERATING MODE is IDLE\n");
+        my_partition->process_current = NULL;
         signal_idle_current_partition();
         ucx_task_yield();
     }
