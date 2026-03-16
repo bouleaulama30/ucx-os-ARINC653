@@ -3,7 +3,13 @@
 ## Partition implem
 
 * implémentation set_operating_mode:
-    * inhibit process scheduling and switch back to initialization mode;
+    * inhibit process scheduling and switch back to initialization mode:
+        * mettre processes courant a null
+        * vider la liste des processus
+        * remettre les variables d'etat comme les indices/indexes a 0
+        * voir si besoin de free des pointeurs lie a la partition ou a la creation des processes via create process
+        * remettre le sp a sa valeur initiale
+        * appeler la fonction entry
     * faire les actions quand elle passe en normal
         * -- a DEADLINE_TIME calculation may cause an overflow of the underlying -- clock. If this occurs, HM is invoked with an illegal request error code set the partition’s lock level to zero;
         * if (an error handler process has been created) then enable the error handler process for execution and fault processing;
