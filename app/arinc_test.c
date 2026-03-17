@@ -75,7 +75,7 @@ void process_test0(void)
 		}
 		
 		if(cnt == 100001)
-			SET_PARTITION_MODE(IDLE, &return_code);
+			SET_PARTITION_MODE(COLD_START, &return_code);
 		// 	STOP(1, &return_code);
 		// if(cnt == 100005)
 		// 	DELAYED_START(1, 50 ,&return_code);
@@ -144,9 +144,10 @@ int32_t cnt = 300000;
 		}
 		
 		if(cnt == 300001)
-			SUSPEND(1, &return_code);
-		if(cnt == 300005)
-			RESUME(1, &return_code);
+			// SUSPEND(1, &return_code);
+			SET_PARTITION_MODE(COLD_START, &return_code);
+		// if(cnt == 300005)
+		// 	RESUME(1, &return_code);
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 
 		ucx_task_yield();

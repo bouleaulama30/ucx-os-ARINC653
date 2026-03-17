@@ -3,13 +3,6 @@
 ## Partition implem
 
 * implémentation set_operating_mode:
-    * inhibit process scheduling and switch back to initialization mode:
-        * mettre processes courant a null
-        * vider la liste des processus
-        * remettre les variables d'etat comme les indices/indexes a 0
-        * voir si besoin de free des pointeurs lie a la partition ou a la creation des processes via create process
-        * remettre le sp a sa valeur initiale
-        * appeler la fonction entry
     * faire les actions quand elle passe en normal
         * -- a DEADLINE_TIME calculation may cause an overflow of the underlying -- clock. If this occurs, HM is invoked with an illegal request error code set the partition’s lock level to zero;
         * if (an error handler process has been created) then enable the error handler process for execution and fault processing;
@@ -67,6 +60,7 @@
     * mettre un linter C en place
     * enlever repetition check_and_release_periodic_waiting_processes
     * enlever les commentaires inutiles surtout ceux de copilot 
+    * voir dans set_operating_mode pour mettre le code pour vider une partition de ces processes dans une fonction
 * faire une batterie de test unitaire que l'on peut test a chaque fois et qui couvre au maximum les partition et les processes
 
 * faire rouler sur la carte en materielle une fois que c'est bon pour les processus

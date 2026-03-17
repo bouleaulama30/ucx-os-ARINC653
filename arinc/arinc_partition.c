@@ -105,6 +105,7 @@ void activate_process_scheduling(){
         struct process_s* first_process = first_process_node->data;
 
         partition->process_current = first_process_node;
+        first_process->processus_status->PROCESS_STATE = RUNNING;
         _dispatch_init(first_process->tcb.context);
     }
 }
@@ -122,12 +123,15 @@ static void partition_OS(void)
     
     _mprv_activate();
     
-
+start_over:
     setjmp(partition->partition_context);
 	if(partition->status->OPERATING_MODE == COLD_START || partition->status->OPERATING_MODE == WARM_START){
         ((void (*)(struct pcb_s *))partition->entry_point)(partition);
 	}
     while (1) {
+        if(partition->status->OPERATING_MODE == COLD_START || partition->status->OPERATING_MODE == WARM_START){
+            goto start_over;
+        }
         list_foreach(partition->processes, check_and_release_periodic_waiting_processes, (void *)0);
         list_foreach(partition->processes, check_timeouts, (void *)0);
     
@@ -444,6 +448,20 @@ void SET_PARTITION_MODE (
     {
         // inhibit process scheduling and switch back to initialization mode
         printf("OPERATING MODE is WARM START or COLD START\n");
+        my_partition->process_current = NULL;
+        my_partition->nbr_processes = 0;
+        my_partition->id_next = 0;
+        my_partition->next_stack_addr = my_partition->memory_requirements->memory[DATA].base + PARTIION_OS_AND_MAIN_PROCESS_STACK_SIZE;
+
+        // on vide la liste des processes de la partition
+        while (my_partition->processes->length != 0)
+        {
+            struct process_s *process  = list_pop(my_partition->processes);
+            free(process->processus_status);
+            free(process);
+        }
+        *RETURN_CODE = NO_ERROR;
+        longjmp(my_partition->partition_context, 1);
     }
     
     if (OPERATING_MODE == NORMAL)
