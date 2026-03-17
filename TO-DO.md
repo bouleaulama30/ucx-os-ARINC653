@@ -8,7 +8,7 @@
         * if (an error handler process has been created) then enable the error handler process for execution and fault processing;
 
 * faire la partie time management:
-    * lire la partie de la norme sur le time management
+    * faire en sorte de mettre toutes les metriques en ns car le lsb de system_time_type est 1 ns
     * implem l'apex:
         * TIMED_WAIT
         * PERIODIC_WAIT
@@ -57,7 +57,7 @@
     * enlever les commentaires inutiles surtout ceux de copilot 
     * voir dans set_operating_mode pour mettre le code pour vider une partition de ces processes dans une fonction
 * faire une batterie de test unitaire que l'on peut test a chaque fois et qui couvre au maximum les partition et les processes
-
+* merge la branche dev sur la main
 * faire rouler sur la carte en materielle une fois que c'est bon toute la norme
 
 ## intra partition communication
