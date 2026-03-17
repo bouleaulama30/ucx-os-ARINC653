@@ -7,27 +7,22 @@
         * -- a DEADLINE_TIME calculation may cause an overflow of the underlying -- clock. If this occurs, HM is invoked with an illegal request error code set the partition’s lock level to zero;
         * if (an error handler process has been created) then enable the error handler process for execution and fault processing;
 
-    * faire de nouveau un test complet de la fonction pour savoir si c est fonctionnel apres avoir implementer la logique des processes
-
-* faire management process    
-    * coder les fonctions de l'APEX sur les processes            
-        * faire une verification globale de toutes les fonctions code pour savoir si ca respecte bien
-
-        * redistribuer les points non coder (comme preemption lock mutex) vers les autres to do
-            * get_process_status cf si le process possede le lock preemption alors renvoyer la priorite max pour la current_priority
-            * set_priority voir dans le cas ou le process own a mutex et ne pas rescheduler s'il n a pas de preemption lock
-            * stop self, liberer les ressources comme le mutex ou autre
-            * stop  gerer les mutex, remove process de la waiting queue s il etait dans l etat waiting
-            * suspend  gerer le lock mutex/mutex
-            * suspend self  gerer le lock mutex/mutex
-            * resume  checker s il attend avec un time wait etc..., gerer le lock mutex et le check avec les ressources et les timer
-            * plus tard repassser sur toute les fonctions pour gerer les processes queue quand elles seront implem
-
-    * tester les fonctions de l'APEX sur les processes
-    * implem la waiting queue (quand on aura implem la partie intra et inter communication)
-
+* faire la partie time management:
+    * lire la partie de la norme sur le time management
+    * implem l'apex:
+        * TIMED_WAIT
+        * PERIODIC_WAIT
+        * GET_TIME
+        * REPLENISH
+    * test rapide du comportement de l'apex
     * ATTENTION des qu'on ajoute un nouveau time count dans la struct du process il faut penser a gerer son etat dans les differentes fonction de l'apex
 
+* faire management process
+    * faire un check quand la deadline est depasse (mettre un print)
+    * implem la waiting queue (quand on aura implem la partie intra et inter communication)
+    * ATTENTION des qu'on ajoute un nouveau time count dans la struct du process il faut penser a gerer son etat dans les differentes fonction de l'apex
+
+* faire une verification globale de toutes les fonctions code pour savoir si ca respecte bien l'apex du time et process management
 
 * refractor / formatage code:
     * mettre des ifndef pour les ajouts a l os de base pour maintenir le code isole:
@@ -63,10 +58,20 @@
     * voir dans set_operating_mode pour mettre le code pour vider une partition de ces processes dans une fonction
 * faire une batterie de test unitaire que l'on peut test a chaque fois et qui couvre au maximum les partition et les processes
 
-* faire rouler sur la carte en materielle une fois que c'est bon pour les processus
+* faire rouler sur la carte en materielle une fois que c'est bon toute la norme
 
 ## intra partition communication
 * coder tout ce qui est relatif au lock preemption mutex pour les process
+
+            * get_process_status cf si le process possede le lock preemption alors renvoyer la priorite max pour la current_priority
+            * set_priority voir dans le cas ou le process own a mutex et ne pas rescheduler s'il n a pas de preemption lock
+            * stop self, liberer les ressources comme le mutex ou autre
+            * stop  gerer les mutex, remove process de la waiting queue s il etait dans l etat waiting
+            * suspend  gerer le lock mutex/mutex
+            * suspend self  gerer le lock mutex/mutex
+            * resume  checker s il attend avec un time wait etc..., gerer le lock mutex et le check avec les ressources et les timer
+            * plus tard repassser sur toute les fonctions pour gerer les processes queue quand elles seront implem
+
 
 ## HM
 
