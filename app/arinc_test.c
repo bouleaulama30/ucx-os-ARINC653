@@ -67,16 +67,16 @@ void process_test0(void)
 		printf("Le nom du process: %s, with priority %d\n", other_process_status.ATTRIBUTES.NAME, other_process_status.CURRENT_PRIORITY);
 	}
 	while (1) {
-		if(cnt % 2 == 0){
-			printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-			SET_PRIORITY(1, 3, &return_code);
-			// SET_PRIORITY(1, 3, &return_code);
+		// if(cnt % 2 == 0){
+		// 	printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
+		// 	SET_PRIORITY(1, 3, &return_code);
+		// 	// SET_PRIORITY(1, 3, &return_code);
 
-		}
+		// }
 		
-		if(cnt == 100001)
-			SET_PARTITION_MODE(COLD_START, &return_code);
-		// 	STOP(1, &return_code);
+		// if(cnt == 100001)
+			// SET_PARTITION_MODE(COLD_START, &return_code);
+			// STOP(1, &return_code);
 		// if(cnt == 100005)
 		// 	DELAYED_START(1, 50 ,&return_code);
 
@@ -86,8 +86,8 @@ void process_test0(void)
 		// 	printf("return code suspend_self %d:", return_code);
 		// }
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-
-		ucx_task_yield();
+		TIMED_WAIT(5, &return_code);
+		// ucx_task_yield();
 	}
 }
 
@@ -101,11 +101,11 @@ void process_test1(void)
 	GET_MY_PARTITION_ID(&paritition_id, &return_code);
     GET_MY_ID(&process_id, &return_code);
 	while (1) {
-		if(cnt % 2 == 0){
-			printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-			SET_PRIORITY(1, 1, &return_code);
-			// SET_PRIORITY(0, 3, &return_code);
-		}
+		// if(cnt % 2 == 0){
+		// 	printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
+		// 	SET_PRIORITY(1, 1, &return_code);
+		// 	// SET_PRIORITY(0, 3, &return_code);
+		// }
 
 		// if(cnt == 200001)
 		// 	STOP(0, &return_code);
@@ -113,7 +113,8 @@ void process_test1(void)
 		// 	DELAYED_START(0, 90 ,&return_code);
 
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-		ucx_task_yield();
+		TIMED_WAIT(5, &return_code);
+		// ucx_task_yield();
 	}
 }
 
@@ -144,13 +145,15 @@ int32_t cnt = 300000;
 		}
 		
 		if(cnt == 300001)
-			// SUSPEND(1, &return_code);
-			SET_PARTITION_MODE(COLD_START, &return_code);
-		// if(cnt == 300005)
-		// 	RESUME(1, &return_code);
+			SUSPEND(1, &return_code);
+			// SET_PARTITION_MODE(COLD_START, &return_code);
+		if(cnt == 300005)
+			RESUME(1, &return_code);
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 
-		ucx_task_yield();
+		TIMED_WAIT(5, &return_code);
+		// ucx_task_yield();
+
 	}
 }
 
@@ -170,7 +173,9 @@ void process_test3(void)
 			// SET_PRIORITY(0, 3, &return_code);
 		}
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-		ucx_task_yield();
+		TIMED_WAIT(5, &return_code);
+		// ucx_task_yield();
+
 	}
 }
 

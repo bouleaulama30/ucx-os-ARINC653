@@ -3,18 +3,19 @@
 ## Partition implem
 
 * implémentation set_operating_mode:
+    * idle voir pour faire autre chose que le yield
     * faire les actions quand elle passe en normal
         * -- a DEADLINE_TIME calculation may cause an overflow of the underlying -- clock. If this occurs, HM is invoked with an illegal request error code set the partition’s lock level to zero;
         * if (an error handler process has been created) then enable the error handler process for execution and fault processing;
 
 * faire la partie time management:
-    * faire en sorte de mettre toutes les metriques en ns car le lsb de system_time_type est 1 ns
     * implem l'apex:
-        * TIMED_WAIT
+        * TIMED_WAIT:
+            * gerer le cas des mutexes
         * PERIODIC_WAIT
-        * GET_TIME
         * REPLENISH
     * test rapide du comportement de l'apex
+    * redistribuer les to do de l'apex dans les autres sections
     * ATTENTION des qu'on ajoute un nouveau time count dans la struct du process il faut penser a gerer son etat dans les differentes fonction de l'apex
 
 * faire management process
@@ -56,6 +57,7 @@
     * enlever repetition check_and_release_periodic_waiting_processes
     * enlever les commentaires inutiles surtout ceux de copilot 
     * voir dans set_operating_mode pour mettre le code pour vider une partition de ces processes dans une fonction
+    * enlever les print f qui sont trop lourd
 * faire une batterie de test unitaire que l'on peut test a chaque fois et qui couvre au maximum les partition et les processes
 * merge la branche dev sur la main
 * faire rouler sur la carte en materielle une fois que c'est bon toute la norme
@@ -74,7 +76,7 @@
 
 
 ## HM
-
+* faire en sorte de mettre toutes les metriques en ns car le lsb de system_time_type est 1 ns
 * implem is_executing_error_handler pour get_my_id et get_my_index
 * implem is_main_process (trouver une condition necessaire et suffisante genre il n y a pas de current process) pour get_my_id et get_my_index
 

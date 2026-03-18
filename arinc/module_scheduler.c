@@ -2,16 +2,17 @@
 
 void print_time_sched()
 {
-	uint32_t secs, msecs, time;
-	
-	time = ucx_uptime();
+	uint64_t secs, msecs, time;
+	RETURN_CODE_TYPE return_code;
+    SYSTEM_TIME_TYPE system_time;
+	GET_TIME(&system_time, &return_code);
 	// if (!time_initialized) {
     //     start_time = time;
     //     time_initialized = 1;
     // }
 	// time -= start_time;
-	secs = time / 1000;
-	msecs = time - secs * 1000;
+	secs = system_time / 1000000;
+	msecs = system_time - secs * 1000000;
 	
 	printf("[Uptime %ld.%03lds]\n", secs, msecs);
 }

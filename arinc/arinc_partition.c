@@ -66,7 +66,10 @@ static struct node_s *check_timeouts(struct node_s *node, void *arg) {
 
     // Si le processus  a un chronomètre actif (différent de 0)
     if (process->time_counter != 0) {
-        
+        // printf("check_timeouts proc: %d, uptime: %u, time counter: %u\n", 
+        //         process->process_id, 
+        //         (unsigned)current_time, 
+        //         (unsigned)process->time_counter); 
         if (current_time >= process->time_counter) {
                         
             process->is_suspended = false;

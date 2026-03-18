@@ -86,15 +86,15 @@ static const window_partition_type DEFAULT_WINDOWS[] = {
         .name = "DefaultPartition",
         .id = 1,
         .start_tick = MS_TO_TICKS(0),
-        .duration_tick = MS_TO_TICKS(30),
+        .duration_tick = MS_TO_TICKS(40),
         .is_periodic_processes_start = (BOOLEAN_TYPE)true,
         // .is_periodic_processes_start = (BOOLEAN_TYPE)false,
     },
     {
         .name = "P2",
         .id = 2,
-        .start_tick = MS_TO_TICKS(30),
-        .duration_tick = MS_TO_TICKS(30),
+        .start_tick = MS_TO_TICKS(40),
+        .duration_tick = MS_TO_TICKS(20),
         .is_periodic_processes_start = (BOOLEAN_TYPE)true,
         },
     {
@@ -134,7 +134,7 @@ static const PROCESS_ATTRIBUTE_TYPE PROCESS_1_CONFIG = {
     .TIME_CAPACITY = 50,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test1,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 3,            // Medium priority (1-239)
+    .BASE_PRIORITY = 2,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "Process 1"
 };
