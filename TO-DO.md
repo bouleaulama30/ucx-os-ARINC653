@@ -14,13 +14,15 @@
         * PERIODIC_WAIT:
             * gerer le cas des mutexes
             * traiter ce commentaire: When a process misses its first deadline, the process is permitted to continue to be eligible for scheduling. If the process overruns its next release point(s), it is implementation dependent whether the next release point is in the future (i.e., the process period(s) that were overrun are skipped) or in the past (i.e., the process period(s) that were overrun are included).
-        * REPLENISH
+        * REPLENISH:
+            * gerer le cas avec le error handler
+            * A periodic or aperiodic process created with an infinite time capacity does not have a deadline.
     * regarder si dans les calcules de deadline si quand le time capacity est infinite alors la deadline l'est aussi 
     * test rapide du comportement de l'apex
     * redistribuer les to do de l'apex dans les autres sections
     * ATTENTION des qu'on ajoute un nouveau time count dans la struct du process il faut penser a gerer son etat dans les differentes fonction de l'apex
 
-* faire un check quand la deadline est depasse (mettre un print) et regarder le commentaire de la fonction periodic_wait dans le time management
+* faire un check quand la deadline est depasse (mettre un print) et regarder le commentaire de la fonction periodic_wait et replenish dans le time management voir si besoin de redire que la deadline est infini dans les fonctions
 
 * faire management process
     * implem la waiting queue (quand on aura implem la partie intra et inter communication)

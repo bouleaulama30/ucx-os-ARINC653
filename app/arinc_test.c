@@ -61,11 +61,6 @@ void process_test0(void)
 	PROCESS_STATUS_TYPE other_process_status;
 	GET_MY_PARTITION_ID(&paritition_id, &return_code);
     GET_MY_ID(&process_id, &return_code);
-	GET_PROCESS_STATUS(1, &other_process_status, &return_code);
-	
-	if(return_code == NO_ERROR){
-		printf("Le nom du process: %s, with priority %d\n", other_process_status.ATTRIBUTES.NAME, other_process_status.CURRENT_PRIORITY);
-	}
 	while (1) {
 		// if(cnt % 2 == 0){
 		// 	printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
@@ -77,8 +72,14 @@ void process_test0(void)
 		// if(cnt == 100001)
 		// 	SET_PARTITION_MODE(IDLE, &return_code);
 			// STOP(1, &return_code);
-		// if(cnt == 100005)
-		// 	DELAYED_START(1, 50 ,&return_code);
+		if(cnt == 100005){
+			GET_PROCESS_STATUS(0, &other_process_status, &return_code);
+			printf("CURRENT DEADLINE OF PROCESS %s: %d\n", other_process_status.ATTRIBUTES.NAME, other_process_status.DEADLINE_TIME);
+			REPLENISH(10, &return_code);
+			GET_PROCESS_STATUS(0, &other_process_status, &return_code);
+			printf("NEW DEADLINE OF PROCESS %s: %d\n", other_process_status.ATTRIBUTES.NAME, other_process_status.DEADLINE_TIME);
+			// DELAYED_START(1, 50 ,&return_code);
+		}
 
 		// if(cnt == 100011){
 		// 	printf("SUSPEND TIME %d\n", ucx_uptime());

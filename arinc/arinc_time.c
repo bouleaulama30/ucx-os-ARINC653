@@ -99,4 +99,37 @@ extern void GET_TIME (
 
 extern void REPLENISH (
        /*in */ SYSTEM_TIME_TYPE         BUDGET_TIME,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+#ifndef MULTICORE
+    struct node_s *partition_node = kcb->partition_current;
+#else
+    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
+#endif
+    struct pcb_s *partition = partition_node->data;
+    struct node_s *current_process_node = partition->process_current; 
+    struct process_s *current_process = current_process_node->data;
+    
+
+    uint64_t uptime = ucx_uptime();
+    uint64_t max_system_time = 0x7fffffffffffffffULL;
+    if (BUDGET_TIME < -1 || uptime > (max_system_time - (uint64_t)BUDGET_TIME)){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if(current_process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE && (BUDGET_TIME == INFINITE_TIME_VALUE || ((SYSTEM_TIME_TYPE)uptime + BUDGET_TIME) > current_process->release_point_time)){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+
+    if(current_process->processus_status->ATTRIBUTES.TIME_CAPACITY == INFINITE_TIME_VALUE)
+        current_process->processus_status->DEADLINE_TIME = INFINITE_TIME_VALUE;
+    else if(current_process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE && BUDGET_TIME == INFINITE_TIME_VALUE)
+        current_process->processus_status->DEADLINE_TIME = INFINITE_TIME_VALUE;
+    else{
+        current_process->processus_status->DEADLINE_TIME = (SYSTEM_TIME_TYPE)ucx_uptime() + BUDGET_TIME;
+    
+    }
+
+    *RETURN_CODE = NO_ERROR;
+}
