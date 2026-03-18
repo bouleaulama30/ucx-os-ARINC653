@@ -38,8 +38,8 @@ static struct node_s *check_and_release_periodic_waiting_processes(struct node_s
         if(current_time >= rp_time){
             printf("=> REVEIL ! release point time: %u\n", (unsigned)rp_time);
             process->processus_status->PROCESS_STATE = READY;
-            process->processus_status->DEADLINE_TIME = process->release_point_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
-            process->release_point_time += process->processus_status->ATTRIBUTES.PERIOD;
+            // process->processus_status->DEADLINE_TIME = process->release_point_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+            // process->release_point_time += process->processus_status->ATTRIBUTES.PERIOD;
         }
     }
     // aperiodic delayed processes started during cold start

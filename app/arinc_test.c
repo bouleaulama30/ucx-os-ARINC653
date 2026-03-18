@@ -74,8 +74,8 @@ void process_test0(void)
 
 		// }
 		
-		if(cnt == 100001)
-			SET_PARTITION_MODE(IDLE, &return_code);
+		// if(cnt == 100001)
+		// 	SET_PARTITION_MODE(IDLE, &return_code);
 			// STOP(1, &return_code);
 		// if(cnt == 100005)
 		// 	DELAYED_START(1, 50 ,&return_code);
@@ -113,7 +113,8 @@ void process_test1(void)
 		// 	DELAYED_START(0, 90 ,&return_code);
 
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-		TIMED_WAIT(5, &return_code);
+		PERIODIC_WAIT(&return_code);
+		printf("return code periodic_wait %d\n", return_code);
 		// ucx_task_yield();
 	}
 }
