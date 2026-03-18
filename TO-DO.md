@@ -18,15 +18,14 @@
             * gerer le cas avec le error handler
             * A periodic or aperiodic process created with an infinite time capacity does not have a deadline.
     * regarder si dans les calcules de deadline si quand le time capacity est infinite alors la deadline l'est aussi 
-    * test rapide du comportement de l'apex
     * redistribuer les to do de l'apex dans les autres sections
-    * ATTENTION des qu'on ajoute un nouveau time count dans la struct du process il faut penser a gerer son etat dans les differentes fonction de l'apex
+
 
 * faire un check quand la deadline est depasse (mettre un print) et regarder le commentaire de la fonction periodic_wait et replenish dans le time management voir si besoin de redire que la deadline est infini dans les fonctions
 
 * faire management process
     * implem la waiting queue (quand on aura implem la partie intra et inter communication)
-    * ATTENTION des qu'on ajoute un nouveau time count dans la struct du process il faut penser a gerer son etat dans les differentes fonction de l'apex
+
 
 * faire une verification globale de toutes les fonctions code pour savoir si ca respecte bien l'apex du time et process management
 

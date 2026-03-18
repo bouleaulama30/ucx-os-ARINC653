@@ -62,7 +62,7 @@ static struct node_s *check_and_release_periodic_waiting_processes(struct node_s
 
 static struct node_s *check_timeouts(struct node_s *node, void *arg) {
     struct process_s *process = node->data;
-    uint64_t current_time = (uint64_t)ucx_uptime();
+    SYSTEM_TIME_TYPE current_time = (SYSTEM_TIME_TYPE)ucx_uptime();
 
     // Si le processus  a un chronomètre actif (différent de 0)
     if (process->time_counter != 0) {
@@ -77,6 +77,16 @@ static struct node_s *check_timeouts(struct node_s *node, void *arg) {
 
             process->processus_status->PROCESS_STATE = READY;
         }
+    }
+    return 0;
+}
+
+static struct node_s *check_deadlines(struct node_s *node, void *arg) {
+    struct process_s *process = node->data;
+    SYSTEM_TIME_TYPE current_time = (SYSTEM_TIME_TYPE)ucx_uptime();
+
+    if (current_time >= process->processus_status->DEADLINE_TIME && process->processus_status->DEADLINE_TIME != INFINITE_TIME_VALUE) {
+        printf("ATTENTION LE PROCESS %d A DEPASSE SA DEADLINE QUI ETAIT DE %d\n", process->process_id, process->processus_status->DEADLINE_TIME);
     }
     return 0;
 }
@@ -137,6 +147,7 @@ start_over:
         }
         list_foreach(partition->processes, check_and_release_periodic_waiting_processes, (void *)0);
         list_foreach(partition->processes, check_timeouts, (void *)0);
+        list_foreach(partition->processes, check_deadlines, (void *)0);
     
         if (!setjmp(partition->partition_context)) {
             
