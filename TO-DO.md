@@ -7,25 +7,6 @@
         * -- a DEADLINE_TIME calculation may cause an overflow of the underlying -- clock. If this occurs, HM is invoked with an illegal request error code set the partition’s lock level to zero;
         * if (an error handler process has been created) then enable the error handler process for execution and fault processing;
 
-* faire la partie time management:
-    * implem l'apex:
-        * TIMED_WAIT:
-            * gerer le cas des mutexes
-        * PERIODIC_WAIT:
-            * gerer le cas des mutexes
-            * traiter ce commentaire: When a process misses its first deadline, the process is permitted to continue to be eligible for scheduling. If the process overruns its next release point(s), it is implementation dependent whether the next release point is in the future (i.e., the process period(s) that were overrun are skipped) or in the past (i.e., the process period(s) that were overrun are included).
-        * REPLENISH:
-            * gerer le cas avec le error handler
-            * A periodic or aperiodic process created with an infinite time capacity does not have a deadline.
-    * regarder si dans les calcules de deadline si quand le time capacity est infinite alors la deadline l'est aussi 
-    * redistribuer les to do de l'apex dans les autres sections
-
-
-* faire un check quand la deadline est depasse (mettre un print) et regarder le commentaire de la fonction periodic_wait et replenish dans le time management voir si besoin de redire que la deadline est infini dans les fonctions
-
-* faire management process
-    * implem la waiting queue (quand on aura implem la partie intra et inter communication)
-
 
 * faire une verification globale de toutes les fonctions code pour savoir si ca respecte bien l'apex du time et process management
 
@@ -62,6 +43,17 @@
     * enlever les commentaires inutiles surtout ceux de copilot 
     * voir dans set_operating_mode pour mettre le code pour vider une partition de ces processes dans une fonction
     * enlever les print f qui sont trop lourd
+    * faire une fonction update deadline ou le check de si le time capacity est infini sera effectue comme ca les process avec infinite time capacity rouleront sans pb:
+    void update_process_deadline(struct process_s *process, SYSTEM_TIME_TYPE base_time) {
+    if (process->processus_status->ATTRIBUTES.TIME_CAPACITY == INFINITE_TIME_VALUE) {
+        // La norme exige que si la capacité est infinie, la deadline devient infinie
+        process->processus_status->DEADLINE_TIME = INFINITE_TIME_VALUE;
+    } else {
+        // Calcul normal
+        process->processus_status->DEADLINE_TIME = base_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+    }
+}
+
 * faire une batterie de test unitaire que l'on peut test a chaque fois et qui couvre au maximum les partition et les processes
 * merge la branche dev sur la main
 * faire rouler sur la carte en materielle une fois que c'est bon toute la norme
@@ -76,7 +68,15 @@
             * suspend  gerer le lock mutex/mutex
             * suspend self  gerer le lock mutex/mutex
             * resume  checker s il attend avec un time wait etc..., gerer le lock mutex et le check avec les ressources et les timer
+            * TIMED_WAIT:
+                * gerer le cas des mutexes
+            * PERIODIC_WAIT:
+                * gerer le cas des mutexes
+            * REPLENISH:
+                * gerer le cas avec le error handler
             * plus tard repassser sur toute les fonctions pour gerer les processes queue quand elles seront implem
+            * implem la waiting queue (quand on aura implem la partie intra et inter communication)
+
 
 
 ## HM

@@ -427,7 +427,7 @@ void START (
     SYSTEM_TIME_TYPE time_capacity = process->processus_status->ATTRIBUTES.TIME_CAPACITY;
     uint64_t uptime = ucx_uptime();
     uint64_t max_system_time = 0x7fffffffffffffffULL;
-    if (time_capacity < 0 || uptime > (max_system_time - (uint64_t)time_capacity)){
+    if (time_capacity < -1 || uptime > (max_system_time - (uint64_t)time_capacity)){
         *RETURN_CODE = INVALID_CONFIG;
         return;
     }
