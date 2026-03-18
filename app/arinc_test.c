@@ -74,8 +74,8 @@ void process_test0(void)
 
 		// }
 		
-		// if(cnt == 100001)
-			// SET_PARTITION_MODE(COLD_START, &return_code);
+		if(cnt == 100001)
+			SET_PARTITION_MODE(IDLE, &return_code);
 			// STOP(1, &return_code);
 		// if(cnt == 100005)
 		// 	DELAYED_START(1, 50 ,&return_code);

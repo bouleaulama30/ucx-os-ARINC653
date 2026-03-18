@@ -144,7 +144,7 @@ start_over:
             process_schedule();
 
             // 4. A-t-on un processus à exécuter ?
-            if (partition->process_current != NULL) {
+            if (partition->process_current != NULL && partition->status->OPERATING_MODE == NORMAL) {
                 // OUI : On a trouvé un processus READY, on lui donne le CPU !
                 struct process_s *process = partition->process_current->data;
                 _interrupt_tick_process();
@@ -444,7 +444,8 @@ void SET_PARTITION_MODE (
         printf("OPERATING MODE is IDLE\n");
         my_partition->process_current = NULL;
         signal_idle_current_partition();
-        ucx_task_yield();
+        longjmp(my_partition->partition_context, 1);
+        // ucx_task_yield();
     }
 
     if (OPERATING_MODE == WARM_START || OPERATING_MODE == COLD_START)
