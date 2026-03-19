@@ -7,9 +7,6 @@
         * -- a DEADLINE_TIME calculation may cause an overflow of the underlying -- clock. If this occurs, HM is invoked with an illegal request error code set the partition’s lock level to zero;
         * if (an error handler process has been created) then enable the error handler process for execution and fault processing;
 
-
-* faire une verification globale de toutes les fonctions code pour savoir si ca respecte bien l'apex du time et process management
-
 * refractor / formatage code:
     * mettre des ifndef pour les ajouts a l os de base pour maintenir le code isole:
         * main, struct kcb, ucx.h, process.c.h, fonction dispatch, interrupt_tick (process et partition) dans le hal, yield (enlever les doublons entre tasks et processes)
@@ -54,7 +51,6 @@
     }
 }
 
-* faire une batterie de test unitaire que l'on peut test a chaque fois et qui couvre au maximum les partition et les processes
 * merge la branche dev sur la main
 * faire rouler sur la carte en materielle une fois que c'est bon toute la norme
 
