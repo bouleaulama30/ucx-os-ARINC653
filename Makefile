@@ -148,6 +148,10 @@ arinc_test_api_partition: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_api_partition.o app/arinc_test_api_partition.c
 	@$(MAKE) --no-print-directory link
 
+arinc_test_apex_process_and_time: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_apex_process_and_time.o app/arinc_test_apex_process_and_time.c
+	@$(MAKE) --no-print-directory link
+
 coroutine_args: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/coroutine_args.o app/coroutine_args.c
 	@$(MAKE) --no-print-directory link
@@ -396,6 +400,13 @@ gdb:
 
 multiarch-gdb:
 	gdb-multiarch -x ./debug/.gdbinit ./build/target/image.elf
+
+test:
+	$(MAKE) veryclean
+	$(MAKE) ucx ARCH=riscv/riscv32-qemu
+	$(MAKE) arinc_test_apex_process_and_time
+	-timeout $(DURATION) qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:./debug/test.txt
+	head -n30 ./debug/test.txt
 
 all:
 	$(MAKE) veryclean

@@ -10,6 +10,13 @@ extern void process_test2(void);
 extern void process_test3(void);
 extern void test_spatial_violation_p1(void);
 extern void test_spatial_violation_p2(void);
+extern void test_round_robin_A(void);
+extern void test_round_robin_B(void);
+extern void test_periodic_accuracy(void);
+extern void test_states_slave(void);
+extern void test_states_master(void);
+extern void test_prio_A(void);
+extern void test_prio_B(void);
 
 
 
@@ -142,7 +149,7 @@ static const PROCESS_ATTRIBUTE_TYPE PROCESS_1_CONFIG = {
 // process 2 configuration
 static const PROCESS_ATTRIBUTE_TYPE PROCESS_2_CONFIG = {
     .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 10000000,       // 10ms in nanoseconds
+    .TIME_CAPACITY = 10,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test2,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
     .BASE_PRIORITY = 2,            // Medium priority (1-239)
@@ -153,7 +160,7 @@ static const PROCESS_ATTRIBUTE_TYPE PROCESS_2_CONFIG = {
 // process 3 configuration
 static const PROCESS_ATTRIBUTE_TYPE PROCESS_3_CONFIG = {
     .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 10000000,       // 10ms in nanoseconds
+    .TIME_CAPACITY = 10,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test3,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
     .BASE_PRIORITY = 3,            // Medium priority (1-239)

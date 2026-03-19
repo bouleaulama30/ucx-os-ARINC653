@@ -391,7 +391,6 @@ static struct node_s *start_process(struct node_s *node, void *arg)
 {
 	struct process_s *process = node->data;
 	SYSTEM_TIME_TYPE first_release_point = (SYSTEM_TIME_TYPE) arg;
-
     // set to READY all previously started (not delayed) aperiodic processes (unless the process was suspended)
 	if (process->processus_status->PROCESS_STATE == WAITING && !process->saved_init_delay && process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE && !process->is_suspended){
         process->processus_status->PROCESS_STATE = READY;
@@ -420,6 +419,8 @@ static struct node_s *start_process(struct node_s *node, void *arg)
         process->processus_status->DEADLINE_TIME =  process->release_point_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
         return 0;
     }
+
+    return 0;
 }
 
 
