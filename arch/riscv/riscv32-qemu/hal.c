@@ -120,7 +120,6 @@ void _irq_handler(uint32_t cause, uint32_t epc)
         mepc = read_csr(mepc);
         mtval = read_csr(mtval);
         mstatus = read_csr(mstatus);
-        // printf("[TIMER INTERRUPT] mcause=%x, mepc=%x, mtval=%x, mstatus=%x\n", val, mepc, mtval, mstatus);
         mtimecmp_w(mtime_r() + (F_CPU / F_TIMER));
 
 #ifndef MULTICORE
@@ -145,7 +144,6 @@ void _irq_handler(uint32_t cause, uint32_t epc)
             longjmp(kcb[core_id]->context, 1);
         }
 #endif
-        // krnl_dispatcher();
     } else {
         mepc = read_csr(mepc);
         mtval = read_csr(mtval);

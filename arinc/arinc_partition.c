@@ -38,8 +38,7 @@ static struct node_s *check_and_release_periodic_waiting_processes(struct node_s
         if(current_time >= rp_time){
             printf("=> REVEIL ! release point time: %u\n", (unsigned)rp_time);
             process->processus_status->PROCESS_STATE = READY;
-            // process->processus_status->DEADLINE_TIME = process->release_point_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
-            // process->release_point_time += process->processus_status->ATTRIBUTES.PERIOD;
+
         }
     }
     // aperiodic delayed processes started during cold start
@@ -66,10 +65,6 @@ static struct node_s *check_timeouts(struct node_s *node, void *arg) {
 
     // Si le processus  a un chronomètre actif (différent de 0)
     if (process->time_counter != 0) {
-        // printf("check_timeouts proc: %d, uptime: %u, time counter: %u\n", 
-        //         process->process_id, 
-        //         (unsigned)current_time, 
-        //         (unsigned)process->time_counter); 
         if (current_time >= process->time_counter) {
                         
             process->is_suspended = false;
@@ -150,35 +145,16 @@ start_over:
         list_foreach(partition->processes, check_deadlines, (void *)0);
     
         if (!setjmp(partition->partition_context)) {
-            
-            // 3. Appel de l'ordonnanceur
             process_schedule();
 
-            // 4. A-t-on un processus à exécuter ?
             if (partition->process_current != NULL && partition->status->OPERATING_MODE == NORMAL) {
-                // OUI : On a trouvé un processus READY, on lui donne le CPU !
                 struct process_s *process = partition->process_current->data;
                 _interrupt_tick_process();
-                longjmp(process->tcb.context, 1); // <-- Saute vers le process
+                longjmp(process->tcb.context, 1); 
             } 
             else {
-                // NON : SLACK TIME ! Tous les processus dorment.
-                // On NE FAIT PAS de longjmp. On s'endort ici, dans le Kernel.
-                
-                // printf("[SLACK TIME] wfi...\n"); // Décommentez pour débugger
-                
-                // On s'assure que les interruptions matérielles sont actives 
-                // pour que le Timer Tick puisse nous réveiller
                 asm volatile ("csrs mstatus, 8"); 
-                
-                // Met le CPU RISC-V en basse consommation
                 _cpu_idle(); 
-
-                // --- BIIIP (Timer Tick Interrupt) ---
-                // Quand l'interruption se termine, le code reprend ici.
-                // La boucle while(1) va recommencer, mettre à jour l'Uptime,
-                // vérifier les timeouts, et si quelqu'un s'est réveillé, 
-                // le prochain process_schedule() le trouvera !
             }
         }
     }
@@ -223,7 +199,6 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     status->IDENTIFIER = IDENTIFIER;
     status->NUM_ASSIGNED_CORES = NUM_ASSIGNED_CORES;
     status->LOCK_LEVEL = 0; 
-    // status->OPERATING_MODE = (IDENTIFIER == IDLE_PARTITION_ID) ? NORMAL : (IDENTIFIER == 1 ? NORMAL : NORMAL); 
     status->OPERATING_MODE = COLD_START;
     status->START_CONDITION = NORMAL_START;
 
@@ -283,11 +258,6 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 
     CRITICAL_LEAVE();
 
-    // // initialisation de la mémoire pour le code, TO-DO faire pareil pour la data
-    // memset(code_region->base, 0x69, code_region->size);
-	// memset(code_region->base, 0x33, 4);
-	// memset((code_region->base) + code_region->size - 4, 0x33, 4);
-
     _context_init(&new_pcb->tcb.context, (size_t)new_pcb->tcb.stack,
         new_pcb->tcb.stack_sz, (size_t)new_pcb->tcb.task);
 
@@ -309,12 +279,8 @@ static struct node_s *find_partition(struct node_s *node, void *arg){
 
 
 int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
-// --- 1. GESTION DU CREUX ENTRE LES PARTITIONS (IDLE) ---
     if (IDENTIFIER == IDLE_PARTITION_ID) {
-        // On sécurise le système : le PMP bloque tous les accès aux zones mémoires usager
         _pmp_partition_activate((uint32_t)_kernel_end, (uint32_t)0, (uint32_t)0);
-
-// L'IDLE n'est plus une vraie partition, on coupe juste le pointeur
 #ifndef MULTICORE
         kcb->partition_current = NULL;
 #else
@@ -323,7 +289,6 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
         return IDLE_PARTITION_ID;
     }
 
-    // --- 2. GESTION DES PARTITIONS USAGER NORMALES ---
 #ifndef MULTICORE
     struct node_s *partition_node = list_foreach(kcb->partitions, find_partition, (void *)IDENTIFIER);
     if(!partition_node){
@@ -482,9 +447,7 @@ void SET_PARTITION_MODE (
     
     if (OPERATING_MODE == NORMAL)
     {
-        // cf norme
         printf("OPERATING MODE is NORMAL\n");
-        //set all processes to ready state
         *RETURN_CODE = NO_ERROR;
 
         SYSTEM_TIME_TYPE first_release_point = find_first_release_point(my_partition);

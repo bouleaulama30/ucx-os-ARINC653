@@ -6,11 +6,6 @@ void print_time_sched()
 	RETURN_CODE_TYPE return_code;
     SYSTEM_TIME_TYPE system_time;
 	GET_TIME(&system_time, &return_code);
-	// if (!time_initialized) {
-    //     start_time = time;
-    //     time_initialized = 1;
-    // }
-	// time -= start_time;
 	secs = system_time / 1000000;
 	msecs = system_time - secs * 1000000;
 	
@@ -106,7 +101,6 @@ void signal_idle_current_partition(void){
 int32_t partition_scheduler(void){
     uint32_t current_time = ucx_uptime();
     uint32_t current_tick = MS_TO_TICKS(current_time);
-    // uint32_t current_tick = ucx_ticks();
     
 #ifndef MULTICORE
     struct mscb_s* ms = kcb->module_scheduler;
@@ -139,7 +133,6 @@ int32_t partition_scheduler(void){
     if(position_in_frame >= ms->major_frame_tick){
         (*windows_idx) = 0;
         partition_id = ms->windows_partition[*windows_idx].id;
-        // position_in_frame = current_tick % ms->major_frame_tick;
         ms->major_frame_count += 1;
         return activate_partition(partition_id);
     }

@@ -6,8 +6,20 @@
     * faire les actions quand elle passe en normal
         * -- a DEADLINE_TIME calculation may cause an overflow of the underlying -- clock. If this occurs, HM is invoked with an illegal request error code set the partition’s lock level to zero;
         * if (an error handler process has been created) then enable the error handler process for execution and fault processing;
+### Refactoring
+Liste des fichier a refactor:
+    * arinc_partition.h/c
+    * module_scheduler.h/c
+    * hal.h/c
+    * ucx.h/c
+    * kernel.h/c
+    * static_conf.h/c
+    * main.h/c
+    * arinc_process.h/c
+    * process.h/c
 
 * refractor / formatage code:
+
     * mettre des ifndef pour les ajouts a l os de base pour maintenir le code isole:
         * main, struct kcb, ucx.h, process.c.h, fonction dispatch, interrupt_tick (process et partition) dans le hal, yield (enlever les doublons entre tasks et processes)
     * trouver des noms plus accurate pour activate partition et les variables dedans
@@ -15,7 +27,6 @@
     * refractor de partionnement spatial
     * refractor de partionnement temporelle
     * refractor tout sur les processes
-    * regarder pok pour s'inspirer
     * remplacer certaines action par des fonctions get et set  (comme fonction pour get le node_s de la partition courante)
     * faire un nettoyage dans les structures de donnees aussi
     * voir si on garde le dispatch dans la logique du scheduling des partitions car c est archi dependant
@@ -25,7 +36,7 @@
     * voir si find_processes_by_id et les autres fonctions on les met dans process.c ou on les laisse dans arinc_partition.c
     * ce morceau de code  pour avoir la partition courante est souvent present, voir pour faire une fonction (get_current_partition) 
     * le morceau de code pour save la tache courante et revenir a la boucle du scheduler est souvent presente, donc faire une fonction
-    * mettre/enlever des commentaires
+    * mettre des commentaires
     * replacer les fonctions utilent pour faire l apex comme find_first_release_point a des endroits plus coherent dans le code
     * voir s il faut mettre les flags booleen en maj   
     * placer les return error a la fin des fonctions apex 
@@ -37,7 +48,7 @@
     * notamment dans set_partition_mode voir pour faire des fonctions pour voir si les processes sont aperiodic not delay not suspend ou aperiodic delay ou periodic not delay etc...
     * mettre un linter C en place
     * enlever repetition check_and_release_periodic_waiting_processes
-    * enlever les commentaires inutiles surtout ceux de copilot 
+    * enlever les printf qui servent a rien
     * voir dans set_operating_mode pour mettre le code pour vider une partition de ces processes dans une fonction
     * enlever les print f qui sont trop lourd
     * faire une fonction update deadline ou le check de si le time capacity est infini sera effectue comme ca les process avec infinite time capacity rouleront sans pb:
