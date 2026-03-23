@@ -19,9 +19,6 @@ Liste des fichier a refactor:
     * process.h/c
 
 * refractor / formatage code:
-
-    * mettre des ifndef pour les ajouts a l os de base pour maintenir le code isole:
-        * main, struct kcb, ucx.h, process.c.h, fonction dispatch, interrupt_tick (process et partition) dans le hal, yield (enlever les doublons entre tasks et processes)
     * trouver des noms plus accurate pour activate partition et les variables dedans
         * lier les noms entre task et processes
     * refractor de partionnement spatial
@@ -29,7 +26,6 @@ Liste des fichier a refactor:
     * refractor tout sur les processes
     * remplacer certaines action par des fonctions get et set  (comme fonction pour get le node_s de la partition courante)
     * faire un nettoyage dans les structures de donnees aussi
-    * voir si on garde le dispatch dans la logique du scheduling des partitions car c est archi dependant
     * voir si c'est bien de mettre le process_scheduler dans le fichier process.c
     voir si la structure tcb dans celle de process_s est toujours utile (etat dont on ne se sert plus comme tcb.state)
     * revoir l ordre de declaration des fonctions dans les fichier
@@ -39,7 +35,6 @@ Liste des fichier a refactor:
     * mettre des commentaires
     * replacer les fonctions utilent pour faire l apex comme find_first_release_point a des endroits plus coherent dans le code
     * voir s il faut mettre les flags booleen en maj   
-    * placer les return error a la fin des fonctions apex 
     * voir pour mettre les calcules d overflow dans des fonctions genre deadline overflow ou time out overflow cf apex processes
     * voir pour faire un signal schedule needed pour eviter de reschedule a chaque fois que ce n est pas necessaire tout le temps
     * voir si les fonctions du pos pour gerer les timer, delay etc.. voir si les mettre dans un autre fichier ou autre
@@ -48,7 +43,6 @@ Liste des fichier a refactor:
     * notamment dans set_partition_mode voir pour faire des fonctions pour voir si les processes sont aperiodic not delay not suspend ou aperiodic delay ou periodic not delay etc...
     * mettre un linter C en place
     * enlever repetition check_and_release_periodic_waiting_processes
-    * enlever les printf qui servent a rien
     * voir dans set_operating_mode pour mettre le code pour vider une partition de ces processes dans une fonction
     * enlever les print f qui sont trop lourd
     * faire une fonction update deadline ou le check de si le time capacity est infini sera effectue comme ca les process avec infinite time capacity rouleront sans pb:

@@ -66,7 +66,9 @@ int main(void)
 		arinc_start_scheduling();
 	}
 	while(1){
-		krnl_dispatcher();
+		kcb->ticks++;
+		kcb->rt_sched();
+		_interrupt_tick_partition();
 		if (kcb->partition_current == NULL) {
             // Mode IDLE : On réactive manuellement les interruptions Timer (bit 3 de mstatus)
 			printf("[IDLE TIME]\n");
@@ -112,11 +114,11 @@ int main(void)
 			arinc_start_scheduling();
 		}
 	while(1){
-		krnl_dispatcher();
-// Même logique élégante pour le multi-coeur
-        int core_id = _cpu_id();
+		int core_id = _cpu_id();
+		kcb[core_id]->ticks++;
+		kcb[core_id]->rt_sched();
+		_interrupt_tick_partition();
         if (kcb[core_id]->partition_current == NULL) {
-			// Mode IDLE : On réactive manuellement les interruptions Timer (bit 3 de mstatus)
 			printf("[CPU IDLE]\n");
             asm volatile ("csrs mstatus, 8");
             _cpu_idle();

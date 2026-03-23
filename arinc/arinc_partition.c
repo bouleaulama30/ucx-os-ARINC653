@@ -421,8 +421,8 @@ void SET_PARTITION_MODE (
         printf("OPERATING MODE is IDLE\n");
         my_partition->process_current = NULL;
         signal_idle_current_partition();
+        *RETURN_CODE = NO_ERROR;
         longjmp(my_partition->partition_context, 1);
-        // ucx_task_yield();
     }
 
     if (OPERATING_MODE == WARM_START || OPERATING_MODE == COLD_START)

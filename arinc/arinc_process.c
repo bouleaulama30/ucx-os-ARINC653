@@ -96,7 +96,6 @@ void CREATE_PROCESS (
         new_process = malloc(sizeof(struct process_s));
         status = malloc(sizeof(PROCESS_STATUS_TYPE));
         
-        // a changer
         status->DEADLINE_TIME = ATTRIBUTES->TIME_CAPACITY;
         status->CURRENT_PRIORITY = ATTRIBUTES->BASE_PRIORITY;
         status->PROCESS_STATE = DORMANT;
@@ -158,7 +157,6 @@ void SET_PRIORITY (
 // else
 
     process->processus_status->CURRENT_PRIORITY = PRIORITY;
-    *RETURN_CODE = NO_ERROR;
 
     // sauvegarde du context du process actuel et on reschedule
     if (process->processus_status->PROCESS_STATE == READY || process->processus_status->PROCESS_STATE == RUNNING){
@@ -177,6 +175,7 @@ void SET_PRIORITY (
             longjmp(partition->partition_context, 1);
         }
     }
+    *RETURN_CODE = NO_ERROR;
 }
 
 void SUSPEND_SELF (
