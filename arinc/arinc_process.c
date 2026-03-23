@@ -41,11 +41,7 @@ void CREATE_PROCESS (
        /*out*/ PROCESS_ID_TYPE          *PROCESS_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
 
-#ifndef MULTICORE
-    struct node_s *partition_node = kcb->partition_current;
-#else
-    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
-#endif
+    struct node_s *partition_node = partition_get_current();
     struct pcb_s *partition = partition_node->data;
     if(partition->nbr_processes >= MAX_NUMBER_OF_PROCESSES){
         *RETURN_CODE = INVALID_CONFIG;
@@ -124,11 +120,7 @@ void SET_PRIORITY (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*in */ PRIORITY_TYPE            PRIORITY,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-#ifndef MULTICORE
-    struct node_s *partition_node = kcb->partition_current;
-#else
-    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
-#endif
+    struct node_s *partition_node = partition_get_current();
     struct pcb_s *partition = partition_node->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
     if(!process_node){
@@ -182,11 +174,7 @@ void SUSPEND_SELF (
        /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
        
-#ifndef MULTICORE
-    struct node_s *partition_node = kcb->partition_current;
-#else
-    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
-#endif
+    struct node_s *partition_node = partition_get_current();
     struct pcb_s *partition = partition_node->data;
     struct node_s *process_node = partition->process_current;
     struct process_s *current_process = process_node->data;
@@ -227,11 +215,7 @@ void SUSPEND_SELF (
 void SUSPEND (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-#ifndef MULTICORE
-    struct node_s *partition_node = kcb->partition_current;
-#else
-    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
-#endif
+    struct node_s *partition_node = partition_get_current();
     struct pcb_s *partition = partition_node->data;
     struct process_s *current_process = partition->process_current->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
@@ -266,11 +250,7 @@ void SUSPEND (
 void RESUME (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-#ifndef MULTICORE
-    struct node_s *partition_node = kcb->partition_current;
-#else
-    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
-#endif
+    struct node_s *partition_node = partition_get_current();
     struct pcb_s *partition = partition_node->data;
     struct process_s *current_process = partition->process_current->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
@@ -317,11 +297,7 @@ void RESUME (
 }
 
 void STOP_SELF (void){
-#ifndef MULTICORE
-    struct node_s *partition_node = kcb->partition_current;
-#else
-    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
-#endif
+    struct node_s *partition_node = partition_get_current();
     struct pcb_s *partition = partition_node->data;
     struct node_s *process_node = partition->process_current;
     struct process_s *current_process = process_node->data;
@@ -337,11 +313,7 @@ void STOP_SELF (void){
 void STOP (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-#ifndef MULTICORE
-    struct node_s *partition_node = kcb->partition_current;
-#else
-    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
-#endif
+    struct node_s *partition_node = partition_get_current();
     struct pcb_s *partition = partition_node->data;
     struct process_s *current_process = partition->process_current->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
@@ -369,44 +341,11 @@ void STOP (
     *RETURN_CODE = NO_ERROR;
 }
 
-SYSTEM_TIME_TYPE  find_first_release_point(struct pcb_s *current_partition){
-#ifndef MULTICORE
-    struct mscb_s* ms = kcb->module_scheduler;
-#else
-    struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
-#endif
-    window_partition_type window_partition ;
-    SYSTEM_TIME_TYPE first_release_point;
-    int windows_idx = (int) ms->windows_idx;
-    int nbr_windows = (int) ms->nbr_windows;
-    for(int i = windows_idx; i < nbr_windows; i++ ){
-        window_partition = ms->windows_partition[i];
-        if(current_partition->status->IDENTIFIER == window_partition.id){
-            if(window_partition.is_periodic_processes_start){
-                first_release_point = ms->major_frame_count*TICKS_TO_MS(ms->major_frame_tick) + TICKS_TO_MS(window_partition.start_tick);
-                return first_release_point;
-            }
-        }
-    }
-    for(int i = 0; i < windows_idx; i++ ){
-        window_partition = ms->windows_partition[i];
-        if(current_partition->status->IDENTIFIER == window_partition.id){
-            if(window_partition.is_periodic_processes_start){
-                first_release_point = (ms->major_frame_count+1)*TICKS_TO_MS(ms->major_frame_tick) + TICKS_TO_MS(window_partition.start_tick);
-                return first_release_point;
-            }
-        }
-    }
-}
 
 void START (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-#ifndef MULTICORE
-    struct node_s *partition_node = kcb->partition_current;
-#else
-    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
-#endif
+    struct node_s *partition_node = partition_get_current();
     struct pcb_s *partition = partition_node->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
     struct process_s *process = process_node->data;
@@ -461,7 +400,7 @@ void START (
         if(partition->status->OPERATING_MODE == NORMAL){
             process->processus_status->PROCESS_STATE = WAITING;
             // trouver le fisrt release point
-            process->release_point_time = find_first_release_point(partition);
+            process->release_point_time = arinc_time_find_first_release_point(partition);
             //calculer la deadline 
             process->processus_status->DEADLINE_TIME = process->release_point_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
 
@@ -481,11 +420,7 @@ void DELAYED_START (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*in */ SYSTEM_TIME_TYPE         DELAY_TIME,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-#ifndef MULTICORE
-    struct node_s *partition_node = kcb->partition_current;
-#else
-    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
-#endif
+    struct node_s *partition_node = partition_get_current();
     struct pcb_s *partition = partition_node->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
     struct process_s *process = process_node->data;
@@ -562,7 +497,7 @@ void DELAYED_START (
         if(partition->status->OPERATING_MODE == NORMAL){
             process->processus_status->PROCESS_STATE = WAITING;
             // trouver le fisrt release point
-            process->release_point_time = find_first_release_point(partition) + DELAY_TIME;
+            process->release_point_time = arinc_time_find_first_release_point(partition) + DELAY_TIME;
             //calculer la deadline 
             process->processus_status->DEADLINE_TIME = process->release_point_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
         }
@@ -615,11 +550,7 @@ void GET_PROCESS_ID (
        /*in */ PROCESS_NAME_TYPE        PROCESS_NAME,
        /*out*/ PROCESS_ID_TYPE          *PROCESS_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-#ifndef MULTICORE
-    struct node_s *partition_node = kcb->partition_current;
-#else
-    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
-#endif
+    struct node_s *partition_node = partition_get_current();
     struct pcb_s *partition = partition_node->data;
     struct node_s *process_node = is_process_name_existed(partition, PROCESS_NAME);
     if(!process_node){
@@ -635,11 +566,7 @@ void GET_PROCESS_STATUS (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*out*/ PROCESS_STATUS_TYPE      *PROCESS_STATUS,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-#ifndef MULTICORE
-    struct node_s *partition_node = kcb->partition_current;
-#else
-    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
-#endif
+    struct node_s *partition_node = partition_get_current();
     struct pcb_s *partition = partition_node->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
     if(!process_node){
@@ -655,11 +582,7 @@ void INITIALIZE_PROCESS_CORE_AFFINITY (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*in */ PROCESSOR_CORE_ID_TYPE   PROCESSOR_CORE_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-#ifndef MULTICORE
-    struct node_s *partition_node = kcb->partition_current;
-#else
-    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
-#endif
+    struct node_s *partition_node = partition_get_current();
     struct pcb_s *partition = partition_node->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
     if(!process_node){

@@ -63,7 +63,7 @@ ucx: incl hal libs ddrivers network kernel arinc
 
 arinc: arinc_partition.o module_scheduler.o arinc_process.o static_conf.o arinc_time.o
 
-kernel: timer.o message.o pipe.o spinlock.o semaphore.o ecodes.o syscall.o coroutine.o ucx.o process.o main.o
+kernel: timer.o message.o pipe.o spinlock.o semaphore.o ecodes.o syscall.o coroutine.o ucx.o process.o partition.o main.o
 
 main.o: $(SRC_DIR)/init/main.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/init/main.c
@@ -71,6 +71,8 @@ ucx.o: $(SRC_DIR)/kernel/ucx.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/kernel/ucx.c
 process.o: $(SRC_DIR)/kernel/process.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/kernel/process.c
+partition.o: $(SRC_DIR)/kernel/partition.c
+	$(CC) $(CFLAGS) $(SRC_DIR)/kernel/partition.c
 coroutine.o:
 	$(CC) $(CFLAGS) $(SRC_DIR)/kernel/coroutine.c
 syscall.o: $(SRC_DIR)/kernel/syscall.c

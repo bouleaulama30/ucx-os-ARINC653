@@ -82,9 +82,6 @@ struct process_s
     SYSTEM_TIME_TYPE saved_init_delay;
 };
 
-extern SYSTEM_TIME_TYPE find_first_release_point(struct pcb_s *current_partition);
-
-
 extern void CREATE_PROCESS (
        /*in */ PROCESS_ATTRIBUTE_TYPE   *ATTRIBUTES,
        /*out*/ PROCESS_ID_TYPE          *PROCESS_ID,

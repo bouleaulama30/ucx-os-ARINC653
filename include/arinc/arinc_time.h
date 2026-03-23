@@ -25,4 +25,6 @@ extern void REPLENISH (
        /*in */ SYSTEM_TIME_TYPE         BUDGET_TIME,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
 
+SYSTEM_TIME_TYPE  arinc_time_find_first_release_point(struct pcb_s *current_partition);
+void arinc_time_update_partition(struct pcb_s *partition);
 #endif

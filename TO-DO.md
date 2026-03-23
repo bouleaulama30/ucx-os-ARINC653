@@ -10,9 +10,6 @@
 Liste des fichier a refactor:
     * arinc_partition.h/c
     * module_scheduler.h/c
-    * hal.h/c
-    * ucx.h/c
-    * kernel.h/c
     * static_conf.h/c
     * main.h/c
     * arinc_process.h/c
@@ -27,17 +24,12 @@ Liste des fichier a refactor:
     * refractor tout sur les timings
     * remplacer certaines action par des fonctions get et set  (comme fonction pour get le node_s de la partition courante)
     * faire un nettoyage dans les structures de donnees aussi
-    * voir si c'est bien de mettre le process_scheduler dans le fichier process.c
     voir si la structure tcb dans celle de process_s est toujours utile (etat dont on ne se sert plus comme tcb.state)
-    * revoir l ordre de declaration des fonctions dans les fichier
-    * voir si find_processes_by_id et les autres fonctions on les met dans process.c ou on les laisse dans arinc_partition.c
     * ce morceau de code  pour avoir la partition courante est souvent present, voir pour faire une fonction (get_current_partition) 
     * le morceau de code pour save la tache courante et revenir a la boucle du scheduler est souvent presente, donc faire une fonction
     * mettre des commentaires
-    * replacer les fonctions utilent pour faire l apex comme find_first_release_point a des endroits plus coherent dans le code
     * voir pour mettre les calcules d overflow dans des fonctions genre deadline overflow ou time out overflow cf apex processes
     * voir pour faire un signal schedule needed pour eviter de reschedule a chaque fois que ce n est pas necessaire tout le temps
-    * voir si les fonctions du pos pour gerer les timer, delay etc.. voir si les mettre dans un autre fichier ou autre
     * faire en sorte d appeler les fonctions de check des delay et des timeout uniquement a chaque tick et non a chaque appel au scheduler car on fait du temps de calcul inutil
     * a la place de call ucx_uptime a chaque fois dans l'apex des processes voir pour get une seule fois le current time au debut de la fonction et ensuite l'utiliser pour toute la fonction
     * notamment dans set_partition_mode voir pour faire des fonctions pour voir si les processes sont aperiodic not delay not suspend ou aperiodic delay ou periodic not delay etc...
