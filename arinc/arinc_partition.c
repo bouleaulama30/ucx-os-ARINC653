@@ -1,62 +1,32 @@
 #include <ucx.h>
 
-static struct node_s *find_highest_priority_process(struct list_s *processes){
-	struct node_s *process_node;
-    struct node_s *highest_priority_process_node;
-	struct process_s *process;
-    struct process_s *highest_priority_process;
-
-	process_node = processes->head->next;
-    process = process_node->data;
-    highest_priority_process_node = process_node;
-    highest_priority_process = highest_priority_process_node->data;
-
-	while (process_node->next) {
-        if(process->processus_status->PROCESS_STATE == READY){
-            if (process->processus_status->CURRENT_PRIORITY > highest_priority_process->processus_status->CURRENT_PRIORITY ){
-                highest_priority_process_node = process_node;
-                highest_priority_process = highest_priority_process_node->data;
-            }	
-
-        }
-        process_node = process_node->next;
-        process = process_node->data;
-    }
-	return highest_priority_process_node;
-}
 static struct node_s *check_and_release_periodic_waiting_processes(struct node_s *node, void *arg)
 {
-	struct process_s *process = node->data;
-    //periodic waiting processes 
-    if ((process->processus_status->PROCESS_STATE == WAITING && process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE)){
-        uint64_t current_time = (uint64_t)ucx_uptime();
-        uint64_t rp_time = (uint64_t)process->release_point_time;
+    struct process_s *process = node->data;
+    uint64_t current_time = (uint64_t)ucx_uptime();
+    uint64_t rp_time = (uint64_t)process->release_point_time;
+    
+    // periodic waiting processes or aperiodic delayed processes
+    if (process->processus_status->PROCESS_STATE == WAITING &&
+        ((process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE) ||
+         (process->saved_init_delay && process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE))) {
+        
         printf("check_periodic proc: %d, uptime: %u, release point: %u\n", 
                 process->process_id, 
                 (unsigned)current_time, 
-                (unsigned)rp_time);        
-        if(current_time >= rp_time){
+                (unsigned)rp_time);
+        
+        if(current_time >= rp_time) {
             printf("=> REVEIL ! release point time: %u\n", (unsigned)rp_time);
             process->processus_status->PROCESS_STATE = READY;
-
+            
+            if(process->saved_init_delay && process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE) {
+                process->release_point_time = 0;
+                process->saved_init_delay = 0;
+            }
         }
     }
-    // aperiodic delayed processes started during cold start
-    else if(process->processus_status->PROCESS_STATE == WAITING && process->saved_init_delay && process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE){
-        uint64_t current_time = (uint64_t)ucx_uptime();
-        uint64_t rp_time = (uint64_t)process->release_point_time;
-        printf("check_periodic proc: %d, uptime: %u, release point: %u\n", 
-                process->process_id, 
-                (unsigned)current_time, 
-                (unsigned)rp_time);        
-        if(current_time >= rp_time){
-            printf("=> REVEIL ! release point time: %u\n", (unsigned)rp_time);
-            process->processus_status->PROCESS_STATE = READY;
-            process->release_point_time = 0;
-            process->saved_init_delay = 0;
-        }
-    }
-	return 0;
+    return 0;
 }
 
 static struct node_s *check_timeouts(struct node_s *node, void *arg) {
@@ -107,15 +77,8 @@ void activate_process_scheduling(){
         partition->process_current = NULL;
         longjmp(partition->partition_context, 1); 
     }
-    else{
-
-        struct node_s* first_process_node = find_highest_priority_process(partition->processes);  
-        struct process_s* first_process = first_process_node->data;
-
-        partition->process_current = first_process_node;
-        first_process->processus_status->PROCESS_STATE = RUNNING;
-        _dispatch_init(first_process->tcb.context);
-    }
+    else
+        longjmp(partition->partition_context, 1);
 }
 
 

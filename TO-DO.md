@@ -24,6 +24,7 @@ Liste des fichier a refactor:
     * refractor de partionnement spatial
     * refractor de partionnement temporelle
     * refractor tout sur les processes
+    * refractor tout sur les timings
     * remplacer certaines action par des fonctions get et set  (comme fonction pour get le node_s de la partition courante)
     * faire un nettoyage dans les structures de donnees aussi
     * voir si c'est bien de mettre le process_scheduler dans le fichier process.c
@@ -34,15 +35,12 @@ Liste des fichier a refactor:
     * le morceau de code pour save la tache courante et revenir a la boucle du scheduler est souvent presente, donc faire une fonction
     * mettre des commentaires
     * replacer les fonctions utilent pour faire l apex comme find_first_release_point a des endroits plus coherent dans le code
-    * voir s il faut mettre les flags booleen en maj   
     * voir pour mettre les calcules d overflow dans des fonctions genre deadline overflow ou time out overflow cf apex processes
     * voir pour faire un signal schedule needed pour eviter de reschedule a chaque fois que ce n est pas necessaire tout le temps
     * voir si les fonctions du pos pour gerer les timer, delay etc.. voir si les mettre dans un autre fichier ou autre
     * faire en sorte d appeler les fonctions de check des delay et des timeout uniquement a chaque tick et non a chaque appel au scheduler car on fait du temps de calcul inutil
     * a la place de call ucx_uptime a chaque fois dans l'apex des processes voir pour get une seule fois le current time au debut de la fonction et ensuite l'utiliser pour toute la fonction
     * notamment dans set_partition_mode voir pour faire des fonctions pour voir si les processes sont aperiodic not delay not suspend ou aperiodic delay ou periodic not delay etc...
-    * mettre un linter C en place
-    * enlever repetition check_and_release_periodic_waiting_processes
     * voir dans set_operating_mode pour mettre le code pour vider une partition de ces processes dans une fonction
     * enlever les print f qui sont trop lourd
     * faire une fonction update deadline ou le check de si le time capacity est infini sera effectue comme ca les process avec infinite time capacity rouleront sans pb:
