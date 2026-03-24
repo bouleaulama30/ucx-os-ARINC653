@@ -30,8 +30,8 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 		
 	CRITICAL_LEAVE();
 	
-	printf("core %d, task %d: 0x%p, stack: 0x%p, size %d\n", _cpu_id(),
-		new_tcb->id, new_tcb->task, new_tcb->stack, new_tcb->stack_sz);
+	// printf("core %d, task %d: 0x%p, stack: 0x%p, size %d\n", _cpu_id(),
+	// 	new_tcb->id, new_tcb->task, new_tcb->stack, new_tcb->stack_sz);
 
     process->tcb = *new_tcb;
 

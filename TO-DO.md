@@ -21,7 +21,6 @@ Liste des fichier a refactor:
     * refractor tout sur les processes
     * refractor tout sur les timings
     * remplacer certaines action par des fonctions get et set:
-    * enlever les print f qui sont trop lourd
 
 * merge la branche dev sur la main
 * faire rouler sur la carte en materielle une fois que c'est bon toute la norme

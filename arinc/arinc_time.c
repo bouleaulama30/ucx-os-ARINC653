@@ -11,13 +11,13 @@ static struct node_s *check_and_release_periodic_waiting_processes(struct node_s
         ((process->processus_status->ATTRIBUTES.PERIOD != INFINITE_TIME_VALUE) ||
          (process->saved_init_delay && process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE))) {
         
-        printf("check_periodic proc: %d, uptime: %u, release point: %u\n", 
-                process->process_id, 
-                (unsigned)current_time, 
-                (unsigned)rp_time);
+        // printf("check_periodic proc: %d, uptime: %u, release point: %u\n", 
+        //         process->process_id, 
+        //         (unsigned)current_time, 
+        //         (unsigned)rp_time);
         
         if(current_time >= rp_time) {
-            printf("=> REVEIL ! release point time: %u\n", (unsigned)rp_time);
+            printf("=> REVEIL du Process %d\n", process->process_id);
             process->processus_status->PROCESS_STATE = READY;
             
             if(process->saved_init_delay && process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE) {
@@ -51,7 +51,7 @@ static struct node_s *check_deadlines(struct node_s *node, void *arg) {
     SYSTEM_TIME_TYPE current_time = (SYSTEM_TIME_TYPE)ucx_uptime();
 
     if (current_time >= process->processus_status->DEADLINE_TIME && process->processus_status->DEADLINE_TIME != INFINITE_TIME_VALUE) {
-        printf("ATTENTION LE PROCESS %d A DEPASSE SA DEADLINE QUI ETAIT DE %d\n", process->process_id, process->processus_status->DEADLINE_TIME);
+        // printf("ATTENTION LE PROCESS %d A DEPASSE SA DEADLINE QUI ETAIT DE %d\n", process->process_id, process->processus_status->DEADLINE_TIME);
     }
     return 0;
 }

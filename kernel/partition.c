@@ -140,7 +140,7 @@ int32_t krnl_partition_switch(PARTITION_ID_TYPE IDENTIFIER){
     struct pcb_s *partition = partition_node->data;
     uint32_t partition_start_addr = (uint32_t) partition->memory_requirements->memory[CODE].base;
     uint32_t partition_end_addr = (uint32_t) partition->memory_requirements->memory[DATA].base + partition->memory_requirements->memory[DATA].size;
-    printf("start partition addr: %x, end partition addr: %x\n", partition_start_addr, partition_end_addr);
+    // printf("start partition addr: %x, end partition addr: %x\n", partition_start_addr, partition_end_addr);
 
     _pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
 
@@ -160,7 +160,7 @@ int32_t krnl_partition_switch(PARTITION_ID_TYPE IDENTIFIER){
     struct pcb_s *partition = partition_node->data;
     uint32_t partition_start_addr = (uint32_t) partition->memory_requirements->memory[CODE].base;
     uint32_t partition_end_addr = (uint32_t) partition->memory_requirements->memory[DATA].base + partition->memory_requirements->memory[DATA].size;
-    printf("start partition addr: %x, end partition addr: %x\n", partition_start_addr, partition_end_addr);
+    // printf("start partition addr: %x, end partition addr: %x\n", partition_start_addr, partition_end_addr);
     _pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
     if(partition->status->OPERATING_MODE == IDLE){
         int32_t id = krnl_partition_switch(IDLE_PARTITION_ID);

@@ -10,12 +10,12 @@ void p1_main_process(struct pcb_s *partition){
     CREATE_PROCESS(&DEFAULT_PROCESS_CONFIG, &process_id_0, &return_code0);
     CREATE_PROCESS(&PROCESS_1_CONFIG, &process_id_1, &return_code1);
 
-    printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
-    printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);      
+    // printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
+    // printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);      
 
     DELAYED_START(process_id_0, 18, &return_code0);  
     // DELAYED_START(process_id_1, 25, &return_code0);  
-    printf("return code delayed start %d\n", return_code0); 
+    // printf("return code delayed start %d\n", return_code0); 
     // START(process_id_0, &return_code0);  
     START(process_id_1, &return_code1);  
 
