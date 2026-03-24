@@ -154,11 +154,7 @@ extern void PERIODIC_WAIT (
 
     current_process->processus_status->PROCESS_STATE = WAITING;
     current_process->release_point_time += current_process->processus_status->ATTRIBUTES.PERIOD;
-    if(current_process->processus_status->ATTRIBUTES.TIME_CAPACITY == INFINITE_TIME_VALUE)
-        current_process->processus_status->DEADLINE_TIME = INFINITE_TIME_VALUE;
-    else     
-        current_process->processus_status->DEADLINE_TIME = current_process->release_point_time + current_process->processus_status->ATTRIBUTES.TIME_CAPACITY; 
-
+    update_process_deadline(current_process, current_process->release_point_time);
     if (setjmp(current_process->tcb.context) == 0) {
     /* Retourner au contexte du kernel (partition_OS) */
         longjmp(partition->partition_context, 1);
@@ -200,7 +196,6 @@ extern void REPLENISH (
         current_process->processus_status->DEADLINE_TIME = INFINITE_TIME_VALUE;
     else{
         current_process->processus_status->DEADLINE_TIME = (SYSTEM_TIME_TYPE)uptime + BUDGET_TIME;
-    
     }
 
     *RETURN_CODE = NO_ERROR;

@@ -65,7 +65,7 @@ static struct node_s *start_process(struct node_s *node, void *arg)
 	if (process->processus_status->PROCESS_STATE == WAITING && !process->saved_init_delay && process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE && !process->is_suspended){
         process->processus_status->PROCESS_STATE = READY;
         // calculate the DEADLINE_TIME of all non-dormant processes in the partition;
-        process->processus_status->DEADLINE_TIME = ucx_uptime() + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+        update_process_deadline(process, (SYSTEM_TIME_TYPE)ucx_uptime());
         return 0;
     }
 
@@ -86,7 +86,7 @@ static struct node_s *start_process(struct node_s *node, void *arg)
 
     // calculate the DEADLINE_TIME of all non-dormant processes in the partition;
     if(process->processus_status->PROCESS_STATE != DORMANT){    
-        process->processus_status->DEADLINE_TIME =  process->release_point_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+        update_process_deadline(process, process->release_point_time);
         return 0;
     }
 

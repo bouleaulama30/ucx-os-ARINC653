@@ -365,7 +365,7 @@ void START (
 
             process->processus_status->PROCESS_STATE = READY;
             //calculer la deadline 
-            process->processus_status->DEADLINE_TIME = (SYSTEM_TIME_TYPE)uptime + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+            update_process_deadline(process,(SYSTEM_TIME_TYPE)uptime);
             //check for rescheduling
             struct process_s *current_process = partition->process_current->data;
             if (setjmp(current_process->tcb.context) == 0) {
@@ -388,8 +388,7 @@ void START (
             // trouver le fisrt release point
             process->release_point_time = arinc_time_find_first_release_point(partition);
             //calculer la deadline 
-            process->processus_status->DEADLINE_TIME = process->release_point_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
-
+            update_process_deadline(process, process->release_point_time);
             //gerer les trucs avec releases point
         }
         else{
@@ -439,7 +438,7 @@ void DELAYED_START (
     
     // when (DEADLINE_TIME calculation is out of range) => INVALID_CONFIG
     SYSTEM_TIME_TYPE time_capacity = process->processus_status->ATTRIBUTES.TIME_CAPACITY;
-    if (time_capacity < 0 || time_overflow(uptime + (uint64_t)time_capacity + (uint64_t)DELAY_TIME)){
+    if (time_capacity < -1 || time_overflow(uptime + (uint64_t)time_capacity + (uint64_t)DELAY_TIME)){
         *RETURN_CODE = INVALID_CONFIG;
         return;
     }
@@ -452,12 +451,14 @@ void DELAYED_START (
         if(partition->status->OPERATING_MODE == NORMAL){
             if (!DELAY_TIME){
                 process->processus_status->PROCESS_STATE = READY;
-                process->processus_status->DEADLINE_TIME = (SYSTEM_TIME_TYPE)uptime + process->processus_status->ATTRIBUTES.TIME_CAPACITY;            
+                update_process_deadline(process, (SYSTEM_TIME_TYPE)uptime);
+
             }
             else {            
                 process->processus_status->PROCESS_STATE = WAITING;
                 //calculer la deadline 
-                process->processus_status->DEADLINE_TIME = (SYSTEM_TIME_TYPE)uptime + process->processus_status->ATTRIBUTES.TIME_CAPACITY + DELAY_TIME;
+                update_process_deadline(process, (SYSTEM_TIME_TYPE)uptime + DELAY_TIME);
+
                 process->time_counter = (SYSTEM_TIME_TYPE)uptime + DELAY_TIME;
             }
             //check for rescheduling
@@ -483,7 +484,8 @@ void DELAYED_START (
             // trouver le fisrt release point
             process->release_point_time = arinc_time_find_first_release_point(partition) + DELAY_TIME;
             //calculer la deadline 
-            process->processus_status->DEADLINE_TIME = process->release_point_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+            update_process_deadline(process, process->release_point_time);
+
         }
         else{
             process->processus_status->PROCESS_STATE = WAITING;

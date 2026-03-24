@@ -21,18 +21,10 @@ Liste des fichier a refactor:
     * refractor tout sur les processes
     * refractor tout sur les timings
     * remplacer certaines action par des fonctions get et set:
-        * le faire pour le module scheduler
     * enlever les print f qui sont trop lourd
     * faire une fonction update deadline ou le check de si le time capacity est infini sera effectue comme ca les process avec infinite time capacity rouleront sans pb:
-    void update_process_deadline(struct process_s *process, SYSTEM_TIME_TYPE base_time) {
-    if (process->processus_status->ATTRIBUTES.TIME_CAPACITY == INFINITE_TIME_VALUE) {
-        // La norme exige que si la capacité est infinie, la deadline devient infinie
-        process->processus_status->DEADLINE_TIME = INFINITE_TIME_VALUE;
-    } else {
-        // Calcul normal
-        process->processus_status->DEADLINE_TIME = base_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
-    }
-}
+    * change issue with time overflow because -1 in uint64 doesn't work
+    * test INFINITE TIME capacity for periodic processes
 
 * merge la branche dev sur la main
 * faire rouler sur la carte en materielle une fois que c'est bon toute la norme

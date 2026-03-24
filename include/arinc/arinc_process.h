@@ -82,6 +82,16 @@ struct process_s
     SYSTEM_TIME_TYPE saved_init_delay;
 };
 
+static inline void update_process_deadline(struct process_s *process, SYSTEM_TIME_TYPE base_time) {
+    if (process->processus_status->ATTRIBUTES.TIME_CAPACITY == INFINITE_TIME_VALUE) {
+        // La norme exige que si la capacité est infinie, la deadline devient infinie
+        process->processus_status->DEADLINE_TIME = INFINITE_TIME_VALUE;      
+    } else {
+        // Calcul normal
+        process->processus_status->DEADLINE_TIME = base_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+    }
+}
+
 extern void CREATE_PROCESS (
        /*in */ PROCESS_ATTRIBUTE_TYPE   *ATTRIBUTES,
        /*out*/ PROCESS_ID_TYPE          *PROCESS_ID,
