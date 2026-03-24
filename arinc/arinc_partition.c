@@ -14,7 +14,12 @@ start_over:
         if(partition->status->OPERATING_MODE == COLD_START || partition->status->OPERATING_MODE == WARM_START){
             goto start_over;
         }
-        arinc_time_update_partition(partition);
+
+        uint32_t current_tick = ucx_ticks();
+        if (current_tick != partition->last_tick) {
+            partition->last_tick = current_tick;
+            arinc_time_update_partition(partition);
+        }
     
         if (!setjmp(partition->partition_context)) {
             process_schedule();

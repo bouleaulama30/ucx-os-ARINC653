@@ -20,11 +20,8 @@ Liste des fichier a refactor:
     * refractor de partionnement temporelle
     * refractor tout sur les processes
     * refractor tout sur les timings
-    * remplacer certaines action par des fonctions get et set
-    * voir pour faire un signal schedule needed pour eviter de reschedule a chaque fois que ce n est pas necessaire tout le temps
-    * faire en sorte d appeler les fonctions de check des delay et des timeout uniquement a chaque tick et non a chaque appel au scheduler car on fait du temps de calcul inutile
-    * notamment dans set_partition_mode voir pour faire des fonctions pour voir si les processes sont aperiodic not delay not suspend ou aperiodic delay ou periodic not delay etc...
-    * voir dans set_operating_mode pour mettre le code pour vider une partition de ces processes dans une fonction
+    * remplacer certaines action par des fonctions get et set:
+        * le faire pour le module scheduler
     * enlever les print f qui sont trop lourd
     * faire une fonction update deadline ou le check de si le time capacity est infini sera effectue comme ca les process avec infinite time capacity rouleront sans pb:
     void update_process_deadline(struct process_s *process, SYSTEM_TIME_TYPE base_time) {

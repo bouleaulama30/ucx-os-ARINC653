@@ -89,6 +89,7 @@ struct pcb_s {
 	jmp_buf partition_context;		/* jmp_buf is architecture specific */
    struct list_s *processes;
    struct node_s *process_current;
+   uint32_t last_tick;
 };
 
 
