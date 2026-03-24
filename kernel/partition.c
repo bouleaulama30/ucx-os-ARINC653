@@ -1,14 +1,5 @@
 #include "ucx.h"
 
-struct node_s* partition_get_current(){
-#ifndef MULTICORE
-    struct node_s *partition_node = kcb->partition_current;
-#else
-    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
-#endif
-    return partition_node;
-}
-
 static struct node_s *find_partition(struct node_s *node, void *arg){
     struct pcb_s *partition = node->data;
     PARTITION_ID_TYPE id = (PARTITION_ID_TYPE) arg;

@@ -21,5 +21,15 @@ extern int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         BOOLEAN_TYPE is_system_partition);
 
 extern int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER);
-extern struct node_s* partition_get_current();
+
+
+static inline struct pcb_s* get_current_partition(){
+#ifndef MULTICORE
+    struct node_s *partition_node = kcb->partition_current;
+#else
+    struct node_s *partition_node = kcb[_cpu_id()]->partition_current;
+#endif
+    struct pcb_s *partition = partition_node->data;
+    return partition;
+}
 #endif

@@ -10,12 +10,8 @@ static struct node_s *find_processes_by_name(struct node_s *node, void *arg){
     return 0;
 }
 
-static struct node_s *is_process_name_existed(struct pcb_s *partition, PROCESS_NAME_TYPE process_name){
-    struct node_s *same_process_name_node = list_foreach(partition->processes, find_processes_by_name, (void *)process_name);
-    if(same_process_name_node){
-        return same_process_name_node;
-    }
-    return 0;
+static struct node_s *find_process_node_by_name(struct pcb_s *partition, PROCESS_NAME_TYPE process_name){
+    return list_foreach(partition->processes, find_processes_by_name, (void *)process_name);
 }
 
 static struct node_s *find_processes_by_id(struct node_s *node, void *arg){
@@ -41,8 +37,7 @@ void CREATE_PROCESS (
        /*out*/ PROCESS_ID_TYPE          *PROCESS_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
 
-    struct node_s *partition_node = partition_get_current();
-    struct pcb_s *partition = partition_node->data;
+    struct pcb_s *partition = get_current_partition();
     if(partition->nbr_processes >= MAX_NUMBER_OF_PROCESSES){
         *RETURN_CODE = INVALID_CONFIG;
     } 
@@ -52,7 +47,7 @@ void CREATE_PROCESS (
     {
         *RETURN_CODE = INVALID_CONFIG;
     }
-    else if (is_process_name_existed(partition, ATTRIBUTES->NAME))
+    else if (find_process_node_by_name(partition, ATTRIBUTES->NAME))
     {
         *RETURN_CODE = NO_ACTION;
     }
@@ -120,8 +115,7 @@ void SET_PRIORITY (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*in */ PRIORITY_TYPE            PRIORITY,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-    struct node_s *partition_node = partition_get_current();
-    struct pcb_s *partition = partition_node->data;
+    struct pcb_s *partition = get_current_partition();
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
     if(!process_node){
         *RETURN_CODE = INVALID_PARAM;
@@ -174,8 +168,7 @@ void SUSPEND_SELF (
        /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
        
-    struct node_s *partition_node = partition_get_current();
-    struct pcb_s *partition = partition_node->data;
+    struct pcb_s *partition = get_current_partition();
     struct node_s *process_node = partition->process_current;
     struct process_s *current_process = process_node->data;
     
@@ -215,8 +208,7 @@ void SUSPEND_SELF (
 void SUSPEND (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-    struct node_s *partition_node = partition_get_current();
-    struct pcb_s *partition = partition_node->data;
+    struct pcb_s *partition = get_current_partition();
     struct process_s *current_process = partition->process_current->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
     struct process_s *process = process_node->data;
@@ -250,8 +242,7 @@ void SUSPEND (
 void RESUME (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-    struct node_s *partition_node = partition_get_current();
-    struct pcb_s *partition = partition_node->data;
+    struct pcb_s *partition = get_current_partition();
     struct process_s *current_process = partition->process_current->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
     struct process_s *process = process_node->data;
@@ -297,8 +288,7 @@ void RESUME (
 }
 
 void STOP_SELF (void){
-    struct node_s *partition_node = partition_get_current();
-    struct pcb_s *partition = partition_node->data;
+    struct pcb_s *partition = get_current_partition();
     struct node_s *process_node = partition->process_current;
     struct process_s *current_process = process_node->data;
 
@@ -313,8 +303,7 @@ void STOP_SELF (void){
 void STOP (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-    struct node_s *partition_node = partition_get_current();
-    struct pcb_s *partition = partition_node->data;
+    struct pcb_s *partition = get_current_partition();
     struct process_s *current_process = partition->process_current->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
     struct process_s *process = process_node->data;
@@ -345,8 +334,7 @@ void STOP (
 void START (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-    struct node_s *partition_node = partition_get_current();
-    struct pcb_s *partition = partition_node->data;
+    struct pcb_s *partition = get_current_partition();
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
     struct process_s *process = process_node->data;
     
@@ -420,8 +408,7 @@ void DELAYED_START (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*in */ SYSTEM_TIME_TYPE         DELAY_TIME,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-    struct node_s *partition_node = partition_get_current();
-    struct pcb_s *partition = partition_node->data;
+    struct pcb_s *partition = get_current_partition();
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
     struct process_s *process = process_node->data;
     
@@ -528,11 +515,7 @@ void GET_MY_ID (
        /*out*/ PROCESS_ID_TYPE          *PROCESS_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE )
 {
-#ifndef MULTICORE
-    struct pcb_s *partition = kcb->partition_current->data;
-#else
-    struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
-#endif
+    struct pcb_s *partition = get_current_partition();
     struct process_s *process = partition->process_current->data;
 
     // 2. Vérifier si le code actuel est le Error Handler (tâche spéciale)
@@ -550,9 +533,8 @@ void GET_PROCESS_ID (
        /*in */ PROCESS_NAME_TYPE        PROCESS_NAME,
        /*out*/ PROCESS_ID_TYPE          *PROCESS_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-    struct node_s *partition_node = partition_get_current();
-    struct pcb_s *partition = partition_node->data;
-    struct node_s *process_node = is_process_name_existed(partition, PROCESS_NAME);
+    struct pcb_s *partition = get_current_partition();
+    struct node_s *process_node = find_process_node_by_name(partition, PROCESS_NAME);
     if(!process_node){
         *RETURN_CODE = INVALID_CONFIG;
         return;
@@ -566,8 +548,7 @@ void GET_PROCESS_STATUS (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*out*/ PROCESS_STATUS_TYPE      *PROCESS_STATUS,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-    struct node_s *partition_node = partition_get_current();
-    struct pcb_s *partition = partition_node->data;
+    struct pcb_s *partition = get_current_partition();
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
     if(!process_node){
         *RETURN_CODE = INVALID_CONFIG;
@@ -582,8 +563,7 @@ void INITIALIZE_PROCESS_CORE_AFFINITY (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*in */ PROCESSOR_CORE_ID_TYPE   PROCESSOR_CORE_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-    struct node_s *partition_node = partition_get_current();
-    struct pcb_s *partition = partition_node->data;
+    struct pcb_s *partition = get_current_partition();
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
     if(!process_node){
         *RETURN_CODE = INVALID_PARAM;
@@ -608,11 +588,8 @@ void INITIALIZE_PROCESS_CORE_AFFINITY (
 void GET_MY_PROCESSOR_CORE_ID (
        /*out*/ PROCESSOR_CORE_ID_TYPE   *PROCESSOR_CORE_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-#ifndef MULTICORE
-    struct pcb_s *partition = kcb->partition_current->data;
-#else
-    struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
-#endif
+
+    struct pcb_s *partition = get_current_partition();
     struct process_s *process = partition->process_current->data;
     
     *PROCESSOR_CORE_ID = process->processor_core_affinity;
@@ -622,11 +599,8 @@ void GET_MY_PROCESSOR_CORE_ID (
 void GET_MY_INDEX (
        /*out*/ PROCESS_INDEX_TYPE       *PROCESS_INDEX,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-#ifndef MULTICORE
-    struct pcb_s *partition = kcb->partition_current->data;
-#else
-    struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
-#endif
+
+    struct pcb_s *partition = get_current_partition();
     struct process_s *process = partition->process_current->data;
 
     // 2. Vérifier si le code actuel est le Error Handler (tâche spéciale) ou si le main process la appele

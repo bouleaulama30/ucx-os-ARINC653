@@ -96,8 +96,7 @@ SYSTEM_TIME_TYPE  arinc_time_find_first_release_point(struct pcb_s *current_part
 extern void TIMED_WAIT (
        /*in */ SYSTEM_TIME_TYPE         DELAY_TIME,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-    struct node_s *partition_node = partition_get_current();
-    struct pcb_s *partition = partition_node->data;
+    struct pcb_s *partition = get_current_partition();
     struct node_s *current_process_node = partition->process_current; 
     struct process_s *current_process = current_process_node->data;
     
@@ -141,8 +140,7 @@ extern void TIMED_WAIT (
 
 extern void PERIODIC_WAIT (
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-    struct node_s *partition_node = partition_get_current();
-    struct pcb_s *partition = partition_node->data;
+    struct pcb_s *partition = get_current_partition();
     struct node_s *current_process_node = partition->process_current; 
     struct process_s *current_process = current_process_node->data;
     
@@ -185,8 +183,7 @@ extern void GET_TIME (
 extern void REPLENISH (
        /*in */ SYSTEM_TIME_TYPE         BUDGET_TIME,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
-    struct node_s *partition_node = partition_get_current();
-    struct pcb_s *partition = partition_node->data;
+    struct pcb_s *partition = get_current_partition();
     struct node_s *current_process_node = partition->process_current; 
     struct process_s *current_process = current_process_node->data;
     

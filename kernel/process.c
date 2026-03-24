@@ -43,12 +43,8 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 
 uint16_t process_schedule(void)
 {
-#ifndef MULTICORE
-    struct pcb_s *partition = kcb->partition_current->data;
-#else
-    struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
-#endif
-
+    struct pcb_s *partition = get_current_partition();
+    
     struct node_s *node;
     
     struct node_s *select = NULL;

@@ -2,13 +2,7 @@
 
 void partition_OS(void)
 {
-    struct pcb_s *partition;
-#ifndef MULTICORE
-    partition = kcb->partition_current->data;
-#else
-    partition = kcb[_cpu_id()]->partition_current->data;
-#endif
-    
+    struct pcb_s *partition = get_current_partition();    
     _mprv_activate();
     
 start_over:
@@ -45,12 +39,8 @@ start_over:
 void GET_PARTITION_STATUS (
     /*out*/ PARTITION_STATUS_TYPE      *PARTITION_STATUS,
     /*out*/ RETURN_CODE_TYPE           *RETURN_CODE ){
-#ifndef MULTICORE
-    struct pcb_s* my_partition = kcb->partition_current->data;
-#else
-    struct pcb_s* my_partition = kcb[_cpu_id()]->partition_current->data;
-#endif
-    
+    struct pcb_s* my_partition = get_current_partition();    
+
     if (!my_partition->status) {
         *RETURN_CODE = NOT_AVAILABLE;
         return;
@@ -102,11 +92,8 @@ static struct node_s *start_process(struct node_s *node, void *arg)
 void SET_PARTITION_MODE (
        /*in */ OPERATING_MODE_TYPE        OPERATING_MODE,
        /*out*/ RETURN_CODE_TYPE           *RETURN_CODE ){
-#ifndef MULTICORE
-    struct pcb_s* my_partition = kcb->partition_current->data;
-#else
-    struct pcb_s* my_partition = kcb[_cpu_id()]->partition_current->data;
-#endif
+
+    struct pcb_s* my_partition = get_current_partition();
     // error
     if(OPERATING_MODE != IDLE && OPERATING_MODE != COLD_START && OPERATING_MODE != WARM_START && OPERATING_MODE != NORMAL){
         *RETURN_CODE = INVALID_PARAM;
@@ -173,11 +160,7 @@ void GET_MY_PARTITION_ID(
                /*out*/ PARTITION_ID_TYPE          *PARTITION_ID,
               /*out*/ RETURN_CODE_TYPE           *RETURN_CODE )
 {
-#ifndef MULTICORE
-    struct pcb_s* my_partition = kcb->partition_current->data;
-#else
-    struct pcb_s* my_partition = kcb[_cpu_id()]->partition_current->data;
-#endif
+    struct pcb_s* my_partition = get_current_partition();
     *PARTITION_ID = my_partition->status->IDENTIFIER;
     if(*PARTITION_ID)
         *RETURN_CODE = NO_ERROR;
