@@ -25,6 +25,14 @@ struct mscb_s {
     uint32_t major_frame_count;
 };      
 
+static inline struct mscb_s* get_module_scheduler(){
+#ifndef MULTICORE
+    struct mscb_s* ms = kcb->module_scheduler;
+#else
+    struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
+#endif
+    return ms;
+}
 extern void  module_scheduler_init(const char* name, uint32_t major_frame_tick, const window_partition_type* windows_partition, uint32_t nbr_windows);
 extern void arinc_start_scheduling(void);
 extern void signal_idle_current_partition(void);

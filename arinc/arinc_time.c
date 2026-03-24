@@ -64,15 +64,12 @@ void arinc_time_update_partition(struct pcb_s *partition) {
 
 
 SYSTEM_TIME_TYPE  arinc_time_find_first_release_point(struct pcb_s *current_partition){
-#ifndef MULTICORE
-    struct mscb_s* ms = kcb->module_scheduler;
-#else
-    struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
-#endif
+    struct mscb_s* ms = get_module_scheduler();
     window_partition_type window_partition ;
     SYSTEM_TIME_TYPE first_release_point;
     int windows_idx = (int) ms->windows_idx;
     int nbr_windows = (int) ms->nbr_windows;
+
     for(int i = windows_idx; i < nbr_windows; i++ ){
         window_partition = ms->windows_partition[i];
         if(current_partition->status->IDENTIFIER == window_partition.id){

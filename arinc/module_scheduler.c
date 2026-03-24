@@ -42,12 +42,7 @@ void module_scheduler_init(const char* name, uint32_t major_frame_tick, const wi
 
 
 void arinc_start_scheduling(void) {
-#ifndef MULTICORE
-    struct mscb_s* ms = kcb->module_scheduler;
-#else
-    struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
-#endif
-
+    struct mscb_s* ms = get_module_scheduler();
     if(ms == NULL){
         krnl_panic(ERR_SCHED_CONFIG); 
     }
@@ -81,11 +76,7 @@ void arinc_start_scheduling(void) {
 }
 
 void signal_idle_current_partition(void){
-#ifndef MULTICORE
-    struct mscb_s* ms = kcb->module_scheduler;
-#else
-    struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
-#endif
+    struct mscb_s* ms = get_module_scheduler();
     ms->idle_current_partition = true;
 }
 
@@ -94,11 +85,7 @@ int32_t partition_scheduler(void){
     uint32_t current_time = ucx_uptime();
     uint32_t current_tick = MS_TO_TICKS(current_time);
     
-#ifndef MULTICORE
-    struct mscb_s* ms = kcb->module_scheduler;
-#else
-    struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
-#endif
+    struct mscb_s* ms = get_module_scheduler();
     uint32_t position_in_frame = current_tick - ms->major_frame_count * ms->major_frame_tick;
     int32_t* windows_idx = &ms->windows_idx;
     uint32_t partition_duration_tick = ms->windows_partition[*windows_idx].duration_tick;
