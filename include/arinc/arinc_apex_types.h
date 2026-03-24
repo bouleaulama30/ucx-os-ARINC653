@@ -139,12 +139,4 @@ typedef
         true
     } BOOLEAN_TYPE;
 
-#define MAX_SYSTEM_TIME 0x7fffffffffffffffULL
-
-static inline BOOLEAN_TYPE time_overflow(uint64_t time){
-    if(time > MAX_SYSTEM_TIME)
-        return true;
-    return false;
-}
-
 #endif

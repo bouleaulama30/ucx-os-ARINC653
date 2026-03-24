@@ -22,9 +22,6 @@ Liste des fichier a refactor:
     * refractor tout sur les timings
     * remplacer certaines action par des fonctions get et set:
     * enlever les print f qui sont trop lourd
-    * faire une fonction update deadline ou le check de si le time capacity est infini sera effectue comme ca les process avec infinite time capacity rouleront sans pb:
-    * change issue with time overflow because -1 in uint64 doesn't work
-    * test INFINITE TIME capacity for periodic processes
 
 * merge la branche dev sur la main
 * faire rouler sur la carte en materielle une fois que c'est bon toute la norme

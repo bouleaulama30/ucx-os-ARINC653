@@ -98,7 +98,8 @@ extern void TIMED_WAIT (
     struct process_s *current_process = current_process_node->data;
     
     uint64_t uptime = ucx_uptime();
-    if (DELAY_TIME < -1 || time_overflow(uptime + (uint64_t)DELAY_TIME)){
+    if (DELAY_TIME < INFINITE_TIME_VALUE ||
+        (DELAY_TIME >= 0 && time_overflow(uptime + (uint64_t)DELAY_TIME))){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -180,7 +181,8 @@ extern void REPLENISH (
     
 
     uint64_t uptime = ucx_uptime();
-    if (BUDGET_TIME < -1 || time_overflow(uptime + (uint64_t)BUDGET_TIME)){
+        if (BUDGET_TIME < INFINITE_TIME_VALUE ||
+            (BUDGET_TIME >= 0 && time_overflow(uptime + (uint64_t)BUDGET_TIME))){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }

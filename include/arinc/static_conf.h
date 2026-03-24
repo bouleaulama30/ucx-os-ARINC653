@@ -138,7 +138,7 @@ static const PROCESS_ATTRIBUTE_TYPE DEFAULT_PROCESS_CONFIG = {
 // process 1 configuration
 static const PROCESS_ATTRIBUTE_TYPE PROCESS_1_CONFIG = {
     .PERIOD = 100,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 50,       // 10ms in nanoseconds
+    .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test1,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
     .BASE_PRIORITY = 2,            // Medium priority (1-239)

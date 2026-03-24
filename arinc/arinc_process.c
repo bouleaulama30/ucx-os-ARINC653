@@ -174,7 +174,8 @@ void SUSPEND_SELF (
     
     // when (TIME_OUT calculation is out of range) => INVALID_CONFIG
     uint64_t uptime = ucx_uptime();
-    if (TIME_OUT < INFINITE_TIME_VALUE || time_overflow(uptime+(uint64_t)TIME_OUT)){
+    if (TIME_OUT < INFINITE_TIME_VALUE ||
+        (TIME_OUT >= 0 && time_overflow(uptime + (uint64_t)TIME_OUT))){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -351,7 +352,8 @@ void START (
     // when (DEADLINE_TIME calculation is out of range) => INVALID_CONFIG
     SYSTEM_TIME_TYPE time_capacity = process->processus_status->ATTRIBUTES.TIME_CAPACITY;
     uint64_t uptime = ucx_uptime();
-    if (time_capacity < -1 || time_overflow(uptime + (uint64_t)time_capacity)){
+    if (time_capacity < INFINITE_TIME_VALUE ||
+        (time_capacity >= 0 && time_overflow(uptime + (uint64_t)time_capacity))){
         *RETURN_CODE = INVALID_CONFIG;
         return;
     }
@@ -421,7 +423,8 @@ void DELAYED_START (
     }
 
     uint64_t uptime = ucx_uptime();
-    if (DELAY_TIME < -1 || time_overflow(uptime + (uint64_t)DELAY_TIME)){
+    if (DELAY_TIME < INFINITE_TIME_VALUE ||
+        (DELAY_TIME >= 0 && time_overflow(uptime + (uint64_t)DELAY_TIME))){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -438,7 +441,8 @@ void DELAYED_START (
     
     // when (DEADLINE_TIME calculation is out of range) => INVALID_CONFIG
     SYSTEM_TIME_TYPE time_capacity = process->processus_status->ATTRIBUTES.TIME_CAPACITY;
-    if (time_capacity < -1 || time_overflow(uptime + (uint64_t)time_capacity + (uint64_t)DELAY_TIME)){
+    if (time_capacity < INFINITE_TIME_VALUE ||
+        (time_capacity >= 0 && time_overflow(uptime + (uint64_t)time_capacity + (uint64_t)DELAY_TIME))){
         *RETURN_CODE = INVALID_CONFIG;
         return;
     }
