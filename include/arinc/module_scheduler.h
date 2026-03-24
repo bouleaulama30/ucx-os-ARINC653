@@ -23,7 +23,7 @@ struct mscb_s {
     int32_t windows_idx;
     BOOLEAN_TYPE idle_current_partition;
     uint32_t major_frame_count;
-};
+};      
 
 extern void  module_scheduler_init(const char* name, uint32_t major_frame_tick, const window_partition_type* windows_partition, uint32_t nbr_windows);
 extern void arinc_start_scheduling(void);

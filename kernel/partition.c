@@ -120,7 +120,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 
 
 
-int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
+int32_t krnl_partition_switch(PARTITION_ID_TYPE IDENTIFIER){
     if (IDENTIFIER == IDLE_PARTITION_ID) {
         _pmp_partition_activate((uint32_t)_kernel_end, (uint32_t)0, (uint32_t)0);
 #ifndef MULTICORE
@@ -145,7 +145,7 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
     _pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
 
     if(partition->status->OPERATING_MODE == IDLE){
-        int32_t id = activate_partition(IDLE_PARTITION_ID);
+        int32_t id = krnl_partition_switch(IDLE_PARTITION_ID);
         return id;
     }
     kcb->partition_current = partition_node;
@@ -163,7 +163,7 @@ int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER){
     printf("start partition addr: %x, end partition addr: %x\n", partition_start_addr, partition_end_addr);
     _pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
     if(partition->status->OPERATING_MODE == IDLE){
-        int32_t id = activate_partition(IDLE_PARTITION_ID);
+        int32_t id = krnl_partition_switch(IDLE_PARTITION_ID);
         return id;
     }
 

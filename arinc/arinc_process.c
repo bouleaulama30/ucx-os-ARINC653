@@ -174,8 +174,7 @@ void SUSPEND_SELF (
     
     // when (TIME_OUT calculation is out of range) => INVALID_CONFIG
     uint64_t uptime = ucx_uptime();
-    uint64_t max_system_time = 0x7fffffffffffffffULL;
-    if (TIME_OUT < INFINITE_TIME_VALUE || uptime > (max_system_time - (uint64_t)TIME_OUT)){
+    if (TIME_OUT < INFINITE_TIME_VALUE || time_overflow(uptime+(uint64_t)TIME_OUT)){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -352,8 +351,7 @@ void START (
     // when (DEADLINE_TIME calculation is out of range) => INVALID_CONFIG
     SYSTEM_TIME_TYPE time_capacity = process->processus_status->ATTRIBUTES.TIME_CAPACITY;
     uint64_t uptime = ucx_uptime();
-    uint64_t max_system_time = 0x7fffffffffffffffULL;
-    if (time_capacity < -1 || uptime > (max_system_time - (uint64_t)time_capacity)){
+    if (time_capacity < -1 || time_overflow(uptime + (uint64_t)time_capacity)){
         *RETURN_CODE = INVALID_CONFIG;
         return;
     }
@@ -367,7 +365,7 @@ void START (
 
             process->processus_status->PROCESS_STATE = READY;
             //calculer la deadline 
-            process->processus_status->DEADLINE_TIME = ucx_uptime() + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+            process->processus_status->DEADLINE_TIME = (SYSTEM_TIME_TYPE)uptime + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
             //check for rescheduling
             struct process_s *current_process = partition->process_current->data;
             if (setjmp(current_process->tcb.context) == 0) {
@@ -424,8 +422,7 @@ void DELAYED_START (
     }
 
     uint64_t uptime = ucx_uptime();
-    uint64_t max_system_time = 0x7fffffffffffffffULL;
-    if (DELAY_TIME < -1 || uptime > (max_system_time - (uint64_t)DELAY_TIME)){
+    if (DELAY_TIME < -1 || time_overflow(uptime + (uint64_t)DELAY_TIME)){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -442,7 +439,7 @@ void DELAYED_START (
     
     // when (DEADLINE_TIME calculation is out of range) => INVALID_CONFIG
     SYSTEM_TIME_TYPE time_capacity = process->processus_status->ATTRIBUTES.TIME_CAPACITY;
-    if (time_capacity < 0 || uptime + (uint64_t)time_capacity + DELAY_TIME > (max_system_time)){
+    if (time_capacity < 0 || time_overflow(uptime + (uint64_t)time_capacity + (uint64_t)DELAY_TIME)){
         *RETURN_CODE = INVALID_CONFIG;
         return;
     }
@@ -455,13 +452,13 @@ void DELAYED_START (
         if(partition->status->OPERATING_MODE == NORMAL){
             if (!DELAY_TIME){
                 process->processus_status->PROCESS_STATE = READY;
-                process->processus_status->DEADLINE_TIME = ucx_uptime() + process->processus_status->ATTRIBUTES.TIME_CAPACITY;            
+                process->processus_status->DEADLINE_TIME = (SYSTEM_TIME_TYPE)uptime + process->processus_status->ATTRIBUTES.TIME_CAPACITY;            
             }
             else {            
                 process->processus_status->PROCESS_STATE = WAITING;
                 //calculer la deadline 
-                process->processus_status->DEADLINE_TIME = ucx_uptime() + process->processus_status->ATTRIBUTES.TIME_CAPACITY + DELAY_TIME;
-                process->time_counter = ucx_uptime() + DELAY_TIME;
+                process->processus_status->DEADLINE_TIME = (SYSTEM_TIME_TYPE)uptime + process->processus_status->ATTRIBUTES.TIME_CAPACITY + DELAY_TIME;
+                process->time_counter = (SYSTEM_TIME_TYPE)uptime + DELAY_TIME;
             }
             //check for rescheduling
             struct process_s *current_process = partition->process_current->data;

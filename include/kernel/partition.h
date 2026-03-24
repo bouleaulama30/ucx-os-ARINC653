@@ -20,7 +20,7 @@ extern int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         SYSTEM_ADDRESS_TYPE entry_point,
                         BOOLEAN_TYPE is_system_partition);
 
-extern int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER);
+extern int32_t krnl_partition_switch(PARTITION_ID_TYPE IDENTIFIER);
 
 
 static inline struct pcb_s* get_current_partition(){

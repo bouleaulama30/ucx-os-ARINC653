@@ -59,7 +59,7 @@ void arinc_start_scheduling(void) {
     int32_t first_window_idx = 0;
     PARTITION_ID_TYPE first_id = ms->windows_partition[first_window_idx].id;
 
-    activate_partition(first_id);
+    krnl_partition_switch(first_id);
 
     ms->windows_idx = 0;
     
@@ -86,9 +86,6 @@ void signal_idle_current_partition(void){
 #else
     struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
 #endif
-    if(ms == NULL){
-        krnl_panic(ERR_SCHED_CONFIG); 
-    }
     ms->idle_current_partition = true;
 }
 
@@ -102,14 +99,6 @@ int32_t partition_scheduler(void){
 #else
     struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
 #endif
-    if (ms == NULL) {
-        krnl_panic((uint32_t)ERR_FAIL);
-    }
-
-    if (ms->windows_partition == NULL || ms->nbr_windows == 0) {
-        krnl_panic(ERR_SCHED_CONFIG);
-    }
-
     uint32_t position_in_frame = current_tick - ms->major_frame_count * ms->major_frame_tick;
     int32_t* windows_idx = &ms->windows_idx;
     uint32_t partition_duration_tick = ms->windows_partition[*windows_idx].duration_tick;
@@ -121,7 +110,7 @@ int32_t partition_scheduler(void){
     printf("[SCHED partition] Position tick: %d, Partition end tick: %d, Major frame tick: %d\n", position_in_frame, partition_end_tick, ms->major_frame_tick);
 
     if(ms->idle_current_partition){
-        partition_id = activate_partition(IDLE_PARTITION_ID);
+        partition_id = krnl_partition_switch(IDLE_PARTITION_ID);
         ms->idle_current_partition = false;
     }
 
@@ -129,22 +118,22 @@ int32_t partition_scheduler(void){
         (*windows_idx) = 0;
         partition_id = ms->windows_partition[*windows_idx].id;
         ms->major_frame_count += 1;
-        return activate_partition(partition_id);
+        return krnl_partition_switch(partition_id);
     }
 
     if(position_in_frame >= partition_end_tick){
         if(*windows_idx == ms->nbr_windows - 1){
-            return activate_partition(IDLE_PARTITION_ID);
+            return krnl_partition_switch(IDLE_PARTITION_ID);
         }
         
         // s'il y a des trous entre les partitions, on idle
         if(position_in_frame < ms->windows_partition[*windows_idx+1].start_tick){
-            return activate_partition(IDLE_PARTITION_ID);
+            return krnl_partition_switch(IDLE_PARTITION_ID);
         }
 
         (*windows_idx)++;
         partition_id = ms->windows_partition[*windows_idx].id;
-        activate_partition(partition_id);
+        krnl_partition_switch(partition_id);
     }
     
     return partition_id;

@@ -20,9 +20,6 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 	new_tcb->stack_sz = stack_size;
 	new_tcb->id = current_partition->id_next++;
 
-	//pas necessaire de definir l'etat car deja dans status du process
-	new_tcb->state = 0;
-
 	new_tcb->stack = current_partition->next_stack_addr;
 	current_partition->next_stack_addr += stack_size;
 
@@ -44,7 +41,7 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 uint16_t process_schedule(void)
 {
     struct pcb_s *partition = get_current_partition();
-    
+
     struct node_s *node;
     
     struct node_s *select = NULL;

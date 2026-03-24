@@ -101,8 +101,7 @@ extern void TIMED_WAIT (
     struct process_s *current_process = current_process_node->data;
     
     uint64_t uptime = ucx_uptime();
-    uint64_t max_system_time = 0x7fffffffffffffffULL;
-    if (DELAY_TIME < -1 || uptime > (max_system_time - (uint64_t)DELAY_TIME)){
+    if (DELAY_TIME < -1 || time_overflow(uptime + (uint64_t)DELAY_TIME)){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -128,7 +127,7 @@ extern void TIMED_WAIT (
     }
     else{
         current_process->processus_status->PROCESS_STATE = WAITING;
-        current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + DELAY_TIME;
+        current_process->time_counter = (SYSTEM_TIME_TYPE)uptime + DELAY_TIME;
         if (setjmp(current_process->tcb.context) == 0) {
         /* Retourner au contexte du kernel (partition_OS) */
             longjmp(partition->partition_context, 1);
@@ -150,9 +149,8 @@ extern void PERIODIC_WAIT (
     }
 
     uint64_t uptime = ucx_uptime();
-    uint64_t max_system_time = 0x7fffffffffffffffULL;
     uint64_t futur_deadline_time = (uint64_t)current_process->processus_status->ATTRIBUTES.PERIOD + (uint64_t)current_process->release_point_time + (uint64_t)current_process->processus_status->ATTRIBUTES.TIME_CAPACITY;
-    if ((max_system_time - futur_deadline_time) < 0){
+    if (time_overflow(futur_deadline_time)){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -189,8 +187,7 @@ extern void REPLENISH (
     
 
     uint64_t uptime = ucx_uptime();
-    uint64_t max_system_time = 0x7fffffffffffffffULL;
-    if (BUDGET_TIME < -1 || uptime > (max_system_time - (uint64_t)BUDGET_TIME)){
+    if (BUDGET_TIME < -1 || time_overflow(uptime + (uint64_t)BUDGET_TIME)){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -205,7 +202,7 @@ extern void REPLENISH (
     else if(current_process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE && BUDGET_TIME == INFINITE_TIME_VALUE)
         current_process->processus_status->DEADLINE_TIME = INFINITE_TIME_VALUE;
     else{
-        current_process->processus_status->DEADLINE_TIME = (SYSTEM_TIME_TYPE)ucx_uptime() + BUDGET_TIME;
+        current_process->processus_status->DEADLINE_TIME = (SYSTEM_TIME_TYPE)uptime + BUDGET_TIME;
     
     }
 
