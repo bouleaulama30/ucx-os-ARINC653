@@ -1,5 +1,7 @@
 # TO-DO
 
+* faire rouler sur la carte en materielle une fois que c'est bon toute la norme
+
 ## Partition implem
 
 * implémentation set_operating_mode:
@@ -7,10 +9,11 @@
         * -- a DEADLINE_TIME calculation may cause an overflow of the underlying -- clock. If this occurs, HM is invoked with an illegal request error code set the partition’s lock level to zero;
         * if (an error handler process has been created) then enable the error handler process for execution and fault processing;
 
-* merge la branche dev sur la main
-* faire rouler sur la carte en materielle une fois que c'est bon toute la norme
 
 ## intra partition communication
+* lire norme la communication inter partition
+* lire norme la communication intra partition
+
 * coder tout ce qui est relatif au lock preemption mutex pour les process
 
             * get_process_status cf si le process possede le lock preemption alors renvoyer la priorite max pour la current_priority
