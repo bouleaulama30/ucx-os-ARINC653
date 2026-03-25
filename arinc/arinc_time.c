@@ -118,19 +118,12 @@ extern void TIMED_WAIT (
         partition->process_current = new_current_process_node;
         
         struct process_s *current_process = partition->process_current->data;
-        if (setjmp(current_process->tcb.context) == 0) {
-            /* Retourner au contexte du kernel (partition_OS) */
-            longjmp(partition->partition_context, 1);
-        }
+        yield_to_partition(partition, current_process);
     }
     else{
         current_process->processus_status->PROCESS_STATE = WAITING;
         current_process->time_counter = (SYSTEM_TIME_TYPE)uptime + DELAY_TIME;
-        if (setjmp(current_process->tcb.context) == 0) {
-        /* Retourner au contexte du kernel (partition_OS) */
-            longjmp(partition->partition_context, 1);
-        }
-
+        yield_to_partition(partition, current_process);
     }
     *RETURN_CODE = NO_ERROR;
 }
@@ -156,10 +149,7 @@ extern void PERIODIC_WAIT (
     current_process->processus_status->PROCESS_STATE = WAITING;
     current_process->release_point_time += current_process->processus_status->ATTRIBUTES.PERIOD;
     update_process_deadline(current_process, current_process->release_point_time);
-    if (setjmp(current_process->tcb.context) == 0) {
-    /* Retourner au contexte du kernel (partition_OS) */
-        longjmp(partition->partition_context, 1);
-    }
+        yield_to_partition(partition, current_process);
     *RETURN_CODE = NO_ERROR;
 
 }

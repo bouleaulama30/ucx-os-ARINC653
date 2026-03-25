@@ -156,10 +156,7 @@ void SET_PRIORITY (
             partition->process_current = new_process_node;
         
         struct process_s *current_process = partition->process_current->data;
-        if (setjmp(current_process->tcb.context) == 0) {
-            /* Retourner au contexte du kernel (partition_OS) */
-            longjmp(partition->partition_context, 1);
-        }
+        yield_to_partition(partition, current_process);
     }
     *RETURN_CODE = NO_ERROR;
 }
@@ -194,10 +191,8 @@ void SUSPEND_SELF (
         if (TIME_OUT != INFINITE_TIME_VALUE){
             current_process->time_counter = (SYSTEM_TIME_TYPE)uptime + TIME_OUT;
         }
-        if (setjmp(current_process->tcb.context) == 0) {
-        /* Retourner au contexte du kernel (partition_OS) */
-        longjmp(partition->partition_context, 1);
-        }
+
+        yield_to_partition(partition, current_process);
         if(current_process->time_counter == 0)
             *RETURN_CODE = TIMED_OUT;
         else            
@@ -276,10 +271,7 @@ void RESUME (
     if(!process->time_counter){
         process->processus_status->PROCESS_STATE = READY;
         // rescheduling
-        if (setjmp(current_process->tcb.context) == 0) {
-            /* Retourner au contexte du kernel (partition_OS) */
-            longjmp(partition->partition_context, 1);
-        }
+        yield_to_partition(partition, current_process);
     }
 
     
@@ -323,10 +315,8 @@ void STOP (
     process->is_suspended = false;
     process->processus_status->DEADLINE_TIME = INFINITE_TIME_VALUE;
     
-    if (setjmp(current_process->tcb.context) == 0) {
-        /* Retourner au contexte du kernel (partition_OS) */
-        longjmp(partition->partition_context, 1);
-    }
+    yield_to_partition(partition, current_process);
+
     *RETURN_CODE = NO_ERROR;
 }
 
@@ -370,10 +360,8 @@ void START (
             update_process_deadline(process,(SYSTEM_TIME_TYPE)uptime);
             //check for rescheduling
             struct process_s *current_process = partition->process_current->data;
-            if (setjmp(current_process->tcb.context) == 0) {
-                /* Retourner au contexte du kernel (partition_OS) */
-                longjmp(partition->partition_context, 1);
-            }
+            yield_to_partition(partition, current_process);
+
         }
         else{
             process->processus_status->PROCESS_STATE = WAITING;
@@ -467,10 +455,8 @@ void DELAYED_START (
             }
             //check for rescheduling
             struct process_s *current_process = partition->process_current->data;
-            if (setjmp(current_process->tcb.context) == 0) {
-                /* Retourner au contexte du kernel (partition_OS) */
-                longjmp(partition->partition_context, 1);
-            }
+            yield_to_partition(partition, current_process);
+
         }
         else{
             process->processus_status->PROCESS_STATE = WAITING;
