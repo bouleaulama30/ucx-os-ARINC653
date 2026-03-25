@@ -6,21 +6,6 @@
     * faire les actions quand elle passe en normal
         * -- a DEADLINE_TIME calculation may cause an overflow of the underlying -- clock. If this occurs, HM is invoked with an illegal request error code set the partition’s lock level to zero;
         * if (an error handler process has been created) then enable the error handler process for execution and fault processing;
-### Refactoring
-Liste des fichier a refactor:
-    * arinc_partition.h/c
-    * module_scheduler.h/c
-    * static_conf.h/c
-    * main.h/c
-    * arinc_process.h/c
-    * process.h/c
-
-* refractor / formatage code:
-    * refractor de partionnement spatial
-    * refractor de partionnement temporelle
-    * refractor tout sur les processes
-    * refractor tout sur les timings
-    * remplacer certaines action par des fonctions get et set:
 
 * merge la branche dev sur la main
 * faire rouler sur la carte en materielle une fois que c'est bon toute la norme

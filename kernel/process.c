@@ -24,7 +24,7 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 	current_partition->next_stack_addr += stack_size;
 
 	// alignement de la prochaine stack adresse sur 8 octets
-	uint32_t addr = (uint32_t) current_partition->next_stack_addr;
+	size_t addr = (size_t) current_partition->next_stack_addr;
     addr = (addr + 7) & ~7;
     current_partition->next_stack_addr = (uint8_t *) addr;
 		

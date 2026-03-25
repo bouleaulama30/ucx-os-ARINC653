@@ -37,24 +37,19 @@ start_over:
     }
 }
 
-
-
-
-
 void GET_PARTITION_STATUS (
     /*out*/ PARTITION_STATUS_TYPE      *PARTITION_STATUS,
     /*out*/ RETURN_CODE_TYPE           *RETURN_CODE ){
-    struct pcb_s* my_partition = get_current_partition();    
+    struct pcb_s* partition = get_current_partition();    
 
-    if (!my_partition->status) {
+    if (!partition->status) {
         *RETURN_CODE = NOT_AVAILABLE;
         return;
     }
 
-    *PARTITION_STATUS = *(my_partition->status);
+    *PARTITION_STATUS = *(partition->status);
     *RETURN_CODE = NOT_AVAILABLE;       
 }
-
 
 
 static struct node_s *start_process(struct node_s *node, void *arg)
@@ -81,8 +76,6 @@ static struct node_s *start_process(struct node_s *node, void *arg)
         return 0;
     }
 
-
-
     return 0;
 }
 
@@ -91,53 +84,53 @@ void SET_PARTITION_MODE (
        /*in */ OPERATING_MODE_TYPE        OPERATING_MODE,
        /*out*/ RETURN_CODE_TYPE           *RETURN_CODE ){
 
-    struct pcb_s* my_partition = get_current_partition();
+    struct pcb_s* partition = get_current_partition();
     // error
     if(OPERATING_MODE != IDLE && OPERATING_MODE != COLD_START && OPERATING_MODE != WARM_START && OPERATING_MODE != NORMAL){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
 
-    if(OPERATING_MODE == NORMAL && my_partition->status->OPERATING_MODE == NORMAL){
+    if(OPERATING_MODE == NORMAL && partition->status->OPERATING_MODE == NORMAL){
         *RETURN_CODE = NO_ACTION;
         return;
     }
 
-    if(OPERATING_MODE == WARM_START && my_partition->status->OPERATING_MODE == COLD_START){
+    if(OPERATING_MODE == WARM_START && partition->status->OPERATING_MODE == COLD_START){
         *RETURN_CODE = INVALID_MODE;
         return;
     }
 
     // normal
-    my_partition->status->OPERATING_MODE = OPERATING_MODE;
+    partition->status->OPERATING_MODE = OPERATING_MODE;
     
     if (OPERATING_MODE == IDLE)
     {   
         // printf("OPERATING MODE is IDLE\n");
-        my_partition->process_current = NULL;
+        partition->process_current = NULL;
         signal_idle_current_partition();
         *RETURN_CODE = NO_ERROR;
-        longjmp(my_partition->partition_context, 1);
+        longjmp(partition->partition_context, 1);
     }
 
     if (OPERATING_MODE == WARM_START || OPERATING_MODE == COLD_START)
     {
         // inhibit process scheduling and switch back to initialization mode
         // printf("OPERATING MODE is WARM START or COLD START\n");
-        my_partition->process_current = NULL;
-        my_partition->nbr_processes = 0;
-        my_partition->id_next = 0;
-        my_partition->next_stack_addr = my_partition->memory_requirements->memory[DATA].base + PARTIION_OS_AND_MAIN_PROCESS_STACK_SIZE;
+        partition->process_current = NULL;
+        partition->nbr_processes = 0;
+        partition->id_next = 0;
+        partition->next_stack_addr = partition->memory_requirements->memory[DATA].base + PARTIION_OS_AND_MAIN_PROCESS_STACK_SIZE;
 
         // on vide la liste des processes de la partition
-        while (my_partition->processes->length != 0)
+        while (partition->processes->length != 0)
         {
-            struct process_s *process  = list_pop(my_partition->processes);
+            struct process_s *process  = list_pop(partition->processes);
             free(process->processus_status);
             free(process);
         }
         *RETURN_CODE = NO_ERROR;
-        longjmp(my_partition->partition_context, 1);
+        longjmp(partition->partition_context, 1);
     }
     
     if (OPERATING_MODE == NORMAL)
@@ -145,9 +138,9 @@ void SET_PARTITION_MODE (
         // printf("OPERATING MODE is NORMAL\n");
         *RETURN_CODE = NO_ERROR;
 
-        SYSTEM_TIME_TYPE first_release_point = arinc_time_find_first_release_point(my_partition);
-        list_foreach(my_partition->processes, start_process, (void *)first_release_point);
-        longjmp(my_partition->partition_context, 1);
+        SYSTEM_TIME_TYPE first_release_point = arinc_time_find_first_release_point(partition);
+        list_foreach(partition->processes, start_process, (void *)first_release_point);
+        longjmp(partition->partition_context, 1);
     }
     
     *RETURN_CODE = NO_ERROR;
@@ -158,8 +151,8 @@ void GET_MY_PARTITION_ID(
                /*out*/ PARTITION_ID_TYPE          *PARTITION_ID,
               /*out*/ RETURN_CODE_TYPE           *RETURN_CODE )
 {
-    struct pcb_s* my_partition = get_current_partition();
-    *PARTITION_ID = my_partition->status->IDENTIFIER;
+    struct pcb_s* partition = get_current_partition();
+    *PARTITION_ID = partition->status->IDENTIFIER;
     if(*PARTITION_ID)
         *RETURN_CODE = NO_ERROR;
     else
