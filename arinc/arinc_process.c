@@ -444,7 +444,6 @@ void DELAYED_START (
             if (!DELAY_TIME){
                 process->processus_status->PROCESS_STATE = READY;
                 update_process_deadline(process, (SYSTEM_TIME_TYPE)uptime);
-
             }
             else {            
                 process->processus_status->PROCESS_STATE = WAITING;
