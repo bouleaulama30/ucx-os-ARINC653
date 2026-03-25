@@ -10,9 +10,10 @@
         * if (an error handler process has been created) then enable the error handler process for execution and fault processing;
 
 
-## intra partition communication
+## partition communication
 * lire norme la communication inter partition
-* lire norme la communication intra partition
+* lire norme la communication intra partition   
+
 
 * coder tout ce qui est relatif au lock preemption mutex pour les process
 
@@ -31,6 +32,14 @@
                 * gerer le cas avec le error handler
             * plus tard repassser sur toute les fonctions pour gerer les processes queue quand elles seront implem
             * implem la waiting queue (quand on aura implem la partie intra et inter communication)
+
+### inter communication
+* faire tout en unicast ?
+
+### intra communication
+comprendre:
+* As with process and port creation, the amount of memory required to create intrapartition communication mechanisms is allocated from the partition’s memory resources, which is defined at system build time.
+* faire tout en unicast ?
 
 ## HM
 * faire en sorte de mettre toutes les metriques en ns car le lsb de system_time_type est 1 ns
