@@ -19,6 +19,12 @@ void p1_main_process(struct pcb_s *partition){
     // START(process_id_0, &return_code0);  
     START(process_id_1, &return_code1);  
 
+    SAMPLING_PORT_ID_TYPE port_id;
+    CREATE_SAMPLING_PORT(system_port_table[0].port_name, system_port_table[0].messageSizeBytes, system_port_table[0].port_direction, system_port_table[0].refreshPeriodMs,
+     &port_id, &return_code0);
+    
+    printf("return code sampling port %d, port id %d\n", return_code0, port_id); 
+
     SET_PARTITION_MODE(NORMAL, &return_code0);
 }
 

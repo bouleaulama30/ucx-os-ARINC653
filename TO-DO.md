@@ -11,10 +11,6 @@
 
 
 ## partition communication
-* lire norme la communication inter partition
-* lire norme la communication intra partition   
-
-
 * coder tout ce qui est relatif au lock preemption mutex pour les process
 
             * get_process_status cf si le process possede le lock preemption alors renvoyer la priorite max pour la current_priority
@@ -41,10 +37,16 @@ comprendre:
 * As with process and port creation, the amount of memory required to create intrapartition communication mechanisms is allocated from the partition’s memory resources, which is defined at system build time.
 * faire tout en unicast ?
 
+
 ## HM
 * faire en sorte de mettre toutes les metriques en ns car le lsb de system_time_type est 1 ns
 * implem is_executing_error_handler pour get_my_id et get_my_index
 * implem is_main_process (trouver une condition necessaire et suffisante genre il n y a pas de current process) pour get_my_id et get_my_index
+
+## refactoring
+
+* sampling_port_s -> sp_s ?
+* mettre des commentaires
 
 ## Choses dependante de l archi
 * protection memoire avec pmp_activate et mprv_activate (lie a riscv32)

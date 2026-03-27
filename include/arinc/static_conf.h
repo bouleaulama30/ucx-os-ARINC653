@@ -191,9 +191,10 @@ struct port_mapping_s {
     struct krnl_sampling_channel *channel;
 };
 
-static struct port_mapping_s system_port_table[] = {
+static const struct port_mapping_s system_port_table[] = {
     {1, "P1_OUT_TEMP", SOURCE, 64, 25, &channel_temperature},
     {2, "P2_IN_TEMP", DESTINATION, 64, 25, &channel_temperature},
 };
+// const int routing_table_size = 3;
 
 #endif 

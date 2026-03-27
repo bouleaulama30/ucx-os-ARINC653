@@ -80,7 +80,7 @@ struct pcb_s {
    PARTITION_NAME_TYPE name;
    MEMORY_REQUIREMENTS_TYPE *memory_requirements;
    SYSTEM_ADDRESS_TYPE next_stack_addr;
-   // interpartition_communication_type communication_ports;
+   struct list_s *communication_ports;
    APEX_INTEGER sampling_port_count;
    // Partion HM Table
    SYSTEM_ADDRESS_TYPE entry_point;
