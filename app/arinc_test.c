@@ -49,103 +49,137 @@ void test_spatial_violation_p1(void) {
     printf("[CRITICAL FAIL] P2 a reussi a ecrire dans P1 !\n");
 }
 
-
-
 __attribute__((section(".p1_code")))
-void test_id_1(void)
-{
-	uint64_t start = ucx_uptime();
-	uint64_t end;
-	APEX_INTEGER id;
-	RETURN_CODE_TYPE return_code;
-
-	
-	while (1) {
-		end = ucx_uptime();
-		GET_MY_PARTITION_ID(&id, &return_code);
-		printf("partition %d, time %lu ms]\n", id, (unsigned long)(end - start));
-		start = end;
-		ucx_task_yield();
-	}
-}
-
-__attribute__((section(".p2_code")))
-void test_id_2(void)
-{
-	uint64_t start = ucx_uptime();
-	uint64_t end;
-	APEX_INTEGER id;
-	RETURN_CODE_TYPE return_code;
-
-	
-	while (1) {
-		end = ucx_uptime();
-		GET_MY_PARTITION_ID(&id, &return_code);
-		printf("partition %d, time %lu ms]\n", id, (unsigned long)(end - start));
-		start = end;
-		ucx_task_yield();
-	}
-}
-
-
-
-// on met la tache dans la section code de la p1
-__attribute__((section(".p1_code")))
-void task0(void)
+void process_test0(void)
 {   
 	int32_t cnt = 100000;
     RETURN_CODE_TYPE return_code;
-	APEX_INTEGER id;
-	GET_MY_PARTITION_ID(&id, &return_code);
+	APEX_INTEGER paritition_id;
+    APEX_INTEGER process_id;
 	
-
+    // APEX_INTEGER other_process_id;
+	PROCESS_STATUS_TYPE other_process_status;
+	GET_MY_PARTITION_ID(&paritition_id, &return_code);
+    GET_MY_ID(&process_id, &return_code);
 	while (1) {
-		if(cnt == 100002){
-			// SET_PARTITION_MODE(IDLE, &return_code);
+		// if(cnt % 2 == 0){
+		// 	printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
+		// 	SET_PRIORITY(1, 3, &return_code);
+		// 	// SET_PRIORITY(1, 3, &return_code);
+
+		// }
+		
+		// if(cnt == 100001)
+		// 	SET_PARTITION_MODE(IDLE, &return_code);
+			// STOP(1, &return_code);
+		if(cnt == 100005){
+			GET_PROCESS_STATUS(0, &other_process_status, &return_code);
+			printf("CURRENT DEADLINE OF PROCESS %s: %d\n", other_process_status.ATTRIBUTES.NAME, other_process_status.DEADLINE_TIME);
+			REPLENISH(10, &return_code);
+			GET_PROCESS_STATUS(0, &other_process_status, &return_code);
+			printf("NEW DEADLINE OF PROCESS %s: %d\n", other_process_status.ATTRIBUTES.NAME, other_process_status.DEADLINE_TIME);
+			// DELAYED_START(1, 50 ,&return_code);
 		}
-		printf("[task %d %ld, partition %d, address cnt: 0x%p]\n\n", id, cnt++, id, &cnt);
-		// print_time();
-		ucx_task_yield();
+
+		// if(cnt == 100011){
+		// 	printf("SUSPEND TIME %d\n", ucx_uptime());
+		// 	SUSPEND_SELF(50, &return_code);
+		// 	printf("return code suspend_self %d:", return_code);
+		// }
+		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
+		TIMED_WAIT(5, &return_code);
+		// ucx_task_yield();
 	}
 }
 
-// on met la tache dans la section code de la p2
-__attribute__((section(".p2_code")))
-void task1(void)
-{
+__attribute__((section(".p1_code")))
+void process_test1(void)
+{   
 	int32_t cnt = 200000;
-	
-	APEX_INTEGER id;
-	RETURN_CODE_TYPE return_code;
-	
-	PARTITION_STATUS_TYPE status;
-	
-	GET_MY_PARTITION_ID(&id, &return_code);
-	SET_PARTITION_MODE(NORMAL, &return_code);
-	GET_PARTITION_STATUS(&status, &return_code);
-	
+    RETURN_CODE_TYPE return_code;
+	APEX_INTEGER paritition_id;
+    APEX_INTEGER process_id;
+	GET_MY_PARTITION_ID(&paritition_id, &return_code);
+    GET_MY_ID(&process_id, &return_code);
 	while (1) {
-		printf("[task %d %ld, address cnt: 0x%p ,period=%ld duration=%ld, mode=%d]\n\n", id, cnt++, &cnt,(long)status.PERIOD, (long)status.DURATION, status.OPERATING_MODE);
-		// print_time();
-		ucx_task_yield();
+		// if(cnt % 2 == 0){
+		// 	printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
+		// 	SET_PRIORITY(1, 1, &return_code);
+		// 	// SET_PRIORITY(0, 3, &return_code);
+		// }
+
+		// if(cnt == 200001)
+		// 	STOP(0, &return_code);
+		// if(cnt == 200003)
+		// 	DELAYED_START(0, 90 ,&return_code);
+
+		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
+		PERIODIC_WAIT(&return_code);
+		printf("return code periodic_wait %d\n", return_code);
+		// ucx_task_yield();
 	}
 }
 
-void task2(void)
-{
-	int32_t cnt = 300000;
-
-	APEX_INTEGER id;
-	RETURN_CODE_TYPE return_code;
-
-	GET_MY_PARTITION_ID(&id, &return_code);
-
+__attribute__((section(".p2_code")))
+void process_test2(void)
+{   
+int32_t cnt = 300000;
+    RETURN_CODE_TYPE return_code;
+	APEX_INTEGER paritition_id;
+    APEX_INTEGER process_id;
+	
+    // APEX_INTEGER other_process_id;
+	PROCESS_STATUS_TYPE other_process_status;
+	GET_MY_PARTITION_ID(&paritition_id, &return_code);
+    GET_MY_ID(&process_id, &return_code);
+	GET_PROCESS_STATUS(1, &other_process_status, &return_code);
+	
+	if(return_code == NO_ERROR){
+		printf("Le nom du process: %s, with priority %d\n", other_process_status.ATTRIBUTES.NAME, other_process_status.CURRENT_PRIORITY);
+	}
 	while (1) {
-		printf("[task %d %ld, partition %d, address cnt: 0x%p]\n", id, cnt++, id, &cnt);
-		ucx_task_yield();
+		if(cnt % 2 == 0){
+			// SET_PARTITION_MODE(IDLE, &return_code);
+			printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
+			SET_PRIORITY(1, 3, &return_code);
+			// SET_PRIORITY(1, 3, &return_code);
+
+		}
+		
+		if(cnt == 300001)
+			SUSPEND(1, &return_code);
+			// SET_PARTITION_MODE(COLD_START, &return_code);
+		if(cnt == 300005)
+			RESUME(1, &return_code);
+		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
+
+		TIMED_WAIT(5, &return_code);
+		// ucx_task_yield();
+
 	}
 }
 
+__attribute__((section(".p2_code")))
+void process_test3(void)
+{   
+	int32_t cnt = 400000;
+    RETURN_CODE_TYPE return_code;
+	APEX_INTEGER paritition_id;
+    APEX_INTEGER process_id;
+	GET_MY_PARTITION_ID(&paritition_id, &return_code);
+    GET_MY_ID(&process_id, &return_code);
+	while (1) {
+		if(cnt % 2 == 0){
+			printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
+			SET_PRIORITY(1, 1, &return_code);
+			// SET_PRIORITY(0, 3, &return_code);
+		}
+		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
+		TIMED_WAIT(5, &return_code);
+		// ucx_task_yield();
+
+	}
+}
 
 int app_main(void)
 {
@@ -171,7 +205,7 @@ int app_main(void)
 				   p1_data_size,
 				   DEFAULT_PARTITION_CONFIG.access_data_mem,
 				//    test_spatial_violation_p2,
-				   task0,
+				   p1_main_process,
 				   DEFAULT_PARTITION_CONFIG.is_system_partition);
 
 	partition_init(P2_CONFIG.period,
@@ -188,7 +222,7 @@ int app_main(void)
 				   p2_data_size,
 				   P2_CONFIG.access_data_mem,
 				//    test_spatial_violation_p1,
-				   task1,
+				   p2_main_process,
 				   P2_CONFIG.is_system_partition);
 
 	return 1;

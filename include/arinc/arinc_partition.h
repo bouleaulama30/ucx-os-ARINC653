@@ -15,6 +15,8 @@
 
 #define IDLE_PARTITION_ID 0
 
+#define PARTIION_OS_AND_MAIN_PROCESS_STACK_SIZE 4096
+
 typedef
    enum {
         IDLE       = 0,
@@ -77,13 +79,18 @@ struct pcb_s {
    PARTITION_STATUS_TYPE *status;
    PARTITION_NAME_TYPE name;
    MEMORY_REQUIREMENTS_TYPE *memory_requirements;
+   SYSTEM_ADDRESS_TYPE next_stack_addr;
    // interpartition_communication_type communication_ports;
+   APEX_INTEGER sampling_port_count;
    // Partion HM Table
    SYSTEM_ADDRESS_TYPE entry_point;
    BOOLEAN_TYPE is_system_partition;
    APEX_UNSIGNED nbr_processes;
-   APEX_UNSIGNED storage_capacity;
+   APEX_UNSIGNED id_next;
+	jmp_buf partition_context;		/* jmp_buf is architecture specific */
    struct list_s *processes;
+   struct node_s *process_current;
+   uint32_t last_tick;
 };
 
 
@@ -99,29 +106,9 @@ extern void GET_MY_PARTITION_ID (
        /*out*/ PARTITION_ID_TYPE          *PARTITION_ID,
        /*out*/ RETURN_CODE_TYPE           *RETURN_CODE );
 
-extern void idle_task(void);
+extern void partition_OS(void);
+extern void p1_main_process(struct pcb_s *partition);
+extern void p2_main_process(struct pcb_s *partition);
 
-extern int32_t partition_init(SYSTEM_TIME_TYPE PERIOD, 
-                        SYSTEM_TIME_TYPE DURATION,
-                        PARTITION_ID_TYPE IDENTIFIER,
-                        NUM_CORES_TYPE    NUM_ASSIGNED_CORES,
-                        const PARTITION_NAME_TYPE name,
-                        const REGION_NAME_TYPE   region_name_code_mem,
-                        SYSTEM_ADDRESS_TYPE base_code_mem,
-                        APEX_UNSIGNED      size_code_mem,
-                        const ACCESS_TYPE        access_code_mem,
-                        const REGION_NAME_TYPE   region_name_data_mem,
-                        SYSTEM_ADDRESS_TYPE base_data_mem,
-                        APEX_UNSIGNED      size_data_mem,
-                        const ACCESS_TYPE        access_data_mem,
-                        SYSTEM_ADDRESS_TYPE entry_point,
-                        BOOLEAN_TYPE is_system_partition);
-
-extern int32_t activate_partition(PARTITION_ID_TYPE IDENTIFIER);
-
-extern void process_test0(void);
-extern void process_test1(void);
-extern void process_test2(void);
-extern void process_test3(void);
 
 #endif

@@ -33,6 +33,7 @@ INC_DIRS += -I $(SRC_DIR)/include -I $(SRC_DIR)/include/lib \
 	-I $(SRC_DIR)/drivers/bus/include -I $(SRC_DIR)/drivers/device/include \
 	-I $(SRC_DIR)/net/include -I $(SRC_DIR)/arch/common
 CFLAGS += -D__VER__=\"$(VERSION)\" \
+-g \
 #-DCONFIG_POWER_ALLOC \
 #-DCONFIG_ALT_ALLOCATOR \
 #-DCONFIG_SCHED_SIMPLE
@@ -60,9 +61,9 @@ ucx: incl hal libs ddrivers network kernel arinc
 	$(AR) $(ARFLAGS) $(BUILD_TARGET_DIR)/libucxos.a \
 		$(BUILD_KERNEL_DIR)/*.o
 
-arinc: arinc_partition.o module_scheduler.o arinc_process.o
+arinc: arinc_partition.o module_scheduler.o arinc_process.o static_conf.o arinc_time.o arinc_interpartition_communication.o
 
-kernel: timer.o message.o pipe.o spinlock.o semaphore.o ecodes.o syscall.o coroutine.o ucx.o process.o main.o
+kernel: timer.o message.o pipe.o spinlock.o semaphore.o ecodes.o syscall.o coroutine.o ucx.o process.o partition.o interpartition_communication.o main.o
 
 main.o: $(SRC_DIR)/init/main.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/init/main.c
@@ -70,6 +71,10 @@ ucx.o: $(SRC_DIR)/kernel/ucx.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/kernel/ucx.c
 process.o: $(SRC_DIR)/kernel/process.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/kernel/process.c
+partition.o: $(SRC_DIR)/kernel/partition.c
+	$(CC) $(CFLAGS) $(SRC_DIR)/kernel/partition.c
+interpartition_communication.o: $(SRC_DIR)/kernel/interpartition_communication.c
+	$(CC) $(CFLAGS) $(SRC_DIR)/kernel/interpartition_communication.c
 coroutine.o:
 	$(CC) $(CFLAGS) $(SRC_DIR)/kernel/coroutine.c
 syscall.o: $(SRC_DIR)/kernel/syscall.c
@@ -112,6 +117,15 @@ module_scheduler.o: $(SRC_DIR)/arinc/module_scheduler.c
 
 arinc_process.o: $(SRC_DIR)/arinc/arinc_process.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/arinc/arinc_process.c
+
+arinc_time.o: $(SRC_DIR)/arinc/arinc_time.c
+	$(CC) $(CFLAGS) $(SRC_DIR)/arinc/arinc_time.c
+
+arinc_interpartition_communication.o: $(SRC_DIR)/arinc/arinc_interpartition_communication.c
+	$(CC) $(CFLAGS) $(SRC_DIR)/arinc/arinc_interpartition_communication.c
+
+static_conf.o: $(SRC_DIR)/arinc/static_conf.c
+	$(CC) $(CFLAGS) $(SRC_DIR)/arinc/static_conf.c
 		
 ## kernel + application link
 link:
@@ -139,6 +153,10 @@ arinc_test: rebuild
 
 arinc_test_api_partition: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_api_partition.o app/arinc_test_api_partition.c
+	@$(MAKE) --no-print-directory link
+
+arinc_test_apex_process_and_time: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_apex_process_and_time.o app/arinc_test_apex_process_and_time.c
 	@$(MAKE) --no-print-directory link
 
 coroutine_args: rebuild
@@ -389,6 +407,13 @@ gdb:
 
 multiarch-gdb:
 	gdb-multiarch -x ./debug/.gdbinit ./build/target/image.elf
+
+test:
+	$(MAKE) veryclean
+	$(MAKE) ucx ARCH=riscv/riscv32-qemu
+	$(MAKE) arinc_test_apex_process_and_time
+	-timeout $(DURATION) qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:./debug/test.txt
+	head -n30 ./debug/test.txt
 
 all:
 	$(MAKE) veryclean

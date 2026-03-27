@@ -3,6 +3,24 @@
 
 #include "arinc/arinc_partition.h"
 #include "arinc/module_scheduler.h"
+#include "kernel/interpartition_communication.h"
+
+
+extern void process_test0(void);
+extern void process_test1(void);
+extern void process_test2(void);
+extern void process_test3(void);
+extern void test_spatial_violation_p1(void);
+extern void test_spatial_violation_p2(void);
+extern void test_round_robin_A(void);
+extern void test_round_robin_B(void);
+extern void test_periodic_accuracy(void);
+extern void test_states_slave(void);
+extern void test_states_master(void);
+extern void test_prio_A(void);
+extern void test_prio_B(void);
+
+
 
 // Déclaration des symboles du linker script du kernel
 extern uint8_t _kernel_end[];
@@ -20,6 +38,7 @@ extern uint8_t _p2_code_end[];
 
 extern uint8_t _p2_data_start[];
 extern uint8_t _p2_data_end[];
+
 
 
 // Hardcoded partition configuration
@@ -43,8 +62,8 @@ struct PartitionConfig {
 
 // Default hardcoded partition configuration et voir le ldscript pour la conf mémoire
 static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
-    .period = 1000000,                    // 1 second in nanoseconds
-    .duration = 500000,                   // 500ms
+    .period = 50,                    // 1 second in nanoseconds
+    .duration = 20,                   // 500ms
     .identifier = 1,
     .num_assigned_cores = 1,
     .name = "DefaultPartition",
@@ -56,8 +75,8 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
 };
 
 static const struct PartitionConfig P2_CONFIG = {
-    .period = 1000000,                    // 1 second in nanoseconds
-    .duration = 500000,                   // 500ms
+    .period = 50,                    // 1 second in nanoseconds
+    .duration = 20,                   // 500ms
     .identifier = 2,
     .num_assigned_cores = 1,
     .name = "P2",
@@ -77,25 +96,31 @@ static const window_partition_type DEFAULT_WINDOWS[] = {
         .name = "DefaultPartition",
         .id = 1,
         .start_tick = MS_TO_TICKS(0),
-        .duration_tick = MS_TO_TICKS(50),
+        .duration_tick = MS_TO_TICKS(40),
+        .is_periodic_processes_start = (BOOLEAN_TYPE)true,
+        // .is_periodic_processes_start = (BOOLEAN_TYPE)false,
     },
     {
-            .name = "P2",
-            .id = 2,
-            .start_tick = MS_TO_TICKS(50),
-            .duration_tick = MS_TO_TICKS(10),
+        .name = "P2",
+        .id = 2,
+        .start_tick = MS_TO_TICKS(40),
+        .duration_tick = MS_TO_TICKS(20),
+        .is_periodic_processes_start = (BOOLEAN_TYPE)true,
         },
     {
         .name = "DefaultPartition",
         .id = 1,
         .start_tick = MS_TO_TICKS(60),
         .duration_tick = MS_TO_TICKS(20),
+        .is_periodic_processes_start = (BOOLEAN_TYPE)false,
+        // .is_periodic_processes_start = (BOOLEAN_TYPE)true,
     },
     {
             .name = "P2",
             .id = 2,
             .start_tick = MS_TO_TICKS(80),
-            .duration_tick = MS_TO_TICKS(10),
+            .duration_tick = MS_TO_TICKS(20),
+            .is_periodic_processes_start = (BOOLEAN_TYPE)false,
         },
     };
     
@@ -104,46 +129,71 @@ static const uint32_t DEFAULT_WINDOWS_COUNT = sizeof(DEFAULT_WINDOWS) / sizeof(D
 
 // Default process configuration
 static const PROCESS_ATTRIBUTE_TYPE DEFAULT_PROCESS_CONFIG = {
-    .PERIOD = 20000000,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 10000000,       // 10ms in nanoseconds
+    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
+    .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test0,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 1,            // Medium priority (1-239)
+    .BASE_PRIORITY = 2,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "DefaultProcess"
 };
 
 // process 1 configuration
 static const PROCESS_ATTRIBUTE_TYPE PROCESS_1_CONFIG = {
-    .PERIOD = 20000000,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 10000000,       // 10ms in nanoseconds
+    .PERIOD = 100,              // 20ms in nanoseconds
+    .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test1,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 1,            // Medium priority (1-239)
+    .BASE_PRIORITY = 2,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "Process 1"
 };
 
 // process 2 configuration
 static const PROCESS_ATTRIBUTE_TYPE PROCESS_2_CONFIG = {
-    .PERIOD = 20000000,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 10000000,       // 10ms in nanoseconds
+    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
+    .TIME_CAPACITY = 10,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test2,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 1,            // Medium priority (1-239)
+    .BASE_PRIORITY = 2,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "Process 2"
 };
 
 // process 3 configuration
 static const PROCESS_ATTRIBUTE_TYPE PROCESS_3_CONFIG = {
-    .PERIOD = 20000000,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 10000000,       // 10ms in nanoseconds
+    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
+    .TIME_CAPACITY = 10,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test3,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 1,            // Medium priority (1-239)
+    .BASE_PRIORITY = 3,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "Process 3"
+};
+
+
+static uint8_t buffer_temperature[64];
+
+static struct krnl_sampling_channel channel_temperature = {
+    .name = "channelTemperature",
+    .buffer = buffer_temperature,
+    .max_message_size = 64,
+    .current_message_size = 0,
+    .last_update_time = 0,
+};
+
+struct port_mapping_s {
+    PARTITION_ID_TYPE partition_id;
+    SAMPLING_PORT_NAME_TYPE port_name;
+    PORT_DIRECTION_TYPE port_direction;
+    MESSAGE_SIZE_TYPE messageSizeBytes;
+    SYSTEM_TIME_TYPE refreshPeriodMs;
+    struct krnl_sampling_channel *channel;
+};
+
+static struct port_mapping_s system_port_table[] = {
+    {1, "P1_OUT_TEMP", SOURCE, 64, 25, &channel_temperature},
+    {2, "P2_IN_TEMP", DESTINATION, 64, 25, &channel_temperature},
 };
 
 #endif 

@@ -14,12 +14,6 @@ static volatile int boot = 0;
 
 static int init = 1;
 
-static const PARTITION_NAME_TYPE idle_partition_name = "IDLE Partition";
-static const REGION_NAME_TYPE idle_code_region_name = "IDLE code";
-static const ACCESS_TYPE idle_code_access = "RX";
-static const REGION_NAME_TYPE idle_data_region_name = "IDLE data";
-static const ACCESS_TYPE idle_data_access = "RW";
-
 int main(void)
 {
 	uint64_t t_end_main = 0;
@@ -59,10 +53,6 @@ int main(void)
 	if (!kcb->partitions)
 		krnl_panic(ERR_KCB_ALLOC);
 	
-	// initialisation de la partition IDLE dans la ram
-	SYSTEM_ADDRESS_TYPE idle_stack = malloc(DEFAULT_STACK_SIZE);
-	partition_init(0, 0, IDLE_PARTITION_ID, 1, idle_partition_name, idle_code_region_name, idle_task, 0, idle_code_access, idle_data_region_name, idle_stack, DEFAULT_STACK_SIZE, idle_data_access, idle_task, false);
-
 	pr = app_main();
 	
 	if (!kcb->tasks->length)
@@ -76,11 +66,21 @@ int main(void)
 		arinc_start_scheduling();
 	}
 	while(1){
-		krnl_dispatcher();
-        struct pcb_s *next_partition = kcb->partition_current->data;
-		if (setjmp(kcb->context) == 0){
-			longjmp(next_partition->tcb.context, 1);
-		}
+		kcb->ticks++;
+		kcb->rt_sched();
+		_interrupt_tick_partition();
+		if (kcb->partition_current == NULL) {
+            // Mode IDLE : On réactive manuellement les interruptions Timer (bit 3 de mstatus)
+			printf("[IDLE TIME]\n");
+            asm volatile ("csrs mstatus, 8");
+            _cpu_idle(); // On met le processeur en pause jusqu'au prochain Tick !
+        } else {
+            // Mode Normal : On lance la vraie partition
+            struct pcb_s *next_partition = kcb->partition_current->data;
+            if (setjmp(kcb->context) == 0){
+                longjmp(next_partition->tcb.context, 1);
+            }
+        }
 	}
 #else
 	kcb[0]->tasks = list_create();
@@ -94,9 +94,6 @@ int main(void)
 	if (!kcb[0]->partitions)
 		krnl_panic(ERR_KCB_ALLOC);
 
-	// initialisation de la partition IDLE dans la ram
-	SYSTEM_ADDRESS_TYPE idle_stack = malloc(DEFAULT_STACK_SIZE);
-	partition_init(0, 0, IDLE_PARTITION_ID, 1, idle_partition_name, idle_code_region_name, idle_task, 0, idle_code_access, idle_data_region_name, idle_stack, DEFAULT_STACK_SIZE, idle_data_access, idle_task, false);
 
 	pr = app_main();
 
@@ -117,11 +114,20 @@ int main(void)
 			arinc_start_scheduling();
 		}
 	while(1){
-		krnl_dispatcher();
-        struct pcb_s *next_partition = kcb[_cpu_id()]->partition_current->data;
-		if (setjmp(kcb[0]->context) == 0){
-			longjmp(next_partition->tcb.context, 1);
-		}
+		int core_id = _cpu_id();
+		kcb[core_id]->ticks++;
+		kcb[core_id]->rt_sched();
+		_interrupt_tick_partition();
+        if (kcb[core_id]->partition_current == NULL) {
+			printf("[CPU IDLE]\n");
+            asm volatile ("csrs mstatus, 8");
+            _cpu_idle();
+        } else {
+            struct pcb_s *next_partition = kcb[core_id]->partition_current->data;
+            if (setjmp(kcb[core_id]->context) == 0){
+                longjmp(next_partition->tcb.context, 1);
+            }
+        }
 	}
 	
 #endif

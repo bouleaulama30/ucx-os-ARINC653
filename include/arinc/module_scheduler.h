@@ -11,8 +11,9 @@ typedef
         PARTITION_ID_TYPE id;
         uint32_t start_tick;
         uint32_t duration_tick;
+        BOOLEAN_TYPE is_periodic_processes_start;
     } window_partition_type;
-    
+
 
 struct mscb_s {
     const char* name;
@@ -21,8 +22,17 @@ struct mscb_s {
     uint32_t nbr_windows;
     int32_t windows_idx;
     BOOLEAN_TYPE idle_current_partition;
-};
+    uint32_t major_frame_count;
+};      
 
+static inline struct mscb_s* get_module_scheduler(){
+#ifndef MULTICORE
+    struct mscb_s* ms = kcb->module_scheduler;
+#else
+    struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
+#endif
+    return ms;
+}
 extern void  module_scheduler_init(const char* name, uint32_t major_frame_tick, const window_partition_type* windows_partition, uint32_t nbr_windows);
 extern void arinc_start_scheduling(void);
 extern void signal_idle_current_partition(void);

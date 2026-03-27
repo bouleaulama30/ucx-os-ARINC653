@@ -2,16 +2,12 @@
 
 void print_time_sched()
 {
-	uint32_t secs, msecs, time;
-	
-	time = ucx_uptime();
-	// if (!time_initialized) {
-    //     start_time = time;
-    //     time_initialized = 1;
-    // }
-	// time -= start_time;
-	secs = time / 1000;
-	msecs = time - secs * 1000;
+	uint64_t secs, msecs, time;
+	RETURN_CODE_TYPE return_code;
+    SYSTEM_TIME_TYPE system_time;
+	GET_TIME(&system_time, &return_code);
+	secs = system_time / 1000000;
+	msecs = system_time - secs * 1000000;
 	
 	printf("[Uptime %ld.%03lds]\n", secs, msecs);
 }
@@ -31,6 +27,7 @@ void module_scheduler_init(const char* name, uint32_t major_frame_tick, const wi
     ms->nbr_windows = nbr_windows;
     ms->windows_idx = 0;
     ms->idle_current_partition = false;
+    ms->major_frame_count = 0;
 
     
     // on associe le module scheduler et le scheduler au kernel
@@ -45,12 +42,7 @@ void module_scheduler_init(const char* name, uint32_t major_frame_tick, const wi
 
 
 void arinc_start_scheduling(void) {
-#ifndef MULTICORE
-    struct mscb_s* ms = kcb->module_scheduler;
-#else
-    struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
-#endif
-
+    struct mscb_s* ms = get_module_scheduler();
     if(ms == NULL){
         krnl_panic(ERR_SCHED_CONFIG); 
     }
@@ -62,7 +54,7 @@ void arinc_start_scheduling(void) {
     int32_t first_window_idx = 0;
     PARTITION_ID_TYPE first_id = ms->windows_partition[first_window_idx].id;
 
-    activate_partition(first_id);
+    krnl_partition_switch(first_id);
 
     ms->windows_idx = 0;
     
@@ -75,12 +67,7 @@ void arinc_start_scheduling(void) {
 
     printf("[SCHED] Starting ARINC schedule with Partition %d\n", first_id);
 
-#ifndef MULTICORE
-    struct pcb_s* first_pcb = kcb->partition_current->data;
-#else
-    struct pcb_s* first_pcb = (struct pcb_s*)kcb[_cpu_id()]->partition_current->data;
-#endif
-
+    struct pcb_s* first_pcb = get_current_partition();
     if (first_pcb == NULL){
         krnl_panic(ERR_FAIL);
     }
@@ -89,14 +76,7 @@ void arinc_start_scheduling(void) {
 }
 
 void signal_idle_current_partition(void){
-#ifndef MULTICORE
-    struct mscb_s* ms = kcb->module_scheduler;
-#else
-    struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
-#endif
-    if(ms == NULL){
-        krnl_panic(ERR_SCHED_CONFIG); 
-    }
+    struct mscb_s* ms = get_module_scheduler();
     ms->idle_current_partition = true;
 }
 
@@ -104,23 +84,9 @@ void signal_idle_current_partition(void){
 int32_t partition_scheduler(void){
     uint32_t current_time = ucx_uptime();
     uint32_t current_tick = MS_TO_TICKS(current_time);
-    // uint32_t current_tick = ucx_ticks();
     
-#ifndef MULTICORE
-    struct mscb_s* ms = kcb->module_scheduler;
-#else
-    struct mscb_s* ms = kcb[_cpu_id()]->module_scheduler;
-#endif
-    if (ms == NULL) {
-        krnl_panic((uint32_t)ERR_FAIL);
-    }
-
-    if (ms->windows_partition == NULL || ms->nbr_windows == 0) {
-        krnl_panic(ERR_SCHED_CONFIG);
-    }
-
-    static uint32_t frame_cnt = 0;
-    uint32_t position_in_frame = current_tick - frame_cnt*ms->major_frame_tick;
+    struct mscb_s* ms = get_module_scheduler();
+    uint32_t position_in_frame = current_tick - ms->major_frame_count * ms->major_frame_tick;
     int32_t* windows_idx = &ms->windows_idx;
     uint32_t partition_duration_tick = ms->windows_partition[*windows_idx].duration_tick;
     uint32_t partition_start_tick = ms->windows_partition[*windows_idx].start_tick;
@@ -131,31 +97,30 @@ int32_t partition_scheduler(void){
     printf("[SCHED partition] Position tick: %d, Partition end tick: %d, Major frame tick: %d\n", position_in_frame, partition_end_tick, ms->major_frame_tick);
 
     if(ms->idle_current_partition){
-        partition_id = activate_partition(IDLE_PARTITION_ID);
+        partition_id = krnl_partition_switch(IDLE_PARTITION_ID);
         ms->idle_current_partition = false;
     }
 
     if(position_in_frame >= ms->major_frame_tick){
         (*windows_idx) = 0;
         partition_id = ms->windows_partition[*windows_idx].id;
-        // position_in_frame = current_tick % ms->major_frame_tick;
-        frame_cnt += 1;
-        return activate_partition(partition_id);
+        ms->major_frame_count += 1;
+        return krnl_partition_switch(partition_id);
     }
 
     if(position_in_frame >= partition_end_tick){
         if(*windows_idx == ms->nbr_windows - 1){
-            return activate_partition(IDLE_PARTITION_ID);
+            return krnl_partition_switch(IDLE_PARTITION_ID);
         }
         
         // s'il y a des trous entre les partitions, on idle
         if(position_in_frame < ms->windows_partition[*windows_idx+1].start_tick){
-            return activate_partition(IDLE_PARTITION_ID);
+            return krnl_partition_switch(IDLE_PARTITION_ID);
         }
 
         (*windows_idx)++;
         partition_id = ms->windows_partition[*windows_idx].id;
-        activate_partition(partition_id);
+        krnl_partition_switch(partition_id);
     }
     
     return partition_id;

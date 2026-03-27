@@ -105,56 +105,64 @@ void _panic(void)
 	while (1);
 }
 
+
 void _irq_handler(uint32_t cause, uint32_t epc)
 {
-	uint32_t val, mepc, mtval, mstatus;
-	
-	/* Désactiver MPRV au début de l'ISR pour que le kernel s'exécute normalement */
-	mstatus = r_mstatus();
-	mstatus &= ~(1 << 17);  // clear MPRV
-	w_mstatus(mstatus);
-	
-	val = read_csr(mcause);
-	if (mtime_r() > mtimecmp_r()) {
-		mepc = read_csr(mepc);
-		mtval = read_csr(mtval);
-		mstatus = read_csr(mstatus);
-		// printf("[TIMER INTERRUPT] mcause=%x, mepc=%x, mtval=%x, mstatus=%x\n", val, mepc, mtval, mstatus);
-		mtimecmp_w(mtime_r() + (F_CPU / F_TIMER));
+    uint32_t val, mepc, mtval, mstatus;
+    
+    /* Désactiver MPRV au début de l'ISR pour que le kernel s'exécute normalement */
+    mstatus = r_mstatus();
+    mstatus &= ~(1 << 17);  // clear MPRV
+    w_mstatus(mstatus);
+    
+    val = read_csr(mcause);
+    if (mtime_r() > mtimecmp_r()) {
+        mepc = read_csr(mepc);
+        mtval = read_csr(mtval);
+        mstatus = read_csr(mstatus);
+        mtimecmp_w(mtime_r() + (F_CPU / F_TIMER));
 
-		struct pcb_s *current_partition;
-	#ifndef MULTICORE
-		current_partition = kcb->partition_current->data;
-		if (setjmp(current_partition->tcb.context) == 0) {
-			longjmp(kcb->context, 1);
-		}
-	#else
-		current_partition = kcb[_cpu_id()]->partition_current->data;
-		if (setjmp(current_partition->tcb.context) == 0) {
-			longjmp(kcb[_cpu_id()]->context, 1);
-		}
-	#endif
-		// krnl_dispatcher();
-	} else {
-		mepc = read_csr(mepc);
-		mtval = read_csr(mtval);
-		mstatus = read_csr(mstatus);
-		printf("[FAULT] mcause=%x, mepc=%x, mtval=%x, mstatus=%x\n", val, mepc, mtval, mstatus);
-		printf("  mcause: %s\n", 
-			val == 0 ? "Instruction address misaligned" :
-			val == 1 ? "Instruction access fault" :
-			val == 2 ? "Illegal instruction" :
-			val == 3 ? "Breakpoint" :
-			val == 4 ? "Load address misaligned" :
-			val == 5 ? "Load access fault" :
-			val == 6 ? "Store address misaligned" :
-			val == 7 ? "Store access fault" :
-			"Unknown");
-		printf("  MPRV=%d, MPP=%d\n", (mstatus >> 17) & 1, (mstatus >> 11) & 3);
-		// while(1);
-		_panic();
-	}
-
+#ifndef MULTICORE
+        if (kcb->partition_current != NULL) {
+            // On sauve le contexte uniquement si on interrompt une vraie partition
+            struct pcb_s *current_partition = kcb->partition_current->data;
+            if (setjmp(current_partition->tcb.context) == 0) {
+                longjmp(kcb->context, 1);
+            }
+        } else {
+            // Si on était en IDLE, on relance juste le main pour vérifier le planning !
+            longjmp(kcb->context, 1);
+        }
+#else
+        int core_id = _cpu_id();
+        if (kcb[core_id]->partition_current != NULL) {
+            struct pcb_s *current_partition = kcb[core_id]->partition_current->data;
+            if (setjmp(current_partition->tcb.context) == 0) {
+                longjmp(kcb[core_id]->context, 1);
+            }
+        } else {
+            longjmp(kcb[core_id]->context, 1);
+        }
+#endif
+    } else {
+        mepc = read_csr(mepc);
+        mtval = read_csr(mtval);
+        mstatus = read_csr(mstatus);
+        printf("[FAULT] mcause=%x, mepc=%x, mtval=%x, mstatus=%x\n", val, mepc, mtval, mstatus);
+        printf("  mcause: %s\n", 
+            val == 0 ? "Instruction address misaligned" :
+            val == 1 ? "Instruction access fault" :
+            val == 2 ? "Illegal instruction" :
+            val == 3 ? "Breakpoint" :
+            val == 4 ? "Load address misaligned" :
+            val == 5 ? "Load access fault" :
+            val == 6 ? "Store address misaligned" :
+            val == 7 ? "Store access fault" :
+            "Unknown");
+        printf("  MPRV=%d, MPP=%d\n", (mstatus >> 17) & 1, (mstatus >> 11) & 3);
+        while(1);
+        _panic();
+    }
 }
 
 uint32_t _readcounter(void)
@@ -269,11 +277,13 @@ void _timer_disable(void)
 	write_csr(mie, csr);
 }
 
-void _interrupt_tick(void)
+void _interrupt_tick_partition(void)
 {
 #ifndef MULTICORE
+	if (kcb->partition_current == NULL) return;
 	struct pcb_s *partition = kcb->partition_current->data;
 #else
+	if (kcb[_cpu_id()]->partition_current == NULL) return;
 	struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
 #endif
 	_read_us();
@@ -281,18 +291,36 @@ void _interrupt_tick(void)
 	if ((uint32_t)partition->tcb.task == partition->tcb.context[CONTEXT_RA])
 		asm volatile ("csrs mstatus, 8");
 }
-// void _interrupt_tick(void)
-// {
-// #ifndef MULTICORE
-// 	struct tcb_s *task = kcb->task_current->data;
-// #else
-// 	struct tcb_s *task = kcb[_cpu_id()]->task_current->data;
-// #endif
-// 	_read_us();
-// 	/* task is run for the first time */
-// 	if ((uint32_t)task->task == task->context[CONTEXT_RA])
-// 		asm volatile ("csrs mstatus, 8");
-// }
+
+void _interrupt_tick_process(void)
+{
+#ifndef MULTICORE
+	if (kcb->partition_current == NULL) return;
+	struct pcb_s *partition = kcb->partition_current->data;
+#else
+	if (kcb[_cpu_id()]->partition_current == NULL) return;
+	struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
+#endif
+	_read_us();
+	/* partition is run for the first time */
+	struct process_s *process = partition->process_current->data;
+	if ((uint32_t)process->tcb.task == process->tcb.context[CONTEXT_RA])
+		asm volatile ("csrs mstatus, 8");
+}
+
+
+void _interrupt_tick(void)
+{
+#ifndef MULTICORE
+	struct tcb_s *task = kcb->task_current->data;
+#else
+	struct tcb_s *task = kcb[_cpu_id()]->task_current->data;
+#endif
+	_read_us();
+	/* task is run for the first time */
+	if ((uint32_t)task->task == task->context[CONTEXT_RA])
+		asm volatile ("csrs mstatus, 8");
+}
 
 extern void __dispatch_init(jmp_buf env);
 

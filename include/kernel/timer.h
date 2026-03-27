@@ -18,6 +18,8 @@ int32_t ucx_timer_cancel(uint16_t timer_id);
 
 #if F_TIMER == 0
 #define MS_TO_TICKS(ms) (((unsigned long)(ms) * (unsigned long)(F_TIMER_FIXED)) / 1000)
+#define TICKS_TO_MS(ticks) (uint32_t)((((uint64_t)(ticks)) * 1000ULL) / (uint32_t)(F_TIMER_FIXED))
 #else
 #define MS_TO_TICKS(ms) (((unsigned long)(ms) * (unsigned long)(F_TIMER)) / 1000)
+#define TICKS_TO_MS(ticks) (uint32_t)((((uint64_t)(ticks)) * 1000ULL) / (uint32_t)(F_TIMER))
 #endif

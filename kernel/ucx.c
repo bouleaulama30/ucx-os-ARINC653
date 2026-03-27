@@ -60,11 +60,11 @@ static void stack_check(void)
 	uint32_t check = 0x33333333;
 	uint32_t *stack_p = (uint32_t *)task->stack;
 
-	// if (*stack_p != check) {
-	// 	printf("\n*** task %d, stack: 0x%p (size %d)\n", task->id,
-	// 		task->stack, task->stack_sz);
-	// 	krnl_panic(ERR_STACK_CHECK);
-	// }
+	if (*stack_p != check) {
+		printf("\n*** task %d, stack: 0x%p (size %d)\n", task->id,
+			task->stack, task->stack_sz);
+		krnl_panic(ERR_STACK_CHECK);
+	}
 		
 }
 
@@ -290,38 +290,39 @@ void krnl_dispatcher(void)
 	_dispatch();
 }
 
+
 void dispatch(void)
 {
 #ifndef MULTICORE
-	// struct tcb_s *task = kcb->task_current->data;
+	struct tcb_s *task = kcb->task_current->data;
 	
-	// if (!kcb->tasks->length)
-	// 	krnl_panic(ERR_NO_TASKS);
+	if (!kcb->tasks->length)
+		krnl_panic(ERR_NO_TASKS);
 	
-	// if (!setjmp(task->context)) {
-		// stack_check();
-		// list_foreach(kcb->tasks, delay_update, (void *)0);
+	if (!setjmp(task->context)) {
+		stack_check();
+		list_foreach(kcb->tasks, delay_update, (void *)0);
 		if (kcb->rt_sched() < 0)
 			krnl_schedule();
-		// task = kcb->task_current->data;
+		task = kcb->task_current->data;
 		_interrupt_tick();
-		// longjmp(task->context, 1);
-	// }
+		longjmp(task->context, 1);
+	}
 #else
-	// struct tcb_s *task = kcb[_cpu_id()]->task_current->data;
+	struct tcb_s *task = kcb[_cpu_id()]->task_current->data;
 	
-	// if (!kcb[_cpu_id()]->tasks->length)
-	// 	krnl_panic(ERR_NO_TASKS);
-
-	// if (!setjmp(task->context)) {
-		// stack_check();
-		// list_foreach(kcb[_cpu_id()]->tasks, delay_update, (void *)0);
+	if (!kcb[_cpu_id()]->tasks->length)
+		krnl_panic(ERR_NO_TASKS);
+	
+	if (!setjmp(task->context)) {
+		stack_check();
+		list_foreach(kcb[_cpu_id()]->tasks, delay_update, (void *)0);
 		if (kcb[_cpu_id()]->rt_sched() < 0)
 			krnl_schedule();
-		// task = kcb[_cpu_id()]->task_current->data;
+		task = kcb[_cpu_id()]->task_current->data;
 		_interrupt_tick();
-		// longjmp(task->context, 1);
-	// }
+		longjmp(task->context, 1);
+	}
 #endif
 }
 
@@ -334,15 +335,7 @@ void yield(void)
 	if (kcb->preemptive == 'y') {
 		s = kcb->ticks;
 		_cpu_idle();
-		// while (s == kcb->ticks);
-
-		/* Sauvegarder le contexte du processus courant */
-		task = kcb->task_current->data;
-		if (setjmp(task->context) == 0) {
-			/* Retourner au contexte du kernel (partition_trampoline) */
-			struct pcb_s *partition = kcb->partition_current->data;
-			longjmp(partition->partition_context, 1);
-		}
+		while (s == kcb->ticks);
 		
 		return;
 	}
@@ -366,13 +359,7 @@ void yield(void)
 	if (kcb[_cpu_id()]->preemptive == 'y') {
 		s = kcb[_cpu_id()]->ticks;
 		_cpu_idle();
-		// while (s == kcb[_cpu_id()]->ticks);
-		task = kcb[_cpu_id()]->task_current->data;
-		if (setjmp(task->context) == 0) {
-			/* Retourner au contexte du kernel (partition_trampoline) */
-			struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
-			longjmp(partition->partition_context, 1);
-		}
+		while (s == kcb[_cpu_id()]->ticks);
 		
 		return;
 	}

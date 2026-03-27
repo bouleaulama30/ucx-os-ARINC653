@@ -90,6 +90,8 @@ void _hardware_init(void);
 void _timer_enable(void);
 void _timer_disable(void);
 void _interrupt_tick(void);
+void _interrupt_tick_partition(void);
+void _interrupt_tick_process(void);
 void _context_init(jmp_buf *ctx, size_t sp, size_t ss, size_t ra);
 void _pmp_init(uint32_t end_addr);
 void _pmp_partition_activate(uint32_t kernel_end_addr, uint32_t partition_start_addr, uint32_t partition_end_addr);

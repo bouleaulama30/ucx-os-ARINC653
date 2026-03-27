@@ -17,6 +17,9 @@
 
 #define  MAX_LOCK_LEVEL           16
 
+//on est en sigle core donc id = 0
+#define DEFAULT_PROCESS_CORE_AFFINITY 0
+
 typedef  NAME_TYPE            PROCESS_NAME_TYPE;
 
 typedef  APEX_INTEGER       PROCESS_ID_TYPE;
@@ -73,8 +76,21 @@ struct process_s
     PROCESS_ID_TYPE process_id;
     PROCESS_INDEX_TYPE process_index;
     PROCESSOR_CORE_ID_TYPE processor_core_affinity;
-
+    SYSTEM_TIME_TYPE release_point_time;
+    BOOLEAN_TYPE is_suspended;
+    SYSTEM_TIME_TYPE time_counter;
+    SYSTEM_TIME_TYPE saved_init_delay;
 };
+
+static inline void update_process_deadline(struct process_s *process, SYSTEM_TIME_TYPE base_time) {
+    if (process->processus_status->ATTRIBUTES.TIME_CAPACITY == INFINITE_TIME_VALUE) {
+        // La norme exige que si la capacité est infinie, la deadline devient infinie
+        process->processus_status->DEADLINE_TIME = INFINITE_TIME_VALUE;      
+    } else {
+        // Calcul normal
+        process->processus_status->DEADLINE_TIME = base_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+    }
+}
 
 extern void CREATE_PROCESS (
        /*in */ PROCESS_ATTRIBUTE_TYPE   *ATTRIBUTES,
