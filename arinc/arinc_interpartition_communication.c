@@ -7,12 +7,16 @@ void CREATE_SAMPLING_PORT (
        /*in */ SYSTEM_TIME_TYPE           REFRESH_PERIOD,
        /*out*/ SAMPLING_PORT_ID_TYPE      *SAMPLING_PORT_ID,
        /*out*/ RETURN_CODE_TYPE           *RETURN_CODE ){
+       
     struct pcb_s *partition = get_current_partition();
+
     if(partition->sampling_port_count + 1 > MAX_NUMBER_OF_SAMPLING_PORTS){
         *RETURN_CODE = INVALID_CONFIG;
         return;
-    
     }
+    
+    
+    
 }
 
 void WRITE_SAMPLING_MESSAGE (
