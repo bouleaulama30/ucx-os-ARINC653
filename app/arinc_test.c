@@ -61,6 +61,16 @@ void process_test0(void)
 	PROCESS_STATUS_TYPE other_process_status;
 	GET_MY_PARTITION_ID(&paritition_id, &return_code);
     GET_MY_ID(&process_id, &return_code);
+
+	SAMPLING_PORT_ID_TYPE port_id;
+	SAMPLING_PORT_STATUS_TYPE port_status;
+
+	GET_SAMPLING_PORT_ID("P1_OUT_TEMP", &port_id, &return_code);
+	printf("PORT ID %d\n", port_id);
+
+	GET_SAMPLING_PORT_STATUS(1, &port_status, &return_code);
+	printf("PORT NAME FROM STATUS %d\n", port_status.MAX_MESSAGE_SIZE);
+
 	while (1) {
 		// if(cnt % 2 == 0){
 		// 	printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);

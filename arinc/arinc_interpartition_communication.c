@@ -1,10 +1,35 @@
 #include "ucx.h"
 
-int check_port_in_conf_table(){
-       return 1;
+
+static struct node_s *find_port_by_name(struct node_s *node, void *arg){
+    struct sampling_port_s *port = node->data;
+    const char *name = (const char *) arg;
+
+    if(strcmp(port->sampling_port_name, name) == 0){
+        return node;
+    }
+    return 0;
 }
 
-int check_port_in_partition(int index_conf_table, struct pcb_s *partition){
+static struct node_s *find_port_node_by_name(struct pcb_s *partition, SAMPLING_PORT_NAME_TYPE SAMPLING_PORT_NAME){
+       return list_foreach(partition->communication_ports, find_port_by_name, (void *)SAMPLING_PORT_NAME);
+}
+
+static struct node_s *find_port_by_id(struct node_s *node, void *arg){
+    struct sampling_port_s *port = node->data;
+    SAMPLING_PORT_ID_TYPE id = (SAMPLING_PORT_ID_TYPE) arg;
+
+    if(id == port->sampling_port_id){
+        return node;
+    }
+    return 0;
+}
+
+static struct node_s *find_port_node_by_id(struct pcb_s *partition, SAMPLING_PORT_ID_TYPE SAMPLING_PORT_ID){
+       return list_foreach(partition->communication_ports, find_port_by_id, (void *)SAMPLING_PORT_ID);
+}
+
+int check_port_in_conf_table(){
        return 1;
 }
 
@@ -37,7 +62,7 @@ void CREATE_SAMPLING_PORT (
        }
 
 
-       if (!check_port_in_partition(index_conf_table, partition)){
+       if (find_port_node_by_name(partition, SAMPLING_PORT_NAME)){
               *RETURN_CODE = NO_ACTION;
               return;
        }
@@ -48,7 +73,6 @@ void CREATE_SAMPLING_PORT (
        }
 
        if ((PORT_DIRECTION != SOURCE && PORT_DIRECTION != DESTINATION) || !check_max_port_direction_in_conf(index_conf_table, PORT_DIRECTION)){
-printf("fdsljfdsalfjdslkjfdsalkf");
               *RETURN_CODE = INVALID_CONFIG;
               return;
        }
@@ -73,7 +97,8 @@ printf("fdsljfdsalfjdslkjfdsalkf");
        sampling_port_status->REFRESH_PERIOD = REFRESH_PERIOD;
  
        sampling_port->sampling_port_status = sampling_port_status;
-       sampling_port->partition_id = port_ID;
+       sampling_port->partition_id = system_port_table[index_conf_table].partition_id;
+       sampling_port->sampling_port_id = port_ID;
 
        strncpy(sampling_port->sampling_port_name, SAMPLING_PORT_NAME, sizeof(sampling_port->sampling_port_name) - 1);
        sampling_port->sampling_port_name[sizeof(sampling_port->sampling_port_name) - 1] = '\0';
@@ -104,9 +129,36 @@ void READ_SAMPLING_MESSAGE (
 void GET_SAMPLING_PORT_ID (
        /*in */ SAMPLING_PORT_NAME_TYPE    SAMPLING_PORT_NAME,
        /*out*/ SAMPLING_PORT_ID_TYPE      *SAMPLING_PORT_ID,
-       /*out*/ RETURN_CODE_TYPE           *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE           *RETURN_CODE ){
+
+       struct pcb_s* partition = get_current_partition();
+       
+       struct node_s *sampling_port_node = find_port_node_by_name(partition, SAMPLING_PORT_NAME); 
+       if (!sampling_port_node){
+              *RETURN_CODE = INVALID_CONFIG;
+              return;
+       }
+
+       struct sampling_port_s* sampling_port = sampling_port_node->data;
+       *SAMPLING_PORT_ID = sampling_port->sampling_port_id;
+
+       *RETURN_CODE = NO_ERROR;
+}
 
 void GET_SAMPLING_PORT_STATUS (
        /*in */ SAMPLING_PORT_ID_TYPE      SAMPLING_PORT_ID,
        /*out*/ SAMPLING_PORT_STATUS_TYPE  *SAMPLING_PORT_STATUS,
-       /*out*/ RETURN_CODE_TYPE           *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE           *RETURN_CODE ){
+       
+       struct pcb_s* partition = get_current_partition();
+       
+       struct node_s *sampling_port_node = find_port_node_by_id(partition, SAMPLING_PORT_ID); 
+       if (!sampling_port_node){
+              *RETURN_CODE = INVALID_PARAM;
+              return;
+       }
+
+       struct sampling_port_s *sampling_port = sampling_port_node->data;
+       *SAMPLING_PORT_STATUS = *sampling_port->sampling_port_status;
+       *RETURN_CODE = NO_ERROR;
+}

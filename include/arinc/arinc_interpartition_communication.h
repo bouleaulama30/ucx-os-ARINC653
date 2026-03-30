@@ -30,6 +30,7 @@ typedef
 
 struct sampling_port_s {
        SAMPLING_PORT_NAME_TYPE sampling_port_name;
+       SAMPLING_PORT_ID_TYPE sampling_port_id;
        PARTITION_ID_TYPE partition_id;
        SAMPLING_PORT_STATUS_TYPE *sampling_port_status;
        struct krnl_sampling_channel *channel;
