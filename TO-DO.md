@@ -30,6 +30,11 @@
             * implem la waiting queue (quand on aura implem la partie intra et inter communication)
 
 ### inter communication
+* pour read sampling port:
+    * comprendre le refresh
+    * terminer la fonction (cf to do)
+    * voir si besoin d'update des éléments du channel si la lecture réussi pour rester consistant
+* faire write sampling port
 * faire tout en unicast ?
 
 ### intra communication

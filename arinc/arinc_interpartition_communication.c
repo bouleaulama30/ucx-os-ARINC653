@@ -132,7 +132,40 @@ void READ_SAMPLING_MESSAGE (
                /* the respective message is passed OUT       */
        /*out*/ MESSAGE_SIZE_TYPE          *LENGTH,
        /*out*/ VALIDITY_TYPE              *VALIDITY,
-       /*out*/ RETURN_CODE_TYPE           *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE           *RETURN_CODE ){
+       struct pcb_s* partition = get_current_partition();
+       
+       struct node_s *sampling_port_node = find_port_node_by_id(partition, SAMPLING_PORT_ID); 
+       if (!sampling_port_node){
+              *RETURN_CODE = INVALID_PARAM;
+              return;
+       }
+
+       struct sampling_port_s* sampling_port = sampling_port_node->data;
+       if(sampling_port->sampling_port_status->PORT_DIRECTION != DESTINATION){
+              *RETURN_CODE = INVALID_MODE;
+              return;
+       }
+
+       struct krnl_sampling_channel *channel = sampling_port->channel;
+       if(!channel->current_message_size){
+              *LENGTH = 0;
+              *VALIDITY = INVALID;
+              *RETURN_CODE = NO_ACTION;
+       }
+       else {
+              memcpy(MESSAGE_ADDR, channel->buffer, channel->current_message_size);
+              *LENGTH = channel->current_message_size;
+              //to do 
+              if(1)
+                     *VALIDITY = VALID;
+              else
+                     *VALIDITY = INVALID;
+              *RETURN_CODE = NO_ERROR;
+       sampling_port->sampling_port_status->LAST_MSG_VALIDITY = *VALIDITY;
+
+       }
+}
 
 void GET_SAMPLING_PORT_ID (
        /*in */ SAMPLING_PORT_NAME_TYPE    SAMPLING_PORT_NAME,
