@@ -29,16 +29,24 @@ static struct node_s *find_port_node_by_id(struct pcb_s *partition, SAMPLING_POR
        return list_foreach(partition->communication_ports, find_port_by_id, (void *)SAMPLING_PORT_ID);
 }
 
-int check_port_in_conf_table(){
-       return 1;
+int check_port_in_conf_table(SAMPLING_PORT_NAME_TYPE SAMPLING_PORT_NAME){
+       for(int i = 0; i<routing_table_size; i++){
+              if(strcmp(SAMPLING_PORT_NAME, system_port_table[i].port_name) == 0)
+                     return i;
+       }
+       return -1;
 }
 
 int check_max_message_size_in_conf(int index_conf_table, MESSAGE_SIZE_TYPE MAX_MESSAGE_SIZE){
-       return 1;
+       if(MAX_MESSAGE_SIZE == system_port_table[index_conf_table].messageSizeBytes)
+              return 1;
+       return 0;
 }
 
-int check_max_port_direction_in_conf(int index_conf_table, PORT_DIRECTION_TYPE PORT_DIRECTION){
-       return 1;
+int check_port_direction_in_conf(int index_conf_table, PORT_DIRECTION_TYPE PORT_DIRECTION){
+       if(PORT_DIRECTION == system_port_table[index_conf_table].port_direction)
+              return 1;
+       return 0;
 }
 
 void CREATE_SAMPLING_PORT (
@@ -55,7 +63,7 @@ void CREATE_SAMPLING_PORT (
               return;
        }
 
-       int index_conf_table = check_port_in_conf_table();
+       int index_conf_table = check_port_in_conf_table(SAMPLING_PORT_NAME);
        if (index_conf_table == -1){
               *RETURN_CODE = INVALID_CONFIG;
               return;
@@ -72,7 +80,7 @@ void CREATE_SAMPLING_PORT (
               return;
        }
 
-       if ((PORT_DIRECTION != SOURCE && PORT_DIRECTION != DESTINATION) || !check_max_port_direction_in_conf(index_conf_table, PORT_DIRECTION)){
+       if ((PORT_DIRECTION != SOURCE && PORT_DIRECTION != DESTINATION) || !check_port_direction_in_conf(index_conf_table, PORT_DIRECTION)){
               *RETURN_CODE = INVALID_CONFIG;
               return;
        }
@@ -149,7 +157,7 @@ void GET_SAMPLING_PORT_STATUS (
        /*in */ SAMPLING_PORT_ID_TYPE      SAMPLING_PORT_ID,
        /*out*/ SAMPLING_PORT_STATUS_TYPE  *SAMPLING_PORT_STATUS,
        /*out*/ RETURN_CODE_TYPE           *RETURN_CODE ){
-       
+
        struct pcb_s* partition = get_current_partition();
        
        struct node_s *sampling_port_node = find_port_node_by_id(partition, SAMPLING_PORT_ID); 

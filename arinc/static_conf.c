@@ -1,5 +1,7 @@
 #include "ucx.h"
 
+const int routing_table_size = 3;
+
 __attribute__((section(".p1_code")))
 void p1_main_process(struct pcb_s *partition){
     RETURN_CODE_TYPE return_code0;
