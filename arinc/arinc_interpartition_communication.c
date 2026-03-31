@@ -20,7 +20,7 @@ static struct node_s *find_port_by_id(struct node_s *node, void *arg){
     SAMPLING_PORT_ID_TYPE id = (SAMPLING_PORT_ID_TYPE) arg;
 
     if(id == port->sampling_port_id){
-        return node;
+       return node;
     }
     return 0;
 }
@@ -123,7 +123,41 @@ void WRITE_SAMPLING_MESSAGE (
        /*in */ SAMPLING_PORT_ID_TYPE      SAMPLING_PORT_ID,
        /*in */ MESSAGE_ADDR_TYPE          MESSAGE_ADDR,     /* by reference */
        /*in */ MESSAGE_SIZE_TYPE          LENGTH,
-       /*out*/ RETURN_CODE_TYPE           *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE           *RETURN_CODE ){
+
+       struct pcb_s* partition = get_current_partition();
+       
+       struct node_s *sampling_port_node = find_port_node_by_id(partition, SAMPLING_PORT_ID); 
+       if (!sampling_port_node){
+              *RETURN_CODE = INVALID_PARAM;
+              return;
+       }
+
+       struct sampling_port_s *sampling_port = sampling_port_node->data;
+
+       if (LENGTH > sampling_port->sampling_port_status->MAX_MESSAGE_SIZE){
+              *RETURN_CODE = INVALID_CONFIG;
+              return;
+       }
+
+       if (LENGTH <= 0){
+              *RETURN_CODE = INVALID_PARAM;
+              return;
+       }
+
+       if (sampling_port->sampling_port_status->PORT_DIRECTION != SOURCE){
+              *RETURN_CODE = INVALID_MODE;
+              return;
+       }
+
+       struct krnl_sampling_channel *channel = sampling_port->channel;
+       
+       memcpy(channel->buffer, MESSAGE_ADDR, LENGTH);
+       channel->current_message_size = LENGTH;
+       channel->last_update_time = (SYSTEM_TIME_TYPE)ucx_uptime();
+
+       *RETURN_CODE = NO_ERROR;
+}
 
 void READ_SAMPLING_MESSAGE (
        /*in */ SAMPLING_PORT_ID_TYPE      SAMPLING_PORT_ID,
@@ -156,14 +190,13 @@ void READ_SAMPLING_MESSAGE (
        else {
               memcpy(MESSAGE_ADDR, channel->buffer, channel->current_message_size);
               *LENGTH = channel->current_message_size;
-              //to do 
-              if(1)
+              SYSTEM_TIME_TYPE age_message = (SYSTEM_TIME_TYPE)ucx_uptime() - channel->last_update_time;
+              if(age_message <= sampling_port->sampling_port_status->REFRESH_PERIOD)
                      *VALIDITY = VALID;
               else
                      *VALIDITY = INVALID;
               *RETURN_CODE = NO_ERROR;
        sampling_port->sampling_port_status->LAST_MSG_VALIDITY = *VALIDITY;
-
        }
 }
 

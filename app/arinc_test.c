@@ -105,28 +105,39 @@ void process_test0(void)
 __attribute__((section(".p1_code")))
 void process_test1(void)
 {   
-	int32_t cnt = 200000;
-    RETURN_CODE_TYPE return_code;
-	APEX_INTEGER paritition_id;
-    APEX_INTEGER process_id;
-	GET_MY_PARTITION_ID(&paritition_id, &return_code);
-    GET_MY_ID(&process_id, &return_code);
+	RETURN_CODE_TYPE return_code;
+	APEX_INTEGER partition_id;
+	APEX_INTEGER process_id;
+	SAMPLING_PORT_ID_TYPE port_id;
+	MESSAGE_SIZE_TYPE write_len;
+
+	struct {
+		uint32_t seq;
+		uint32_t sent_at_ms;
+		uint32_t sender_pid;
+	} tx_msg;
+
+	GET_MY_PARTITION_ID(&partition_id, &return_code);
+	GET_MY_ID(&process_id, &return_code);
+	GET_SAMPLING_PORT_ID("P1_OUT_TEMP", &port_id, &return_code);
+
+	printf("[P1/Process1] GET_SAMPLING_PORT_ID('P1_OUT_TEMP') rc=%d id=%d\n", return_code, port_id);
+
+	tx_msg.seq = 0;
 	while (1) {
-		// if(cnt % 2 == 0){
-		// 	printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-		// 	SET_PRIORITY(1, 1, &return_code);
-		// 	// SET_PRIORITY(0, 3, &return_code);
-		// }
+		tx_msg.seq++;
+		tx_msg.sent_at_ms = ucx_uptime();
+		tx_msg.sender_pid = (uint32_t)process_id;
+		write_len = sizeof(tx_msg);
 
-		// if(cnt == 200001)
-		// 	STOP(0, &return_code);
-		// if(cnt == 200003)
-		// 	DELAYED_START(0, 90 ,&return_code);
+		WRITE_SAMPLING_MESSAGE(port_id, (MESSAGE_ADDR_TYPE)&tx_msg, write_len, &return_code);
+		printf("[P1/Process1] WRITE_SAMPLING_MESSAGE seq=%lu len=%d rc=%d %s\n",
+			   tx_msg.seq,
+			   write_len,
+			   return_code,
+			   (return_code == NO_ERROR) ? "PASS" : "FAIL");
 
-		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 		PERIODIC_WAIT(&return_code);
-		printf("return code periodic_wait %d\n", return_code);
-		// ucx_task_yield();
 	}
 }
 
@@ -148,19 +159,9 @@ int32_t cnt = 300000;
 		printf("Le nom du process: %s, with priority %d\n", other_process_status.ATTRIBUTES.NAME, other_process_status.CURRENT_PRIORITY);
 	}
 	while (1) {
-		if(cnt % 2 == 0){
-			// SET_PARTITION_MODE(IDLE, &return_code);
-			printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-			SET_PRIORITY(1, 3, &return_code);
-			// SET_PRIORITY(1, 3, &return_code);
 
-		}
 		
-		if(cnt == 300001)
-			SUSPEND(1, &return_code);
-			// SET_PARTITION_MODE(COLD_START, &return_code);
-		if(cnt == 300005)
-			RESUME(1, &return_code);
+
 		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
 
 		TIMED_WAIT(5, &return_code);
@@ -172,22 +173,49 @@ int32_t cnt = 300000;
 __attribute__((section(".p2_code")))
 void process_test3(void)
 {   
-	int32_t cnt = 400000;
-    RETURN_CODE_TYPE return_code;
-	APEX_INTEGER paritition_id;
-    APEX_INTEGER process_id;
-	GET_MY_PARTITION_ID(&paritition_id, &return_code);
-    GET_MY_ID(&process_id, &return_code);
-	while (1) {
-		if(cnt % 2 == 0){
-			printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-			SET_PRIORITY(1, 1, &return_code);
-			// SET_PRIORITY(0, 3, &return_code);
-		}
-		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-		TIMED_WAIT(5, &return_code);
-		// ucx_task_yield();
+	RETURN_CODE_TYPE return_code;
+	APEX_INTEGER partition_id;
+	APEX_INTEGER process_id;
+	SAMPLING_PORT_ID_TYPE port_id;
+	MESSAGE_SIZE_TYPE read_len;
+	VALIDITY_TYPE validity;
+	uint32_t last_seq = 0;
 
+	struct {
+		uint32_t seq;
+		uint32_t sent_at_ms;
+		uint32_t sender_pid;
+	} rx_msg;
+
+	GET_MY_PARTITION_ID(&partition_id, &return_code);
+	GET_MY_ID(&process_id, &return_code);
+	GET_SAMPLING_PORT_ID("P2_IN_TEMP", &port_id, &return_code);
+
+	printf("[P2/Process3] GET_SAMPLING_PORT_ID('P2_IN_TEMP') rc=%d id=%d\n", return_code, port_id);
+
+	while (1) {
+		read_len = 0;
+		READ_SAMPLING_MESSAGE(port_id, (MESSAGE_ADDR_TYPE)&rx_msg, &read_len, &validity, &return_code);
+
+		if (return_code == NO_ACTION) {
+			printf("[P2/Process3] READ_SAMPLING_MESSAGE rc=%d (pas encore de message)\n", return_code);
+		} else if (return_code == NO_ERROR) {
+			int size_ok = (read_len == sizeof(rx_msg));
+			int seq_ok = (rx_msg.seq >= last_seq);
+			printf("[P2/Process3] READ_SAMPLING_MESSAGE rc=%d len=%d validity=%d seq=%lu sent_at=%lu sender=%lu %s\n",
+				   return_code,
+				   read_len,
+				   validity,
+				   rx_msg.seq,
+				   rx_msg.sent_at_ms,
+				   rx_msg.sender_pid,
+				   (size_ok && seq_ok) ? "PASS" : "FAIL");
+			last_seq = rx_msg.seq;
+		} else {
+			printf("[P2/Process3] READ_SAMPLING_MESSAGE rc=%d FAIL\n", return_code);
+		}
+
+		PERIODIC_WAIT(&return_code);
 	}
 }
 

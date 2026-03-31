@@ -162,7 +162,7 @@ static const PROCESS_ATTRIBUTE_TYPE PROCESS_2_CONFIG = {
 
 // process 3 configuration
 static const PROCESS_ATTRIBUTE_TYPE PROCESS_3_CONFIG = {
-    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
+    .PERIOD = 100,              // 20ms in nanoseconds
     .TIME_CAPACITY = 10,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test3,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
@@ -192,8 +192,8 @@ struct port_mapping_s {
 };
 
 static const struct port_mapping_s system_port_table[] = {
-    {1, "P1_OUT_TEMP", SOURCE, 64, 25, &channel_temperature},
-    {2, "P2_IN_TEMP", DESTINATION, 64, 25, &channel_temperature},
+    {1, "P1_OUT_TEMP", SOURCE, 64, 200, &channel_temperature},
+    {2, "P2_IN_TEMP", DESTINATION, 64, 200, &channel_temperature},
 };
 extern const int routing_table_size;
 
