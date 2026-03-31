@@ -36,6 +36,7 @@ struct sampling_port_s {
        struct krnl_sampling_channel *channel;
 };
 
+
 extern void CREATE_SAMPLING_PORT (
        /*in */ SAMPLING_PORT_NAME_TYPE    SAMPLING_PORT_NAME,
        /*in */ MESSAGE_SIZE_TYPE          MAX_MESSAGE_SIZE,
@@ -96,6 +97,16 @@ typedef
       WAITING_RANGE_TYPE      WAITING_PROCESSES;
    } QUEUING_PORT_STATUS_TYPE;
 
+
+struct queuing_port_s {
+       QUEUING_PORT_NAME_TYPE queuing_port_name;
+       QUEUING_PORT_ID_TYPE queuing_port_id;
+       PARTITION_ID_TYPE partition_id;
+       QUEUING_DISCIPLINE_TYPE QUEUING_DISCIPLINE;
+       struct list_s *wainting_processes;
+       QUEUING_PORT_STATUS_TYPE *queuing_port_status;
+       struct krnl_sampling_channel *channel;
+};
 
 extern void CREATE_QUEUING_PORT (
        /*in */ QUEUING_PORT_NAME_TYPE   QUEUING_PORT_NAME,
