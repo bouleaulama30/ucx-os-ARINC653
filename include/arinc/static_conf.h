@@ -182,14 +182,20 @@ static struct krnl_sampling_channel channel_temperature = {
     .last_update_time = 0,
 };
 
-static uint8_t buffer_cmds[10 * 32];
+// L'allocation de la RAM du noyau
+static uint8_t q_channel_data[10 * 64]; 
+static uint32_t q_channel_sizes[10]; // Tableau pour stocker les 10 tailles
 
-static struct krnl_sampling_channel channel_cmds = {
-    .name = "channelcmds",
-    .buffer = buffer_cmds,
-    .max_message_size = 32,
-    .current_message_size = 0,
-    .last_update_time = 0,
+static struct krnl_queuing_channel_s channel_cmds = {
+    .buffer_data = q_channel_data,
+    .buffer_sizes = q_channel_sizes,
+    .max_message_size = 64,
+    .max_nb_messages = 10,
+    .current_nb_messages = 0,
+    .read_index = 0,
+    .write_index = 0,
+    .waiting_readers = NULL,
+    .waiting_writers = NULL
 };
 
 struct port_mapping_s {

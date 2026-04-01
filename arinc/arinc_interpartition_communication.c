@@ -332,6 +332,7 @@ void CREATE_QUEUING_PORT (
        queuing_port->partition_id = system_port_table[index_conf_table].partition_id;
        queuing_port->queuing_port_id = port_ID;
        queuing_port->QUEUING_DISCIPLINE = QUEUING_DISCIPLINE;
+       queuing_port->waiting_processes = list_create();
 
        strncpy(queuing_port->queuing_port_name, QUEUING_PORT_NAME, sizeof(queuing_port->queuing_port_name) - 1);
        queuing_port->queuing_port_name[sizeof(queuing_port->queuing_port_name) - 1] = '\0';
@@ -349,7 +350,44 @@ void SEND_QUEUING_MESSAGE (
        /*in */ MESSAGE_SIZE_TYPE        LENGTH,
        /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE){
-       
+
+       struct pcb_s *partition = get_current_partition();
+       struct node_s *queuing_port_node = find_queuing_port_node_by_id(partition, QUEUING_PORT_ID);
+       if (!queuing_port_node){
+              *RETURN_CODE = INVALID_PARAM;
+              return;
+       }
+
+       struct queuing_port_s *queuing_port = queuing_port_node->data;
+
+       if(TIME_OUT < 0 || time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT)){
+              *RETURN_CODE = INVALID_PARAM;
+              return;
+       }
+
+       if(LENGTH >= queuing_port->queuing_port_status->MAX_MESSAGE_SIZE){
+              *RETURN_CODE = INVALID_CONFIG;
+              return;
+       }
+
+       if(LENGTH <= 0){
+              *RETURN_CODE = INVALID_PARAM;
+              return;
+       }
+
+       if(queuing_port->queuing_port_status->PORT_DIRECTION != SOURCE){
+              *RETURN_CODE = INVALID_MODE;
+              return;
+       }
+
+       if(queuing_port->channel->current_message_size < LENGTH && queuing_port->waiting_processes->length == 0){
+              struct krnl_sampling_channel *channel = queuing_port->channel;
+              memcpy(channel->buffer, MESSAGE_ADDR, LENGTH);
+              channel->current_message_size = LENGTH;
+       }
+       else {
+       }
+
 }
 
 void RECEIVE_QUEUING_MESSAGE (
