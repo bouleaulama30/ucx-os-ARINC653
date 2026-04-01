@@ -1,6 +1,6 @@
 #include "ucx.h"
 
-const int routing_table_size = 2;
+const int routing_table_size = 4;
 
 __attribute__((section(".p1_code")))
 void p1_main_process(struct pcb_s *partition){
@@ -24,8 +24,11 @@ void p1_main_process(struct pcb_s *partition){
     SAMPLING_PORT_ID_TYPE port_id;
     CREATE_SAMPLING_PORT(system_port_table[0].port_name, system_port_table[0].messageSizeBytes, system_port_table[0].port_direction, system_port_table[0].refreshPeriodMs,
      &port_id, &return_code0);
-    
     printf("return code sampling port %d, port id %d\n", return_code0, port_id); 
+    
+    CREATE_QUEUING_PORT(system_port_table[2].port_name, system_port_table[2].messageSizeBytes, system_port_table[2].max_nb_message, system_port_table[2].port_direction, system_port_table[2].QUEUING_DISCIPLINE,
+     &port_id, &return_code1);
+    printf("return code queuing port %d, port id %d\n", return_code1, port_id);
 
     SET_PARTITION_MODE(NORMAL, &return_code0);
 }
@@ -49,8 +52,11 @@ void p2_main_process(struct pcb_s *partition){
     SAMPLING_PORT_ID_TYPE port_id;
     CREATE_SAMPLING_PORT(system_port_table[1].port_name, system_port_table[1].messageSizeBytes, system_port_table[1].port_direction, system_port_table[1].refreshPeriodMs,
     &port_id, &return_code0);
-
     printf("return code sampling port %d, port id %d\n", return_code0, port_id); 
+
+    CREATE_QUEUING_PORT(system_port_table[3].port_name, system_port_table[3].messageSizeBytes, system_port_table[3].max_nb_message, system_port_table[3].port_direction, system_port_table[3].QUEUING_DISCIPLINE,
+     &port_id, &return_code1);
+    printf("return code queuing port %d, port id %d\n", return_code1, port_id);
 
     SET_PARTITION_MODE(NORMAL, &return_code0);
 }

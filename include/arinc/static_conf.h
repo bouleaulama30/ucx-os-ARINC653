@@ -182,18 +182,32 @@ static struct krnl_sampling_channel channel_temperature = {
     .last_update_time = 0,
 };
 
+static uint8_t buffer_cmds[10 * 32];
+
+static struct krnl_sampling_channel channel_cmds = {
+    .name = "channelcmds",
+    .buffer = buffer_cmds,
+    .max_message_size = 32,
+    .current_message_size = 0,
+    .last_update_time = 0,
+};
+
 struct port_mapping_s {
     PARTITION_ID_TYPE partition_id;
     SAMPLING_PORT_NAME_TYPE port_name;
     PORT_DIRECTION_TYPE port_direction;
     MESSAGE_SIZE_TYPE messageSizeBytes;
+    MESSAGE_RANGE_TYPE max_nb_message;
+    QUEUING_DISCIPLINE_TYPE QUEUING_DISCIPLINE;
     SYSTEM_TIME_TYPE refreshPeriodMs;
     struct krnl_sampling_channel *channel;
 };
 
 static const struct port_mapping_s system_port_table[] = {
-    {1, "P1_OUT_TEMP", SOURCE, 64, 200, &channel_temperature},
-    {2, "P2_IN_TEMP", DESTINATION, 64, 200, &channel_temperature},
+    {.partition_id = 1, .port_name = "P1_OUT_TEMP", .port_direction = SOURCE, .messageSizeBytes = 64, .refreshPeriodMs = 200, .channel = &channel_temperature},
+    {.partition_id = 2, .port_name = "P2_IN_TEMP", .port_direction = DESTINATION, .messageSizeBytes = 64, .refreshPeriodMs = 200, .channel = &channel_temperature},
+    {.partition_id = 1, .port_name = "P1_IN_CMDS", .port_direction = DESTINATION, .messageSizeBytes = 32, .max_nb_message = 10, .QUEUING_DISCIPLINE = FIFO, .channel = &channel_cmds},
+    {.partition_id = 2, .port_name = "P2_OUT_CMDS", .port_direction = SOURCE, .messageSizeBytes = 32, .max_nb_message = 10, .QUEUING_DISCIPLINE = FIFO, .channel = &channel_cmds},
 };
 extern const int routing_table_size;
 

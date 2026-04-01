@@ -62,14 +62,23 @@ void process_test0(void)
 	GET_MY_PARTITION_ID(&paritition_id, &return_code);
     GET_MY_ID(&process_id, &return_code);
 
-	SAMPLING_PORT_ID_TYPE port_id;
-	SAMPLING_PORT_STATUS_TYPE port_status;
+	SAMPLING_PORT_ID_TYPE sampling_port_id;
+	SAMPLING_PORT_STATUS_TYPE sampling_port_status;
 
-	GET_SAMPLING_PORT_ID("P1_OUT_TEMP", &port_id, &return_code);
-	printf("PORT ID %d\n", port_id);
+	QUEUING_PORT_ID_TYPE queuing_port_id;
+	QUEUING_PORT_STATUS_TYPE queuing_port_status;
 
-	GET_SAMPLING_PORT_STATUS(1, &port_status, &return_code);
-	printf("PORT NAME FROM STATUS %d\n", port_status.MAX_MESSAGE_SIZE);
+	GET_SAMPLING_PORT_ID("P1_OUT_TEMP", &sampling_port_id, &return_code);
+	printf("PORT SAMPLING ID %d\n", sampling_port_id);
+
+	GET_SAMPLING_PORT_STATUS(1, &sampling_port_status, &return_code);
+	printf("PORT SAMPLING NAME FROM STATUS %d\n", sampling_port_status.MAX_MESSAGE_SIZE);
+	
+	GET_QUEUING_PORT_ID("P1_IN_CMDS", &queuing_port_id, &return_code);
+	printf("PORT QUEUING ID %d\n", queuing_port_id);
+
+	GET_QUEUING_PORT_STATUS(1, &queuing_port_status, &return_code);
+	printf("PORT QUEUING NAME FROM STATUS %d\n", queuing_port_status.MAX_MESSAGE_SIZE);
 
 	while (1) {
 		// if(cnt % 2 == 0){

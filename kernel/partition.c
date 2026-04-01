@@ -106,7 +106,10 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->id_next = 0;
     new_pcb->next_stack_addr = memory_requirements->memory[DATA].base + PARTIION_OS_AND_MAIN_PROCESS_STACK_SIZE;
     new_pcb->processes = list_create();
-    new_pcb->communication_ports = list_create();
+    new_pcb->communication_sampling_ports = list_create();
+    new_pcb->communication_queuing_ports = list_create();
+    new_pcb->sampling_port_count = 0;
+    new_pcb->queuing_port_count = 0;
 
 
     CRITICAL_LEAVE();

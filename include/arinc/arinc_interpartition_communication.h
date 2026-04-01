@@ -102,10 +102,10 @@ struct queuing_port_s {
        QUEUING_PORT_NAME_TYPE queuing_port_name;
        QUEUING_PORT_ID_TYPE queuing_port_id;
        PARTITION_ID_TYPE partition_id;
-       QUEUING_DISCIPLINE_TYPE QUEUING_DISCIPLINE;
-       struct list_s *wainting_processes;
        QUEUING_PORT_STATUS_TYPE *queuing_port_status;
        struct krnl_sampling_channel *channel;
+       QUEUING_DISCIPLINE_TYPE QUEUING_DISCIPLINE;
+       struct list_s *waiting_processes;
 };
 
 extern void CREATE_QUEUING_PORT (
