@@ -183,7 +183,7 @@ static struct krnl_sampling_channel channel_temperature = {
 };
 
 // L'allocation de la RAM du noyau
-static uint8_t q_channel_data[10 * 64]; 
+static uint8_t q_channel_data[10 * 32]; 
 static uint32_t q_channel_sizes[10]; // Tableau pour stocker les 10 tailles
 
 static struct krnl_queuing_channel_s channel_cmds = {
@@ -194,8 +194,8 @@ static struct krnl_queuing_channel_s channel_cmds = {
     .current_nb_messages = 0,
     .read_index = 0,
     .write_index = 0,
-    .waiting_readers = NULL,
-    .waiting_writers = NULL
+    .source_partition_id = 2,
+    .dest_partition_id = 1
 };
 
 struct port_mapping_s {

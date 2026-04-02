@@ -25,10 +25,9 @@ struct krnl_queuing_channel_s {
     uint32_t current_nb_messages; // Combien de messages actuellement ?
     uint32_t read_index;          // Tête de lecture
     uint32_t write_index;         // Tête d'écriture
-    
-    // --- 4. La Synchronisation (Listes d'attente) ---
-    struct process_s *waiting_readers; // Tête de liste des processus qui ont fait RECEIVE sur une file vide
-    struct process_s *waiting_writers; // Tête de liste des processus qui ont fait SEND sur une file pleine
+
+    PARTITION_ID_TYPE source_partition_id;
+    PARTITION_ID_TYPE dest_partition_id;
 };
 
 #endif

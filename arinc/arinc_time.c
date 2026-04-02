@@ -36,7 +36,7 @@ static struct node_s *check_timeouts(struct node_s *node, void *arg) {
     // Si le processus  a un chronomètre actif (différent de 0)
     if (process->time_counter != 0) {
         if (current_time >= process->time_counter) {
-                        
+            // si le process a un chrono lie a une ressource en attente alors faire en sorte de le retirer de la liste d'attente de la ressource( utiliser le waiting on port du process_s pour trouver la ressource) et de le mettre en ready
             process->is_suspended = false;
             process->time_counter = 0;
 

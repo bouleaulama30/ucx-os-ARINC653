@@ -80,6 +80,7 @@ struct process_s
     BOOLEAN_TYPE is_suspended;
     SYSTEM_TIME_TYPE time_counter;
     SYSTEM_TIME_TYPE saved_init_delay;
+    struct queuing_port_s *waiting_queuing_port;
 };
 
 static inline void update_process_deadline(struct process_s *process, SYSTEM_TIME_TYPE base_time) {

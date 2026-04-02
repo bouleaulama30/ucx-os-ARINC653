@@ -30,11 +30,11 @@
             * implem la waiting queue (quand on aura implem la partie intra et inter communication)
 
 ### inter communication
-* pour read sampling port:
-    * comprendre le refresh
-    * terminer la fonction (cf to do)
-    * voir si besoin d'update des éléments du channel si la lecture réussi pour rester consistant
-* faire write sampling port
+* ajouter un mecanisme pour dire a une partition que des ressources sont dispo pour une autre partition comme ca on ne verifie pas a chaque tick les ressources des port 
+* faire en sorte de check le time out quand le chrono est activer et dans ce ca remove le process de la waiting queue du port (cf commentaire)
+* voir pour implementer la queuing discipline en mode priority
+* SEND_QUEUING_MESSAGE:
+    * voir current process own mutex
 * faire tout en unicast ?
 
 ### intra communication

@@ -1,5 +1,21 @@
 #include <ucx.h>
 
+static struct node_s *check_available_resources_on_port(struct node_s *node, void *arg) {
+    struct queuing_port_s *queuing_port = node->data;
+    struct krnl_queuing_channel_s *channel = queuing_port->channel;
+
+    if(channel->current_nb_messages < channel->max_nb_messages && queuing_port->queuing_port_status->PORT_DIRECTION == DESTINATION && queuing_port->waiting_processes->length != 0){
+        struct process_s *waiting_process = list_pop(queuing_port->waiting_processes);
+        waiting_process->processus_status->PROCESS_STATE = READY;
+    }
+
+    if(channel->current_nb_messages > 0 && queuing_port->queuing_port_status->PORT_DIRECTION == SOURCE && queuing_port->waiting_processes->length != 0){
+        struct process_s *waiting_process = list_pop(queuing_port->waiting_processes);
+        waiting_process->processus_status->PROCESS_STATE = READY;
+    }
+    return 0;
+}
+
 void partition_OS(void)
 {
     struct pcb_s *partition = get_current_partition();    
@@ -19,6 +35,7 @@ start_over:
         if (current_tick != partition->last_tick) {
             partition->last_tick = current_tick;
             arinc_time_update_partition(partition);
+            list_foreach(partition->communication_queuing_ports, check_available_resources_on_port, NULL);
         }
     
         if (!setjmp(partition->partition_context)) {

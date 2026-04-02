@@ -380,14 +380,43 @@ void SEND_QUEUING_MESSAGE (
               return;
        }
 
-       if(queuing_port->channel->current_message_size < LENGTH && queuing_port->waiting_processes->length == 0){
-              struct krnl_sampling_channel *channel = queuing_port->channel;
-              memcpy(channel->buffer, MESSAGE_ADDR, LENGTH);
-              channel->current_message_size = LENGTH;
+       struct process_s *current_process = partition->process_current->data;
+       struct krnl_queuing_channel_s *channel = queuing_port->channel;
+       if(channel->current_nb_messages < channel->max_nb_messages && queuing_port->waiting_processes->length == 0){
+              channel->current_nb_messages++;
+              uint32_t write_index = channel->write_index;
+              memcpy(channel->buffer_data + write_index * channel->max_message_size, MESSAGE_ADDR, LENGTH);
+              channel->buffer_sizes[write_index] = LENGTH;
+              channel->write_index = (write_index + 1) % channel->max_nb_messages;
+              *RETURN_CODE = NO_ERROR;
        }
+       else if (TIME_OUT == 0){
+              *RETURN_CODE = NOT_AVAILABLE;
+       }
+       // cd current process own mutex
+       // else if ()
        else {
-       }
+              if (TIME_OUT != INFINITE_TIME_VALUE){
+                     current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
+              }}
+              current_process->processus_status->PROCESS_STATE = WAITING;
+              // to do implementer selon la discipline de la file d'attente
+              list_pushback(queuing_port->waiting_processes, current_process);
+              current_process->waiting_queuing_port = queuing_port;
+              yield_to_partition(partition, current_process);
+              if(current_process->time_counter == 0){
+                     *RETURN_CODE = TIMED_OUT;
+              } else {
+                     channel->current_nb_messages++;
+                     uint32_t write_index = channel->write_index;
+                     memcpy(channel->buffer_data + write_index * channel->max_message_size, MESSAGE_ADDR, LENGTH);
+                     channel->buffer_sizes[write_index] = LENGTH;
+                     channel->write_index = (write_index + 1) % channel->max_nb_messages;
 
+                     if(TIME_OUT != INFINITE_TIME_VALUE){
+                            current_process->time_counter = 0;
+                     }
+                     *RETURN_CODE = NO_ERROR;
 }
 
 void RECEIVE_QUEUING_MESSAGE (
