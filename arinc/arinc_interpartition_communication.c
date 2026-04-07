@@ -140,7 +140,7 @@ void CREATE_SAMPLING_PORT (
        strncpy(sampling_port->sampling_port_name, SAMPLING_PORT_NAME, sizeof(sampling_port->sampling_port_name) - 1);
        sampling_port->sampling_port_name[sizeof(sampling_port->sampling_port_name) - 1] = '\0';
        
-       sampling_port->channel = system_port_table[index_conf_table].channel;
+       sampling_port->channel = system_port_table[index_conf_table].sampling_channel;
        
        list_pushback(partition->communication_sampling_ports, sampling_port);
        *SAMPLING_PORT_ID = port_ID;
@@ -337,7 +337,7 @@ void CREATE_QUEUING_PORT (
        strncpy(queuing_port->queuing_port_name, QUEUING_PORT_NAME, sizeof(queuing_port->queuing_port_name) - 1);
        queuing_port->queuing_port_name[sizeof(queuing_port->queuing_port_name) - 1] = '\0';
        
-       queuing_port->channel = system_port_table[index_conf_table].channel;
+       queuing_port->channel = system_port_table[index_conf_table].queuing_channel;
        
        list_pushback(partition->communication_queuing_ports, queuing_port);
        *QUEUING_PORT_ID = port_ID;
@@ -418,6 +418,7 @@ void SEND_QUEUING_MESSAGE (
                      }
                      *RETURN_CODE = NO_ERROR;
 }
+       }
 
 void RECEIVE_QUEUING_MESSAGE (
        /*in */ QUEUING_PORT_ID_TYPE     QUEUING_PORT_ID,
@@ -426,7 +427,68 @@ void RECEIVE_QUEUING_MESSAGE (
                /* The message address is passed IN, although */
                /* the respective message is passed OUT       */
        /*out*/ MESSAGE_SIZE_TYPE        *LENGTH,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+
+       struct pcb_s *partition = get_current_partition();
+       struct node_s *queuing_port_node = find_queuing_port_node_by_id(partition, QUEUING_PORT_ID);
+       if (!queuing_port_node){
+              *RETURN_CODE = INVALID_PARAM;
+              return;
+       }
+
+       struct queuing_port_s *queuing_port = queuing_port_node->data;
+
+       if(TIME_OUT < 0 || time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT)){
+              *RETURN_CODE = INVALID_PARAM;
+              return;
+       }
+
+       if(queuing_port->queuing_port_status->PORT_DIRECTION != DESTINATION){
+              *RETURN_CODE = INVALID_MODE;
+              return;
+       }
+
+       struct process_s *current_process = partition->process_current->data;
+       struct krnl_queuing_channel_s *channel = queuing_port->channel;
+       if(channel->current_nb_messages > 0){
+              channel->current_nb_messages--;
+              uint32_t read_index = channel->read_index;
+              memcpy(MESSAGE_ADDR, channel->buffer_data + read_index * channel->max_message_size, channel->buffer_sizes[read_index]);
+              *LENGTH = channel->buffer_sizes[read_index];
+              channel->read_index = (read_index + 1) % channel->max_nb_messages;
+              *RETURN_CODE = NO_ERROR;
+       }
+       else if (TIME_OUT == 0){
+              *LENGTH = 0;
+              *RETURN_CODE = NOT_AVAILABLE;
+       }
+       // cd current process own mutex
+       // else if ()
+       else {
+              if (TIME_OUT != INFINITE_TIME_VALUE){
+                     current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
+              }}
+              current_process->processus_status->PROCESS_STATE = WAITING;
+              // to do implementer selon la discipline de la file d'attente
+              list_pushback(queuing_port->waiting_processes, current_process);
+              current_process->waiting_queuing_port = queuing_port;
+              yield_to_partition(partition, current_process);
+              if(current_process->time_counter == 0){
+                     *LENGTH = 0;
+                     *RETURN_CODE = TIMED_OUT;
+              } else {
+                     if(TIME_OUT != INFINITE_TIME_VALUE){
+                            current_process->time_counter = 0;
+                     }
+                     channel->current_nb_messages--;
+                     uint32_t read_index = channel->read_index;
+                     memcpy(MESSAGE_ADDR, channel->buffer_data + read_index * channel->max_message_size, channel->buffer_sizes[read_index]);
+                     *LENGTH = channel->buffer_sizes[read_index];
+                     channel->read_index = (read_index + 1) % channel->max_nb_messages;
+
+                     *RETURN_CODE = NO_ERROR;
+              }
+}
 
 void GET_QUEUING_PORT_ID (
        /*in */ QUEUING_PORT_NAME_TYPE   QUEUING_PORT_NAME,

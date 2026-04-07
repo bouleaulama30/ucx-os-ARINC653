@@ -103,7 +103,7 @@ struct queuing_port_s {
        QUEUING_PORT_ID_TYPE queuing_port_id;
        PARTITION_ID_TYPE partition_id;
        QUEUING_PORT_STATUS_TYPE *queuing_port_status;
-       struct krnl_queuing_channel *channel;
+       struct krnl_queuing_channel_s *channel;
        QUEUING_DISCIPLINE_TYPE QUEUING_DISCIPLINE;
        struct list_s *waiting_processes;
 };

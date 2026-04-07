@@ -31,9 +31,10 @@
 
 ### inter communication
 * ajouter un mecanisme pour dire a une partition que des ressources sont dispo pour une autre partition comme ca on ne verifie pas a chaque tick les ressources des port 
-* faire en sorte de check le time out quand le chrono est activer et dans ce ca remove le process de la waiting queue du port (cf commentaire)
 * voir pour implementer la queuing discipline en mode priority
 * SEND_QUEUING_MESSAGE:
+    * voir current process own mutex
+* RECEIVE_QUEUING_MESSAGE:
     * voir current process own mutex
 * faire tout en unicast ?
 

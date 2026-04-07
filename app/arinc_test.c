@@ -52,62 +52,39 @@ void test_spatial_violation_p1(void) {
 __attribute__((section(".p1_code")))
 void process_test0(void)
 {   
-	int32_t cnt = 100000;
-    RETURN_CODE_TYPE return_code;
-	APEX_INTEGER paritition_id;
-    APEX_INTEGER process_id;
-	
-    // APEX_INTEGER other_process_id;
-	PROCESS_STATUS_TYPE other_process_status;
-	GET_MY_PARTITION_ID(&paritition_id, &return_code);
-    GET_MY_ID(&process_id, &return_code);
-
-	SAMPLING_PORT_ID_TYPE sampling_port_id;
-	SAMPLING_PORT_STATUS_TYPE sampling_port_status;
-
+	RETURN_CODE_TYPE return_code;
+	APEX_INTEGER partition_id;
+	APEX_INTEGER process_id;
 	QUEUING_PORT_ID_TYPE queuing_port_id;
-	QUEUING_PORT_STATUS_TYPE queuing_port_status;
+	MESSAGE_SIZE_TYPE message_length;
+	uint32_t received_seq = 0;
+	char received_message[32] = {0};
 
-	GET_SAMPLING_PORT_ID("P1_OUT_TEMP", &sampling_port_id, &return_code);
-	printf("PORT SAMPLING ID %d\n", sampling_port_id);
-
-	GET_SAMPLING_PORT_STATUS(1, &sampling_port_status, &return_code);
-	printf("PORT SAMPLING NAME FROM STATUS %d\n", sampling_port_status.MAX_MESSAGE_SIZE);
-	
+	GET_MY_PARTITION_ID(&partition_id, &return_code);
+	GET_MY_ID(&process_id, &return_code);
 	GET_QUEUING_PORT_ID("P1_IN_CMDS", &queuing_port_id, &return_code);
-	printf("PORT QUEUING ID %d\n", queuing_port_id);
 
-	GET_QUEUING_PORT_STATUS(1, &queuing_port_status, &return_code);
-	printf("PORT QUEUING NAME FROM STATUS %d\n", queuing_port_status.MAX_MESSAGE_SIZE);
+	printf("[P1/Process0] GET_QUEUING_PORT_ID('P1_IN_CMDS') rc=%d id=%d\n", return_code, queuing_port_id);
 
 	while (1) {
-		// if(cnt % 2 == 0){
-		// 	printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-		// 	SET_PRIORITY(1, 3, &return_code);
-		// 	// SET_PRIORITY(1, 3, &return_code);
+		message_length = 0;
+		RECEIVE_QUEUING_MESSAGE(queuing_port_id, 200, (MESSAGE_ADDR_TYPE)received_message, &message_length, &return_code);
 
-		// }
-		
-		// if(cnt == 100001)
-		// 	SET_PARTITION_MODE(IDLE, &return_code);
-			// STOP(1, &return_code);
-		if(cnt == 100005){
-			GET_PROCESS_STATUS(0, &other_process_status, &return_code);
-			printf("CURRENT DEADLINE OF PROCESS %s: %d\n", other_process_status.ATTRIBUTES.NAME, other_process_status.DEADLINE_TIME);
-			REPLENISH(10, &return_code);
-			GET_PROCESS_STATUS(0, &other_process_status, &return_code);
-			printf("NEW DEADLINE OF PROCESS %s: %d\n", other_process_status.ATTRIBUTES.NAME, other_process_status.DEADLINE_TIME);
-			// DELAYED_START(1, 50 ,&return_code);
+		if (return_code == NO_ERROR) {
+			received_message[(message_length < sizeof(received_message)) ? message_length : (sizeof(received_message) - 1)] = '\0';
+			printf("[P1/Process0] RECEIVE_QUEUING_MESSAGE rc=%d len=%d seq=%lu msg='%s'\n",
+				   return_code,
+				   message_length,
+				   (unsigned long)received_seq,
+				   received_message);
+			received_seq++;
+		} else if (return_code == NOT_AVAILABLE) {
+			printf("[P1/Process0] RECEIVE_QUEUING_MESSAGE rc=%d (queue vide)\n", return_code);
+		} else {
+			printf("[P1/Process0] RECEIVE_QUEUING_MESSAGE rc=%d FAIL\n", return_code);
 		}
 
-		// if(cnt == 100011){
-		// 	printf("SUSPEND TIME %d\n", ucx_uptime());
-		// 	SUSPEND_SELF(50, &return_code);
-		// 	printf("return code suspend_self %d:", return_code);
-		// }
-		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-		TIMED_WAIT(5, &return_code);
-		// ucx_task_yield();
+		TIMED_WAIT(10, &return_code);
 	}
 }
 
@@ -185,46 +162,29 @@ void process_test3(void)
 	RETURN_CODE_TYPE return_code;
 	APEX_INTEGER partition_id;
 	APEX_INTEGER process_id;
-	SAMPLING_PORT_ID_TYPE port_id;
-	MESSAGE_SIZE_TYPE read_len;
-	VALIDITY_TYPE validity;
-	uint32_t last_seq = 0;
-
-	struct {
-		uint32_t seq;
-		uint32_t sent_at_ms;
-		uint32_t sender_pid;
-	} rx_msg;
+	QUEUING_PORT_ID_TYPE queuing_port_id;
+	MESSAGE_SIZE_TYPE message_length;
+	uint32_t seq = 0;
+	char message[32];
 
 	GET_MY_PARTITION_ID(&partition_id, &return_code);
 	GET_MY_ID(&process_id, &return_code);
-	GET_SAMPLING_PORT_ID("P2_IN_TEMP", &port_id, &return_code);
+	GET_QUEUING_PORT_ID("P2_OUT_CMDS", &queuing_port_id, &return_code);
 
-	printf("[P2/Process3] GET_SAMPLING_PORT_ID('P2_IN_TEMP') rc=%d id=%d\n", return_code, port_id);
+	printf("[P2/Process3] GET_QUEUING_PORT_ID('P2_OUT_CMDS') rc=%d id=%d\n", return_code, queuing_port_id);
 
 	while (1) {
-		read_len = 0;
-		READ_SAMPLING_MESSAGE(port_id, (MESSAGE_ADDR_TYPE)&rx_msg, &read_len, &validity, &return_code);
+		seq++;
+		message_length = (MESSAGE_SIZE_TYPE)sprintf(message, "cmd-seq=%lu from=P2", (unsigned long)seq);
 
-		if (return_code == NO_ACTION) {
-			printf("[P2/Process3] READ_SAMPLING_MESSAGE rc=%d (pas encore de message)\n", return_code);
-		} else if (return_code == NO_ERROR) {
-			int size_ok = (read_len == sizeof(rx_msg));
-			int seq_ok = (rx_msg.seq >= last_seq);
-			printf("[P2/Process3] READ_SAMPLING_MESSAGE rc=%d len=%d validity=%d seq=%lu sent_at=%lu sender=%lu %s\n",
-				   return_code,
-				   read_len,
-				   validity,
-				   rx_msg.seq,
-				   rx_msg.sent_at_ms,
-				   rx_msg.sender_pid,
-				   (size_ok && seq_ok) ? "PASS" : "FAIL");
-			last_seq = rx_msg.seq;
-		} else {
-			printf("[P2/Process3] READ_SAMPLING_MESSAGE rc=%d FAIL\n", return_code);
-		}
+		SEND_QUEUING_MESSAGE(queuing_port_id, (MESSAGE_ADDR_TYPE)message, 16 + 1, 0, &return_code);
+		printf("[P2/Process3] SEND_QUEUING_MESSAGE rc=%d seq=%lu len=%d msg='%s'\n",
+			   return_code,
+			   (unsigned long)seq,
+			   message_length + 1,
+			   message);
 
-		PERIODIC_WAIT(&return_code);
+		TIMED_WAIT(10, &return_code);
 	}
 }
 
