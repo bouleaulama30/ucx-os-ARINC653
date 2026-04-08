@@ -39,7 +39,8 @@
 
 ### intra communication
 comprendre:
-* As with process and port creation, the amount of memory required to create intrapartition communication mechanisms is allocated from the partition’s memory resources, which is defined at system build time.
+* est ce que les partitions on un pool de memoire dans la region de l os d'une taille predef dans le xml afin de pouvoir y allouer les ressources comme les blackboard buffer etc... voir discussion avec gemini
+* ou doit etre stocker en memoire le buffer: dans la region data de la partition ? Dans le kernel ?
 * faire tout en unicast ?
 
 
@@ -50,6 +51,7 @@ comprendre:
 
 ## Optimisation
 
+* retirer les mallocs et les free en utilisant le pool allocator utiliser durant la communication inter et intra partition
 * ajouter un mecanisme pour dire a une partition que des ressources sont dispo pour une autre partition comme ca on ne verifie pas a chaque tick les ressources des port
 
 * essayer de rassembler les parcours de liste a chaque tick en une seule fonction
