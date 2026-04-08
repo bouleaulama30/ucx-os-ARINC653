@@ -130,29 +130,32 @@ void process_test1(void)
 __attribute__((section(".p2_code")))
 void process_test2(void)
 {   
-int32_t cnt = 300000;
-    RETURN_CODE_TYPE return_code;
-	APEX_INTEGER paritition_id;
-    APEX_INTEGER process_id;
-	
-    // APEX_INTEGER other_process_id;
-	PROCESS_STATUS_TYPE other_process_status;
-	GET_MY_PARTITION_ID(&paritition_id, &return_code);
-    GET_MY_ID(&process_id, &return_code);
-	GET_PROCESS_STATUS(1, &other_process_status, &return_code);
-	
-	if(return_code == NO_ERROR){
-		printf("Le nom du process: %s, with priority %d\n", other_process_status.ATTRIBUTES.NAME, other_process_status.CURRENT_PRIORITY);
-	}
+	RETURN_CODE_TYPE return_code;
+	APEX_INTEGER partition_id;
+	APEX_INTEGER process_id;
+	QUEUING_PORT_ID_TYPE queuing_port_id;
+	MESSAGE_SIZE_TYPE message_length;
+	uint32_t seq = 0;
+	char message[32];
+
+	GET_MY_PARTITION_ID(&partition_id, &return_code);
+	GET_MY_ID(&process_id, &return_code);
+	GET_QUEUING_PORT_ID("P2_OUT_CMDS", &queuing_port_id, &return_code);
+
+	printf("[P2/Process0] GET_QUEUING_PORT_ID('P2_OUT_CMDS') rc=%d id=%d\n", return_code, queuing_port_id);
+
 	while (1) {
+		seq++;
+		message_length = (MESSAGE_SIZE_TYPE)sprintf(message, "cmd-seq=%lu from=P2p0", (unsigned long)seq);
 
-		
+		SEND_QUEUING_MESSAGE(queuing_port_id, (MESSAGE_ADDR_TYPE)message, 18 + 1, 10, &return_code);
+		printf("[P2/Process0] SEND_QUEUING_MESSAGE rc=%d seq=%lu len=%d msg='%s'\n",
+			   return_code,
+			   (unsigned long)seq,
+			   message_length + 1,
+			   message);
 
-		printf("[process %d %ld, partition %d, address cnt: 0x%p]\n\n", process_id, cnt++, paritition_id, &cnt);
-
-		TIMED_WAIT(5, &return_code);
-		// ucx_task_yield();
-
+		TIMED_WAIT(0, &return_code);
 	}
 }
 
@@ -171,20 +174,20 @@ void process_test3(void)
 	GET_MY_ID(&process_id, &return_code);
 	GET_QUEUING_PORT_ID("P2_OUT_CMDS", &queuing_port_id, &return_code);
 
-	printf("[P2/Process3] GET_QUEUING_PORT_ID('P2_OUT_CMDS') rc=%d id=%d\n", return_code, queuing_port_id);
+	printf("[P2/Process1] GET_QUEUING_PORT_ID('P2_OUT_CMDS') rc=%d id=%d\n", return_code, queuing_port_id);
 
 	while (1) {
 		seq++;
-		message_length = (MESSAGE_SIZE_TYPE)sprintf(message, "cmd-seq=%lu from=P2", (unsigned long)seq);
+		message_length = (MESSAGE_SIZE_TYPE)sprintf(message, "cmd-seq=%lu from=P2p1", (unsigned long)seq);
 
-		SEND_QUEUING_MESSAGE(queuing_port_id, (MESSAGE_ADDR_TYPE)message, 16 + 1, 0, &return_code);
-		printf("[P2/Process3] SEND_QUEUING_MESSAGE rc=%d seq=%lu len=%d msg='%s'\n",
+		SEND_QUEUING_MESSAGE(queuing_port_id, (MESSAGE_ADDR_TYPE)message, 18 + 1, 10, &return_code);
+		printf("[P2/Process1] SEND_QUEUING_MESSAGE rc=%d seq=%lu len=%d msg='%s'\n",
 			   return_code,
 			   (unsigned long)seq,
 			   message_length + 1,
 			   message);
 
-		TIMED_WAIT(10, &return_code);
+		TIMED_WAIT(0, &return_code);
 	}
 }
 

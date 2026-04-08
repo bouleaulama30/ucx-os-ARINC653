@@ -78,6 +78,20 @@ int check_port_direction_in_conf(int index_conf_table, PORT_DIRECTION_TYPE PORT_
        return 0;
 }
 
+void list_insert_sorted(struct list_s *list, struct process_s *process) {
+       struct node_s *new_node = malloc(sizeof(struct node_s));
+       new_node->data = process;
+       new_node->next = NULL;
+
+       struct node_s *current = list->head;
+       while (current->next != list->tail && ((struct process_s *)current->next->data)->processus_status->CURRENT_PRIORITY >= process->processus_status->CURRENT_PRIORITY) {
+              current = current->next;
+       }
+       new_node->next = current->next;
+       current->next = new_node;
+       list->length++;
+}
+
 void CREATE_SAMPLING_PORT (
        /*in */ SAMPLING_PORT_NAME_TYPE    SAMPLING_PORT_NAME,
        /*in */ MESSAGE_SIZE_TYPE          MAX_MESSAGE_SIZE,
@@ -398,10 +412,16 @@ void SEND_QUEUING_MESSAGE (
        else {
               if (TIME_OUT != INFINITE_TIME_VALUE){
                      current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
-              }}
+              }
               current_process->processus_status->PROCESS_STATE = WAITING;
               // to do implementer selon la discipline de la file d'attente
-              list_pushback(queuing_port->waiting_processes, current_process);
+              if (queuing_port->QUEUING_DISCIPLINE == PRIORITY){
+                     // to do insert process in waiting_processes list according to its priority
+                     list_insert_sorted(queuing_port->waiting_processes, current_process);
+              }
+              else {
+                     list_pushback(queuing_port->waiting_processes, current_process);
+              }
               current_process->waiting_queuing_port = queuing_port;
               yield_to_partition(partition, current_process);
               if(current_process->time_counter == 0){
@@ -417,8 +437,9 @@ void SEND_QUEUING_MESSAGE (
                             current_process->time_counter = 0;
                      }
                      *RETURN_CODE = NO_ERROR;
-}
+              }
        }
+}
 
 void RECEIVE_QUEUING_MESSAGE (
        /*in */ QUEUING_PORT_ID_TYPE     QUEUING_PORT_ID,
@@ -467,10 +488,16 @@ void RECEIVE_QUEUING_MESSAGE (
        else {
               if (TIME_OUT != INFINITE_TIME_VALUE){
                      current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
-              }}
+              }
               current_process->processus_status->PROCESS_STATE = WAITING;
-              // to do implementer selon la discipline de la file d'attente
-              list_pushback(queuing_port->waiting_processes, current_process);
+              if (queuing_port->QUEUING_DISCIPLINE == PRIORITY){
+                     // to do insert process in waiting_processes list according to its priority
+                     list_insert_sorted(queuing_port->waiting_processes, current_process);
+
+              }
+              else {
+                     list_pushback(queuing_port->waiting_processes, current_process);
+              }
               current_process->waiting_queuing_port = queuing_port;
               yield_to_partition(partition, current_process);
               if(current_process->time_counter == 0){
@@ -488,6 +515,7 @@ void RECEIVE_QUEUING_MESSAGE (
 
                      *RETURN_CODE = NO_ERROR;
               }
+       }
 }
 
 void GET_QUEUING_PORT_ID (
@@ -529,4 +557,27 @@ void GET_QUEUING_PORT_STATUS (
 
 void CLEAR_QUEUING_PORT (
        /*in */ QUEUING_PORT_ID_TYPE     QUEUING_PORT_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+       
+       struct pcb_s* partition = get_current_partition();
+       
+       struct node_s *queuing_port_node = find_queuing_port_node_by_id(partition, QUEUING_PORT_ID); 
+       if (!queuing_port_node){
+              *RETURN_CODE = INVALID_PARAM;
+              return;
+       }
+
+       struct queuing_port_s *queuing_port = queuing_port_node->data;
+
+       if(queuing_port->queuing_port_status->PORT_DIRECTION != DESTINATION){
+              *RETURN_CODE = INVALID_MODE;
+              return;
+       }
+
+       struct krnl_queuing_channel_s *channel = queuing_port->channel;
+
+       channel->current_nb_messages = 0;
+       channel->read_index = 0;
+       channel->write_index = 0;
+       *RETURN_CODE = NO_ERROR;
+}

@@ -133,7 +133,7 @@ static const PROCESS_ATTRIBUTE_TYPE DEFAULT_PROCESS_CONFIG = {
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test0,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 2,            // Medium priority (1-239)
+    .BASE_PRIORITY = 3,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "DefaultProcess"
 };
@@ -162,7 +162,7 @@ static const PROCESS_ATTRIBUTE_TYPE PROCESS_2_CONFIG = {
 
 // process 3 configuration
 static const PROCESS_ATTRIBUTE_TYPE PROCESS_3_CONFIG = {
-    .PERIOD = 100,              // 20ms in nanoseconds
+    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
     .TIME_CAPACITY = 10,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test3,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
@@ -213,8 +213,8 @@ struct port_mapping_s {
 static const struct port_mapping_s system_port_table[] = {
     {.partition_id = 1, .port_name = "P1_OUT_TEMP", .port_direction = SOURCE, .messageSizeBytes = 64, .refreshPeriodMs = 200, .sampling_channel = &channel_temperature},
     {.partition_id = 2, .port_name = "P2_IN_TEMP", .port_direction = DESTINATION, .messageSizeBytes = 64, .refreshPeriodMs = 200, .sampling_channel = &channel_temperature},
-    {.partition_id = 1, .port_name = "P1_IN_CMDS", .port_direction = DESTINATION, .messageSizeBytes = 32, .max_nb_message = 10, .QUEUING_DISCIPLINE = FIFO, .queuing_channel = &channel_cmds},
-    {.partition_id = 2, .port_name = "P2_OUT_CMDS", .port_direction = SOURCE, .messageSizeBytes = 32, .max_nb_message = 10, .QUEUING_DISCIPLINE = FIFO, .queuing_channel = &channel_cmds},
+    {.partition_id = 1, .port_name = "P1_IN_CMDS", .port_direction = DESTINATION, .messageSizeBytes = 32, .max_nb_message = 10, .QUEUING_DISCIPLINE = PRIORITY, .queuing_channel = &channel_cmds},
+    {.partition_id = 2, .port_name = "P2_OUT_CMDS", .port_direction = SOURCE, .messageSizeBytes = 32, .max_nb_message = 10, .QUEUING_DISCIPLINE = PRIORITY, .queuing_channel = &channel_cmds},
 };
 extern const int routing_table_size;
 

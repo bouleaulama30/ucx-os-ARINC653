@@ -30,12 +30,7 @@
             * implem la waiting queue (quand on aura implem la partie intra et inter communication)
 
 ### inter communication
-* ajouter un mecanisme pour dire a une partition que des ressources sont dispo pour une autre partition comme ca on ne verifie pas a chaque tick les ressources des port
-* debug et faire plusieurs test sur send and receive queue:
-    * test dans le cas ecrivain full et reader empty
-    * test avec les time out côté écrivain et reader
-* voir si internaliser les index des écrivains et reader pour du multicast (ne pas les mettres propre au channel car sinon pb dans clear receive queue)
-* voir pour implementer la queuing discipline en mode priority
+
 * SEND_QUEUING_MESSAGE:
     * voir current process own mutex
 * RECEIVE_QUEUING_MESSAGE:
@@ -52,6 +47,13 @@ comprendre:
 * faire en sorte de mettre toutes les metriques en ns car le lsb de system_time_type est 1 ns
 * implem is_executing_error_handler pour get_my_id et get_my_index
 * implem is_main_process (trouver une condition necessaire et suffisante genre il n y a pas de current process) pour get_my_id et get_my_index
+
+## Optimisation
+
+* ajouter un mecanisme pour dire a une partition que des ressources sont dispo pour une autre partition comme ca on ne verifie pas a chaque tick les ressources des port
+
+* essayer de rassembler les parcours de liste a chaque tick en une seule fonction
+* appeler les checks dynamiquement selon la period la plus petite pour eviter les parcours de liste a chaque tick
 
 ## refactoring
 
