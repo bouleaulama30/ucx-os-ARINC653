@@ -20,6 +20,18 @@ int find_blackboard_by_id(struct pcb_s *partition, BLACKBOARD_ID_TYPE id){
     return -1;  
 }
 
+static struct node_s *release_waiting_bb_process(struct node_s *node, void *arg){
+    struct list_s *waiting_processes = (struct list_s *) arg;
+    struct process_s *process = node->data;
+    if (process->time_counter != 0){
+        process->time_counter = 0;
+    }
+
+    list_remove(waiting_processes, node);
+    process->processus_status->PROCESS_STATE = READY;
+    return 0;
+}
+
 void CREATE_BLACKBOARD (
        /*in */ BLACKBOARD_NAME_TYPE     BLACKBOARD_NAME,
        /*in */ MESSAGE_SIZE_TYPE        MAX_MESSAGE_SIZE,
@@ -66,7 +78,33 @@ void DISPLAY_BLACKBOARD (
        /*in */ BLACKBOARD_ID_TYPE       BLACKBOARD_ID,
        /*in */ MESSAGE_ADDR_TYPE        MESSAGE_ADDR,       /* by reference */
        /*in */ MESSAGE_SIZE_TYPE        LENGTH,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    int index = find_blackboard_by_id(partition, BLACKBOARD_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_CONFIG;
+        return;
+    }
+
+    struct blackboard_s *bb = &partition->blackboards[index];
+    if (LENGTH > bb->blackboard_status.MAX_MESSAGE_SIZE){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+    
+    if (LENGTH <= 0){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    bb->blackboard_status.EMPTY_INDICATOR = OCCUPIED;
+    memcpy(partition->blackboards_data + (index * partition->max_blackboard_data_size), MESSAGE_ADDR, LENGTH);
+    if(bb->waiting_processes->length > 0){
+        list_foreach(bb->waiting_processes, release_waiting_bb_process, bb->waiting_processes);
+        yield_to_partition(partition, NULL);
+    }
+    *RETURN_CODE = NO_ERROR;
+}
 
 void READ_BLACKBOARD (
        /*in */ BLACKBOARD_ID_TYPE       BLACKBOARD_ID,
