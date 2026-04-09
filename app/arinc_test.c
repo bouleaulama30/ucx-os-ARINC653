@@ -56,6 +56,8 @@ void process_test0(void)
 	APEX_INTEGER partition_id;
 	APEX_INTEGER process_id;
 	QUEUING_PORT_ID_TYPE queuing_port_id;
+	BLACKBOARD_ID_TYPE blackboard_id;
+	BLACKBOARD_STATUS_TYPE blackboard_status;
 	MESSAGE_SIZE_TYPE message_length;
 	uint32_t received_seq = 0;
 	char received_message[32] = {0};
@@ -63,9 +65,15 @@ void process_test0(void)
 	GET_MY_PARTITION_ID(&partition_id, &return_code);
 	GET_MY_ID(&process_id, &return_code);
 	GET_QUEUING_PORT_ID("P1_IN_CMDS", &queuing_port_id, &return_code);
-
-	printf("[P1/Process0] GET_QUEUING_PORT_ID('P1_IN_CMDS') rc=%d id=%d\n", return_code, queuing_port_id);
-
+	GET_BLACKBOARD_ID("BB1", &blackboard_id, &return_code);
+	GET_BLACKBOARD_STATUS(blackboard_id, &blackboard_status, &return_code); 
+	printf("[P1/Process0] GET('BB1') rc=%d id=%d\n", return_code, blackboard_id);
+	printf("[P1/Process0] GET('P1_IN_CMDS') rc=%d id=%d\n", return_code, queuing_port_id);
+	printf("[P1/Process0] BLACKBOARD_STATUS EMPTY=%d MAX_MESSAGE_SIZE=%d WAITING_PROCESSES=%d\n",
+		   blackboard_status.EMPTY_INDICATOR,
+		   blackboard_status.MAX_MESSAGE_SIZE,
+		   blackboard_status.WAITING_PROCESSES);
+		   
 	while (1) {
 		message_length = 0;
 		RECEIVE_QUEUING_MESSAGE(queuing_port_id, 200, (MESSAGE_ADDR_TYPE)received_message, &message_length, &return_code);

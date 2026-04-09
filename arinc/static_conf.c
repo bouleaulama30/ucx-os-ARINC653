@@ -30,6 +30,9 @@ void p1_main_process(struct pcb_s *partition){
      &port_id, &return_code1);
     printf("return code queuing port %d, port id %d\n", return_code1, port_id);
 
+    CREATE_BLACKBOARD("BB1", 512, &port_id, &return_code0);
+    printf("return code blackboard %d, blackboard id %d\n", return_code0, port_id);
+
     SET_PARTITION_MODE(NORMAL, &return_code0);
 }
 

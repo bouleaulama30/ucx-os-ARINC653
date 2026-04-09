@@ -95,7 +95,7 @@ struct blackboard_s {
        BLACKBOARD_NAME_TYPE blackboard_name;
        BLACKBOARD_ID_TYPE blackboard_id;
        PARTITION_ID_TYPE partition_id;
-       BLACKBOARD_STATUS_TYPE *blackboard_status;
+       BLACKBOARD_STATUS_TYPE blackboard_status;
        struct list_s *waiting_processes;
 };
 
