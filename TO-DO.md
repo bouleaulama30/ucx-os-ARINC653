@@ -38,7 +38,11 @@
 * faire tout en unicast ?
 
 ### intra communication
-* faire allocation des spaces (cf message felipe pour les ports)
+* bb:
+    * test avec plusieurs black board
+    * test avec plusieurs processes qui read
+* read bb:
+    * to do mutex or error handler
 * faire tout en unicast ?
 
 

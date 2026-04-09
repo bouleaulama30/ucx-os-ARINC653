@@ -101,7 +101,8 @@ void DISPLAY_BLACKBOARD (
     memcpy(partition->blackboards_data + (index * partition->max_blackboard_data_size), MESSAGE_ADDR, LENGTH);
     if(bb->waiting_processes->length > 0){
         list_foreach(bb->waiting_processes, release_waiting_bb_process, bb->waiting_processes);
-        yield_to_partition(partition, NULL);
+        struct process_s *current_process = partition->process_current->data;
+        yield_to_partition(partition, current_process);
     }
     *RETURN_CODE = NO_ERROR;
 }
@@ -113,7 +114,54 @@ void READ_BLACKBOARD (
                /* The message address is passed IN, although */
                /* the respective message is passed OUT       */
        /*out*/ MESSAGE_SIZE_TYPE        *LENGTH,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    int index = find_blackboard_by_id(partition, BLACKBOARD_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_CONFIG;
+        return;
+    }
+
+    if(TIME_OUT < 0 || time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT)){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    struct process_s *current_process = partition->process_current->data;
+    struct blackboard_s *bb = &partition->blackboards[index];
+    if (bb->blackboard_status.EMPTY_INDICATOR == OCCUPIED){
+        memcpy(MESSAGE_ADDR, partition->blackboards_data + (index * partition->max_blackboard_data_size), bb->blackboard_status.MAX_MESSAGE_SIZE);
+        *LENGTH = bb->blackboard_status.MAX_MESSAGE_SIZE;
+        *RETURN_CODE = NO_ERROR;
+    } else if (TIME_OUT == 0){
+        *LENGTH = 0;
+        *RETURN_CODE = NOT_AVAILABLE;
+    }
+    // to do mutex or error handler
+    else if (TIME_OUT == INFINITE_TIME_VALUE) {
+        current_process->processus_status->PROCESS_STATE = WAITING;
+        list_pushback(bb->waiting_processes, current_process);
+        yield_to_partition(partition, current_process);
+        memcpy(MESSAGE_ADDR, partition->blackboards_data + (index * partition->max_blackboard_data_size), bb->blackboard_status.MAX_MESSAGE_SIZE);
+        *LENGTH = bb->blackboard_status.MAX_MESSAGE_SIZE;
+        *RETURN_CODE = NO_ERROR;
+    } else {
+        current_process->processus_status->PROCESS_STATE = WAITING;
+        list_pushback(bb->waiting_processes, current_process);
+        current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
+        yield_to_partition(partition, current_process);
+        if(current_process->time_counter == 0){
+            *LENGTH = 0;
+            *RETURN_CODE = TIMED_OUT;
+        }
+        else {
+            memcpy(MESSAGE_ADDR, partition->blackboards_data + (index * partition->max_blackboard_data_size), bb->blackboard_status.MAX_MESSAGE_SIZE);
+            *LENGTH = bb->blackboard_status.MAX_MESSAGE_SIZE;
+            *RETURN_CODE = NO_ERROR;
+        }
+    }
+}
+
 
 void CLEAR_BLACKBOARD (
        /*in */ BLACKBOARD_ID_TYPE       BLACKBOARD_ID,

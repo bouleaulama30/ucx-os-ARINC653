@@ -55,44 +55,41 @@ void process_test0(void)
 	RETURN_CODE_TYPE return_code;
 	APEX_INTEGER partition_id;
 	APEX_INTEGER process_id;
-	QUEUING_PORT_ID_TYPE queuing_port_id;
 	BLACKBOARD_ID_TYPE blackboard_id;
-	BLACKBOARD_STATUS_TYPE blackboard_status;
 	MESSAGE_SIZE_TYPE message_length;
-	uint32_t received_seq = 0;
-	char received_message[32] = {0};
+	char bb_message[64];
 
 	GET_MY_PARTITION_ID(&partition_id, &return_code);
 	GET_MY_ID(&process_id, &return_code);
-	GET_QUEUING_PORT_ID("P1_IN_CMDS", &queuing_port_id, &return_code);
-	GET_BLACKBOARD_ID("BB1", &blackboard_id, &return_code);
-	GET_BLACKBOARD_STATUS(blackboard_id, &blackboard_status, &return_code); 
-	printf("[P1/Process0] GET('BB1') rc=%d id=%d\n", return_code, blackboard_id);
-	printf("[P1/Process0] GET('P1_IN_CMDS') rc=%d id=%d\n", return_code, queuing_port_id);
-	printf("[P1/Process0] BLACKBOARD_STATUS EMPTY=%d MAX_MESSAGE_SIZE=%d WAITING_PROCESSES=%d\n",
-		   blackboard_status.EMPTY_INDICATOR,
-		   blackboard_status.MAX_MESSAGE_SIZE,
-		   blackboard_status.WAITING_PROCESSES);
+
+	while (1) {
+		GET_BLACKBOARD_ID("BB1", &blackboard_id, &return_code);
+		if (return_code == NO_ERROR) {
+			break;
+		}
+		printf("[P1/Process0] GET_BLACKBOARD_ID('BB1') rc=%d (retry)\n", return_code);
+		TIMED_WAIT(2, &return_code);
+	}
+
+	printf("[P1/Process0] BB1 ready id=%d\n", blackboard_id);
 		   
 	while (1) {
 		message_length = 0;
-		RECEIVE_QUEUING_MESSAGE(queuing_port_id, 200, (MESSAGE_ADDR_TYPE)received_message, &message_length, &return_code);
+		READ_BLACKBOARD(blackboard_id, 50, (MESSAGE_ADDR_TYPE)bb_message, &message_length, &return_code);
 
-		if (return_code == NO_ERROR) {
-			received_message[(message_length < sizeof(received_message)) ? message_length : (sizeof(received_message) - 1)] = '\0';
-			printf("[P1/Process0] RECEIVE_QUEUING_MESSAGE rc=%d len=%d seq=%lu msg='%s'\n",
+		if (return_code == NO_ERROR || return_code == TIMED_OUT) {
+			bb_message[(message_length < sizeof(bb_message)) ? message_length : (sizeof(bb_message) - 1)] = '\0';
+			printf("[P1/Process0] READ_BLACKBOARD rc=%d len=%d msg='%s'\n",
 				   return_code,
 				   message_length,
-				   (unsigned long)received_seq,
-				   received_message);
-			received_seq++;
+				   bb_message);
 		} else if (return_code == NOT_AVAILABLE) {
-			printf("[P1/Process0] RECEIVE_QUEUING_MESSAGE rc=%d (queue vide)\n", return_code);
+			printf("[P1/Process0] READ_BLACKBOARD rc=%d (bb vide)\n", return_code);
 		} else {
-			printf("[P1/Process0] RECEIVE_QUEUING_MESSAGE rc=%d FAIL\n", return_code);
+			printf("[P1/Process0] READ_BLACKBOARD rc=%d FAIL\n", return_code);
 		}
 
-		TIMED_WAIT(10, &return_code);
+		TIMED_WAIT(5, &return_code);
 	}
 }
 
@@ -102,34 +99,39 @@ void process_test1(void)
 	RETURN_CODE_TYPE return_code;
 	APEX_INTEGER partition_id;
 	APEX_INTEGER process_id;
-	SAMPLING_PORT_ID_TYPE port_id;
+	BLACKBOARD_ID_TYPE blackboard_id;
 	MESSAGE_SIZE_TYPE write_len;
+	char bb_message[64];
+	uint32_t seq = 0;
 
-	struct {
-		uint32_t seq;
-		uint32_t sent_at_ms;
-		uint32_t sender_pid;
-	} tx_msg;
 
 	GET_MY_PARTITION_ID(&partition_id, &return_code);
 	GET_MY_ID(&process_id, &return_code);
-	GET_SAMPLING_PORT_ID("P1_OUT_TEMP", &port_id, &return_code);
 
-	printf("[P1/Process1] GET_SAMPLING_PORT_ID('P1_OUT_TEMP') rc=%d id=%d\n", return_code, port_id);
-
-	tx_msg.seq = 0;
 	while (1) {
-		tx_msg.seq++;
-		tx_msg.sent_at_ms = ucx_uptime();
-		tx_msg.sender_pid = (uint32_t)process_id;
-		write_len = sizeof(tx_msg);
+		GET_BLACKBOARD_ID("BB1", &blackboard_id, &return_code);
+		if (return_code == NO_ERROR) {
+			break;
+		}
+		printf("[P1/Process1] GET_BLACKBOARD_ID('BB1') rc=%d (retry)\n", return_code);
+		TIMED_WAIT(2, &return_code);
+	}
 
-		WRITE_SAMPLING_MESSAGE(port_id, (MESSAGE_ADDR_TYPE)&tx_msg, write_len, &return_code);
-		printf("[P1/Process1] WRITE_SAMPLING_MESSAGE seq=%lu len=%d rc=%d %s\n",
-			   tx_msg.seq,
-			   write_len,
+	printf("[P1/Process1] BB1 ready id=%d\n", blackboard_id);
+
+	while (1) {
+		seq++;
+		write_len = (MESSAGE_SIZE_TYPE)sprintf(bb_message, "P1p1 seq=%lu t=%lu pid=%d",
+								   (unsigned long)seq,
+								   (unsigned long)ucx_uptime(),
+								   process_id);
+		write_len += 1;
+
+		DISPLAY_BLACKBOARD(blackboard_id, (MESSAGE_ADDR_TYPE)bb_message, 25, &return_code);
+		printf("[P1/Process1] DISPLAY_BLACKBOARD rc=%d len=%d msg='%s'\n",
 			   return_code,
-			   (return_code == NO_ERROR) ? "PASS" : "FAIL");
+			   write_len,
+			   bb_message);
 
 		PERIODIC_WAIT(&return_code);
 	}
