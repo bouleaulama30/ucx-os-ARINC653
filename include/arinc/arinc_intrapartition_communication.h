@@ -29,6 +29,7 @@ typedef
    } BUFFER_STATUS_TYPE;
 
 
+
 extern void CREATE_BUFFER (
        /*in */ BUFFER_NAME_TYPE         BUFFER_NAME,
        /*in */ MESSAGE_SIZE_TYPE        MAX_MESSAGE_SIZE,
@@ -90,6 +91,13 @@ typedef
       WAITING_RANGE_TYPE    WAITING_PROCESSES;
    } BLACKBOARD_STATUS_TYPE;
 
+struct blackboard_s {
+       BLACKBOARD_NAME_TYPE blackboard_name;
+       BLACKBOARD_ID_TYPE blackboard_id;
+       PARTITION_ID_TYPE partition_id;
+       BLACKBOARD_STATUS_TYPE *blackboard_status;
+       struct list_s *waiting_processes;
+};
 
 extern void CREATE_BLACKBOARD (
        /*in */ BLACKBOARD_NAME_TYPE     BLACKBOARD_NAME,

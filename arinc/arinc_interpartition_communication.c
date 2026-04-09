@@ -414,6 +414,7 @@ void SEND_QUEUING_MESSAGE (
                      current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
               }
               current_process->processus_status->PROCESS_STATE = WAITING;
+              queuing_port->queuing_port_status->WAITING_PROCESSES++;
               // to do implementer selon la discipline de la file d'attente
               if (queuing_port->QUEUING_DISCIPLINE == PRIORITY){
                      // to do insert process in waiting_processes list according to its priority
@@ -490,6 +491,7 @@ void RECEIVE_QUEUING_MESSAGE (
                      current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
               }
               current_process->processus_status->PROCESS_STATE = WAITING;
+              queuing_port->queuing_port_status->WAITING_PROCESSES++;
               if (queuing_port->QUEUING_DISCIPLINE == PRIORITY){
                      // to do insert process in waiting_processes list according to its priority
                      list_insert_sorted(queuing_port->waiting_processes, current_process);

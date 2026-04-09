@@ -26,7 +26,13 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         APEX_UNSIGNED      size_data_mem,
                         const ACCESS_TYPE        access_data_mem,
                         SYSTEM_ADDRESS_TYPE entry_point,
-                        BOOLEAN_TYPE is_system_partition)
+                        BOOLEAN_TYPE is_system_partition,
+                        struct blackboard_s *blackboards,
+                        APEX_INTEGER max_blackboards,
+                        APEX_INTEGER blackboard_count,
+                        APEX_INTEGER max_blackboard_data_size,
+                        uint8_t *blackboards_data
+                        )
 {
     // déclaration des structures
 	struct pcb_s *new_pcb;
@@ -110,6 +116,13 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->communication_queuing_ports = list_create();
     new_pcb->sampling_port_count = 0;
     new_pcb->queuing_port_count = 0;
+
+    //bb
+    new_pcb->blackboards = blackboards;
+    new_pcb->max_blackboards = max_blackboards;
+    new_pcb->blackboard_count = blackboard_count;
+    new_pcb->max_blackboard_data_size = max_blackboard_data_size;
+    new_pcb->blackboards_data = blackboards_data;
 
 
     CRITICAL_LEAVE();

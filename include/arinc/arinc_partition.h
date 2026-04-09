@@ -80,10 +80,20 @@ struct pcb_s {
    PARTITION_NAME_TYPE name;
    MEMORY_REQUIREMENTS_TYPE *memory_requirements;
    SYSTEM_ADDRESS_TYPE next_stack_addr;
+
+   // port
    struct list_s *communication_sampling_ports;
    struct list_s *communication_queuing_ports;
    APEX_INTEGER sampling_port_count;
    APEX_INTEGER queuing_port_count;
+
+   // bb
+   struct blackboard_s *blackboards;
+   APEX_INTEGER max_blackboards;
+   APEX_INTEGER blackboard_count;
+   APEX_INTEGER max_blackboard_data_size;
+   uint8_t *blackboards_data;
+
    // Partion HM Table
    SYSTEM_ADDRESS_TYPE entry_point;
    BOOLEAN_TYPE is_system_partition;

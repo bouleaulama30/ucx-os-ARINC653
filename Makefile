@@ -61,7 +61,7 @@ ucx: incl hal libs ddrivers network kernel arinc
 	$(AR) $(ARFLAGS) $(BUILD_TARGET_DIR)/libucxos.a \
 		$(BUILD_KERNEL_DIR)/*.o
 
-arinc: arinc_partition.o module_scheduler.o arinc_process.o static_conf.o arinc_time.o arinc_interpartition_communication.o
+arinc: arinc_partition.o module_scheduler.o arinc_process.o static_conf.o arinc_time.o arinc_interpartition_communication.o arinc_intrapartition_communication.o
 
 kernel: timer.o message.o pipe.o spinlock.o semaphore.o ecodes.o syscall.o coroutine.o ucx.o process.o partition.o interpartition_communication.o main.o
 
@@ -123,7 +123,8 @@ arinc_time.o: $(SRC_DIR)/arinc/arinc_time.c
 
 arinc_interpartition_communication.o: $(SRC_DIR)/arinc/arinc_interpartition_communication.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/arinc/arinc_interpartition_communication.c
-
+arinc_intrapartition_communication.o: $(SRC_DIR)/arinc/arinc_intrapartition_communication.c
+	$(CC) $(CFLAGS) $(SRC_DIR)/arinc/arinc_intrapartition_communication.c
 static_conf.o: $(SRC_DIR)/arinc/static_conf.c
 	$(CC) $(CFLAGS) $(SRC_DIR)/arinc/static_conf.c
 		

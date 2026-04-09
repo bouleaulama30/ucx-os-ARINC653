@@ -216,7 +216,12 @@ int app_main(void)
 				   DEFAULT_PARTITION_CONFIG.access_data_mem,
 				//    test_spatial_violation_p2,
 				   p1_main_process,
-				   DEFAULT_PARTITION_CONFIG.is_system_partition);
+				   DEFAULT_PARTITION_CONFIG.is_system_partition,
+				   DEFAULT_PARTITION_CONFIG.blackboards,
+				   DEFAULT_PARTITION_CONFIG.max_blackboards,
+				   DEFAULT_PARTITION_CONFIG.blackboard_count,
+				   DEFAULT_PARTITION_CONFIG.max_blackboard_data_size,
+				   DEFAULT_PARTITION_CONFIG.blackboards_data);
 
 	partition_init(P2_CONFIG.period,
 				   P2_CONFIG.duration,
@@ -233,7 +238,12 @@ int app_main(void)
 				   P2_CONFIG.access_data_mem,
 				//    test_spatial_violation_p1,
 				   p2_main_process,
-				   P2_CONFIG.is_system_partition);
+				   P2_CONFIG.is_system_partition,
+				   P2_CONFIG.blackboards,
+				   P2_CONFIG.max_blackboards,
+				   P2_CONFIG.blackboard_count,
+				   P2_CONFIG.max_blackboard_data_size,
+				   P2_CONFIG.blackboards_data);
 
 	return 1;
 }

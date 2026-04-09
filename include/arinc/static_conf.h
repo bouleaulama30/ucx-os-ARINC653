@@ -40,6 +40,8 @@ extern uint8_t _p2_data_start[];
 extern uint8_t _p2_data_end[];
 
 
+static struct blackboard_s p1_blackboards[MAX_NUMBER_OF_BLACKBOARDS];
+static uint8_t p1_blackboards_data[MAX_NUMBER_OF_BLACKBOARDS * 512]; // 512 bytes par blackboard
 
 // Hardcoded partition configuration
 struct PartitionConfig {
@@ -58,6 +60,12 @@ struct PartitionConfig {
     ACCESS_TYPE access_data_mem;
     SYSTEM_ADDRESS_TYPE entry_point;
     BOOLEAN_TYPE is_system_partition;
+    struct blackboard_s *blackboards;
+    APEX_INTEGER max_blackboards;
+    APEX_INTEGER blackboard_count;
+    APEX_INTEGER max_blackboard_data_size;
+    uint8_t *blackboards_data;
+
 };
 
 // Default hardcoded partition configuration et voir le ldscript pour la conf mémoire
@@ -72,6 +80,11 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
     .region_name_data_mem = "p1_data",
     .access_data_mem = "RW",
     .is_system_partition = (BOOLEAN_TYPE)false,
+    .blackboards = p1_blackboards,
+    .max_blackboards = MAX_NUMBER_OF_BLACKBOARDS,
+    .blackboard_count = 0,
+    .max_blackboard_data_size = 512, // 512 bytes par blackboard
+    .blackboards_data = p1_blackboards_data,
 };
 
 static const struct PartitionConfig P2_CONFIG = {
@@ -85,6 +98,11 @@ static const struct PartitionConfig P2_CONFIG = {
     .region_name_data_mem = "p2_data",
     .access_data_mem = "RW",
     .is_system_partition = (BOOLEAN_TYPE)true,
+    .blackboards = NULL,
+    .max_blackboards = 0,
+    .blackboard_count = 0,
+    .max_blackboard_data_size = 0,
+    .blackboards_data = NULL,
 };
 
 // Static module scheduler configuration

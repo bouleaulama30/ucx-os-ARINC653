@@ -51,8 +51,10 @@ static struct node_s *check_timeouts(struct node_s *node, void *arg) {
             if(process->waiting_queuing_port) {
                 struct queuing_port_s *queuing_port = process->waiting_queuing_port;
                 struct node_s *waiting_node = list_foreach(queuing_port->waiting_processes, find_waiting_process_node, process);
-                if (waiting_node)
+                if (waiting_node){ 
                     list_remove(queuing_port->waiting_processes, waiting_node);
+                    queuing_port->queuing_port_status->WAITING_PROCESSES--;
+                }
                 process->waiting_queuing_port = NULL;
             }
 

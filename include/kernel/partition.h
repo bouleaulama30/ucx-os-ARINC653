@@ -18,7 +18,13 @@ extern int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         APEX_UNSIGNED      size_data_mem,
                         const ACCESS_TYPE        access_data_mem,
                         SYSTEM_ADDRESS_TYPE entry_point,
-                        BOOLEAN_TYPE is_system_partition);
+                        BOOLEAN_TYPE is_system_partition,
+                        struct blackboard_s *blackboards,
+                        APEX_INTEGER max_blackboards,
+                        APEX_INTEGER blackboard_count,
+                        APEX_INTEGER max_blackboard_data_size,
+                        uint8_t *blackboards_data
+                        );
 
 extern int32_t krnl_partition_switch(PARTITION_ID_TYPE IDENTIFIER);
 

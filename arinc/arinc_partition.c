@@ -7,12 +7,14 @@ static struct node_s *check_available_resources_on_port(struct node_s *node, voi
     if(channel->current_nb_messages < channel->max_nb_messages && queuing_port->queuing_port_status->PORT_DIRECTION == SOURCE && queuing_port->waiting_processes->length != 0){
         struct process_s *waiting_process = list_pop(queuing_port->waiting_processes);
         waiting_process->processus_status->PROCESS_STATE = READY;
+        queuing_port->queuing_port_status->WAITING_PROCESSES--;
         waiting_process->waiting_queuing_port = NULL;
     }
 
     if(channel->current_nb_messages > 0 && queuing_port->queuing_port_status->PORT_DIRECTION == DESTINATION && queuing_port->waiting_processes->length != 0){
         struct process_s *waiting_process = list_pop(queuing_port->waiting_processes);
         waiting_process->processus_status->PROCESS_STATE = READY;
+        queuing_port->queuing_port_status->WAITING_PROCESSES--;
         waiting_process->waiting_queuing_port = NULL;
     }
 

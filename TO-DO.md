@@ -30,7 +30,7 @@
             * implem la waiting queue (quand on aura implem la partie intra et inter communication)
 
 ### inter communication
-
+* faire allocation des spaces (cf message felipe pour les ports) comme pour le intrapartition
 * SEND_QUEUING_MESSAGE:
     * voir current process own mutex
 * RECEIVE_QUEUING_MESSAGE:
@@ -38,9 +38,7 @@
 * faire tout en unicast ?
 
 ### intra communication
-comprendre:
-* est ce que les partitions on un pool de memoire dans la region de l os d'une taille predef dans le xml afin de pouvoir y allouer les ressources comme les blackboard buffer etc... voir discussion avec gemini
-* ou doit etre stocker en memoire le buffer: dans la region data de la partition ? Dans le kernel ?
+* faire allocation des spaces (cf message felipe pour les ports)
 * faire tout en unicast ?
 
 
