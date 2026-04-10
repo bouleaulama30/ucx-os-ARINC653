@@ -58,6 +58,17 @@ static struct node_s *check_timeouts(struct node_s *node, void *arg) {
                 process->waiting_queuing_port = NULL;
             }
 
+            if(process->waiting_blackboard) {
+                struct blackboard_s *bb = process->waiting_blackboard;
+                struct node_s *waiting_node = list_foreach(bb->waiting_processes, find_waiting_process_node, process);
+                if (waiting_node){ 
+                    list_remove(bb->waiting_processes, waiting_node);
+                    bb->blackboard_status.WAITING_PROCESSES--;
+                }
+                process->waiting_blackboard = NULL;
+            }
+            
+
             process->is_suspended = false;
             process->time_counter = 0;
 

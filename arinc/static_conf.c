@@ -33,6 +33,9 @@ void p1_main_process(struct pcb_s *partition){
     CREATE_BLACKBOARD("BB1", 512, &port_id, &return_code0);
     printf("return code blackboard %d, blackboard id %d\n", return_code0, port_id);
 
+    CREATE_BLACKBOARD("BB2", 512, &port_id, &return_code0);
+    printf("return code blackboard %d, blackboard id %d\n", return_code0, port_id);
+
     SET_PARTITION_MODE(NORMAL, &return_code0);
 }
 

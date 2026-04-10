@@ -29,6 +29,7 @@ static struct node_s *release_waiting_bb_process(struct node_s *node, void *arg)
 
     list_remove(waiting_processes, node);
     process->processus_status->PROCESS_STATE = READY;
+    process->waiting_blackboard = NULL;
     return 0;
 }
 
@@ -147,6 +148,7 @@ void READ_BLACKBOARD (
         *RETURN_CODE = NO_ERROR;
     } else {
         current_process->processus_status->PROCESS_STATE = WAITING;
+        current_process->waiting_blackboard = bb;
         list_pushback(bb->waiting_processes, current_process);
         current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
         yield_to_partition(partition, current_process);
