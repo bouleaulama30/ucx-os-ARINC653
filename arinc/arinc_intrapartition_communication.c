@@ -24,7 +24,8 @@ static struct node_s *release_waiting_bb_process(struct node_s *node, void *arg)
     struct list_s *waiting_processes = (struct list_s *) arg;
     struct process_s *process = node->data;
     if (process->time_counter != 0){
-        process->time_counter = 0;
+        // on considère que le processus a un timeout lié à la lecture du blackboard, on le désactive
+        process->time_counter = INFINITE_TIME_VALUE;
     }
 
     list_remove(waiting_processes, node);

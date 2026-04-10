@@ -8,18 +8,24 @@ void p1_main_process(struct pcb_s *partition){
     RETURN_CODE_TYPE return_code1;
     PROCESS_ID_TYPE process_id_0;
     PROCESS_ID_TYPE process_id_1;
+    PROCESS_ID_TYPE process_id_2;
 
     CREATE_PROCESS(&DEFAULT_PROCESS_CONFIG, &process_id_0, &return_code0);
     CREATE_PROCESS(&PROCESS_1_CONFIG, &process_id_1, &return_code1);
+    CREATE_PROCESS(&PROCESS_2_CONFIG, &process_id_2, &return_code0);
 
     // printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
     // printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);      
 
-    DELAYED_START(process_id_0, 18, &return_code0);  
+    // DELAYED_START(process_id_0, 18, &return_code0);  
     // DELAYED_START(process_id_1, 25, &return_code0);  
     // printf("return code delayed start %d\n", return_code0); 
-    // START(process_id_0, &return_code0);  
+    START(process_id_0, &return_code0);  
     START(process_id_1, &return_code1);  
+
+    START(process_id_0, &return_code0);  
+    START(process_id_2, &return_code0);  
+
 
     SAMPLING_PORT_ID_TYPE port_id;
     CREATE_SAMPLING_PORT(system_port_table[0].port_name, system_port_table[0].messageSizeBytes, system_port_table[0].port_direction, system_port_table[0].refreshPeriodMs,
@@ -33,9 +39,6 @@ void p1_main_process(struct pcb_s *partition){
     CREATE_BLACKBOARD("BB1", 512, &port_id, &return_code0);
     printf("return code blackboard %d, blackboard id %d\n", return_code0, port_id);
 
-    CREATE_BLACKBOARD("BB2", 512, &port_id, &return_code0);
-    printf("return code blackboard %d, blackboard id %d\n", return_code0, port_id);
-
     SET_PARTITION_MODE(NORMAL, &return_code0);
 }
 
@@ -46,13 +49,11 @@ void p2_main_process(struct pcb_s *partition){
     PROCESS_ID_TYPE process_id_0;
     PROCESS_ID_TYPE process_id_1;
 
-    CREATE_PROCESS(&PROCESS_2_CONFIG, &process_id_0, &return_code0);
     CREATE_PROCESS(&PROCESS_3_CONFIG, &process_id_1, &return_code1);
 
     printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
     printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);
 
-    START(process_id_0, &return_code0);  
     START(process_id_1, &return_code1);  
     
     SAMPLING_PORT_ID_TYPE port_id;

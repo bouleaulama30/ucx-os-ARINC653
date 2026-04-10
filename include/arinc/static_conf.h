@@ -151,18 +151,18 @@ static const PROCESS_ATTRIBUTE_TYPE DEFAULT_PROCESS_CONFIG = {
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test0,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 3,            // Medium priority (1-239)
+    .BASE_PRIORITY = 2,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "DefaultProcess"
 };
 
 // process 1 configuration
 static const PROCESS_ATTRIBUTE_TYPE PROCESS_1_CONFIG = {
-    .PERIOD = 100,              // 20ms in nanoseconds
+    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test1,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 2,            // Medium priority (1-239)
+    .BASE_PRIORITY = 1,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "Process 1"
 };
@@ -170,7 +170,7 @@ static const PROCESS_ATTRIBUTE_TYPE PROCESS_1_CONFIG = {
 // process 2 configuration
 static const PROCESS_ATTRIBUTE_TYPE PROCESS_2_CONFIG = {
     .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 10,       // 10ms in nanoseconds
+    .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test2,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
     .BASE_PRIORITY = 2,            // Medium priority (1-239)

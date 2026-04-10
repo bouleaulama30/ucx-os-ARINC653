@@ -38,10 +38,6 @@
 * faire tout en unicast ?
 
 ### intra communication
-* bb:
-    * retirer les processes de la waiting queue du blackboard quand il y a le time out
-    * test avec plusieurs processes qui read
-    * test si le clear bb est fonctionnel
 * read bb:
     * to do mutex or error handler
 * faire tout en unicast ?
