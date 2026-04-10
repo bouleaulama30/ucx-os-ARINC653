@@ -165,7 +165,18 @@ void READ_BLACKBOARD (
 
 void CLEAR_BLACKBOARD (
        /*in */ BLACKBOARD_ID_TYPE       BLACKBOARD_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    
+    struct pcb_s *partition = get_current_partition();
+    int index = find_blackboard_by_id(partition, BLACKBOARD_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_CONFIG;
+        return;
+    }
+    struct blackboard_s *bb = &partition->blackboards[index];
+    bb->blackboard_status.EMPTY_INDICATOR = EMPTY;
+    *RETURN_CODE = NO_ERROR;
+}
 
 void GET_BLACKBOARD_ID (
        /*in */ BLACKBOARD_NAME_TYPE     BLACKBOARD_NAME,

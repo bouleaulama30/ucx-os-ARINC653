@@ -41,6 +41,7 @@
 * bb:
     * test avec plusieurs black board
     * test avec plusieurs processes qui read
+    * test si le clear bb est fonctionnel
 * read bb:
     * to do mutex or error handler
 * faire tout en unicast ?
