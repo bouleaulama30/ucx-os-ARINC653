@@ -101,8 +101,26 @@ void DISPLAY_BLACKBOARD (
 
     bb->blackboard_status.EMPTY_INDICATOR = OCCUPIED;
     memcpy(partition->blackboards_data + (index * partition->max_blackboard_data_size), MESSAGE_ADDR, LENGTH);
-    if(bb->waiting_processes->length > 0){
-        list_foreach(bb->waiting_processes, release_waiting_bb_process, bb->waiting_processes);
+    int is_waiting_processes = bb->blackboard_status.WAITING_PROCESSES > 0;
+    while (bb->waiting_processes->length > 0) {
+        // 1. Prendre le premier noeud (la tête)
+        struct node_s *first_node = bb->waiting_processes->head->next;
+        struct process_s *woken_process = first_node->data;
+        
+        // 2. Annuler son timer
+        if (woken_process->time_counter != 0) {
+            woken_process->time_counter = INFINITE_TIME_VALUE;
+        }
+        
+        // 3. Le retirer proprement de la liste
+        list_remove(bb->waiting_processes, first_node);
+        
+        // 4. Le réveiller
+        woken_process->processus_status->PROCESS_STATE = READY;
+        bb->blackboard_status.WAITING_PROCESSES--;
+        woken_process->waiting_blackboard = NULL;
+    }
+    if (is_waiting_processes) {
         struct process_s *current_process = partition->process_current->data;
         yield_to_partition(partition, current_process);
     }
@@ -142,6 +160,7 @@ void READ_BLACKBOARD (
     // to do mutex or error handler
     else if (TIME_OUT == INFINITE_TIME_VALUE) {
         current_process->processus_status->PROCESS_STATE = WAITING;
+        bb->blackboard_status.WAITING_PROCESSES++;
         list_pushback(bb->waiting_processes, current_process);
         yield_to_partition(partition, current_process);
         memcpy(MESSAGE_ADDR, partition->blackboards_data + (index * partition->max_blackboard_data_size), bb->blackboard_status.MAX_MESSAGE_SIZE);
@@ -150,6 +169,7 @@ void READ_BLACKBOARD (
     } else {
         current_process->processus_status->PROCESS_STATE = WAITING;
         current_process->waiting_blackboard = bb;
+        bb->blackboard_status.WAITING_PROCESSES++;
         list_pushback(bb->waiting_processes, current_process);
         current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
         yield_to_partition(partition, current_process);
