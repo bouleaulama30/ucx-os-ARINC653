@@ -2,6 +2,7 @@
 
 const int routing_table_size = 4;
 
+
 __attribute__((section(".p1_code")))
 void p1_main_process(struct pcb_s *partition){
     RETURN_CODE_TYPE return_code0;
@@ -36,8 +37,9 @@ void p1_main_process(struct pcb_s *partition){
      &port_id, &return_code1);
     printf("return code queuing port %d, port id %d\n", return_code1, port_id);
 
-    CREATE_BLACKBOARD("BB1", 512, &port_id, &return_code0);
+    CREATE_BLACKBOARD(blackboard_configs->blackboard_name , blackboard_configs->max_message_size, &port_id, &return_code0);
     printf("return code blackboard %d, blackboard id %d\n", return_code0, port_id);
+    
 
     SET_PARTITION_MODE(NORMAL, &return_code0);
 }

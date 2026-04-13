@@ -5,6 +5,10 @@
 #include "arinc/module_scheduler.h"
 #include "kernel/interpartition_communication.h"
 
+#define BLACKBOARD_MAX_MESSAGE_SIZE 512
+
+#define BUFFER_MAX_MESSAGE_SIZE 64
+#define BUFFER_MAX_NB_MESSAGE 8
 
 extern void process_test0(void);
 extern void process_test1(void);
@@ -41,7 +45,10 @@ extern uint8_t _p2_data_end[];
 
 
 static struct blackboard_s p1_blackboards[MAX_NUMBER_OF_BLACKBOARDS];
-static uint8_t p1_blackboards_data[MAX_NUMBER_OF_BLACKBOARDS * 512]; // 512 bytes par blackboard
+static uint8_t p1_blackboards_data[MAX_NUMBER_OF_BLACKBOARDS * BLACKBOARD_MAX_MESSAGE_SIZE]; // 512 bytes par blackboard
+
+static struct buffer_s p1_buffers[MAX_NUMBER_OF_BUFFERS];
+static uint8_t p1_buffers_data[MAX_NUMBER_OF_BUFFERS * BUFFER_MAX_MESSAGE_SIZE * BUFFER_MAX_NB_MESSAGE]; // 512 bytes par buffer
 
 // Hardcoded partition configuration
 struct PartitionConfig {
@@ -60,11 +67,18 @@ struct PartitionConfig {
     ACCESS_TYPE access_data_mem;
     SYSTEM_ADDRESS_TYPE entry_point;
     BOOLEAN_TYPE is_system_partition;
+
     struct blackboard_s *blackboards;
     APEX_INTEGER max_blackboards;
     APEX_INTEGER blackboard_count;
     APEX_INTEGER max_blackboard_data_size;
     uint8_t *blackboards_data;
+    
+    struct buffer_s *buffers;
+    APEX_INTEGER max_buffers;
+    APEX_INTEGER buffer_count;
+    APEX_INTEGER max_buffer_data_size;
+    uint8_t *buffers_data;
 
 };
 
@@ -80,11 +94,18 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
     .region_name_data_mem = "p1_data",
     .access_data_mem = "RW",
     .is_system_partition = (BOOLEAN_TYPE)false,
+
     .blackboards = p1_blackboards,
     .max_blackboards = MAX_NUMBER_OF_BLACKBOARDS,
     .blackboard_count = 0,
-    .max_blackboard_data_size = 512, // 512 bytes par blackboard
+    .max_blackboard_data_size = BLACKBOARD_MAX_MESSAGE_SIZE, // 512 bytes par blackboard
     .blackboards_data = p1_blackboards_data,
+
+    .buffers = p1_buffers,
+    .max_buffers = MAX_NUMBER_OF_BUFFERS,
+    .buffer_count = 0,
+    .max_buffer_data_size = BUFFER_MAX_MESSAGE_SIZE * BUFFER_MAX_NB_MESSAGE, // 512 bytes par buffer
+    .buffers_data = p1_buffers_data,
 };
 
 static const struct PartitionConfig P2_CONFIG = {
@@ -98,11 +119,18 @@ static const struct PartitionConfig P2_CONFIG = {
     .region_name_data_mem = "p2_data",
     .access_data_mem = "RW",
     .is_system_partition = (BOOLEAN_TYPE)true,
+    
     .blackboards = NULL,
     .max_blackboards = 0,
     .blackboard_count = 0,
     .max_blackboard_data_size = 0,
     .blackboards_data = NULL,
+
+    .buffers = NULL,
+    .max_buffers = 0,
+    .buffer_count = 0,
+    .max_buffer_data_size = 0,
+    .buffers_data = NULL,
 };
 
 // Static module scheduler configuration
@@ -235,5 +263,29 @@ static const struct port_mapping_s system_port_table[] = {
     {.partition_id = 2, .port_name = "P2_OUT_CMDS", .port_direction = SOURCE, .messageSizeBytes = 32, .max_nb_message = 10, .QUEUING_DISCIPLINE = PRIORITY, .queuing_channel = &channel_cmds},
 };
 extern const int routing_table_size;
+
+
+struct blackboardConfig {
+    BLACKBOARD_NAME_TYPE blackboard_name;
+    MESSAGE_SIZE_TYPE max_message_size;
+};
+
+static const struct blackboardConfig blackboard_configs[] = {
+    {.blackboard_name = "BB1", .max_message_size = BLACKBOARD_MAX_MESSAGE_SIZE},
+    {.blackboard_name = "BB2", .max_message_size = BLACKBOARD_MAX_MESSAGE_SIZE},
+};
+
+
+struct bufferConfig {
+    BUFFER_NAME_TYPE buffer_name;
+    MESSAGE_SIZE_TYPE max_message_size;
+    MESSAGE_RANGE_TYPE max_nb_message;
+    QUEUING_DISCIPLINE_TYPE queuing_discipline;
+};
+
+static const struct bufferConfig buffer_configs[] = {
+    {.buffer_name = "Buffer1", .max_message_size = BUFFER_MAX_MESSAGE_SIZE, .max_nb_message = BUFFER_MAX_NB_MESSAGE, .queuing_discipline = FIFO},
+    {.buffer_name = "Buffer2", .max_message_size = BUFFER_MAX_MESSAGE_SIZE, .max_nb_message = BUFFER_MAX_NB_MESSAGE, .queuing_discipline = FIFO},
+};
 
 #endif 

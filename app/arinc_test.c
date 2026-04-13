@@ -246,7 +246,14 @@ int app_main(void)
 				   DEFAULT_PARTITION_CONFIG.max_blackboards,
 				   DEFAULT_PARTITION_CONFIG.blackboard_count,
 				   DEFAULT_PARTITION_CONFIG.max_blackboard_data_size,
-				   DEFAULT_PARTITION_CONFIG.blackboards_data);
+				   DEFAULT_PARTITION_CONFIG.blackboards_data,
+
+				   DEFAULT_PARTITION_CONFIG.buffers,
+				   DEFAULT_PARTITION_CONFIG.max_buffers,
+				   DEFAULT_PARTITION_CONFIG.buffer_count,
+				   DEFAULT_PARTITION_CONFIG.max_buffer_data_size,
+				   DEFAULT_PARTITION_CONFIG.buffers_data
+				   );
 
 	partition_init(P2_CONFIG.period,
 				   P2_CONFIG.duration,
@@ -268,7 +275,13 @@ int app_main(void)
 				   P2_CONFIG.max_blackboards,
 				   P2_CONFIG.blackboard_count,
 				   P2_CONFIG.max_blackboard_data_size,
-				   P2_CONFIG.blackboards_data);
+				   P2_CONFIG.blackboards_data,
+				   
+				   P2_CONFIG.buffers,
+				   P2_CONFIG.max_buffers,
+				   P2_CONFIG.buffer_count,
+				   P2_CONFIG.max_buffer_data_size,
+				   P2_CONFIG.buffers_data);
 
 	return 1;
 }

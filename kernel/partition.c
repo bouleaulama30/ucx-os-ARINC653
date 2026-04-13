@@ -27,11 +27,18 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         const ACCESS_TYPE        access_data_mem,
                         SYSTEM_ADDRESS_TYPE entry_point,
                         BOOLEAN_TYPE is_system_partition,
+                        
                         struct blackboard_s *blackboards,
                         APEX_INTEGER max_blackboards,
                         APEX_INTEGER blackboard_count,
                         APEX_INTEGER max_blackboard_data_size,
-                        uint8_t *blackboards_data
+                        uint8_t *blackboards_data,
+                        
+                        struct buffer_s *buffers,
+                        APEX_INTEGER max_buffers,
+                        APEX_INTEGER buffer_count,
+                        APEX_INTEGER max_buffer_data_size,
+                        uint8_t *buffers_data
                         )
 {
     // déclaration des structures
