@@ -33,12 +33,15 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         APEX_INTEGER blackboard_count,
                         APEX_INTEGER max_blackboard_data_size,
                         uint8_t *blackboards_data,
+                        uint32_t *blackboards_size_data,
+
                         
                         struct buffer_s *buffers,
                         APEX_INTEGER max_buffers,
                         APEX_INTEGER buffer_count,
                         APEX_INTEGER max_buffer_data_size,
-                        uint8_t *buffers_data
+                        uint8_t *buffers_data,
+                        uint32_t *buffers_size_data
                         )
 {
     // déclaration des structures
@@ -130,6 +133,15 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->blackboard_count = blackboard_count;
     new_pcb->max_blackboard_data_size = max_blackboard_data_size;
     new_pcb->blackboards_data = blackboards_data;
+    new_pcb->blackboards_size_data = blackboards_size_data;
+
+    //buffer
+    new_pcb->buffers = buffers;
+    new_pcb->max_buffers = max_buffers;
+    new_pcb->buffer_count = buffer_count;
+    new_pcb->max_buffer_data_size = max_buffer_data_size;
+    new_pcb->buffers_data = buffers_data;
+    new_pcb->buffers_size_data = buffers_size_data;
 
 
     CRITICAL_LEAVE();

@@ -10,10 +10,30 @@ int find_blackboard_by_name(struct pcb_s *partition, char* name){
     return -1;  
 }
 
+int find_buffer_by_name(struct pcb_s *partition, char* name){
+    for (int i = 0; i < partition->buffer_count; i++){
+        struct buffer_s *buf = &partition->buffers[i];
+        if (strcmp(buf->buffer_name, name) == 0){
+            return i;
+        }
+    }
+    return -1;  
+}
+
 int find_blackboard_by_id(struct pcb_s *partition, BLACKBOARD_ID_TYPE id){
     for (int i = 0; i < partition->blackboard_count; i++){
         struct blackboard_s *bb = &partition->blackboards[i];
         if (bb->blackboard_id == id){
+            return i;
+        }
+    }
+    return -1;  
+}
+
+int find_buffer_by_id(struct pcb_s *partition, BUFFER_ID_TYPE id){
+    for (int i = 0; i < partition->buffer_count; i++){
+        struct buffer_s *buf = &partition->buffers[i];
+        if (buf->buffer_id == id){
             return i;
         }
     }
@@ -101,6 +121,7 @@ void DISPLAY_BLACKBOARD (
 
     bb->blackboard_status.EMPTY_INDICATOR = OCCUPIED;
     memcpy(partition->blackboards_data + (index * partition->max_blackboard_data_size), MESSAGE_ADDR, LENGTH);
+    partition->blackboards_size_data[index] = LENGTH;
     int is_waiting_processes = bb->blackboard_status.WAITING_PROCESSES > 0;
     while (bb->waiting_processes->length > 0) {
         // 1. Prendre le premier noeud (la tête)
@@ -150,8 +171,8 @@ void READ_BLACKBOARD (
     struct process_s *current_process = partition->process_current->data;
     struct blackboard_s *bb = &partition->blackboards[index];
     if (bb->blackboard_status.EMPTY_INDICATOR == OCCUPIED){
-        memcpy(MESSAGE_ADDR, partition->blackboards_data + (index * partition->max_blackboard_data_size), bb->blackboard_status.MAX_MESSAGE_SIZE);
-        *LENGTH = bb->blackboard_status.MAX_MESSAGE_SIZE;
+        memcpy(MESSAGE_ADDR, partition->blackboards_data + (index * partition->max_blackboard_data_size), partition->blackboards_size_data[index]);
+        *LENGTH = partition->blackboards_size_data[index];
         *RETURN_CODE = NO_ERROR;
     } else if (TIME_OUT == 0){
         *LENGTH = 0;
@@ -163,8 +184,8 @@ void READ_BLACKBOARD (
         bb->blackboard_status.WAITING_PROCESSES++;
         list_pushback(bb->waiting_processes, current_process);
         yield_to_partition(partition, current_process);
-        memcpy(MESSAGE_ADDR, partition->blackboards_data + (index * partition->max_blackboard_data_size), bb->blackboard_status.MAX_MESSAGE_SIZE);
-        *LENGTH = bb->blackboard_status.MAX_MESSAGE_SIZE;
+        memcpy(MESSAGE_ADDR, partition->blackboards_data + (index * partition->max_blackboard_data_size), partition->blackboards_size_data[index]);
+        *LENGTH = partition->blackboards_size_data[index];
         *RETURN_CODE = NO_ERROR;
     } else {
         current_process->processus_status->PROCESS_STATE = WAITING;
@@ -178,8 +199,8 @@ void READ_BLACKBOARD (
             *RETURN_CODE = TIMED_OUT;
         }
         else {
-            memcpy(MESSAGE_ADDR, partition->blackboards_data + (index * partition->max_blackboard_data_size), bb->blackboard_status.MAX_MESSAGE_SIZE);
-            *LENGTH = bb->blackboard_status.MAX_MESSAGE_SIZE;
+            memcpy(MESSAGE_ADDR, partition->blackboards_data + (index * partition->max_blackboard_data_size), partition->blackboards_size_data[index]);
+            *LENGTH = partition->blackboards_size_data[index];
             *RETURN_CODE = NO_ERROR;
         }
     }
@@ -230,5 +251,109 @@ void GET_BLACKBOARD_STATUS (
     }
 
     *BLACKBOARD_STATUS = partition->blackboards[index].blackboard_status;
+    *RETURN_CODE = NO_ERROR;
+}
+
+void CREATE_BUFFER (
+       /*in */ BUFFER_NAME_TYPE         BUFFER_NAME,
+       /*in */ MESSAGE_SIZE_TYPE        MAX_MESSAGE_SIZE,
+       /*in */ MESSAGE_RANGE_TYPE       MAX_NB_MESSAGE,
+       /*in */ QUEUING_DISCIPLINE_TYPE  QUEUING_DISCIPLINE,
+       /*out*/ BUFFER_ID_TYPE           *BUFFER_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+       
+    struct pcb_s *partition = get_current_partition();
+    if (partition->buffer_count + 1 > partition->max_buffers || partition->max_buffer_data_size < MAX_MESSAGE_SIZE * MAX_NB_MESSAGE){
+        *RETURN_CODE = INVALID_CONFIG;
+        return;
+    }
+
+    if (find_buffer_by_name(partition, BUFFER_NAME) != -1){
+        *RETURN_CODE = NO_ACTION;
+        return;
+    }
+
+    if (MAX_MESSAGE_SIZE <= 0){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if (MAX_NB_MESSAGE <= 0){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if (QUEUING_DISCIPLINE != FIFO && QUEUING_DISCIPLINE != PRIORITY){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if (partition->status->OPERATING_MODE == NORMAL){
+         *RETURN_CODE = INVALID_MODE;
+         return;
+    }
+
+    struct buffer_s *buf = &partition->buffers[partition->buffer_count++];
+    strncpy(buf->buffer_name, BUFFER_NAME, sizeof(buf->buffer_name) - 1);
+    buf->buffer_name[sizeof(buf->buffer_name) - 1] = '\0';
+    buf->buffer_id = partition->buffer_count;
+    buf->partition_id = partition->status->IDENTIFIER;
+    buf->waiting_readers = list_create();
+    buf->waiting_writers = list_create();
+    buf->read_index = 0;
+    buf->write_index = 0;
+    buf->buffer_status.NB_MESSAGE = 0;
+    buf->buffer_status.MAX_NB_MESSAGE = MAX_NB_MESSAGE;
+    buf->buffer_status.MAX_MESSAGE_SIZE = MAX_MESSAGE_SIZE;
+    buf->buffer_status.WAITING_PROCESSES = 0; 
+
+    *BUFFER_ID = buf->buffer_id;
+    *RETURN_CODE = NO_ERROR;
+}
+
+void SEND_BUFFER (
+       /*in */ BUFFER_ID_TYPE           BUFFER_ID,
+       /*in */ MESSAGE_ADDR_TYPE        MESSAGE_ADDR,       /* by reference */
+       /*in */ MESSAGE_SIZE_TYPE        LENGTH,
+       /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void RECEIVE_BUFFER (
+       /*in */ BUFFER_ID_TYPE           BUFFER_ID,
+       /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
+       /*in */ MESSAGE_ADDR_TYPE        MESSAGE_ADDR,
+               /* The message address is passed IN, although */
+               /* the respective message is passed OUT       */
+       /*out*/ MESSAGE_SIZE_TYPE        *LENGTH,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void GET_BUFFER_ID (
+       /*in */ BUFFER_NAME_TYPE         BUFFER_NAME,
+       /*out*/ BUFFER_ID_TYPE           *BUFFER_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    int index = find_buffer_by_name(partition, BUFFER_NAME);
+    if (index == -1){
+        *RETURN_CODE = INVALID_CONFIG;
+        return;
+    }
+    struct buffer_s *buf = &partition->buffers[index];
+    *BUFFER_ID = buf->buffer_id;
+    *RETURN_CODE = NO_ERROR;
+}
+
+void GET_BUFFER_STATUS (
+       /*in */ BUFFER_ID_TYPE           BUFFER_ID,
+       /*out*/ BUFFER_STATUS_TYPE       *BUFFER_STATUS,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    int index = find_buffer_by_id(partition, BUFFER_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+    struct buffer_s *buf = &partition->buffers[index];
+
+    *BUFFER_STATUS = buf->buffer_status;
     *RETURN_CODE = NO_ERROR;
 }

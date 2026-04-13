@@ -46,9 +46,11 @@ extern uint8_t _p2_data_end[];
 
 static struct blackboard_s p1_blackboards[MAX_NUMBER_OF_BLACKBOARDS];
 static uint8_t p1_blackboards_data[MAX_NUMBER_OF_BLACKBOARDS * BLACKBOARD_MAX_MESSAGE_SIZE]; // 512 bytes par blackboard
+static uint32_t p1_blackboards_size_data[MAX_NUMBER_OF_BLACKBOARDS];
 
 static struct buffer_s p1_buffers[MAX_NUMBER_OF_BUFFERS];
 static uint8_t p1_buffers_data[MAX_NUMBER_OF_BUFFERS * BUFFER_MAX_MESSAGE_SIZE * BUFFER_MAX_NB_MESSAGE]; // 512 bytes par buffer
+static uint32_t p1_buffers_size_data[MAX_NUMBER_OF_BUFFERS * BUFFER_MAX_NB_MESSAGE]; // 512 bytes par buffer
 
 // Hardcoded partition configuration
 struct PartitionConfig {
@@ -73,12 +75,14 @@ struct PartitionConfig {
     APEX_INTEGER blackboard_count;
     APEX_INTEGER max_blackboard_data_size;
     uint8_t *blackboards_data;
+    uint32_t *blackboards_size_data;
     
     struct buffer_s *buffers;
     APEX_INTEGER max_buffers;
     APEX_INTEGER buffer_count;
     APEX_INTEGER max_buffer_data_size;
     uint8_t *buffers_data;
+    uint32_t *buffers_size_data;
 
 };
 
@@ -100,12 +104,14 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
     .blackboard_count = 0,
     .max_blackboard_data_size = BLACKBOARD_MAX_MESSAGE_SIZE, // 512 bytes par blackboard
     .blackboards_data = p1_blackboards_data,
+    .blackboards_size_data = p1_blackboards_size_data,
 
     .buffers = p1_buffers,
     .max_buffers = MAX_NUMBER_OF_BUFFERS,
     .buffer_count = 0,
     .max_buffer_data_size = BUFFER_MAX_MESSAGE_SIZE * BUFFER_MAX_NB_MESSAGE, // 512 bytes par buffer
     .buffers_data = p1_buffers_data,
+    .buffers_size_data = p1_buffers_size_data
 };
 
 static const struct PartitionConfig P2_CONFIG = {
@@ -125,12 +131,14 @@ static const struct PartitionConfig P2_CONFIG = {
     .blackboard_count = 0,
     .max_blackboard_data_size = 0,
     .blackboards_data = NULL,
+    .blackboards_size_data = NULL,
 
     .buffers = NULL,
     .max_buffers = 0,
     .buffer_count = 0,
     .max_buffer_data_size = 0,
     .buffers_data = NULL,
+    .buffers_size_data = NULL,
 };
 
 // Static module scheduler configuration

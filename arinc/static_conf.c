@@ -39,7 +39,9 @@ void p1_main_process(struct pcb_s *partition){
 
     CREATE_BLACKBOARD(blackboard_configs->blackboard_name , blackboard_configs->max_message_size, &port_id, &return_code0);
     printf("return code blackboard %d, blackboard id %d\n", return_code0, port_id);
-    
+
+    CREATE_BUFFER(buffer_configs->buffer_name, buffer_configs->max_message_size, buffer_configs->max_nb_message, buffer_configs->queuing_discipline, &port_id, &return_code1);
+    printf("return code buffer %d, buffer id %d\n", return_code1, port_id);
 
     SET_PARTITION_MODE(NORMAL, &return_code0);
 }

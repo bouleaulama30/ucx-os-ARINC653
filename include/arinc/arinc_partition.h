@@ -93,6 +93,7 @@ struct pcb_s {
    APEX_INTEGER blackboard_count;
    APEX_INTEGER max_blackboard_data_size;
    uint8_t *blackboards_data;
+   uint32_t *blackboards_size_data;
 
    // buffer
    struct buffer_s *buffers;
@@ -100,6 +101,7 @@ struct pcb_s {
    APEX_INTEGER buffer_count;
    APEX_INTEGER max_buffer_data_size;
    uint8_t *buffers_data;
+   uint32_t *buffers_size_data;
 
    // Partion HM Table
    SYSTEM_ADDRESS_TYPE entry_point;

@@ -59,6 +59,31 @@ void process_test0(void)
 	MESSAGE_SIZE_TYPE message_length;
 	char bb_message[64];
 
+	// Test for GET_BUFFER_STATUS and buffer ID retrieval
+	BUFFER_ID_TYPE buffer_id;
+	BUFFER_STATUS_TYPE buffer_status;
+
+	while (1) {
+		GET_BUFFER_ID("Buffer1", &buffer_id, &return_code);
+		if (return_code == NO_ERROR) {
+			break;
+		}
+		printf("[P1/Process0] GET_BUFFER_ID('Buffer1') rc=%d (retry)\n", return_code);
+		TIMED_WAIT(2, &return_code);
+	}
+
+	printf("[P1/Process0] Buffer1 ready id=%d\n", buffer_id);
+
+	GET_BUFFER_STATUS(buffer_id, &buffer_status, &return_code);
+	if (return_code == NO_ERROR) {
+		printf("[P1/Process0] GET_BUFFER_STATUS rc=%d num_messages=%d max_message_size=%d\n",
+			   return_code,
+			   buffer_status.NB_MESSAGE,
+			   buffer_status.MAX_MESSAGE_SIZE);
+	} else {
+		printf("[P1/Process0] GET_BUFFER_STATUS rc=%d FAIL\n", return_code);
+	}
+
 	GET_MY_PARTITION_ID(&partition_id, &return_code);
 	GET_MY_ID(&process_id, &return_code);
 
@@ -247,12 +272,14 @@ int app_main(void)
 				   DEFAULT_PARTITION_CONFIG.blackboard_count,
 				   DEFAULT_PARTITION_CONFIG.max_blackboard_data_size,
 				   DEFAULT_PARTITION_CONFIG.blackboards_data,
+				   DEFAULT_PARTITION_CONFIG.blackboards_size_data,
 
 				   DEFAULT_PARTITION_CONFIG.buffers,
 				   DEFAULT_PARTITION_CONFIG.max_buffers,
 				   DEFAULT_PARTITION_CONFIG.buffer_count,
 				   DEFAULT_PARTITION_CONFIG.max_buffer_data_size,
-				   DEFAULT_PARTITION_CONFIG.buffers_data
+				   DEFAULT_PARTITION_CONFIG.buffers_data,
+				   DEFAULT_PARTITION_CONFIG.buffers_size_data
 				   );
 
 	partition_init(P2_CONFIG.period,
@@ -276,12 +303,14 @@ int app_main(void)
 				   P2_CONFIG.blackboard_count,
 				   P2_CONFIG.max_blackboard_data_size,
 				   P2_CONFIG.blackboards_data,
-				   
+				   P2_CONFIG.blackboards_size_data,
+
 				   P2_CONFIG.buffers,
 				   P2_CONFIG.max_buffers,
 				   P2_CONFIG.buffer_count,
 				   P2_CONFIG.max_buffer_data_size,
-				   P2_CONFIG.buffers_data);
+				   P2_CONFIG.buffers_data,
+				   P2_CONFIG.buffers_size_data);
 
 	return 1;
 }

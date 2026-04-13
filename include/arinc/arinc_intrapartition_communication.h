@@ -34,9 +34,6 @@ struct buffer_s {
     PARTITION_ID_TYPE partition_id;
     BUFFER_STATUS_TYPE buffer_status;
     
-    // Le Ring Buffer ! (Alloué lors de CREATE_BUFFER depuis le PCB)
-    uint8_t *message_data_array; 
-    uint32_t *message_sizes_array;
     uint32_t read_index;
     uint32_t write_index;
     
