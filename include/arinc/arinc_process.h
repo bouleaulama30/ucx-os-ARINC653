@@ -82,6 +82,7 @@ struct process_s
     SYSTEM_TIME_TYPE saved_init_delay;
     struct queuing_port_s *waiting_queuing_port;
     struct blackboard_s *waiting_blackboard;
+//     struct buffer_s *waiting_buffer;
 };
 
 static inline void update_process_deadline(struct process_s *process, SYSTEM_TIME_TYPE base_time) {

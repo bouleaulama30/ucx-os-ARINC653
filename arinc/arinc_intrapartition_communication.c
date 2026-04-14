@@ -306,6 +306,7 @@ void CREATE_BUFFER (
     buf->buffer_status.MAX_NB_MESSAGE = MAX_NB_MESSAGE;
     buf->buffer_status.MAX_MESSAGE_SIZE = MAX_MESSAGE_SIZE;
     buf->buffer_status.WAITING_PROCESSES = 0; 
+    buf->queuing_discipline = QUEUING_DISCIPLINE;
 
     *BUFFER_ID = buf->buffer_id;
     *RETURN_CODE = NO_ERROR;
@@ -316,7 +317,97 @@ void SEND_BUFFER (
        /*in */ MESSAGE_ADDR_TYPE        MESSAGE_ADDR,       /* by reference */
        /*in */ MESSAGE_SIZE_TYPE        LENGTH,
        /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+       
+    struct pcb_s *partition = get_current_partition();
+    int index = find_buffer_by_id(partition, BUFFER_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    struct buffer_s *buf = &partition->buffers[index];
+
+    if(LENGTH >= buf->buffer_status.MAX_MESSAGE_SIZE){
+            *RETURN_CODE = INVALID_CONFIG;
+            return;
+    }
+
+    if(LENGTH <= 0){
+            *RETURN_CODE = INVALID_PARAM;
+            return;
+    }
+
+    if(TIME_OUT < 0 || time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT)){
+            *RETURN_CODE = INVALID_PARAM;
+            return;
+    }
+
+    struct process_s *current_process = partition->process_current->data;
+    if(buf->buffer_status.NB_MESSAGE < buf->buffer_status.MAX_NB_MESSAGE){
+            if (buf->waiting_readers->length == 0){
+                buf->buffer_status.NB_MESSAGE++;
+                uint32_t write_index = buf->write_index;
+                memcpy(&partition->buffers_data[index + write_index * buf->buffer_status.MAX_MESSAGE_SIZE] , MESSAGE_ADDR, LENGTH);
+                partition->buffers_size_data[index + write_index] = LENGTH;
+                buf->write_index = (write_index + 1) % buf->buffer_status.MAX_NB_MESSAGE;
+            } else {
+                // réveiller un lecteur en attente
+                struct node_s *first_reader_node = buf->waiting_readers->head->next;
+                struct process_s *reader_process = first_reader_node->data;
+                list_remove(buf->waiting_readers, first_reader_node);
+                buf->buffer_status.WAITING_PROCESSES--;
+                // écrire le message directement dans le buffer du lecteur MESS ADDR 
+                // memcpy(partition->buffers_data[index] + reader_process. * buf->buffer_status.MAX_MESSAGE_SIZE, MESSAGE_ADDR, LENGTH);
+                // partition->buffers_size_data[index + reader_process->process_index] = LENGTH;
+                if (reader_process->time_counter != 0) {
+                    reader_process->time_counter = INFINITE_TIME_VALUE;
+                }
+                reader_process->processus_status->PROCESS_STATE = READY;
+                yield_to_partition(partition, current_process);
+            }
+            *RETURN_CODE = NO_ERROR;
+    }
+    else if (TIME_OUT == 0){
+        *RETURN_CODE = NOT_AVAILABLE;
+    }
+    // cd current process own mutex
+    // else if ()
+    else if (TIME_OUT == INFINITE_TIME_VALUE){
+        current_process->processus_status->PROCESS_STATE = WAITING;
+        buf->buffer_status.WAITING_PROCESSES++;
+        // to do implementer selon la discipline de la file d'attente
+        if (buf->queuing_discipline == PRIORITY){
+            // to do insert process in waiting_processes list according to its priority
+            list_insert_sorted(buf->waiting_writers, current_process);
+        }
+        else {
+            list_pushback(buf->waiting_writers, current_process);
+        }
+        yield_to_partition(partition, current_process);
+        *RETURN_CODE = NO_ERROR;
+
+    } else {
+        current_process->processus_status->PROCESS_STATE = WAITING;
+        buf->buffer_status.WAITING_PROCESSES++;
+        // to do implementer selon la discipline de la file d'attente
+        if (buf->queuing_discipline == PRIORITY){
+            // to do insert process in waiting_processes list according to its priority
+            list_insert_sorted(buf->waiting_writers, current_process);
+        }
+        else {
+            list_pushback(buf->waiting_writers, current_process);
+        }
+        current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
+        yield_to_partition(partition, current_process);
+        if(current_process->time_counter == 0){
+            *RETURN_CODE = TIMED_OUT;
+        }
+        else {
+            *RETURN_CODE = NO_ERROR;
+        }
+    }
+}
 
 void RECEIVE_BUFFER (
        /*in */ BUFFER_ID_TYPE           BUFFER_ID,
@@ -325,7 +416,84 @@ void RECEIVE_BUFFER (
                /* The message address is passed IN, although */
                /* the respective message is passed OUT       */
        /*out*/ MESSAGE_SIZE_TYPE        *LENGTH,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    int index = find_buffer_by_id(partition, BUFFER_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if (TIME_OUT < 0 || time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT)){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    struct buffer_s *buf = &partition->buffers[index];
+    struct process_s *current_process = partition->process_current->data;
+
+    if(partition->buffers[index].buffer_status.NB_MESSAGE > 0){
+        buf->buffer_status.NB_MESSAGE--;
+        uint32_t read_index = buf->read_index;
+        memcpy(MESSAGE_ADDR, &partition->buffers_data[index + read_index * buf->buffer_status.MAX_MESSAGE_SIZE], partition->buffers_size_data[index + read_index]);
+        *LENGTH = partition->buffers_size_data[index + read_index];
+        buf->read_index = (read_index + 1) % buf->buffer_status.MAX_NB_MESSAGE;
+
+        if (buf->waiting_writers->length > 0){
+            // réveiller un écrivain en attente
+            struct node_s *first_writer_node = buf->waiting_writers->head->next;
+            struct process_s *writer_process = first_writer_node->data;
+            list_remove(buf->waiting_writers, first_writer_node);
+            buf->buffer_status.WAITING_PROCESSES--;
+            // put the message associated with this sending process in the FIFO
+            if (writer_process->time_counter != 0) {
+                writer_process->time_counter = INFINITE_TIME_VALUE;
+            }
+            writer_process->processus_status->PROCESS_STATE = READY;
+            yield_to_partition(partition, current_process);
+        }
+        *RETURN_CODE = NO_ERROR;
+    }
+    else if (TIME_OUT == 0){
+        *LENGTH = 0;
+        *RETURN_CODE = NOT_AVAILABLE;
+    }
+    // to do mutex or error handler
+    else if (TIME_OUT == INFINITE_TIME_VALUE){
+        current_process->processus_status->PROCESS_STATE = WAITING;
+        buf->buffer_status.WAITING_PROCESSES++;
+        if (buf->queuing_discipline == PRIORITY){
+            // to do insert process in waiting_processes list according to its priority
+            list_insert_sorted(buf->waiting_readers, current_process);
+        }
+        else {
+            list_pushback(buf->waiting_readers, current_process);
+        }
+        yield_to_partition(partition, current_process);
+        *RETURN_CODE = NO_ERROR;
+    } else {
+        current_process->processus_status->PROCESS_STATE = WAITING;
+        buf->buffer_status.WAITING_PROCESSES++;
+        if (buf->queuing_discipline == PRIORITY){
+            // to do insert process in waiting_processes list according to its priority
+            list_insert_sorted(buf->waiting_readers, current_process);
+        }
+        else {
+            list_pushback(buf->waiting_readers, current_process);
+        }
+        current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
+        yield_to_partition(partition, current_process);
+
+        if(current_process->time_counter == 0){
+            *LENGTH = 0;
+            *RETURN_CODE = TIMED_OUT;
+        }
+        else {
+            *RETURN_CODE = NO_ERROR;
+        }
+    }
+
+}
 
 void GET_BUFFER_ID (
        /*in */ BUFFER_NAME_TYPE         BUFFER_NAME,

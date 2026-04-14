@@ -33,7 +33,7 @@ struct buffer_s {
     BUFFER_ID_TYPE buffer_id;
     PARTITION_ID_TYPE partition_id;
     BUFFER_STATUS_TYPE buffer_status;
-    
+    QUEUING_DISCIPLINE_TYPE queuing_discipline;
     uint32_t read_index;
     uint32_t write_index;
     

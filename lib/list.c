@@ -281,6 +281,20 @@ struct node_s *list_foreach(struct list_s *list, struct node_s *(*iter_fn)(struc
 	return 0;
 }
 
+void list_insert_sorted(struct list_s *list, struct process_s *process) {
+       struct node_s *new_node = malloc(sizeof(struct node_s));
+       new_node->data = process;
+       new_node->next = NULL;
+
+       struct node_s *current = list->head;
+       while (current->next != list->tail && ((struct process_s *)current->next->data)->processus_status->CURRENT_PRIORITY >= process->processus_status->CURRENT_PRIORITY) {
+              current = current->next;
+       }
+       new_node->next = current->next;
+       current->next = new_node;
+       list->length++;
+}
+
 
 /* doubly linked list */
 

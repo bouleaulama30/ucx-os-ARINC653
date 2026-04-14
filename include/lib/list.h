@@ -9,6 +9,8 @@ struct list_s {
 	int length;
 };
 
+struct process_s;
+
 struct list_s *list_create();
 int list_destroy(struct list_s *list);
 struct node_s *list_push(struct list_s *list, void *val);
@@ -23,6 +25,7 @@ struct node_s *list_insert(struct list_s *list, struct node_s *prevnode, void *v
 void *list_remove(struct list_s *list, struct node_s *node);
 struct node_s *list_index(struct list_s *list, int idx);
 struct node_s *list_foreach(struct list_s *list, struct node_s *(*iter_fn)(struct node_s *, void *), void *arg);
+void list_insert_sorted(struct list_s *list, struct process_s *process);
 
 struct dnode_s {
 	struct dnode_s *prev;

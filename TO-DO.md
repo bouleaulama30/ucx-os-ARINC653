@@ -38,6 +38,16 @@
 * faire tout en unicast ?
 
 ### intra communication
+* send buffer:
+    * copy the message represented by MESSAGE_ADDR and LENGTH into the receiving process’s message area associated with the RECEIVE_BUFFER service request made by this receiving process;
+    * to do mutex or error handler
+    * remove waiting process quand time out dans la partition update
+
+* receive buffer:
+    * put the message associated with this sending process in the FIFO
+    * to do mutex or error handler
+    * remove waiting process quand time out dans la partition update
+
 * read bb:
     * to do mutex or error handler
 * faire tout en unicast ?
@@ -60,6 +70,7 @@
 
 * sampling_port_s -> sp_s ?
 * mettre des commentaires
+* voir si pour les ressources comme bb, la reference vers la partition ou le waiting_blackboard est necessaire dans la struct
 
 ## Choses dependante de l archi
 * protection memoire avec pmp_activate et mprv_activate (lie a riscv32)
