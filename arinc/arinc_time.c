@@ -68,6 +68,22 @@ static struct node_s *check_timeouts(struct node_s *node, void *arg) {
                 process->waiting_blackboard = NULL;
             }
             
+            if(process->waiting_buffer) {
+                struct buffer_s *buf = process->waiting_buffer;
+                struct node_s *waiting_reader_node = list_foreach(buf->waiting_readers, find_waiting_process_node, process);
+                if (waiting_reader_node){ 
+                    list_remove(buf->waiting_readers, waiting_reader_node);
+                    buf->buffer_status.WAITING_PROCESSES--;
+                }
+
+                struct node_s *waiting_writer_node = list_foreach(buf->waiting_writers, find_waiting_process_node, process);
+                if (waiting_writer_node){ 
+                    list_remove(buf->waiting_writers, waiting_writer_node);
+                    buf->buffer_status.WAITING_PROCESSES--;
+                }
+                process->waiting_buffer = NULL;
+            }
+            
 
             process->is_suspended = false;
             process->time_counter = 0;

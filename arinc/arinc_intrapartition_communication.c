@@ -358,12 +358,13 @@ void SEND_BUFFER (
                 list_remove(buf->waiting_readers, first_reader_node);
                 buf->buffer_status.WAITING_PROCESSES--;
                 // écrire le message directement dans le buffer du lecteur MESS ADDR 
-                // memcpy(partition->buffers_data[index] + reader_process. * buf->buffer_status.MAX_MESSAGE_SIZE, MESSAGE_ADDR, LENGTH);
-                // partition->buffers_size_data[index + reader_process->process_index] = LENGTH;
+                memcpy(reader_process->waiting_message_addr, MESSAGE_ADDR, LENGTH);
+                reader_process->waiting_message_size = LENGTH;
                 if (reader_process->time_counter != 0) {
                     reader_process->time_counter = INFINITE_TIME_VALUE;
                 }
                 reader_process->processus_status->PROCESS_STATE = READY;
+                reader_process->waiting_buffer = NULL;
                 yield_to_partition(partition, current_process);
             }
             *RETURN_CODE = NO_ERROR;
@@ -376,6 +377,9 @@ void SEND_BUFFER (
     else if (TIME_OUT == INFINITE_TIME_VALUE){
         current_process->processus_status->PROCESS_STATE = WAITING;
         buf->buffer_status.WAITING_PROCESSES++;
+        current_process->waiting_buffer = buf;
+        current_process->waiting_message_addr = MESSAGE_ADDR;
+        current_process->waiting_message_size = LENGTH;
         // to do implementer selon la discipline de la file d'attente
         if (buf->queuing_discipline == PRIORITY){
             // to do insert process in waiting_processes list according to its priority
@@ -388,8 +392,12 @@ void SEND_BUFFER (
         *RETURN_CODE = NO_ERROR;
 
     } else {
+        printf("REVEIL LECTEUR ENVOI DIRECT \n");   
         current_process->processus_status->PROCESS_STATE = WAITING;
         buf->buffer_status.WAITING_PROCESSES++;
+        current_process->waiting_buffer = buf;
+        current_process->waiting_message_addr = MESSAGE_ADDR;
+        current_process->waiting_message_size = LENGTH;
         // to do implementer selon la discipline de la file d'attente
         if (buf->queuing_discipline == PRIORITY){
             // to do insert process in waiting_processes list according to its priority
@@ -446,10 +454,15 @@ void RECEIVE_BUFFER (
             list_remove(buf->waiting_writers, first_writer_node);
             buf->buffer_status.WAITING_PROCESSES--;
             // put the message associated with this sending process in the FIFO
+            memcpy(&partition->buffers_data[index + buf->write_index * buf->buffer_status.MAX_MESSAGE_SIZE], writer_process->waiting_message_addr, writer_process->waiting_message_size);
+            partition->buffers_size_data[index + buf->write_index] = writer_process->waiting_message_size;
+            buf->buffer_status.NB_MESSAGE++;
+            buf->write_index = (buf->write_index + 1) % buf->buffer_status.MAX_NB_MESSAGE;
             if (writer_process->time_counter != 0) {
                 writer_process->time_counter = INFINITE_TIME_VALUE;
             }
             writer_process->processus_status->PROCESS_STATE = READY;
+            writer_process->waiting_buffer = NULL;
             yield_to_partition(partition, current_process);
         }
         *RETURN_CODE = NO_ERROR;
@@ -462,6 +475,8 @@ void RECEIVE_BUFFER (
     else if (TIME_OUT == INFINITE_TIME_VALUE){
         current_process->processus_status->PROCESS_STATE = WAITING;
         buf->buffer_status.WAITING_PROCESSES++;
+        current_process->waiting_buffer = buf;
+        current_process->waiting_message_addr = MESSAGE_ADDR;
         if (buf->queuing_discipline == PRIORITY){
             // to do insert process in waiting_processes list according to its priority
             list_insert_sorted(buf->waiting_readers, current_process);
@@ -470,10 +485,13 @@ void RECEIVE_BUFFER (
             list_pushback(buf->waiting_readers, current_process);
         }
         yield_to_partition(partition, current_process);
+        *LENGTH = current_process->waiting_message_size;
         *RETURN_CODE = NO_ERROR;
     } else {
         current_process->processus_status->PROCESS_STATE = WAITING;
         buf->buffer_status.WAITING_PROCESSES++;
+        current_process->waiting_buffer = buf;
+        current_process->waiting_message_addr = MESSAGE_ADDR;
         if (buf->queuing_discipline == PRIORITY){
             // to do insert process in waiting_processes list according to its priority
             list_insert_sorted(buf->waiting_readers, current_process);
@@ -489,6 +507,7 @@ void RECEIVE_BUFFER (
             *RETURN_CODE = TIMED_OUT;
         }
         else {
+            *LENGTH = current_process->waiting_message_size;
             *RETURN_CODE = NO_ERROR;
         }
     }

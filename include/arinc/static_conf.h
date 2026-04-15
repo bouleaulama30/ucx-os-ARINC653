@@ -8,7 +8,7 @@
 #define BLACKBOARD_MAX_MESSAGE_SIZE 512
 
 #define BUFFER_MAX_MESSAGE_SIZE 64
-#define BUFFER_MAX_NB_MESSAGE 8
+#define BUFFER_MAX_NB_MESSAGE 3
 
 extern void process_test0(void);
 extern void process_test1(void);
@@ -198,7 +198,7 @@ static const PROCESS_ATTRIBUTE_TYPE PROCESS_1_CONFIG = {
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test1,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 1,            // Medium priority (1-239)
+    .BASE_PRIORITY = 2,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "Process 1"
 };
@@ -209,7 +209,7 @@ static const PROCESS_ATTRIBUTE_TYPE PROCESS_2_CONFIG = {
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = process_test2,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 2,            // Medium priority (1-239)
+    .BASE_PRIORITY = 1,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "Process 2"
 };
