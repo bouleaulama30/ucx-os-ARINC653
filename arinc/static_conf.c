@@ -42,7 +42,16 @@ void p1_main_process(struct pcb_s *partition){
 
     CREATE_BUFFER(buffer_configs->buffer_name, buffer_configs->max_message_size, buffer_configs->max_nb_message, buffer_configs->queuing_discipline, &port_id, &return_code1);
     printf("return code buffer %d, buffer id %d\n", return_code1, port_id);
+    
+    CREATE_SEMAPHORE(semaphore_configs->semaphore_name, semaphore_configs->current_value, semaphore_configs->maximum_value, semaphore_configs->queuing_discipline, &port_id, &return_code0);
+    printf("return code semaphore %d, semaphore id %d\n", return_code0, port_id);
 
+    CREATE_EVENT(event_configs->event_name, &port_id, &return_code1);
+    printf("return code event %d, event id %d\n", return_code1, port_id);
+
+    CREATE_MUTEX(mutex_configs->mutex_name, mutex_configs->mutex_priority, mutex_configs->queuing_discipline, &port_id, &return_code0);
+    printf("return code mutex %d, mutex id %d\n", return_code0, port_id);
+    
     SET_PARTITION_MODE(NORMAL, &return_code0);
 }
 

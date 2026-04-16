@@ -356,7 +356,6 @@ struct eventConfig {
     EVENT_NAME_TYPE event_name;
     EVENT_ID_TYPE event_id;
     PARTITION_ID_TYPE partition_id;
-    struct list_s *waiting_processes;
 };
 
 static const struct eventConfig event_configs[] = {
@@ -365,13 +364,13 @@ static const struct eventConfig event_configs[] = {
 
 struct mutexConfig {
     MUTEX_NAME_TYPE mutex_name;
-    MUTEX_ID_TYPE mutex_id;
+    PRIORITY_TYPE mutex_priority;
     PARTITION_ID_TYPE partition_id;
-    struct list_s *waiting_processes;
+    QUEUING_DISCIPLINE_TYPE queuing_discipline;
 };
 
 static const struct mutexConfig mutex_configs[] = {
-    {.mutex_name = "Mutex1", .mutex_id = 1},
+    {.mutex_name = "Mutex1", .mutex_priority = 1, .queuing_discipline = FIFO},
 };
 
 #endif 

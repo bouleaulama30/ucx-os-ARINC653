@@ -58,6 +58,13 @@ void process_test0(void)
 	char tx_message[64];
 	uint32_t seq = 0;
 
+	SEMAPHORE_ID_TYPE semaphore_id;
+	SEMAPHORE_STATUS_TYPE semaphore_status;
+	EVENT_ID_TYPE event_id;
+	EVENT_STATUS_TYPE event_status;
+	MUTEX_ID_TYPE mutex_id;
+	MUTEX_STATUS_TYPE mutex_status;
+
 	BUFFER_ID_TYPE buffer_id;
 	BUFFER_STATUS_TYPE buffer_status;
 
@@ -72,6 +79,65 @@ void process_test0(void)
 
 	printf("[P1/Process0] Buffer1 ready id=%d\n", buffer_id);
 	GET_MY_ID(&process_id, &return_code);
+
+	printf("\n--- START TEST GET_ID / GET_STATUS (Semaphore, Event, Mutex) ---\n");
+
+	GET_SEMAPHORE_ID("Semaphore1", &semaphore_id, &return_code);
+	printf("[P1/Process0] GET_SEMAPHORE_ID('Semaphore1') rc=%d id=%d [%s]\n",
+	       return_code,
+	       semaphore_id,
+	       (return_code == NO_ERROR && semaphore_id == 1) ? "PASS" : "FAIL");
+	if (return_code == NO_ERROR) {
+		GET_SEMAPHORE_STATUS(semaphore_id, &semaphore_status, &return_code);
+		printf("[P1/Process0] GET_SEMAPHORE_STATUS rc=%d current=%d max=%d waiting=%d [%s]\n",
+		       return_code,
+		       semaphore_status.CURRENT_VALUE,
+		       semaphore_status.MAXIMUM_VALUE,
+		       semaphore_status.WAITING_PROCESSES,
+		       (return_code == NO_ERROR &&
+		        semaphore_status.CURRENT_VALUE == 3 &&
+		        semaphore_status.MAXIMUM_VALUE == 3 &&
+		        semaphore_status.WAITING_PROCESSES == 0) ? "PASS" : "FAIL");
+	}
+
+	GET_EVENT_ID("Event1", &event_id, &return_code);
+	printf("[P1/Process0] GET_EVENT_ID('Event1') rc=%d id=%d [%s]\n",
+	       return_code,
+	       event_id,
+	       (return_code == NO_ERROR && event_id == 1) ? "PASS" : "FAIL");
+	if (return_code == NO_ERROR) {
+		GET_EVENT_STATUS(event_id, &event_status, &return_code);
+		printf("[P1/Process0] GET_EVENT_STATUS rc=%d state=%d waiting=%d [%s]\n",
+		       return_code,
+		       event_status.EVENT_STATE,
+		       event_status.WAITING_PROCESSES,
+		       (return_code == NO_ERROR &&
+		        event_status.EVENT_STATE == DOWN &&
+		        event_status.WAITING_PROCESSES == 0) ? "PASS" : "FAIL");
+	}
+
+	GET_MUTEX_ID("Mutex1", &mutex_id, &return_code);
+	printf("[P1/Process0] GET_MUTEX_ID('Mutex1') rc=%d id=%d [%s]\n",
+	       return_code,
+	       mutex_id,
+	       (return_code == NO_ERROR && mutex_id == 1) ? "PASS" : "FAIL");
+	if (return_code == NO_ERROR) {
+		GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
+		printf("[P1/Process0] GET_MUTEX_STATUS rc=%d owner=%d state=%d priority=%d lock_count=%d waiting=%d [%s]\n",
+		       return_code,
+		       mutex_status.MUTEX_OWNER,
+		       mutex_status.MUTEX_STATE,
+		       mutex_status.MUTEX_PRIORITY,
+		       mutex_status.LOCK_COUNT,
+		       mutex_status.WAITING_PROCESSES,
+		       (return_code == NO_ERROR &&
+		        mutex_status.MUTEX_STATE == AVAILABLE &&
+		        mutex_status.MUTEX_PRIORITY == 1 &&
+		        mutex_status.LOCK_COUNT == 0 &&
+		        mutex_status.WAITING_PROCESSES == 0) ? "PASS" : "FAIL");
+	}
+
+	printf("--- END TEST GET_ID / GET_STATUS ---\n\n");
 
 	while (1) {
 		seq++;

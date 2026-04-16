@@ -889,6 +889,7 @@ void GET_MUTEX_STATUS (
         // to do get the process id of the owner of the mutex
         status.MUTEX_OWNER = mutex->mutex_status.MUTEX_OWNER;
     } 
+    *MUTEX_STATUS = status;
     *RETURN_CODE = NO_ERROR;
 }
 

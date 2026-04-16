@@ -161,6 +161,16 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->semaphore_count = semaphore_count;
     new_pcb->semaphores_counter = semaphores_counter;
 
+    // event
+    new_pcb->events = events;
+    new_pcb->max_events = max_events;
+    new_pcb->event_count = event_count;
+
+    // mutex
+    new_pcb->mutexes = mutexes;
+    new_pcb->max_mutexes = max_mutexes;
+    new_pcb->mutex_count = mutex_count;
+
     CRITICAL_LEAVE();
 
     _context_init(&new_pcb->tcb.context, (size_t)new_pcb->tcb.stack,
