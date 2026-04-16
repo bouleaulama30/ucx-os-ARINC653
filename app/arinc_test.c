@@ -275,7 +275,11 @@ int app_main(void)
 
 				   DEFAULT_PARTITION_CONFIG.events,
 				   DEFAULT_PARTITION_CONFIG.max_events,
-				   DEFAULT_PARTITION_CONFIG.event_count
+				   DEFAULT_PARTITION_CONFIG.event_count,
+
+				   DEFAULT_PARTITION_CONFIG.mutexes,
+				   DEFAULT_PARTITION_CONFIG.max_mutexes,
+				   DEFAULT_PARTITION_CONFIG.mutex_count
 				   );
 
 	partition_init(P2_CONFIG.period,
@@ -315,7 +319,12 @@ int app_main(void)
 
 				   P2_CONFIG.events,
 				   P2_CONFIG.max_events,
-				   P2_CONFIG.event_count
+				   P2_CONFIG.event_count,
+
+				   P2_CONFIG.mutexes,
+				   P2_CONFIG.max_mutexes,
+				   P2_CONFIG.mutex_count
+
 				   );
 
 	return 1;

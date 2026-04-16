@@ -48,6 +48,10 @@
     * to do mutex or error handler
 * faire tout en unicast ?
 
+* Mutex:
+    * voir si pb avec null process id et le process 0
+    * MUTEX_STATUS := (MUTEX_OWNER => identifier of the owning process);
+* test create, id, status de semaphore, event, mutex
 
 ## HM
 * faire en sorte de mettre toutes les metriques en ns car le lsb de system_time_type est 1 ns

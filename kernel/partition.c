@@ -49,7 +49,11 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 
                         struct event_s *events,
                         APEX_INTEGER max_events,
-                        APEX_INTEGER event_count
+                        APEX_INTEGER event_count,
+
+                        struct mutex_s *mutexes,
+                        APEX_INTEGER max_mutexes,
+                        APEX_INTEGER mutex_count
                         )
 {
     // déclaration des structures

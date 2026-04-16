@@ -57,6 +57,8 @@ static volatile int32_t p1_semaphores_counter[MAX_NUMBER_OF_SEMAPHORES];
 
 static struct event_s p1_events[MAX_NUMBER_OF_EVENTS];
 
+static struct mutex_s p1_mutexes[MAX_NUMBER_OF_MUTEXES];
+
 // Hardcoded partition configuration
 struct PartitionConfig {
     SYSTEM_TIME_TYPE period;
@@ -97,6 +99,10 @@ struct PartitionConfig {
     struct event_s *events;
     APEX_INTEGER max_events;
     APEX_INTEGER event_count;
+
+    struct mutex_s *mutexes;
+    APEX_INTEGER max_mutexes;
+    APEX_INTEGER mutex_count;
 };
 
 // Default hardcoded partition configuration et voir le ldscript pour la conf mémoire
@@ -134,6 +140,10 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
     .events = p1_events,
     .max_events = MAX_NUMBER_OF_EVENTS,
     .event_count = 0,
+
+    .mutexes = p1_mutexes,
+    .max_mutexes = MAX_NUMBER_OF_MUTEXES,
+    .mutex_count = 0,
 };
 
 static const struct PartitionConfig P2_CONFIG = {
@@ -170,6 +180,10 @@ static const struct PartitionConfig P2_CONFIG = {
     .events = NULL,
     .max_events = 0,
     .event_count = 0,
+
+    .mutexes = NULL,
+    .max_mutexes = 0,
+    .mutex_count = 0,
 };
 
 // Static module scheduler configuration
@@ -346,7 +360,18 @@ struct eventConfig {
 };
 
 static const struct eventConfig event_configs[] = {
-    {.event_name = "Event1", .event_id = 1, .partition_id = 1, .waiting_processes = NULL},
+    {.event_name = "Event1", .event_id = 1},
+};
+
+struct mutexConfig {
+    MUTEX_NAME_TYPE mutex_name;
+    MUTEX_ID_TYPE mutex_id;
+    PARTITION_ID_TYPE partition_id;
+    struct list_s *waiting_processes;
+};
+
+static const struct mutexConfig mutex_configs[] = {
+    {.mutex_name = "Mutex1", .mutex_id = 1},
 };
 
 #endif 

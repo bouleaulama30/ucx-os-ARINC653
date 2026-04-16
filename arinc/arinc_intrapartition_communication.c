@@ -80,6 +80,26 @@ int find_event_by_id(struct pcb_s *partition, EVENT_ID_TYPE id){
     return -1;  
 }
 
+int find_mutex_by_name(struct pcb_s *partition, char* name){
+    for (int i = 0; i < partition->mutex_count; i++){
+        struct mutex_s *mutex = &partition->mutexes[i];
+        if (strcmp(mutex->mutex_name, name) == 0){
+            return i;
+        }
+    }
+    return -1;  
+}
+
+int find_mutex_by_id(struct pcb_s *partition, MUTEX_ID_TYPE id){
+    for (int i = 0; i < partition->mutex_count; i++){
+        struct mutex_s *mutex = &partition->mutexes[i];
+        if (mutex->mutex_id == id){
+            return i;
+        }
+    }
+    return -1;  
+}
+
 static struct node_s *release_waiting_bb_process(struct node_s *node, void *arg){
     struct list_s *waiting_processes = (struct list_s *) arg;
     struct process_s *process = node->data;
@@ -763,4 +783,116 @@ void GET_EVENT_STATUS (
 }
 void APERIODIC_WAIT_EVENT (
        /*in */ EVENT_ID_TYPE            EVENT_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void CREATE_MUTEX (
+       /*in */ MUTEX_NAME_TYPE          MUTEX_NAME,
+       /*in */ PRIORITY_TYPE            MUTEX_PRIORITY,
+       /*in */ QUEUING_DISCIPLINE_TYPE  QUEUING_DISCIPLINE,
+       /*out*/ MUTEX_ID_TYPE            *MUTEX_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    if (partition->mutex_count + 1 > partition->max_mutexes){
+        *RETURN_CODE = INVALID_CONFIG;
+        return;
+    }
+
+    if (find_mutex_by_name(partition, MUTEX_NAME) != -1){
+        *RETURN_CODE = NO_ACTION;
+        return;
+    }
+
+    if (MUTEX_PRIORITY < 0){
+         *RETURN_CODE = INVALID_PARAM;
+         return;
+    }
+
+    if (QUEUING_DISCIPLINE != FIFO && QUEUING_DISCIPLINE != PRIORITY){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if (partition->status->OPERATING_MODE == NORMAL){
+         *RETURN_CODE = INVALID_MODE;
+         return;
+    }
+
+    struct mutex_s *mutex = &partition->mutexes[partition->mutex_count++];
+    strncpy(mutex->mutex_name, MUTEX_NAME, sizeof(mutex->mutex_name) - 1);
+    mutex->mutex_name[sizeof(mutex->mutex_name) - 1] = '\0';
+    mutex->mutex_id = partition->mutex_count;
+    mutex->partition_id = partition->status->IDENTIFIER;
+    mutex->waiting_processes = list_create();
+    mutex->mutex_status.MUTEX_STATE = AVAILABLE;
+    mutex->mutex_status.MUTEX_PRIORITY = MUTEX_PRIORITY;
+    mutex->mutex_status.WAITING_PROCESSES = 0;
+    mutex->mutex_status.LOCK_COUNT = 0;
+    mutex->queuing_discipline = QUEUING_DISCIPLINE;
+
+    *MUTEX_ID = mutex->mutex_id;
+    *RETURN_CODE = NO_ERROR;
+}
+
+void ACQUIRE_MUTEX (
+       /*in */ MUTEX_ID_TYPE            MUTEX_ID,
+       /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void RELEASE_MUTEX (
+       /*in */ MUTEX_ID_TYPE            MUTEX_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void RESET_MUTEX (
+       /*in */ MUTEX_ID_TYPE            MUTEX_ID,
+       /*in */ PROCESS_ID_TYPE          PROCESS_ID, 
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void GET_MUTEX_ID (
+       /*in */ MUTEX_NAME_TYPE          MUTEX_NAME,
+       /*out*/ MUTEX_ID_TYPE            *MUTEX_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    int index = find_mutex_by_name(partition, MUTEX_NAME);
+    if (index == -1){  
+        *RETURN_CODE = INVALID_CONFIG;
+        return;
+    }
+    struct mutex_s *mutex = &partition->mutexes[index];
+    *MUTEX_ID = mutex->mutex_id;
+    *RETURN_CODE = NO_ERROR;
+}
+
+void GET_MUTEX_STATUS (
+       /*in */ MUTEX_ID_TYPE            MUTEX_ID,
+       /*out*/ MUTEX_STATUS_TYPE        *MUTEX_STATUS,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    int index = find_mutex_by_id(partition, MUTEX_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+    struct mutex_s *mutex = &partition->mutexes[index];
+    MUTEX_STATUS_TYPE status;
+    status.MUTEX_STATE = mutex->mutex_status.MUTEX_STATE;
+    status.MUTEX_PRIORITY = mutex->mutex_status.MUTEX_PRIORITY;
+    status.WAITING_PROCESSES = mutex->mutex_status.WAITING_PROCESSES;
+    status.LOCK_COUNT = mutex->mutex_status.LOCK_COUNT;
+    if (mutex->mutex_status.MUTEX_STATE == AVAILABLE){
+        status.MUTEX_OWNER = NULL_PROCESS_ID;
+    }
+
+    else if (mutex->mutex_status.MUTEX_OWNER == MAIN_PROCESS_ID){
+        status.MUTEX_OWNER = MAIN_PROCESS_ID;
+    }
+    else {
+        // to do get the process id of the owner of the mutex
+        status.MUTEX_OWNER = mutex->mutex_status.MUTEX_OWNER;
+    } 
+    *RETURN_CODE = NO_ERROR;
+}
+
+void GET_PROCESS_MUTEX_STATE (
+       /*in */ PROCESS_ID_TYPE          PROCESS_ID,
+       /*out*/ MUTEX_ID_TYPE            *MUTEX_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );

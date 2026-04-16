@@ -114,6 +114,11 @@ struct pcb_s {
    APEX_INTEGER max_events;
    APEX_INTEGER event_count;
 
+   // mutex
+   struct mutex_s *mutexes;
+   APEX_INTEGER max_mutexes;
+   APEX_INTEGER mutex_count;
+   
    // Partion HM Table
    SYSTEM_ADDRESS_TYPE entry_point;
    BOOLEAN_TYPE is_system_partition;

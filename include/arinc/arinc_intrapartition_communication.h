@@ -315,6 +315,14 @@ typedef
       WAITING_RANGE_TYPE    WAITING_PROCESSES;
    } MUTEX_STATUS_TYPE;
 
+struct mutex_s {
+       MUTEX_NAME_TYPE mutex_name;
+       MUTEX_ID_TYPE mutex_id;
+       PARTITION_ID_TYPE partition_id;
+       QUEUING_DISCIPLINE_TYPE queuing_discipline;
+       MUTEX_STATUS_TYPE mutex_status;
+       struct list_s *waiting_processes;
+};
 
 extern void CREATE_MUTEX (
        /*in */ MUTEX_NAME_TYPE          MUTEX_NAME,
