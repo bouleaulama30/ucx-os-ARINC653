@@ -10,16 +10,6 @@ int find_blackboard_by_name(struct pcb_s *partition, char* name){
     return -1;  
 }
 
-int find_buffer_by_name(struct pcb_s *partition, char* name){
-    for (int i = 0; i < partition->buffer_count; i++){
-        struct buffer_s *buf = &partition->buffers[i];
-        if (strcmp(buf->buffer_name, name) == 0){
-            return i;
-        }
-    }
-    return -1;  
-}
-
 int find_blackboard_by_id(struct pcb_s *partition, BLACKBOARD_ID_TYPE id){
     for (int i = 0; i < partition->blackboard_count; i++){
         struct blackboard_s *bb = &partition->blackboards[i];
@@ -30,10 +20,60 @@ int find_blackboard_by_id(struct pcb_s *partition, BLACKBOARD_ID_TYPE id){
     return -1;  
 }
 
+int find_buffer_by_name(struct pcb_s *partition, char* name){
+    for (int i = 0; i < partition->buffer_count; i++){
+        struct buffer_s *buf = &partition->buffers[i];
+        if (strcmp(buf->buffer_name, name) == 0){
+            return i;
+        }
+    }
+    return -1;  
+}
+
 int find_buffer_by_id(struct pcb_s *partition, BUFFER_ID_TYPE id){
     for (int i = 0; i < partition->buffer_count; i++){
         struct buffer_s *buf = &partition->buffers[i];
         if (buf->buffer_id == id){
+            return i;
+        }
+    }
+    return -1;  
+}
+
+int find_semaphore_by_name(struct pcb_s *partition, char* name){
+    for (int i = 0; i < partition->semaphore_count; i++){
+        struct semaphore_s *sem = &partition->semaphores[i];
+        if (strcmp(sem->semaphore_name, name) == 0){
+            return i;
+        }
+    }
+    return -1;  
+}
+
+int find_semaphore_by_id(struct pcb_s *partition, SEMAPHORE_ID_TYPE id){
+    for (int i = 0; i < partition->semaphore_count; i++){
+        struct semaphore_s *sem = &partition->semaphores[i];
+        if (sem->semaphore_id == id){
+            return i;
+        }
+    }
+    return -1;  
+}
+
+int find_event_by_name(struct pcb_s *partition, char* name){
+    for (int i = 0; i < partition->event_count; i++){
+        struct event_s *event = &partition->events[i];
+        if (strcmp(event->event_name, name) == 0){
+            return i;
+        }
+    }
+    return -1;  
+}
+
+int find_event_by_id(struct pcb_s *partition, EVENT_ID_TYPE id){
+    for (int i = 0; i < partition->event_count; i++){
+        struct event_s *event = &partition->events[i];
+        if (event->event_id == id){
             return i;
         }
     }
@@ -551,7 +591,57 @@ void CREATE_SEMAPHORE (
        /*in */ SEMAPHORE_VALUE_TYPE     MAXIMUM_VALUE,
        /*in */ QUEUING_DISCIPLINE_TYPE  QUEUING_DISCIPLINE,
        /*out*/ SEMAPHORE_ID_TYPE        *SEMAPHORE_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    if (partition->semaphore_count + 1 > partition->max_semaphores){
+        *RETURN_CODE = INVALID_CONFIG;
+        return;
+    }
+
+    if (find_semaphore_by_name(partition, SEMAPHORE_NAME) != -1){
+        *RETURN_CODE = NO_ACTION;
+        return;
+    }
+
+    if (CURRENT_VALUE < 0){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if (MAXIMUM_VALUE <= 0){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if (CURRENT_VALUE > MAXIMUM_VALUE){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if (QUEUING_DISCIPLINE != FIFO && QUEUING_DISCIPLINE != PRIORITY){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if (partition->status->OPERATING_MODE == NORMAL){
+         *RETURN_CODE = INVALID_MODE;
+         return;
+    } 
+
+    struct semaphore_s *sem = &partition->semaphores[partition->semaphore_count++];
+    strncpy(sem->semaphore_name, SEMAPHORE_NAME, sizeof(sem->semaphore_name) - 1);
+    sem->semaphore_name[sizeof(sem->semaphore_name) - 1] = '\0';
+    sem->semaphore_id = partition->semaphore_count;
+    sem->partition_id = partition->status->IDENTIFIER;
+    sem->waiting_processes = list_create();
+    sem->semaphore_status.CURRENT_VALUE = CURRENT_VALUE;
+    sem->semaphore_status.MAXIMUM_VALUE = MAXIMUM_VALUE;
+    sem->semaphore_status.WAITING_PROCESSES = 0;
+    sem->queuing_discipline = QUEUING_DISCIPLINE;
+
+    *SEMAPHORE_ID = sem->semaphore_id;
+    *RETURN_CODE = NO_ERROR;
+}
 
 void WAIT_SEMAPHORE (
        /*in */ SEMAPHORE_ID_TYPE        SEMAPHORE_ID,
@@ -565,9 +655,112 @@ void SIGNAL_SEMAPHORE (
 void GET_SEMAPHORE_ID (
        /*in */ SEMAPHORE_NAME_TYPE      SEMAPHORE_NAME,
        /*out*/ SEMAPHORE_ID_TYPE        *SEMAPHORE_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    
+    struct pcb_s *partition = get_current_partition();
+    int index = find_semaphore_by_name(partition, SEMAPHORE_NAME);
+    if (index == -1){   
+        *RETURN_CODE = INVALID_CONFIG;
+        return;
+    }
+    struct semaphore_s *sem = &partition->semaphores[index];
+    *SEMAPHORE_ID = sem->semaphore_id;
+    *RETURN_CODE = NO_ERROR;
+}
+
 
 void GET_SEMAPHORE_STATUS (
        /*in */ SEMAPHORE_ID_TYPE        SEMAPHORE_ID,
        /*out*/ SEMAPHORE_STATUS_TYPE    *SEMAPHORE_STATUS,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+
+    struct pcb_s *partition = get_current_partition();
+    int index = find_semaphore_by_id(partition, SEMAPHORE_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+    struct semaphore_s *sem = &partition->semaphores[index];
+
+    *SEMAPHORE_STATUS = sem->semaphore_status;
+    *RETURN_CODE = NO_ERROR;
+}
+
+void CREATE_EVENT (
+       /*in */ EVENT_NAME_TYPE          EVENT_NAME,
+       /*out*/ EVENT_ID_TYPE            *EVENT_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    if (partition->event_count + 1 > partition->max_events){
+        *RETURN_CODE = INVALID_CONFIG;
+        return;
+    }
+
+    if (find_event_by_name(partition, EVENT_NAME) != -1){
+        *RETURN_CODE = NO_ACTION;
+        return;
+    }
+
+    if (partition->status->OPERATING_MODE == NORMAL){
+         *RETURN_CODE = INVALID_MODE;
+         return;
+    }
+
+    struct event_s *event = &partition->events[partition->event_count++];
+    strncpy(event->event_name, EVENT_NAME, sizeof(event->event_name) - 1);
+    event->event_name[sizeof(event->event_name) - 1] = '\0';
+    event->event_id = partition->event_count;
+    event->partition_id = partition->status->IDENTIFIER;
+    event->waiting_processes = list_create();
+    event->event_status.EVENT_STATE = DOWN;
+    event->event_status.WAITING_PROCESSES = 0;
+
+    *EVENT_ID = event->event_id;
+    *RETURN_CODE = NO_ERROR;
+}
+
+void SET_EVENT (
+       /*in */ EVENT_ID_TYPE            EVENT_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void RESET_EVENT (
+       /*in */ EVENT_ID_TYPE            EVENT_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void WAIT_EVENT (
+       /*in */ EVENT_ID_TYPE            EVENT_ID,
+       /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void GET_EVENT_ID (
+       /*in */ EVENT_NAME_TYPE          EVENT_NAME,
+       /*out*/ EVENT_ID_TYPE            *EVENT_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    int index = find_event_by_name(partition, EVENT_NAME);
+    if (index == -1){
+        *RETURN_CODE = INVALID_CONFIG;
+        return; 
+    }
+    struct event_s *event = &partition->events[index];
+    *EVENT_ID = event->event_id;
+    *RETURN_CODE = NO_ERROR;
+}
+
+void GET_EVENT_STATUS (
+       /*in */ EVENT_ID_TYPE            EVENT_ID,
+       /*out*/ EVENT_STATUS_TYPE        *EVENT_STATUS,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    int index = find_event_by_id(partition, EVENT_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+    struct event_s *event = &partition->events[index];
+    *EVENT_STATUS = event->event_status;
+    *RETURN_CODE = NO_ERROR;
+}
+void APERIODIC_WAIT_EVENT (
+       /*in */ EVENT_ID_TYPE            EVENT_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );

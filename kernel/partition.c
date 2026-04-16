@@ -45,7 +45,11 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         struct semaphore_s *semaphores,
                         APEX_INTEGER max_semaphores,
                         APEX_INTEGER semaphore_count,
-                        volatile int32_t *semaphores_counter
+                        volatile int32_t *semaphores_counter,
+
+                        struct event_s *events,
+                        APEX_INTEGER max_events,
+                        APEX_INTEGER event_count
                         )
 {
     // déclaration des structures

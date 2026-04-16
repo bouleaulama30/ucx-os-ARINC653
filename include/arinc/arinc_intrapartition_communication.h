@@ -180,6 +180,7 @@ struct semaphore_s {
        SEMAPHORE_NAME_TYPE semaphore_name;
        SEMAPHORE_ID_TYPE semaphore_id;
        PARTITION_ID_TYPE partition_id;
+       QUEUING_DISCIPLINE_TYPE queuing_discipline;
        SEMAPHORE_STATUS_TYPE semaphore_status;
        struct list_s *waiting_processes;
 };
@@ -238,6 +239,14 @@ typedef
       EVENT_STATE_TYPE    EVENT_STATE;
       WAITING_RANGE_TYPE  WAITING_PROCESSES;
    } EVENT_STATUS_TYPE;
+
+struct event_s {
+       EVENT_NAME_TYPE event_name;
+       EVENT_ID_TYPE event_id;
+       PARTITION_ID_TYPE partition_id;
+       EVENT_STATUS_TYPE event_status;
+       struct list_s *waiting_processes;
+};
 
 
 extern void CREATE_EVENT (

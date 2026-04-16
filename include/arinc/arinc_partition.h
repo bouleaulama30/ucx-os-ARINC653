@@ -109,6 +109,11 @@ struct pcb_s {
    APEX_INTEGER semaphore_count;
    volatile int32_t *semaphores_counter;
 
+   // event
+   struct event_s *events;
+   APEX_INTEGER max_events;
+   APEX_INTEGER event_count;
+
    // Partion HM Table
    SYSTEM_ADDRESS_TYPE entry_point;
    BOOLEAN_TYPE is_system_partition;
