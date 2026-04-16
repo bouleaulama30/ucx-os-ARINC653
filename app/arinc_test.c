@@ -266,7 +266,12 @@ int app_main(void)
 				   DEFAULT_PARTITION_CONFIG.buffer_count,
 				   DEFAULT_PARTITION_CONFIG.max_buffer_data_size,
 				   DEFAULT_PARTITION_CONFIG.buffers_data,
-				   DEFAULT_PARTITION_CONFIG.buffers_size_data
+				   DEFAULT_PARTITION_CONFIG.buffers_size_data,
+
+				   DEFAULT_PARTITION_CONFIG.semaphores,
+				   DEFAULT_PARTITION_CONFIG.max_semaphores,
+				   DEFAULT_PARTITION_CONFIG.semaphore_count,
+				   DEFAULT_PARTITION_CONFIG.semaphores_counter
 				   );
 
 	partition_init(P2_CONFIG.period,
@@ -297,7 +302,12 @@ int app_main(void)
 				   P2_CONFIG.buffer_count,
 				   P2_CONFIG.max_buffer_data_size,
 				   P2_CONFIG.buffers_data,
-				   P2_CONFIG.buffers_size_data);
+				   P2_CONFIG.buffers_size_data,
+
+				   P2_CONFIG.semaphores,
+				   P2_CONFIG.max_semaphores,
+				   P2_CONFIG.semaphore_count,
+				   P2_CONFIG.semaphores_counter);
 
 	return 1;
 }

@@ -103,6 +103,12 @@ struct pcb_s {
    uint8_t *buffers_data;
    uint32_t *buffers_size_data;
 
+   // semaphore
+   struct semaphore_s *semaphores;
+   APEX_INTEGER max_semaphores;
+   APEX_INTEGER semaphore_count;
+   volatile int32_t *semaphores_counter;
+
    // Partion HM Table
    SYSTEM_ADDRESS_TYPE entry_point;
    BOOLEAN_TYPE is_system_partition;

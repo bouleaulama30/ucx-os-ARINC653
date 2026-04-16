@@ -52,6 +52,9 @@ static struct buffer_s p1_buffers[MAX_NUMBER_OF_BUFFERS];
 static uint8_t p1_buffers_data[MAX_NUMBER_OF_BUFFERS * BUFFER_MAX_MESSAGE_SIZE * BUFFER_MAX_NB_MESSAGE]; // 512 bytes par buffer
 static uint32_t p1_buffers_size_data[MAX_NUMBER_OF_BUFFERS * BUFFER_MAX_NB_MESSAGE]; // 512 bytes par buffer
 
+static struct semaphore_s p1_semaphores[MAX_NUMBER_OF_SEMAPHORES];
+static volatile int32_t p1_semaphores_counter[MAX_NUMBER_OF_SEMAPHORES];
+
 // Hardcoded partition configuration
 struct PartitionConfig {
     SYSTEM_TIME_TYPE period;
@@ -84,6 +87,11 @@ struct PartitionConfig {
     uint8_t *buffers_data;
     uint32_t *buffers_size_data;
 
+    struct semaphore_s *semaphores;
+    APEX_INTEGER max_semaphores;
+    APEX_INTEGER semaphore_count;
+    volatile int32_t *semaphores_counter;
+
 };
 
 // Default hardcoded partition configuration et voir le ldscript pour la conf mémoire
@@ -111,7 +119,12 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
     .buffer_count = 0,
     .max_buffer_data_size = BUFFER_MAX_MESSAGE_SIZE * BUFFER_MAX_NB_MESSAGE, // 512 bytes par buffer
     .buffers_data = p1_buffers_data,
-    .buffers_size_data = p1_buffers_size_data
+    .buffers_size_data = p1_buffers_size_data,
+
+    .semaphores = p1_semaphores,
+    .max_semaphores = MAX_NUMBER_OF_SEMAPHORES,
+    .semaphore_count = 0,
+    .semaphores_counter = p1_semaphores_counter,
 };
 
 static const struct PartitionConfig P2_CONFIG = {
@@ -139,6 +152,11 @@ static const struct PartitionConfig P2_CONFIG = {
     .max_buffer_data_size = 0,
     .buffers_data = NULL,
     .buffers_size_data = NULL,
+    
+    .semaphores = NULL,
+    .max_semaphores = 0,
+    .semaphore_count = 0,
+    .semaphores_counter = NULL,
 };
 
 // Static module scheduler configuration
@@ -294,6 +312,17 @@ struct bufferConfig {
 static const struct bufferConfig buffer_configs[] = {
     {.buffer_name = "Buffer1", .max_message_size = BUFFER_MAX_MESSAGE_SIZE, .max_nb_message = BUFFER_MAX_NB_MESSAGE, .queuing_discipline = FIFO},
     {.buffer_name = "Buffer2", .max_message_size = BUFFER_MAX_MESSAGE_SIZE, .max_nb_message = BUFFER_MAX_NB_MESSAGE, .queuing_discipline = FIFO},
+};
+
+struct semaphoreConfig {
+    SEMAPHORE_NAME_TYPE semaphore_name;
+    SEMAPHORE_VALUE_TYPE current_value;
+    SEMAPHORE_VALUE_TYPE maximum_value;
+    QUEUING_DISCIPLINE_TYPE queuing_discipline;
+};
+
+static const struct semaphoreConfig semaphore_configs[] = {
+    {.semaphore_name = "Semaphore1", .current_value = 3, .maximum_value = 3, .queuing_discipline = FIFO},
 };
 
 #endif 

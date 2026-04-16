@@ -35,13 +35,17 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         uint8_t *blackboards_data,
                         uint32_t *blackboards_size_data,
 
-                        
                         struct buffer_s *buffers,
                         APEX_INTEGER max_buffers,
                         APEX_INTEGER buffer_count,
                         APEX_INTEGER max_buffer_data_size,
                         uint8_t *buffers_data,
-                        uint32_t *buffers_size_data
+                        uint32_t *buffers_size_data,
+
+                        struct semaphore_s *semaphores,
+                        APEX_INTEGER max_semaphores,
+                        APEX_INTEGER semaphore_count,
+                        volatile int32_t *semaphores_counter
                         )
 {
     // déclaration des structures
@@ -143,6 +147,11 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->buffers_data = buffers_data;
     new_pcb->buffers_size_data = buffers_size_data;
 
+    // semaphore
+    new_pcb->semaphores = semaphores;
+    new_pcb->max_semaphores = max_semaphores;
+    new_pcb->semaphore_count = semaphore_count;
+    new_pcb->semaphores_counter = semaphores_counter;
 
     CRITICAL_LEAVE();
 

@@ -32,7 +32,12 @@ extern int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         APEX_INTEGER buffer_count,
                         APEX_INTEGER max_buffer_data_size,
                         uint8_t *buffers_data,
-                        uint32_t *buffers_size_data
+                        uint32_t *buffers_size_data,
+
+                        struct semaphore_s *semaphores,
+                        APEX_INTEGER max_semaphores,
+                        APEX_INTEGER semaphore_count,
+                        volatile int32_t *semaphores_counter
                         );
 
 extern int32_t krnl_partition_switch(PARTITION_ID_TYPE IDENTIFIER);

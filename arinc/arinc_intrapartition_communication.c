@@ -544,3 +544,30 @@ void GET_BUFFER_STATUS (
     *BUFFER_STATUS = buf->buffer_status;
     *RETURN_CODE = NO_ERROR;
 }
+
+void CREATE_SEMAPHORE (
+       /*in */ SEMAPHORE_NAME_TYPE      SEMAPHORE_NAME,
+       /*in */ SEMAPHORE_VALUE_TYPE     CURRENT_VALUE,
+       /*in */ SEMAPHORE_VALUE_TYPE     MAXIMUM_VALUE,
+       /*in */ QUEUING_DISCIPLINE_TYPE  QUEUING_DISCIPLINE,
+       /*out*/ SEMAPHORE_ID_TYPE        *SEMAPHORE_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void WAIT_SEMAPHORE (
+       /*in */ SEMAPHORE_ID_TYPE        SEMAPHORE_ID,
+       /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void SIGNAL_SEMAPHORE (
+       /*in */ SEMAPHORE_ID_TYPE        SEMAPHORE_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void GET_SEMAPHORE_ID (
+       /*in */ SEMAPHORE_NAME_TYPE      SEMAPHORE_NAME,
+       /*out*/ SEMAPHORE_ID_TYPE        *SEMAPHORE_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+
+void GET_SEMAPHORE_STATUS (
+       /*in */ SEMAPHORE_ID_TYPE        SEMAPHORE_ID,
+       /*out*/ SEMAPHORE_STATUS_TYPE    *SEMAPHORE_STATUS,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );

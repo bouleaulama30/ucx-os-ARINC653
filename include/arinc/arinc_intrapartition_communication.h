@@ -176,6 +176,14 @@ typedef
       WAITING_RANGE_TYPE    WAITING_PROCESSES;
    } SEMAPHORE_STATUS_TYPE;
 
+struct semaphore_s {
+       SEMAPHORE_NAME_TYPE semaphore_name;
+       SEMAPHORE_ID_TYPE semaphore_id;
+       PARTITION_ID_TYPE partition_id;
+       SEMAPHORE_STATUS_TYPE semaphore_status;
+       struct list_s *waiting_processes;
+};
+
 
 extern void CREATE_SEMAPHORE (
        /*in */ SEMAPHORE_NAME_TYPE      SEMAPHORE_NAME,
