@@ -65,11 +65,12 @@ void process_test0(void)
 	MUTEX_ID_TYPE mutex_id;
 	MUTEX_STATUS_TYPE mutex_status;
 
-	BUFFER_ID_TYPE buffer_id;
+	BUFFER_ID_TYPE buffer1_id;
+	BUFFER_ID_TYPE buffer2_id;
 	BUFFER_STATUS_TYPE buffer_status;
 
 	while (1) {
-		GET_BUFFER_ID("Buffer1", &buffer_id, &return_code);
+		GET_BUFFER_ID("Buffer1", &buffer1_id, &return_code);
 		if (return_code == NO_ERROR) {
 			break;
 		}
@@ -77,7 +78,16 @@ void process_test0(void)
 		// TIMED_WAIT(2, &return_code);
 	}
 
-	printf("[P1/Process0] Buffer1 ready id=%d\n", buffer_id);
+	while (1) {
+		GET_BUFFER_ID("Buffer2", &buffer2_id, &return_code);
+		if (return_code == NO_ERROR) {
+			break;
+		}
+		printf("[P1/Process0] GET_BUFFER_ID('Buffer2') rc=%d (retry)\n", return_code);
+		// TIMED_WAIT(2, &return_code);
+	}
+
+	printf("[P1/Process0] Buffer1 ready id=%d | Buffer2 ready id=%d\n", buffer1_id, buffer2_id);
 	GET_MY_ID(&process_id, &return_code);
 
 	printf("\n--- START TEST GET_ID / GET_STATUS (Semaphore, Event, Mutex) ---\n");
@@ -146,13 +156,13 @@ void process_test0(void)
 				process_id);
 		write_len = (MESSAGE_SIZE_TYPE)(strlen(tx_message) + 1);
 
-		SEND_BUFFER(buffer_id, (MESSAGE_ADDR_TYPE)tx_message, write_len, 1, &return_code);
+		SEND_BUFFER(buffer1_id, (MESSAGE_ADDR_TYPE)tx_message, write_len, 1, &return_code);
 		printf("[P1/Process0] SEND_BUFFER('Buffer1') rc=%d len=%d msg='%s'\n",
 		       return_code,
 		       write_len,
 		       tx_message);
 
-		GET_BUFFER_STATUS(buffer_id, &buffer_status, &return_code);
+		GET_BUFFER_STATUS(buffer1_id, &buffer_status, &return_code);
 		if (return_code == NO_ERROR) {
 			printf("[P1/Process0] GET_BUFFER_STATUS rc=%d num_messages=%d max_message_size=%d\n",
 				   return_code,
@@ -180,27 +190,27 @@ void process_test1(void)
 	GET_MY_ID(&process_id, &return_code);
 
 	while (1) {
-		GET_BUFFER_ID("Buffer1", &buffer_id, &return_code);
+		GET_BUFFER_ID("Buffer2", &buffer_id, &return_code);
 		if (return_code == NO_ERROR) {
 			break;
 		}
-		printf("[P1/Process1] GET_BUFFER_ID('Buffer1') rc=%d (retry)\n", return_code);
+		printf("[P1/Process1] GET_BUFFER_ID('Buffer2') rc=%d (retry)\n", return_code);
 		// TIMED_WAIT(2, &return_code);
 	}
 
-	printf("[P1/Process1] Buffer1 ready id=%d\n", buffer_id);
+	printf("[P1/Process1] Buffer2 ready id=%d\n", buffer_id);
 	// TIMED_WAIT(2, &return_code);
 
 	while (1) {
 		seq++;
-		sprintf(tx_message, "P1p1->Buffer1 seq=%lu t=%lu pid=%d",
+		sprintf(tx_message, "P1p1->Buffer2 seq=%lu t=%lu pid=%d",
 				(unsigned long)seq,
 				(unsigned long)ucx_uptime(),
 				process_id);
 		write_len = (MESSAGE_SIZE_TYPE)(strlen(tx_message) + 1);
 
 		SEND_BUFFER(buffer_id, (MESSAGE_ADDR_TYPE)tx_message, write_len, 1, &return_code);
-		printf("[P1/Process1] SEND_BUFFER('Buffer1') rc=%d len=%d msg='%s'\n",
+		printf("[P1/Process1] SEND_BUFFER('Buffer2') rc=%d len=%d msg='%s'\n",
 			   return_code,
 			   write_len,
 			   tx_message);
@@ -224,14 +234,15 @@ void process_test2(void)
 {   
 	RETURN_CODE_TYPE return_code;
 	APEX_INTEGER process_id;
-	BUFFER_ID_TYPE buffer_id;
+	BUFFER_ID_TYPE buffer1_id;
+	BUFFER_ID_TYPE buffer2_id;
 	MESSAGE_SIZE_TYPE message_length;
 	char rx_message[64];
 
 	GET_MY_ID(&process_id, &return_code);
 
 	while (1) {
-		GET_BUFFER_ID("Buffer1", &buffer_id, &return_code);
+		GET_BUFFER_ID("Buffer1", &buffer1_id, &return_code);
 		if (return_code == NO_ERROR) {
 			break;
 		}
@@ -239,13 +250,22 @@ void process_test2(void)
 		TIMED_WAIT(2, &return_code);
 	}
 
-	printf("[P1/Process2] Buffer1 ready id=%d\n", buffer_id);
+	while (1) {
+		GET_BUFFER_ID("Buffer2", &buffer2_id, &return_code);
+		if (return_code == NO_ERROR) {
+			break;
+		}
+		printf("[P1/Process2] GET_BUFFER_ID('Buffer2') rc=%d (retry)\n", return_code);
+		TIMED_WAIT(2, &return_code);
+	}
+
+	printf("[P1/Process2] Buffer1 ready id=%d | Buffer2 ready id=%d\n", buffer1_id, buffer2_id);
 	// printf("[P1/Process2] Initial delay to let the writers fill Buffer1\n");
 	// TIMED_WAIT(25, &return_code);
 
 	while (1) {
 		message_length = 0;
-		RECEIVE_BUFFER(buffer_id, 40, (MESSAGE_ADDR_TYPE)rx_message, &message_length, &return_code);
+		RECEIVE_BUFFER(buffer1_id, 20, (MESSAGE_ADDR_TYPE)rx_message, &message_length, &return_code);
 
 		if (return_code == NO_ERROR || return_code == TIMED_OUT) {
 			rx_message[(message_length < sizeof(rx_message)) ? message_length : (sizeof(rx_message) - 1)] = '\0';
@@ -255,6 +275,19 @@ void process_test2(void)
 				   rx_message);
 		} else {
 			printf("[P1/Process2] RECEIVE_BUFFER('Buffer1') rc=%d FAIL\n", return_code);
+		}
+
+		message_length = 0;
+		RECEIVE_BUFFER(buffer2_id, 20, (MESSAGE_ADDR_TYPE)rx_message, &message_length, &return_code);
+
+		if (return_code == NO_ERROR || return_code == TIMED_OUT) {
+			rx_message[(message_length < sizeof(rx_message)) ? message_length : (sizeof(rx_message) - 1)] = '\0';
+			printf("[P1/Process2] RECEIVE_BUFFER('Buffer2') rc=%d len=%d msg='%s'\n",
+				   return_code,
+				   message_length,
+				   rx_message);
+		} else {
+			printf("[P1/Process2] RECEIVE_BUFFER('Buffer2') rc=%d FAIL\n", return_code);
 		}
 
 		TIMED_WAIT(8, &return_code);

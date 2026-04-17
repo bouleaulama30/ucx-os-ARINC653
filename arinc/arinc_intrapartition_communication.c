@@ -387,6 +387,8 @@ void SEND_BUFFER (
     }
 
     struct buffer_s *buf = &partition->buffers[index];
+    uint32_t data_base = (uint32_t)index * (uint32_t)partition->max_buffer_data_size;
+    uint32_t size_base = (uint32_t)index * (uint32_t)buf->buffer_status.MAX_NB_MESSAGE;
 
     if(LENGTH >= buf->buffer_status.MAX_MESSAGE_SIZE){
             *RETURN_CODE = INVALID_CONFIG;
@@ -408,8 +410,8 @@ void SEND_BUFFER (
             if (buf->waiting_readers->length == 0){
                 buf->buffer_status.NB_MESSAGE++;
                 uint32_t write_index = buf->write_index;
-                memcpy(&partition->buffers_data[index + write_index * buf->buffer_status.MAX_MESSAGE_SIZE] , MESSAGE_ADDR, LENGTH);
-                partition->buffers_size_data[index + write_index] = LENGTH;
+                memcpy(&partition->buffers_data[data_base + write_index * buf->buffer_status.MAX_MESSAGE_SIZE], MESSAGE_ADDR, LENGTH);
+                partition->buffers_size_data[size_base + write_index] = LENGTH;
                 buf->write_index = (write_index + 1) % buf->buffer_status.MAX_NB_MESSAGE;
             } else {
                 // réveiller un lecteur en attente
@@ -499,12 +501,14 @@ void RECEIVE_BUFFER (
 
     struct buffer_s *buf = &partition->buffers[index];
     struct process_s *current_process = partition->process_current->data;
+    uint32_t data_base = (uint32_t)index * (uint32_t)partition->max_buffer_data_size;
+    uint32_t size_base = (uint32_t)index * (uint32_t)buf->buffer_status.MAX_NB_MESSAGE;
 
     if(partition->buffers[index].buffer_status.NB_MESSAGE > 0){
         buf->buffer_status.NB_MESSAGE--;
         uint32_t read_index = buf->read_index;
-        memcpy(MESSAGE_ADDR, &partition->buffers_data[index + read_index * buf->buffer_status.MAX_MESSAGE_SIZE], partition->buffers_size_data[index + read_index]);
-        *LENGTH = partition->buffers_size_data[index + read_index];
+        memcpy(MESSAGE_ADDR, &partition->buffers_data[data_base + read_index * buf->buffer_status.MAX_MESSAGE_SIZE], partition->buffers_size_data[size_base + read_index]);
+        *LENGTH = partition->buffers_size_data[size_base + read_index];
         buf->read_index = (read_index + 1) % buf->buffer_status.MAX_NB_MESSAGE;
 
         if (buf->waiting_writers->length > 0){
@@ -514,8 +518,8 @@ void RECEIVE_BUFFER (
             list_remove(buf->waiting_writers, first_writer_node);
             buf->buffer_status.WAITING_PROCESSES--;
             // put the message associated with this sending process in the FIFO
-            memcpy(&partition->buffers_data[index + buf->write_index * buf->buffer_status.MAX_MESSAGE_SIZE], writer_process->waiting_message_addr, writer_process->waiting_message_size);
-            partition->buffers_size_data[index + buf->write_index] = writer_process->waiting_message_size;
+            memcpy(&partition->buffers_data[data_base + buf->write_index * buf->buffer_status.MAX_MESSAGE_SIZE], writer_process->waiting_message_addr, writer_process->waiting_message_size);
+            partition->buffers_size_data[size_base + buf->write_index] = writer_process->waiting_message_size;
             buf->buffer_status.NB_MESSAGE++;
             buf->write_index = (buf->write_index + 1) % buf->buffer_status.MAX_NB_MESSAGE;
             if (writer_process->time_counter != 0) {
@@ -666,7 +670,22 @@ void CREATE_SEMAPHORE (
 void WAIT_SEMAPHORE (
        /*in */ SEMAPHORE_ID_TYPE        SEMAPHORE_ID,
        /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    
+    struct pcb_s *partition = get_current_partition();
+    int index = find_semaphore_by_id(partition, SEMAPHORE_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if (TIME_OUT < 0 || time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT)){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    struct semaphore_s *sem = &partition->semaphores[index];
+}
 
 void SIGNAL_SEMAPHORE (
        /*in */ SEMAPHORE_ID_TYPE        SEMAPHORE_ID,
