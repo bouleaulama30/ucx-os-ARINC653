@@ -50,6 +50,14 @@
 * wait semaphore:
     * to do mutex or error handler
 
+* wait_event:
+    * to do mutex or error handler
+
+* wait_periodic_event:
+    * current process is error handler process
+    * current process owns a mutex
+
+
 * Mutex:
     * voir si pb avec null process id et le process 0
     * MUTEX_STATUS := (MUTEX_OWNER => identifier of the owning process);

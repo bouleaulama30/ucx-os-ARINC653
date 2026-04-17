@@ -838,16 +838,100 @@ void CREATE_EVENT (
 
 void SET_EVENT (
        /*in */ EVENT_ID_TYPE            EVENT_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    int index = find_event_by_id(partition, EVENT_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+    struct event_s *event = &partition->events[index];
+    event->event_status.EVENT_STATE = UP;
+    if (event->waiting_processes->length > 0){
+        struct process_s *current_process = partition->process_current->data;
+        while (event->waiting_processes->length > 0) {
+            // 1. Prendre le premier noeud (la tête)
+            struct node_s *first_node = event->waiting_processes->head->next;
+            struct process_s *woken_process = first_node->data;
+            
+            // 2. Annuler son timer
+            if (woken_process->time_counter != 0) {
+                woken_process->time_counter = INFINITE_TIME_VALUE;
+            }
+            
+            // 3. Le retirer proprement de la liste
+            list_remove(event->waiting_processes, first_node);
+            
+            // 4. Le réveiller
+            woken_process->processus_status->PROCESS_STATE = READY;
+            event->event_status.WAITING_PROCESSES--;
+            woken_process->waiting_event = NULL;
+        }
+        yield_to_partition(partition, current_process);
+    }
+    *RETURN_CODE = NO_ERROR;
+}
 
 void RESET_EVENT (
        /*in */ EVENT_ID_TYPE            EVENT_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    int index = find_event_by_id(partition, EVENT_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_PARAM;
+        return;}
+    struct event_s *event = &partition->events[index];
+    event->event_status.EVENT_STATE = DOWN;
+    *RETURN_CODE = NO_ERROR;
+}
 
 void WAIT_EVENT (
        /*in */ EVENT_ID_TYPE            EVENT_ID,
        /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    int index = find_event_by_id(partition, EVENT_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+    if (TIME_OUT < 0 || time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT)){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    struct event_s *event = &partition->events[index];
+    if (event->event_status.EVENT_STATE == UP){
+        *RETURN_CODE = NO_ERROR;
+    }
+    else if (TIME_OUT == 0){
+        *RETURN_CODE = NOT_AVAILABLE;
+    }
+    // to do mutex or error handler
+    else if (TIME_OUT == INFINITE_TIME_VALUE){
+        struct process_s *current_process = partition->process_current->data;
+        current_process->processus_status->PROCESS_STATE = WAITING;
+        event->event_status.WAITING_PROCESSES++;
+        current_process->waiting_event = event;
+        list_pushback(event->waiting_processes, current_process);
+        yield_to_partition(partition, current_process);
+        *RETURN_CODE = NO_ERROR;
+    } else {
+        struct process_s *current_process = partition->process_current->data;
+        current_process->processus_status->PROCESS_STATE = WAITING;
+        event->event_status.WAITING_PROCESSES++;
+        current_process->waiting_event = event;
+        list_insert_sorted(event->waiting_processes, current_process);
+        current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
+        yield_to_partition(partition, current_process);
+        if(current_process->time_counter == 0){
+            *RETURN_CODE = TIMED_OUT;
+        }
+        else {
+            *RETURN_CODE = NO_ERROR;
+        }
+    }
+}
 
 void GET_EVENT_ID (
        /*in */ EVENT_NAME_TYPE          EVENT_NAME,
@@ -878,9 +962,59 @@ void GET_EVENT_STATUS (
     *EVENT_STATUS = event->event_status;
     *RETURN_CODE = NO_ERROR;
 }
+
 void APERIODIC_WAIT_EVENT (
        /*in */ EVENT_ID_TYPE            EVENT_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+
+    struct pcb_s *partition = get_current_partition();
+    struct process_s *current_process = partition->process_current->data;
+    // to do 
+    if (partition->status->OPERATING_MODE == NORMAL){
+         *RETURN_CODE = INVALID_MODE;
+         return;
+    }
+    
+    int index = find_event_by_id(partition, EVENT_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if (current_process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+
+    // to do current process owns a mutex
+
+    struct event_s *event = &partition->events[index];
+    current_process->processus_status->DEADLINE_TIME = INFINITE_TIME_VALUE;
+
+    if (event->event_status.EVENT_STATE == UP){
+        *RETURN_CODE = NO_ERROR;
+    }
+    else {
+        current_process->processus_status->PROCESS_STATE = WAITING;
+        event->event_status.WAITING_PROCESSES++;
+        current_process->waiting_event = event;
+        list_insert_sorted(event->waiting_processes, current_process);
+        yield_to_partition(partition, current_process);
+        *RETURN_CODE = NO_ERROR;
+    }
+    if (current_process->processus_status->ATTRIBUTES.TIME_CAPACITY != INFINITE_TIME_VALUE){
+        SYSTEM_TIME_TYPE new_dealine = ucx_uptime() + current_process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+        if (time_overflow(new_dealine)){
+            *RETURN_CODE = INVALID_CONFIG;
+            return;
+        }
+    }
+    update_process_deadline(current_process, (SYSTEM_TIME_TYPE)ucx_uptime());
+    
+
+    
+    
+}
 
 void CREATE_MUTEX (
        /*in */ MUTEX_NAME_TYPE          MUTEX_NAME,
