@@ -54,38 +54,37 @@ void process_test0(void)
 {   
 	RETURN_CODE_TYPE return_code;
 	APEX_INTEGER process_id;
-	SEMAPHORE_ID_TYPE semaphore_id;
-	SEMAPHORE_STATUS_TYPE semaphore_status;
+	EVENT_ID_TYPE event_id;
+	EVENT_STATUS_TYPE event_status;
 	uint32_t seq = 0;
 
 	GET_MY_ID(&process_id, &return_code);
-	printf("\n--- START TEST WAIT_SEMAPHORE / SIGNAL_SEMAPHORE ---\n");
+	printf("\n--- START TEST WAIT_EVENT / SET_EVENT / RESET_EVENT ---\n");
 
-	GET_SEMAPHORE_ID("Semaphore1", &semaphore_id, &return_code);
-	printf("[P1/Process0] GET_SEMAPHORE_ID('Semaphore1') rc=%d id=%d\n",
+	GET_EVENT_ID("Event1", &event_id, &return_code);
+	printf("[P1/Process0] GET_EVENT_ID('Event1') rc=%d id=%d\n",
 	       return_code,
-	       semaphore_id);
+	       event_id);
 	if (return_code == NO_ERROR) {
-		GET_SEMAPHORE_STATUS(semaphore_id, &semaphore_status, &return_code);
-		printf("[P1/Process0] INIT STATUS rc=%d current=%d max=%d waiting=%d\n",
+		GET_EVENT_STATUS(event_id, &event_status, &return_code);
+		printf("[P1/Process0] INIT STATUS rc=%d state=%d waiting=%d\n",
 		       return_code,
-		       semaphore_status.CURRENT_VALUE,
-		       semaphore_status.MAXIMUM_VALUE,
-		       semaphore_status.WAITING_PROCESSES);
+		       event_status.EVENT_STATE,
+		       event_status.WAITING_PROCESSES);
 	}
-	printf("--- END INIT WAIT/SIGNAL TEST ---\n\n");
+	printf("--- END INIT WAIT/EVENT TEST ---\n\n");
 
 	while (1) {
 		seq++;
-		printf("[P1/Process0] WAIT_SEMAPHORE #%lu pid=%d timeout=20\n",
+		printf("[P1/Process0] WAIT_EVENT #%lu pid=%d timeout=20\n",
 		       (unsigned long)seq,
 		       process_id);
-		WAIT_SEMAPHORE(semaphore_id, 20, &return_code);
-		GET_SEMAPHORE_STATUS(semaphore_id, &semaphore_status, &return_code);
-		printf("[P1/Process0] WAKE rc=%d current=%d waiting=%d\n",
+		WAIT_EVENT(event_id, 20, &return_code);
+		GET_EVENT_STATUS(event_id, &event_status, &return_code);
+		printf("[P1/Process0] WAKE rc=%d state=%d waiting=%d\n",
 		       return_code,
-		       semaphore_status.CURRENT_VALUE,
-		       semaphore_status.WAITING_PROCESSES);
+		       event_status.EVENT_STATE,
+		       event_status.WAITING_PROCESSES);
 
 		TIMED_WAIT(2, &return_code);
 	}
@@ -96,34 +95,44 @@ void process_test1(void)
 {   
 	RETURN_CODE_TYPE return_code;
 	APEX_INTEGER process_id;
-	SEMAPHORE_ID_TYPE semaphore_id;
-	SEMAPHORE_STATUS_TYPE semaphore_status;
+	EVENT_ID_TYPE event_id;
+	EVENT_STATUS_TYPE event_status;
 	uint32_t seq = 0;
 
 	GET_MY_ID(&process_id, &return_code);
 
 	while (1) {
-		GET_SEMAPHORE_ID("Semaphore1", &semaphore_id, &return_code);
+		GET_EVENT_ID("Event1", &event_id, &return_code);
 		if (return_code == NO_ERROR) {
 			break;
 		}
-		printf("[P1/Process1] GET_SEMAPHORE_ID('Semaphore1') rc=%d (retry)\n", return_code);
+		printf("[P1/Process1] GET_EVENT_ID('Event1') rc=%d (retry)\n", return_code);
 		TIMED_WAIT(2, &return_code);
 	}
 
-	printf("[P1/Process1] Semaphore1 ready id=%d\n", semaphore_id);
+	printf("[P1/Process1] Event1 ready id=%d\n", event_id);
 
 	while (1) {
 		seq++;
 		TIMED_WAIT(6, &return_code);
-		SIGNAL_SEMAPHORE(semaphore_id, &return_code);
-		GET_SEMAPHORE_STATUS(semaphore_id, &semaphore_status, &return_code);
-		printf("[P1/Process1] SIGNAL_SEMAPHORE #%lu pid=%d rc=%d current=%d waiting=%d\n",
+		SET_EVENT(event_id, &return_code);
+		GET_EVENT_STATUS(event_id, &event_status, &return_code);
+		printf("[P1/Process1] SET_EVENT #%lu pid=%d rc=%d state=%d waiting=%d\n",
 		       (unsigned long)seq,
 		       process_id,
 		       return_code,
-		       semaphore_status.CURRENT_VALUE,
-		       semaphore_status.WAITING_PROCESSES);
+		       event_status.EVENT_STATE,
+		       event_status.WAITING_PROCESSES);
+
+		TIMED_WAIT(2, &return_code);
+		RESET_EVENT(event_id, &return_code);
+		GET_EVENT_STATUS(event_id, &event_status, &return_code);
+		printf("[P1/Process1] RESET_EVENT #%lu pid=%d rc=%d state=%d waiting=%d\n",
+		       (unsigned long)seq,
+		       process_id,
+		       return_code,
+		       event_status.EVENT_STATE,
+		       event_status.WAITING_PROCESSES);
 	}
 }
 
@@ -132,35 +141,34 @@ void process_test2(void)
 {   
 	RETURN_CODE_TYPE return_code;
 	APEX_INTEGER process_id;
-	SEMAPHORE_ID_TYPE semaphore_id;
-	SEMAPHORE_STATUS_TYPE semaphore_status;
+	EVENT_ID_TYPE event_id;
+	EVENT_STATUS_TYPE event_status;
 	uint32_t seq = 0;
 
 	GET_MY_ID(&process_id, &return_code);
 
 	while (1) {
-		GET_SEMAPHORE_ID("Semaphore1", &semaphore_id, &return_code);
+		GET_EVENT_ID("Event1", &event_id, &return_code);
 		if (return_code == NO_ERROR) {
 			break;
 		}
-		printf("[P1/Process2] GET_SEMAPHORE_ID('Semaphore1') rc=%d (retry)\n", return_code);
+		printf("[P1/Process2] GET_EVENT_ID('Event1') rc=%d (retry)\n", return_code);
 		TIMED_WAIT(2, &return_code);
 	}
 
-	printf("[P1/Process2] Semaphore1 ready id=%d (waiter pid=%d)\n", semaphore_id, process_id);
+	printf("[P1/Process2] Event1 ready id=%d (waiter pid=%d)\n", event_id, process_id);
 
 	while (1) {
 		seq++;
-		printf("[P1/Process2] WAIT_SEMAPHORE #%lu pid=%d timeout=20\n",
+		printf("[P1/Process2] WAIT_EVENT 	#%lu pid=%d timeout=20\n",
 		       (unsigned long)seq,
 		       process_id);
-		WAIT_SEMAPHORE(semaphore_id, 1, &return_code);
-		GET_SEMAPHORE_STATUS(semaphore_id, &semaphore_status, &return_code);
-		printf("[P1/Process2] WAKE rc=%d current=%d max=%d waiting=%d\n",
+		WAIT_EVENT(event_id, 20, &return_code);
+		GET_EVENT_STATUS(event_id, &event_status, &return_code);
+		printf("[P1/Process2] WAKE rc=%d state=%d waiting=%d\n",
 		       return_code,
-		       semaphore_status.CURRENT_VALUE,
-		       semaphore_status.MAXIMUM_VALUE,
-		       semaphore_status.WAITING_PROCESSES);
+		       event_status.EVENT_STATE,
+		       event_status.WAITING_PROCESSES);
 		TIMED_WAIT(10, &return_code);
 	}
 }

@@ -1011,9 +1011,6 @@ void APERIODIC_WAIT_EVENT (
     }
     update_process_deadline(current_process, (SYSTEM_TIME_TYPE)ucx_uptime());
     
-
-    
-    
 }
 
 void CREATE_MUTEX (
