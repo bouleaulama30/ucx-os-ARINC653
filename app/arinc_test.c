@@ -54,125 +54,40 @@ void process_test0(void)
 {   
 	RETURN_CODE_TYPE return_code;
 	APEX_INTEGER process_id;
-	MESSAGE_SIZE_TYPE write_len;
-	char tx_message[64];
-	uint32_t seq = 0;
-
 	SEMAPHORE_ID_TYPE semaphore_id;
 	SEMAPHORE_STATUS_TYPE semaphore_status;
-	EVENT_ID_TYPE event_id;
-	EVENT_STATUS_TYPE event_status;
-	MUTEX_ID_TYPE mutex_id;
-	MUTEX_STATUS_TYPE mutex_status;
+	uint32_t seq = 0;
 
-	BUFFER_ID_TYPE buffer1_id;
-	BUFFER_ID_TYPE buffer2_id;
-	BUFFER_STATUS_TYPE buffer_status;
-
-	while (1) {
-		GET_BUFFER_ID("Buffer1", &buffer1_id, &return_code);
-		if (return_code == NO_ERROR) {
-			break;
-		}
-		printf("[P1/Process0] GET_BUFFER_ID('Buffer1') rc=%d (retry)\n", return_code);
-		// TIMED_WAIT(2, &return_code);
-	}
-
-	while (1) {
-		GET_BUFFER_ID("Buffer2", &buffer2_id, &return_code);
-		if (return_code == NO_ERROR) {
-			break;
-		}
-		printf("[P1/Process0] GET_BUFFER_ID('Buffer2') rc=%d (retry)\n", return_code);
-		// TIMED_WAIT(2, &return_code);
-	}
-
-	printf("[P1/Process0] Buffer1 ready id=%d | Buffer2 ready id=%d\n", buffer1_id, buffer2_id);
 	GET_MY_ID(&process_id, &return_code);
-
-	printf("\n--- START TEST GET_ID / GET_STATUS (Semaphore, Event, Mutex) ---\n");
+	printf("\n--- START TEST WAIT_SEMAPHORE / SIGNAL_SEMAPHORE ---\n");
 
 	GET_SEMAPHORE_ID("Semaphore1", &semaphore_id, &return_code);
-	printf("[P1/Process0] GET_SEMAPHORE_ID('Semaphore1') rc=%d id=%d [%s]\n",
+	printf("[P1/Process0] GET_SEMAPHORE_ID('Semaphore1') rc=%d id=%d\n",
 	       return_code,
-	       semaphore_id,
-	       (return_code == NO_ERROR && semaphore_id == 1) ? "PASS" : "FAIL");
+	       semaphore_id);
 	if (return_code == NO_ERROR) {
 		GET_SEMAPHORE_STATUS(semaphore_id, &semaphore_status, &return_code);
-		printf("[P1/Process0] GET_SEMAPHORE_STATUS rc=%d current=%d max=%d waiting=%d [%s]\n",
+		printf("[P1/Process0] INIT STATUS rc=%d current=%d max=%d waiting=%d\n",
 		       return_code,
 		       semaphore_status.CURRENT_VALUE,
 		       semaphore_status.MAXIMUM_VALUE,
-		       semaphore_status.WAITING_PROCESSES,
-		       (return_code == NO_ERROR &&
-		        semaphore_status.CURRENT_VALUE == 3 &&
-		        semaphore_status.MAXIMUM_VALUE == 3 &&
-		        semaphore_status.WAITING_PROCESSES == 0) ? "PASS" : "FAIL");
+		       semaphore_status.WAITING_PROCESSES);
 	}
-
-	GET_EVENT_ID("Event1", &event_id, &return_code);
-	printf("[P1/Process0] GET_EVENT_ID('Event1') rc=%d id=%d [%s]\n",
-	       return_code,
-	       event_id,
-	       (return_code == NO_ERROR && event_id == 1) ? "PASS" : "FAIL");
-	if (return_code == NO_ERROR) {
-		GET_EVENT_STATUS(event_id, &event_status, &return_code);
-		printf("[P1/Process0] GET_EVENT_STATUS rc=%d state=%d waiting=%d [%s]\n",
-		       return_code,
-		       event_status.EVENT_STATE,
-		       event_status.WAITING_PROCESSES,
-		       (return_code == NO_ERROR &&
-		        event_status.EVENT_STATE == DOWN &&
-		        event_status.WAITING_PROCESSES == 0) ? "PASS" : "FAIL");
-	}
-
-	GET_MUTEX_ID("Mutex1", &mutex_id, &return_code);
-	printf("[P1/Process0] GET_MUTEX_ID('Mutex1') rc=%d id=%d [%s]\n",
-	       return_code,
-	       mutex_id,
-	       (return_code == NO_ERROR && mutex_id == 1) ? "PASS" : "FAIL");
-	if (return_code == NO_ERROR) {
-		GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
-		printf("[P1/Process0] GET_MUTEX_STATUS rc=%d owner=%d state=%d priority=%d lock_count=%d waiting=%d [%s]\n",
-		       return_code,
-		       mutex_status.MUTEX_OWNER,
-		       mutex_status.MUTEX_STATE,
-		       mutex_status.MUTEX_PRIORITY,
-		       mutex_status.LOCK_COUNT,
-		       mutex_status.WAITING_PROCESSES,
-		       (return_code == NO_ERROR &&
-		        mutex_status.MUTEX_STATE == AVAILABLE &&
-		        mutex_status.MUTEX_PRIORITY == 1 &&
-		        mutex_status.LOCK_COUNT == 0 &&
-		        mutex_status.WAITING_PROCESSES == 0) ? "PASS" : "FAIL");
-	}
-
-	printf("--- END TEST GET_ID / GET_STATUS ---\n\n");
+	printf("--- END INIT WAIT/SIGNAL TEST ---\n\n");
 
 	while (1) {
 		seq++;
-		sprintf(tx_message, "P1p0->Buffer1 seq=%lu pid=%d",
-				(unsigned long)seq,
-				process_id);
-		write_len = (MESSAGE_SIZE_TYPE)(strlen(tx_message) + 1);
-
-		SEND_BUFFER(buffer1_id, (MESSAGE_ADDR_TYPE)tx_message, write_len, 1, &return_code);
-		printf("[P1/Process0] SEND_BUFFER('Buffer1') rc=%d len=%d msg='%s'\n",
+		printf("[P1/Process0] WAIT_SEMAPHORE #%lu pid=%d timeout=20\n",
+		       (unsigned long)seq,
+		       process_id);
+		WAIT_SEMAPHORE(semaphore_id, 20, &return_code);
+		GET_SEMAPHORE_STATUS(semaphore_id, &semaphore_status, &return_code);
+		printf("[P1/Process0] WAKE rc=%d current=%d waiting=%d\n",
 		       return_code,
-		       write_len,
-		       tx_message);
+		       semaphore_status.CURRENT_VALUE,
+		       semaphore_status.WAITING_PROCESSES);
 
-		GET_BUFFER_STATUS(buffer1_id, &buffer_status, &return_code);
-		if (return_code == NO_ERROR) {
-			printf("[P1/Process0] GET_BUFFER_STATUS rc=%d num_messages=%d max_message_size=%d\n",
-				   return_code,
-				   buffer_status.NB_MESSAGE,
-				   buffer_status.MAX_MESSAGE_SIZE);
-		} else {
-			printf("[P1/Process0] GET_BUFFER_STATUS rc=%d FAIL\n", return_code);
-		}
-
-		TIMED_WAIT(0, &return_code);
+		TIMED_WAIT(2, &return_code);
 	}
 }
 
@@ -181,51 +96,34 @@ void process_test1(void)
 {   
 	RETURN_CODE_TYPE return_code;
 	APEX_INTEGER process_id;
-	BUFFER_ID_TYPE buffer_id;
-	BUFFER_STATUS_TYPE buffer_status;
-	MESSAGE_SIZE_TYPE write_len;
-	char tx_message[64];
+	SEMAPHORE_ID_TYPE semaphore_id;
+	SEMAPHORE_STATUS_TYPE semaphore_status;
 	uint32_t seq = 0;
 
 	GET_MY_ID(&process_id, &return_code);
 
 	while (1) {
-		GET_BUFFER_ID("Buffer2", &buffer_id, &return_code);
+		GET_SEMAPHORE_ID("Semaphore1", &semaphore_id, &return_code);
 		if (return_code == NO_ERROR) {
 			break;
 		}
-		printf("[P1/Process1] GET_BUFFER_ID('Buffer2') rc=%d (retry)\n", return_code);
-		// TIMED_WAIT(2, &return_code);
+		printf("[P1/Process1] GET_SEMAPHORE_ID('Semaphore1') rc=%d (retry)\n", return_code);
+		TIMED_WAIT(2, &return_code);
 	}
 
-	printf("[P1/Process1] Buffer2 ready id=%d\n", buffer_id);
-	// TIMED_WAIT(2, &return_code);
+	printf("[P1/Process1] Semaphore1 ready id=%d\n", semaphore_id);
 
 	while (1) {
 		seq++;
-		sprintf(tx_message, "P1p1->Buffer2 seq=%lu t=%lu pid=%d",
-				(unsigned long)seq,
-				(unsigned long)ucx_uptime(),
-				process_id);
-		write_len = (MESSAGE_SIZE_TYPE)(strlen(tx_message) + 1);
-
-		SEND_BUFFER(buffer_id, (MESSAGE_ADDR_TYPE)tx_message, write_len, 1, &return_code);
-		printf("[P1/Process1] SEND_BUFFER('Buffer2') rc=%d len=%d msg='%s'\n",
-			   return_code,
-			   write_len,
-			   tx_message);
-
-		GET_BUFFER_STATUS(buffer_id, &buffer_status, &return_code);
-		if (return_code == NO_ERROR) {
-			printf("[P1/Process1] GET_BUFFER_STATUS rc=%d num_messages=%d max_message_size=%d\n",
-				   return_code,
-				   buffer_status.NB_MESSAGE,
-				   buffer_status.MAX_MESSAGE_SIZE);
-		} else {
-			printf("[P1/Process1] GET_BUFFER_STATUS rc=%d FAIL\n", return_code);
-		}
-
-			TIMED_WAIT(0, &return_code);
+		TIMED_WAIT(6, &return_code);
+		SIGNAL_SEMAPHORE(semaphore_id, &return_code);
+		GET_SEMAPHORE_STATUS(semaphore_id, &semaphore_status, &return_code);
+		printf("[P1/Process1] SIGNAL_SEMAPHORE #%lu pid=%d rc=%d current=%d waiting=%d\n",
+		       (unsigned long)seq,
+		       process_id,
+		       return_code,
+		       semaphore_status.CURRENT_VALUE,
+		       semaphore_status.WAITING_PROCESSES);
 	}
 }
 
@@ -234,63 +132,36 @@ void process_test2(void)
 {   
 	RETURN_CODE_TYPE return_code;
 	APEX_INTEGER process_id;
-	BUFFER_ID_TYPE buffer1_id;
-	BUFFER_ID_TYPE buffer2_id;
-	MESSAGE_SIZE_TYPE message_length;
-	char rx_message[64];
+	SEMAPHORE_ID_TYPE semaphore_id;
+	SEMAPHORE_STATUS_TYPE semaphore_status;
+	uint32_t seq = 0;
 
 	GET_MY_ID(&process_id, &return_code);
 
 	while (1) {
-		GET_BUFFER_ID("Buffer1", &buffer1_id, &return_code);
+		GET_SEMAPHORE_ID("Semaphore1", &semaphore_id, &return_code);
 		if (return_code == NO_ERROR) {
 			break;
 		}
-		printf("[P1/Process2] GET_BUFFER_ID('Buffer1') rc=%d (retry)\n", return_code);
+		printf("[P1/Process2] GET_SEMAPHORE_ID('Semaphore1') rc=%d (retry)\n", return_code);
 		TIMED_WAIT(2, &return_code);
 	}
 
-	while (1) {
-		GET_BUFFER_ID("Buffer2", &buffer2_id, &return_code);
-		if (return_code == NO_ERROR) {
-			break;
-		}
-		printf("[P1/Process2] GET_BUFFER_ID('Buffer2') rc=%d (retry)\n", return_code);
-		TIMED_WAIT(2, &return_code);
-	}
-
-	printf("[P1/Process2] Buffer1 ready id=%d | Buffer2 ready id=%d\n", buffer1_id, buffer2_id);
-	// printf("[P1/Process2] Initial delay to let the writers fill Buffer1\n");
-	// TIMED_WAIT(25, &return_code);
+	printf("[P1/Process2] Semaphore1 ready id=%d (waiter pid=%d)\n", semaphore_id, process_id);
 
 	while (1) {
-		message_length = 0;
-		RECEIVE_BUFFER(buffer1_id, 20, (MESSAGE_ADDR_TYPE)rx_message, &message_length, &return_code);
-
-		if (return_code == NO_ERROR || return_code == TIMED_OUT) {
-			rx_message[(message_length < sizeof(rx_message)) ? message_length : (sizeof(rx_message) - 1)] = '\0';
-			printf("[P1/Process2] RECEIVE_BUFFER('Buffer1') rc=%d len=%d msg='%s'\n",
-				   return_code,
-				   message_length,
-				   rx_message);
-		} else {
-			printf("[P1/Process2] RECEIVE_BUFFER('Buffer1') rc=%d FAIL\n", return_code);
-		}
-
-		message_length = 0;
-		RECEIVE_BUFFER(buffer2_id, 20, (MESSAGE_ADDR_TYPE)rx_message, &message_length, &return_code);
-
-		if (return_code == NO_ERROR || return_code == TIMED_OUT) {
-			rx_message[(message_length < sizeof(rx_message)) ? message_length : (sizeof(rx_message) - 1)] = '\0';
-			printf("[P1/Process2] RECEIVE_BUFFER('Buffer2') rc=%d len=%d msg='%s'\n",
-				   return_code,
-				   message_length,
-				   rx_message);
-		} else {
-			printf("[P1/Process2] RECEIVE_BUFFER('Buffer2') rc=%d FAIL\n", return_code);
-		}
-
-		TIMED_WAIT(8, &return_code);
+		seq++;
+		printf("[P1/Process2] WAIT_SEMAPHORE #%lu pid=%d timeout=20\n",
+		       (unsigned long)seq,
+		       process_id);
+		WAIT_SEMAPHORE(semaphore_id, 1, &return_code);
+		GET_SEMAPHORE_STATUS(semaphore_id, &semaphore_status, &return_code);
+		printf("[P1/Process2] WAKE rc=%d current=%d max=%d waiting=%d\n",
+		       return_code,
+		       semaphore_status.CURRENT_VALUE,
+		       semaphore_status.MAXIMUM_VALUE,
+		       semaphore_status.WAITING_PROCESSES);
+		TIMED_WAIT(10, &return_code);
 	}
 }
 

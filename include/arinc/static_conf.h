@@ -349,7 +349,7 @@ struct semaphoreConfig {
 };
     
 static const struct semaphoreConfig semaphore_configs[] = {
-    {.semaphore_name = "Semaphore1", .current_value = 3, .maximum_value = 3, .queuing_discipline = FIFO},
+    {.semaphore_name = "Semaphore1", .current_value = 0, .maximum_value = 1, .queuing_discipline = FIFO},
 };
 
 struct eventConfig {

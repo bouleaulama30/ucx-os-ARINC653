@@ -46,7 +46,9 @@
 
 * read bb:
     * to do mutex or error handler
-* faire tout en unicast ?
+
+* wait semaphore:
+    * to do mutex or error handler
 
 * Mutex:
     * voir si pb avec null process id et le process 0

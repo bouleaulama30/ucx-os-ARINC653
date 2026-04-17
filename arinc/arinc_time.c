@@ -83,6 +83,16 @@ static struct node_s *check_timeouts(struct node_s *node, void *arg) {
                 }
                 process->waiting_buffer = NULL;
             }
+
+            if(process->waiting_semaphore) {
+                struct semaphore_s *sem = process->waiting_semaphore;
+                struct node_s *waiting_node = list_foreach(sem->waiting_processes, find_waiting_process_node, process);
+                if (waiting_node){ 
+                    list_remove(sem->waiting_processes, waiting_node);
+                    sem->semaphore_status.WAITING_PROCESSES--;
+                }
+                process->waiting_semaphore = NULL;
+            }
             
 
             process->is_suspended = false;

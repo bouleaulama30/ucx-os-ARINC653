@@ -685,11 +685,89 @@ void WAIT_SEMAPHORE (
     }
 
     struct semaphore_s *sem = &partition->semaphores[index];
+    if (sem->semaphore_status.CURRENT_VALUE > 0){
+        sem->semaphore_status.CURRENT_VALUE--;
+        *RETURN_CODE = NO_ERROR;
+    }
+    else if (TIME_OUT == 0){
+        *RETURN_CODE = NOT_AVAILABLE;
+    }
+    // to do mutex or error handler
+    else if (TIME_OUT == INFINITE_TIME_VALUE){
+        struct process_s *current_process = partition->process_current->data;
+        current_process->processus_status->PROCESS_STATE = WAITING;
+        sem->semaphore_status.WAITING_PROCESSES++;
+        // to do implementer selon la discipline de la file d'attente
+        if (sem->queuing_discipline == PRIORITY){
+            // to do insert process in waiting_processes list according to its priority
+            list_insert_sorted(sem->waiting_processes, current_process);
+        }
+        else {
+            list_pushback(sem->waiting_processes, current_process);
+        }
+        yield_to_partition(partition, current_process);
+        *RETURN_CODE = NO_ERROR;
+    } else {
+        struct process_s *current_process = partition->process_current->data;
+        current_process->processus_status->PROCESS_STATE = WAITING;
+        sem->semaphore_status.WAITING_PROCESSES++;
+        current_process->waiting_semaphore = sem;
+        // to do implementer selon la discipline de la file d'attente
+        if (sem->queuing_discipline == PRIORITY){
+            // to do insert process in waiting_processes list according to its priority
+            list_insert_sorted(sem->waiting_processes, current_process);
+        }
+        else {
+            list_pushback(sem->waiting_processes, current_process);
+        }
+        current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
+        yield_to_partition(partition, current_process);
+
+        if(current_process->time_counter == 0){
+            *RETURN_CODE = TIMED_OUT;
+        }
+        else {
+            *RETURN_CODE = NO_ERROR;
+        }
+    }
 }
 
 void SIGNAL_SEMAPHORE (
        /*in */ SEMAPHORE_ID_TYPE        SEMAPHORE_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    int index = find_semaphore_by_id(partition, SEMAPHORE_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    struct semaphore_s *sem = &partition->semaphores[index];
+    if (sem->semaphore_status.CURRENT_VALUE == sem->semaphore_status.MAXIMUM_VALUE){
+        *RETURN_CODE = INVALID_CONFIG;
+        return;
+    }
+    
+    if (sem->waiting_processes->length == 0){
+        sem->semaphore_status.CURRENT_VALUE++;
+        *RETURN_CODE = NO_ERROR;
+    }
+    else {
+        // réveiller un processus en attente
+        struct process_s *current_process = partition->process_current->data;
+        struct node_s *first_node = sem->waiting_processes->head->next;
+        struct process_s *woken_process = first_node->data;
+        list_remove(sem->waiting_processes, first_node);
+        sem->semaphore_status.WAITING_PROCESSES--;
+        woken_process->processus_status->PROCESS_STATE = READY;
+        woken_process->waiting_semaphore = NULL;
+        if(woken_process->time_counter != 0){
+            woken_process->time_counter = INFINITE_TIME_VALUE;
+        }
+        yield_to_partition(partition, current_process);
+        *RETURN_CODE = NO_ERROR;
+    }
+}
 
 void GET_SEMAPHORE_ID (
        /*in */ SEMAPHORE_NAME_TYPE      SEMAPHORE_NAME,

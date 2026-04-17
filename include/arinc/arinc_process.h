@@ -85,8 +85,7 @@ struct process_s
     struct buffer_s *waiting_buffer;
     MESSAGE_ADDR_TYPE waiting_message_addr;
     MESSAGE_SIZE_TYPE waiting_message_size;
-//     MESSAGE_SIZE_TYPE *waiting_length_ptr; 
-    
+    struct semaphore_s *waiting_semaphore;
 };
 
 static inline void update_process_deadline(struct process_s *process, SYSTEM_TIME_TYPE base_time) {
