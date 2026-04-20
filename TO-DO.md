@@ -9,6 +9,9 @@
         * -- a DEADLINE_TIME calculation may cause an overflow of the underlying -- clock. If this occurs, HM is invoked with an illegal request error code set the partition’s lock level to zero;
         * if (an error handler process has been created) then enable the error handler process for execution and fault processing;
 
+## Process
+
+* voir pour faire les processes dans des spaces aussi ?
 
 ## partition communication
 * coder tout ce qui est relatif au lock preemption mutex pour les process
@@ -57,12 +60,16 @@
     * current process is error handler process
     * current process owns a mutex
 
-
 * Mutex:
     * voir si pb avec null process id et le process 0
     * MUTEX_STATUS := (MUTEX_OWNER => identifier of the owning process);
-* test create, id, status de semaphore, event, mutex
-
+    * define and implem preemption lock mutex
+    * mutex acquire:
+        * when (current process is the error handler process) =>
+        * positioning the process as being in the ready state for the longest elapsed time at that priority (i.e., other processes at the same priority
+    * mutex reset:
+        * and the current process is not the error handler process) =>
+        * when (the current process is not the error handler process and the current process is not the identified process) => -- mutex can only be reset by the error handler or ownin
 ## HM
 * faire en sorte de mettre toutes les metriques en ns car le lsb de system_time_type est 1 ns
 * implem is_executing_error_handler pour get_my_id et get_my_index
@@ -89,6 +96,7 @@
 
 ## Warning
 * beaucoup d'utilisation de malloc, voir si necessaire d'enlever tous les mallocs
+    * mais alors comment faire pour les liste et tout
 ## remind debug
 
 * build:

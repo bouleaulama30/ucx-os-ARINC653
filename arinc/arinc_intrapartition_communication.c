@@ -1064,16 +1064,119 @@ void CREATE_MUTEX (
 void ACQUIRE_MUTEX (
        /*in */ MUTEX_ID_TYPE            MUTEX_ID,
        /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    int index = find_mutex_by_id(partition, MUTEX_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if(MUTEX_ID == PREEMPTION_LOCK_MUTEX){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if (TIME_OUT < 0 || time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT)){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    struct process_s *current_process = partition->process_current->data;
+    if (current_process->owned_mutex_id != NO_MUTEX_OWNED && current_process->owned_mutex_id != MUTEX_ID){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+    
+    // to do 
+    struct mutex_s *mutex = &partition->mutexes[index];
+    if (current_process->processus_status->CURRENT_PRIORITY >= mutex->mutex_status.MUTEX_PRIORITY){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+
+
+    if (mutex->mutex_status.MUTEX_STATE == AVAILABLE){
+        mutex->mutex_status.MUTEX_STATE = OWNED;
+        current_process->owned_mutex_id = MUTEX_ID;
+        mutex->mutex_status.LOCK_COUNT ++;
+        mutex->saved_owner_priority = current_process->processus_status->CURRENT_PRIORITY;
+        current_process->processus_status->CURRENT_PRIORITY = mutex->mutex_status.MUTEX_PRIORITY;
+        // to do 
+        *RETURN_CODE = NO_ERROR;
+    }
+    else if (TIME_OUT == 0){
+        *RETURN_CODE = NOT_AVAILABLE;
+    }
+
+
+
+}
 
 void RELEASE_MUTEX (
        /*in */ MUTEX_ID_TYPE            MUTEX_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    int index = find_mutex_by_id(partition, MUTEX_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    if(MUTEX_ID == PREEMPTION_LOCK_MUTEX){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    struct process_s *current_process = partition->process_current->data;
+    if (current_process->owned_mutex_id != MUTEX_ID){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+
+
+}
 
 void RESET_MUTEX (
        /*in */ MUTEX_ID_TYPE            MUTEX_ID,
        /*in */ PROCESS_ID_TYPE          PROCESS_ID, 
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+
+    struct pcb_s *partition = get_current_partition();
+    if(partition->status->OPERATING_MODE != NORMAL){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+
+    int index = find_mutex_by_id(partition, MUTEX_ID);
+    if (index == -1){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    //to do 
+    if(MUTEX_ID == PREEMPTION_LOCK_MUTEX){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
+    if (process_node == NULL){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    struct process_s *process = process_node->data;
+    if (process->owned_mutex_id != MUTEX_ID){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+
+    // to do
+
+
+
+}
 
 void GET_MUTEX_ID (
        /*in */ MUTEX_NAME_TYPE          MUTEX_NAME,
@@ -1121,7 +1224,28 @@ void GET_MUTEX_STATUS (
     *RETURN_CODE = NO_ERROR;
 }
 
+
 void GET_PROCESS_MUTEX_STATE (
        /*in */ PROCESS_ID_TYPE          PROCESS_ID,
        /*out*/ MUTEX_ID_TYPE            *MUTEX_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    struct pcb_s *partition = get_current_partition();
+    struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
+    if (process_node == NULL){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    struct process_s *process = process_node->data;
+    if(process->owned_mutex_id == PREEMPTION_LOCK_MUTEX){
+        *MUTEX_ID = PREEMPTION_LOCK_MUTEX;
+    }
+    else if (process->owned_mutex_id >= NULL_MUTEX_ID && process->owned_mutex_id != PREEMPTION_LOCK_MUTEX){
+        *MUTEX_ID = process->owned_mutex_id;
+    }
+    else {
+        *MUTEX_ID = NO_MUTEX_OWNED;
+    }
+
+    *RETURN_CODE = NO_ERROR;
+}

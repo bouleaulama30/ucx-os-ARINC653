@@ -87,7 +87,8 @@ struct process_s
     MESSAGE_SIZE_TYPE waiting_message_size;
     struct semaphore_s *waiting_semaphore;
     struct event_s *waiting_event;
-    struct mutex_s *waiting_mutex;     
+    struct mutex_s *waiting_mutex; 
+    MUTEX_ID_TYPE owned_mutex_id;    
 };
 
 static inline void update_process_deadline(struct process_s *process, SYSTEM_TIME_TYPE base_time) {
@@ -99,6 +100,11 @@ static inline void update_process_deadline(struct process_s *process, SYSTEM_TIM
         process->processus_status->DEADLINE_TIME = base_time + process->processus_status->ATTRIBUTES.TIME_CAPACITY;
     }
 }
+
+struct pcb_s;
+struct node_s *find_processes_by_id(struct node_s *node, void *arg);
+struct node_s *is_process_id_existed(struct pcb_s *partition, PROCESS_ID_TYPE process_id);
+
 
 extern void CREATE_PROCESS (
        /*in */ PROCESS_ATTRIBUTE_TYPE   *ATTRIBUTES,

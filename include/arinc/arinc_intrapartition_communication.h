@@ -296,10 +296,9 @@ extern void APERIODIC_WAIT_EVENT (
 
 typedef  NAME_TYPE       MUTEX_NAME_TYPE;
 
-typedef  APEX_INTEGER   MUTEX_ID_TYPE;
 #define  NULL_MUTEX_ID           0
-#define  NO_MUTEX_OWNED          <implementation dependent>
-#define  PREEMPTION_LOCK_MUTEX   <implementation dependent>
+#define  NO_MUTEX_OWNED          -1
+#define  PREEMPTION_LOCK_MUTEX   1
 
 typedef  APEX_INTEGER    LOCK_COUNT_TYPE;
 
@@ -321,6 +320,7 @@ struct mutex_s {
        PARTITION_ID_TYPE partition_id;
        QUEUING_DISCIPLINE_TYPE queuing_discipline;
        MUTEX_STATUS_TYPE mutex_status;
+       PRIORITY_TYPE saved_owner_priority;
        struct list_s *waiting_processes;
 };
 

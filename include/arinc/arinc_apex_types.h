@@ -139,5 +139,7 @@ typedef
         true
     } BOOLEAN_TYPE;
 
+typedef  APEX_INTEGER   MUTEX_ID_TYPE;
+
 
 #endif

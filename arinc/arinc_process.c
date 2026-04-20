@@ -14,7 +14,7 @@ static struct node_s *find_process_node_by_name(struct pcb_s *partition, PROCESS
     return list_foreach(partition->processes, find_processes_by_name, (void *)process_name);
 }
 
-static struct node_s *find_processes_by_id(struct node_s *node, void *arg){
+struct node_s *find_processes_by_id(struct node_s *node, void *arg){
     struct process_s *process = node->data;
     PROCESS_ID_TYPE id = (PROCESS_ID_TYPE) arg;
     
@@ -24,7 +24,7 @@ static struct node_s *find_processes_by_id(struct node_s *node, void *arg){
     return 0;
 }
 
-static struct node_s *is_process_id_existed(struct pcb_s *partition, PROCESS_ID_TYPE process_id){
+struct node_s *is_process_id_existed(struct pcb_s *partition, PROCESS_ID_TYPE process_id){
     struct node_s *same_process_name_node = list_foreach(partition->processes, find_processes_by_id, (void *)process_id);
     if(same_process_name_node){
         return same_process_name_node;
@@ -102,6 +102,7 @@ void CREATE_PROCESS (
         new_process->is_suspended = false;
         new_process->time_counter = 0;
         new_process->saved_init_delay = 0;
+        new_process->owned_mutex_id = NO_MUTEX_OWNED;
 
        
         list_pushback(partition->processes, new_process);
