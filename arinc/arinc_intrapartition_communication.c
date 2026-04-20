@@ -1077,7 +1077,7 @@ void ACQUIRE_MUTEX (
         return;
     }
 
-    if (TIME_OUT < 0 || time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT)){
+    if (TIME_OUT < -1 || (TIME_OUT != INFINITE_TIME_VALUE && time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT))){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -1124,6 +1124,7 @@ void ACQUIRE_MUTEX (
     }
 
     else if (TIME_OUT == INFINITE_TIME_VALUE){
+        printf("ACQUIRE_MUTEX WAIT INFINITE \n");
         current_process->processus_status->PROCESS_STATE = WAITING;
         mutex->mutex_status.WAITING_PROCESSES++;
         current_process->waiting_mutex = mutex;
@@ -1155,9 +1156,6 @@ void ACQUIRE_MUTEX (
             *RETURN_CODE = NO_ERROR;
         }
     }
-
-
-
 }
 
 void RELEASE_MUTEX (
@@ -1275,6 +1273,7 @@ void RESET_MUTEX (
         if (woken_process->time_counter != 0) {
             woken_process->time_counter = INFINITE_TIME_VALUE;
         }
+        printf("RESET_MUTEX: wake up process %d\n", woken_process->process_id);
         mutex->mutex_status.MUTEX_STATE = OWNED;
         mutex->mutex_status.LOCK_COUNT ++;
         mutex->mutex_status.MUTEX_OWNER = woken_process->process_id;
@@ -1285,6 +1284,7 @@ void RESET_MUTEX (
 
         struct node_s *woken_process_node = is_process_id_existed(partition, woken_process->process_id);
         list_remove(partition->processes, woken_process_node);
+        list_push(partition->processes, woken_process);
         woken_process->processus_status->PROCESS_STATE = READY;
     }
     struct process_s *current_process = partition->process_current->data;

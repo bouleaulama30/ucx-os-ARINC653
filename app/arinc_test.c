@@ -53,40 +53,40 @@ __attribute__((section(".p1_code")))
 void process_test0(void)
 {   
 	RETURN_CODE_TYPE return_code;
+	RETURN_CODE_TYPE return_code1;
 	APEX_INTEGER process_id;
-	EVENT_ID_TYPE event_id;
-	EVENT_STATUS_TYPE event_status;
-	uint32_t seq = 0;
+	MUTEX_ID_TYPE mutex_id;
+	MUTEX_STATUS_TYPE mutex_status;
 
 	GET_MY_ID(&process_id, &return_code);
-	printf("\n--- START TEST WAIT_EVENT / SET_EVENT / RESET_EVENT ---\n");
-
-	GET_EVENT_ID("Event1", &event_id, &return_code);
-	printf("[P1/Process0] GET_EVENT_ID('Event1') rc=%d id=%d\n",
-	       return_code,
-	       event_id);
-	if (return_code == NO_ERROR) {
-		GET_EVENT_STATUS(event_id, &event_status, &return_code);
-		printf("[P1/Process0] INIT STATUS rc=%d state=%d waiting=%d\n",
-		       return_code,
-		       event_status.EVENT_STATE,
-		       event_status.WAITING_PROCESSES);
-	}
-	printf("--- END INIT WAIT/EVENT TEST ---\n\n");
+	printf("\n--- START TEST ACQUIRE/RELEASE/RESET_MUTEX (P1: p0,p1,p2) ---\n");
 
 	while (1) {
-		seq++;
-		printf("[P1/Process0] WAIT_EVENT #%lu pid=%d timeout=20\n",
-		       (unsigned long)seq,
-		       process_id);
-		WAIT_EVENT(event_id, 20, &return_code);
-		GET_EVENT_STATUS(event_id, &event_status, &return_code);
-		printf("[P1/Process0] WAKE rc=%d state=%d waiting=%d\n",
-		       return_code,
-		       event_status.EVENT_STATE,
-		       event_status.WAITING_PROCESSES);
-
+		GET_MUTEX_ID("Mutex2", &mutex_id, &return_code);
+		if (return_code == NO_ERROR) {
+			break;
+		}
+		printf("[P1/Process0] GET_MUTEX_ID('Mutex2') rc=%d (retry)\n", return_code);
 		TIMED_WAIT(2, &return_code);
+	}
+
+	printf("[P1/Process0] mutex ready id=%d pid=%d\n", mutex_id, process_id);
+	ACQUIRE_MUTEX(mutex_id, INFINITE_TIME_VALUE, &return_code1);
+	GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
+	printf("[P1/Process0] ACQUIRE_MUTEX rc=%d owner=%d lock=%d waiting=%d\n",
+	       return_code1,
+	       mutex_status.MUTEX_OWNER,
+	       mutex_status.LOCK_COUNT,
+	       mutex_status.WAITING_PROCESSES);
+
+	while (1) {
+		TIMED_WAIT(0, &return_code);
+		GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
+		printf("[P1/Process0] status rc=%d owner=%d lock=%d waiting=%d\n",
+		       return_code,
+		       mutex_status.MUTEX_OWNER,
+		       mutex_status.LOCK_COUNT,
+		       mutex_status.WAITING_PROCESSES);
 	}
 }
 
@@ -94,45 +94,47 @@ __attribute__((section(".p1_code")))
 void process_test1(void)
 {   
 	RETURN_CODE_TYPE return_code;
+	RETURN_CODE_TYPE return_code1;
 	APEX_INTEGER process_id;
-	EVENT_ID_TYPE event_id;
-	EVENT_STATUS_TYPE event_status;
-	uint32_t seq = 0;
+	MUTEX_ID_TYPE mutex_id;
+	MUTEX_STATUS_TYPE mutex_status;
+	int released_once = 0;
 
 	GET_MY_ID(&process_id, &return_code);
 
 	while (1) {
-		GET_EVENT_ID("Event1", &event_id, &return_code);
+		GET_MUTEX_ID("Mutex2", &mutex_id, &return_code);
 		if (return_code == NO_ERROR) {
 			break;
 		}
-		printf("[P1/Process1] GET_EVENT_ID('Event1') rc=%d (retry)\n", return_code);
+		printf("[P1/Process1] GET_MUTEX_ID('Mutex2') rc=%d (retry)\n", return_code);
 		TIMED_WAIT(2, &return_code);
 	}
 
-	printf("[P1/Process1] Event1 ready id=%d\n", event_id);
+	printf("[P1/Process1] mutex ready id=%d pid=%d\n", mutex_id, process_id);
+	// TIMED_WAIT(6, &return_code);
+	printf("[P1/Process1] ACQUIRE_MUTEX (blocking) pid=%d\n", process_id);
+	ACQUIRE_MUTEX(mutex_id, INFINITE_TIME_VALUE, &return_code1);
+	GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
+	printf("[P1/Process1] ACQUIRE_MUTEX return rc=%d owner=%d lock=%d waiting=%d\n",
+	       return_code,
+	       mutex_status.MUTEX_OWNER,
+	       mutex_status.LOCK_COUNT,
+	       mutex_status.WAITING_PROCESSES);
+
+	if (released_once == 0) {
+		RELEASE_MUTEX(mutex_id, &return_code1);
+		GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
+		printf("[P1/Process1] RELEASE_MUTEX rc=%d owner=%d lock=%d waiting=%d\n",
+		       return_code1,
+		       mutex_status.MUTEX_OWNER,
+		       mutex_status.LOCK_COUNT,
+		       mutex_status.WAITING_PROCESSES);
+		released_once = 1;
+	}
 
 	while (1) {
-		seq++;
-		TIMED_WAIT(6, &return_code);
-		SET_EVENT(event_id, &return_code);
-		GET_EVENT_STATUS(event_id, &event_status, &return_code);
-		printf("[P1/Process1] SET_EVENT #%lu pid=%d rc=%d state=%d waiting=%d\n",
-		       (unsigned long)seq,
-		       process_id,
-		       return_code,
-		       event_status.EVENT_STATE,
-		       event_status.WAITING_PROCESSES);
-
-		TIMED_WAIT(2, &return_code);
-		RESET_EVENT(event_id, &return_code);
-		GET_EVENT_STATUS(event_id, &event_status, &return_code);
-		printf("[P1/Process1] RESET_EVENT #%lu pid=%d rc=%d state=%d waiting=%d\n",
-		       (unsigned long)seq,
-		       process_id,
-		       return_code,
-		       event_status.EVENT_STATE,
-		       event_status.WAITING_PROCESSES);
+		TIMED_WAIT(20, &return_code);
 	}
 }
 
@@ -140,36 +142,39 @@ __attribute__((section(".p1_code")))
 void process_test2(void)
 {   
 	RETURN_CODE_TYPE return_code;
+	RETURN_CODE_TYPE return_code1;
 	APEX_INTEGER process_id;
-	EVENT_ID_TYPE event_id;
-	EVENT_STATUS_TYPE event_status;
-	uint32_t seq = 0;
+	MUTEX_ID_TYPE mutex_id;
+	MUTEX_STATUS_TYPE mutex_status;
+	int reset_done = 0;
 
 	GET_MY_ID(&process_id, &return_code);
 
 	while (1) {
-		GET_EVENT_ID("Event1", &event_id, &return_code);
+		GET_MUTEX_ID("Mutex2", &mutex_id, &return_code);
 		if (return_code == NO_ERROR) {
 			break;
 		}
-		printf("[P1/Process2] GET_EVENT_ID('Event1') rc=%d (retry)\n", return_code);
+		printf("[P1/Process2] GET_MUTEX_ID('Mutex2') rc=%d (retry)\n", return_code);
 		TIMED_WAIT(2, &return_code);
 	}
 
-	printf("[P1/Process2] Event1 ready id=%d (waiter pid=%d)\n", event_id, process_id);
+	printf("[P1/Process2] mutex ready id=%d pid=%d\n", mutex_id, process_id);
+	TIMED_WAIT(2, &return_code);
+
+	if (reset_done == 0) {
+		RESET_MUTEX(mutex_id, 0, &return_code1);
+		GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
+		printf("[P1/Process2] RESET_MUTEX(target=0) rc=%d owner=%d lock=%d waiting=%d\n",
+		       return_code1,
+		       mutex_status.MUTEX_OWNER,
+		       mutex_status.LOCK_COUNT,
+		       mutex_status.WAITING_PROCESSES);
+		reset_done = 1;
+	}
 
 	while (1) {
-		seq++;
-		printf("[P1/Process2] WAIT_EVENT 	#%lu pid=%d timeout=20\n",
-		       (unsigned long)seq,
-		       process_id);
-		WAIT_EVENT(event_id, 20, &return_code);
-		GET_EVENT_STATUS(event_id, &event_status, &return_code);
-		printf("[P1/Process2] WAKE rc=%d state=%d waiting=%d\n",
-		       return_code,
-		       event_status.EVENT_STATE,
-		       event_status.WAITING_PROCESSES);
-		TIMED_WAIT(10, &return_code);
+		TIMED_WAIT(20, &return_code);
 	}
 }
 
