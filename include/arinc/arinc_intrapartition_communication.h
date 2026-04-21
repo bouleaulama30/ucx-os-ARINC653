@@ -324,6 +324,12 @@ struct mutex_s {
        struct list_s *waiting_processes;
 };
 
+void krnl_acquire_mutex(/*in */ MUTEX_ID_TYPE            MUTEX_ID,
+       /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE);
+void krnl_release_mutex(/*in */ MUTEX_ID_TYPE            MUTEX_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE);
+
 extern void CREATE_MUTEX (
        /*in */ MUTEX_NAME_TYPE          MUTEX_NAME,
        /*in */ PRIORITY_TYPE            MUTEX_PRIORITY,

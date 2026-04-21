@@ -13,6 +13,12 @@
 
 * voir pour faire les processes dans des spaces aussi ?
 
+* Lock_preemption:
+    * current process is error handler process
+
+* Unlock_preemption:
+    * current process is error handler process
+
 ## partition communication
 * coder tout ce qui est relatif au lock preemption mutex pour les process
 
@@ -61,7 +67,6 @@
     * current process owns a mutex
 
 * Mutex:
-    * MUTEX_STATUS := (MUTEX_OWNER => identifier of the owning process);
     * mutex acquire:
         * when (current process is the error handler process) =>
         * positioning the process as being in the ready state for the longest elapsed time at that priority (i.e., other processes at the same priority
@@ -88,6 +93,7 @@
 * sampling_port_s -> sp_s ?
 * mettre des commentaires
 * voir si pour les ressources comme bb, la reference vers la partition ou le waiting_blackboard est necessaire dans la struct
+* voir pour mettre krnl acquire et release mutex dans un fichier du krnl
 
 ## Choses dependante de l archi
 * protection memoire avec pmp_activate et mprv_activate (lie a riscv32)

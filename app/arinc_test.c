@@ -114,7 +114,9 @@ void p1_process2(void)
 	printf("[P1/Process2] mutex ready id=%d pid=%d\n", mutex_id, process_id);
 	// TIMED_WAIT(6, &return_code);
 	printf("[P1/Process2] ACQUIRE_MUTEX (blocking) pid=%d\n", process_id);
+	LOCK_LEVEL_TYPE lock_level;
 	ACQUIRE_MUTEX(mutex_id, INFINITE_TIME_VALUE, &return_code1);
+	// LOCK_PREEMPTION(&lock_level, &return_code);
 	GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
 	printf("[P1/Process2] ACQUIRE_MUTEX return rc=%d owner=%d lock=%d waiting=%d\n",
 	       return_code,
@@ -124,6 +126,7 @@ void p1_process2(void)
 
 	if (released_once == 0) {
 		RELEASE_MUTEX(mutex_id, &return_code1);
+		// UNLOCK_PREEMPTION(&lock_level, &return_code1);
 		GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
 		printf("[P1/Process2] RELEASE_MUTEX rc=%d owner=%d lock=%d waiting=%d\n",
 		       return_code1,
@@ -134,7 +137,7 @@ void p1_process2(void)
 	}
 
 	while (1) {
-		TIMED_WAIT(20, &return_code);
+		// TIMED_WAIT(20, &return_code);
 	}
 }
 

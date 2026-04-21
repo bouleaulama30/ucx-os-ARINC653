@@ -1289,7 +1289,6 @@ void RESET_MUTEX (
         if (woken_process->time_counter != 0) {
             woken_process->time_counter = INFINITE_TIME_VALUE;
         }
-        printf("RESET_MUTEX: wake up process %d\n", woken_process->process_id);
         mutex->mutex_status.MUTEX_STATE = OWNED;
         mutex->mutex_status.LOCK_COUNT ++;
         mutex->mutex_status.MUTEX_OWNER = woken_process->process_id;
@@ -1347,7 +1346,6 @@ void GET_MUTEX_STATUS (
         status.MUTEX_OWNER = MAIN_PROCESS_ID;
     }
     else {
-        // to do get the process id of the owner of the mutex
         status.MUTEX_OWNER = mutex->mutex_status.MUTEX_OWNER;
     } 
     *MUTEX_STATUS = status;

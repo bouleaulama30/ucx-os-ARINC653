@@ -488,12 +488,57 @@ void DELAYED_START (
 // to do pendant la partie intra communication
 void LOCK_PREEMPTION (
        /*out*/ LOCK_LEVEL_TYPE          *LOCK_LEVEL,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    // to do
+    struct pcb_s *partition = get_current_partition();
+    if (partition->status->OPERATING_MODE != NORMAL){
+        *LOCK_LEVEL = partition->status->LOCK_LEVEL;
+        *RETURN_CODE = NO_ACTION;
+        return;
+    }
+
+    else {
+        krnl_acquire_mutex(PREEMPTION_LOCK_MUTEX, INFINITE_TIME_VALUE, RETURN_CODE);
+
+        RETURN_CODE_TYPE return_code;
+        MUTEX_STATUS_TYPE mutex_status;
+        GET_MUTEX_STATUS(PREEMPTION_LOCK_MUTEX, &mutex_status, &return_code);
+        if (return_code == NO_ERROR){
+            partition->status->LOCK_LEVEL = mutex_status.LOCK_COUNT;
+        }
+        *LOCK_LEVEL = partition->status->LOCK_LEVEL;
+    }
+}
 
 // to do pendant la partie intra communication
 void UNLOCK_PREEMPTION (
        /*out*/ LOCK_LEVEL_TYPE          *LOCK_LEVEL,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    // to do 
+    struct pcb_s *partition = get_current_partition();
+    struct process_s *current_process = partition->process_current->data;
+    if (partition->status->OPERATING_MODE != NORMAL && partition->status->LOCK_LEVEL == 0){
+        *RETURN_CODE = NO_ACTION;
+        *LOCK_LEVEL = partition->status->LOCK_LEVEL;
+        return;
+    }
+    else if (current_process->owned_mutex_id != PREEMPTION_LOCK_MUTEX){
+        *LOCK_LEVEL = partition->status->LOCK_LEVEL;
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+    else {
+        krnl_release_mutex(PREEMPTION_LOCK_MUTEX, RETURN_CODE);
+
+        RETURN_CODE_TYPE return_code;
+        MUTEX_STATUS_TYPE mutex_status;
+        GET_MUTEX_STATUS(PREEMPTION_LOCK_MUTEX, &mutex_status, &return_code);
+        if (return_code == NO_ERROR){
+            partition->status->LOCK_LEVEL = mutex_status.LOCK_COUNT;
+        }
+        *LOCK_LEVEL = partition->status->LOCK_LEVEL;
+    }
+}
 
 
 // to do 
