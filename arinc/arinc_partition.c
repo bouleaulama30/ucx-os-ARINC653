@@ -25,6 +25,12 @@ void partition_OS(void)
 {
     struct pcb_s *partition = get_current_partition();    
     _mprv_activate();
+
+    // create a mutex for preemption lock
+    int port_id;
+    RETURN_CODE_TYPE return_code0, return_code1;
+    CREATE_MUTEX("PREEMPTION_LOCK", MAX_PRIORITY_VALUE, FIFO, &port_id, &return_code0);
+    printf("return code mutex %d, mutex id %d\n", return_code0, port_id);
     
 start_over:
     setjmp(partition->partition_context);

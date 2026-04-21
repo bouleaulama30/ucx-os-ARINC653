@@ -50,7 +50,7 @@ void test_spatial_violation_p1(void) {
 }
 
 __attribute__((section(".p1_code")))
-void process_test0(void)
+void p1_process1(void)
 {   
 	RETURN_CODE_TYPE return_code;
 	RETURN_CODE_TYPE return_code1;
@@ -62,18 +62,18 @@ void process_test0(void)
 	printf("\n--- START TEST ACQUIRE/RELEASE/RESET_MUTEX (P1: p0,p1,p2) ---\n");
 
 	while (1) {
-		GET_MUTEX_ID("Mutex2", &mutex_id, &return_code);
+		GET_MUTEX_ID("Mutex1", &mutex_id, &return_code);
 		if (return_code == NO_ERROR) {
 			break;
 		}
-		printf("[P1/Process0] GET_MUTEX_ID('Mutex2') rc=%d (retry)\n", return_code);
+		printf("[P1/Process1] GET_MUTEX_ID('Mutex1') rc=%d (retry)\n", return_code);
 		TIMED_WAIT(2, &return_code);
 	}
 
-	printf("[P1/Process0] mutex ready id=%d pid=%d\n", mutex_id, process_id);
+	printf("[P1/Process1] mutex ready id=%d pid=%d\n", mutex_id, process_id);
 	ACQUIRE_MUTEX(mutex_id, INFINITE_TIME_VALUE, &return_code1);
 	GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
-	printf("[P1/Process0] ACQUIRE_MUTEX rc=%d owner=%d lock=%d waiting=%d\n",
+	printf("[P1/Process1] ACQUIRE_MUTEX rc=%d owner=%d lock=%d waiting=%d\n",
 	       return_code1,
 	       mutex_status.MUTEX_OWNER,
 	       mutex_status.LOCK_COUNT,
@@ -82,7 +82,7 @@ void process_test0(void)
 	while (1) {
 		TIMED_WAIT(0, &return_code);
 		GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
-		printf("[P1/Process0] status rc=%d owner=%d lock=%d waiting=%d\n",
+		printf("[P1/Process1] status rc=%d owner=%d lock=%d waiting=%d\n",
 		       return_code,
 		       mutex_status.MUTEX_OWNER,
 		       mutex_status.LOCK_COUNT,
@@ -91,7 +91,7 @@ void process_test0(void)
 }
 
 __attribute__((section(".p1_code")))
-void process_test1(void)
+void p1_process2(void)
 {   
 	RETURN_CODE_TYPE return_code;
 	RETURN_CODE_TYPE return_code1;
@@ -103,20 +103,20 @@ void process_test1(void)
 	GET_MY_ID(&process_id, &return_code);
 
 	while (1) {
-		GET_MUTEX_ID("Mutex2", &mutex_id, &return_code);
+		GET_MUTEX_ID("Mutex1", &mutex_id, &return_code);
 		if (return_code == NO_ERROR) {
 			break;
 		}
-		printf("[P1/Process1] GET_MUTEX_ID('Mutex2') rc=%d (retry)\n", return_code);
+		printf("[P1/Process2] GET_MUTEX_ID('Mutex1') rc=%d (retry)\n", return_code);
 		TIMED_WAIT(2, &return_code);
 	}
 
-	printf("[P1/Process1] mutex ready id=%d pid=%d\n", mutex_id, process_id);
+	printf("[P1/Process2] mutex ready id=%d pid=%d\n", mutex_id, process_id);
 	// TIMED_WAIT(6, &return_code);
-	printf("[P1/Process1] ACQUIRE_MUTEX (blocking) pid=%d\n", process_id);
+	printf("[P1/Process2] ACQUIRE_MUTEX (blocking) pid=%d\n", process_id);
 	ACQUIRE_MUTEX(mutex_id, INFINITE_TIME_VALUE, &return_code1);
 	GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
-	printf("[P1/Process1] ACQUIRE_MUTEX return rc=%d owner=%d lock=%d waiting=%d\n",
+	printf("[P1/Process2] ACQUIRE_MUTEX return rc=%d owner=%d lock=%d waiting=%d\n",
 	       return_code,
 	       mutex_status.MUTEX_OWNER,
 	       mutex_status.LOCK_COUNT,
@@ -125,7 +125,7 @@ void process_test1(void)
 	if (released_once == 0) {
 		RELEASE_MUTEX(mutex_id, &return_code1);
 		GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
-		printf("[P1/Process1] RELEASE_MUTEX rc=%d owner=%d lock=%d waiting=%d\n",
+		printf("[P1/Process2] RELEASE_MUTEX rc=%d owner=%d lock=%d waiting=%d\n",
 		       return_code1,
 		       mutex_status.MUTEX_OWNER,
 		       mutex_status.LOCK_COUNT,
@@ -139,7 +139,7 @@ void process_test1(void)
 }
 
 __attribute__((section(".p1_code")))
-void process_test2(void)
+void p1_process3(void)
 {   
 	RETURN_CODE_TYPE return_code;
 	RETURN_CODE_TYPE return_code1;
@@ -151,21 +151,21 @@ void process_test2(void)
 	GET_MY_ID(&process_id, &return_code);
 
 	while (1) {
-		GET_MUTEX_ID("Mutex2", &mutex_id, &return_code);
+		GET_MUTEX_ID("Mutex1", &mutex_id, &return_code);
 		if (return_code == NO_ERROR) {
 			break;
 		}
-		printf("[P1/Process2] GET_MUTEX_ID('Mutex2') rc=%d (retry)\n", return_code);
+		printf("[P1/Process3] GET_MUTEX_ID('Mutex1') rc=%d (retry)\n", return_code);
 		TIMED_WAIT(2, &return_code);
 	}
 
-	printf("[P1/Process2] mutex ready id=%d pid=%d\n", mutex_id, process_id);
+	printf("[P1/Process3] mutex ready id=%d pid=%d\n", mutex_id, process_id);
 	TIMED_WAIT(2, &return_code);
 
 	if (reset_done == 0) {
-		RESET_MUTEX(mutex_id, 0, &return_code1);
+		RESET_MUTEX(mutex_id, 1, &return_code1);
 		GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
-		printf("[P1/Process2] RESET_MUTEX(target=0) rc=%d owner=%d lock=%d waiting=%d\n",
+		printf("[P1/Process3] RESET_MUTEX(target=1) rc=%d owner=%d lock=%d waiting=%d\n",
 		       return_code1,
 		       mutex_status.MUTEX_OWNER,
 		       mutex_status.LOCK_COUNT,
@@ -179,7 +179,7 @@ void process_test2(void)
 }
 
 __attribute__((section(".p2_code")))
-void process_test3(void)
+void p2_process1(void)
 {   
 	RETURN_CODE_TYPE return_code;
 	APEX_INTEGER partition_id;

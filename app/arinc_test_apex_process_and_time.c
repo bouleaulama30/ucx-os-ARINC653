@@ -15,7 +15,7 @@ extern uint8_t _p2_data_start[];
 extern uint8_t _p2_data_end[];
 
 __attribute__((section(".p2_code")))
-void process_test2(void)
+void p1_process3(void)
 {   
 int32_t cnt = 300000;
     RETURN_CODE_TYPE return_code;
@@ -54,7 +54,7 @@ int32_t cnt = 300000;
 }
 
 __attribute__((section(".p2_code")))
-void process_test3(void)
+void p2_process1(void)
 {   
 	int32_t cnt = 400000;
     RETURN_CODE_TYPE return_code;

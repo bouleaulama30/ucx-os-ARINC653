@@ -1061,10 +1061,10 @@ void CREATE_MUTEX (
     *RETURN_CODE = NO_ERROR;
 }
 
-void ACQUIRE_MUTEX (
-       /*in */ MUTEX_ID_TYPE            MUTEX_ID,
+void krnl_acquire_mutex(/*in */ MUTEX_ID_TYPE            MUTEX_ID,
        /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE){
+
     struct pcb_s *partition = get_current_partition();
     int index = find_mutex_by_id(partition, MUTEX_ID);
     if (index == -1){
@@ -1072,10 +1072,6 @@ void ACQUIRE_MUTEX (
         return;
     }
 
-    if(MUTEX_ID == PREEMPTION_LOCK_MUTEX){
-        *RETURN_CODE = INVALID_PARAM;
-        return;
-    }
 
     if (TIME_OUT < -1 || (TIME_OUT != INFINITE_TIME_VALUE && time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT))){
         *RETURN_CODE = INVALID_PARAM;
@@ -1158,9 +1154,22 @@ void ACQUIRE_MUTEX (
     }
 }
 
-void RELEASE_MUTEX (
+void ACQUIRE_MUTEX (
        /*in */ MUTEX_ID_TYPE            MUTEX_ID,
+       /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    if(MUTEX_ID == PREEMPTION_LOCK_MUTEX){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
+    krnl_acquire_mutex(MUTEX_ID, TIME_OUT, RETURN_CODE);
+    return;
+}
+
+
+void krnl_release_mutex(/*in */ MUTEX_ID_TYPE            MUTEX_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE){
     struct pcb_s *partition = get_current_partition();
     int index = find_mutex_by_id(partition, MUTEX_ID);
     if (index == -1){
@@ -1168,10 +1177,6 @@ void RELEASE_MUTEX (
         return;
     }
 
-    if(MUTEX_ID == PREEMPTION_LOCK_MUTEX){
-        *RETURN_CODE = INVALID_PARAM;
-        return;
-    }
 
     struct node_s *current_process_node = partition->process_current;
     struct process_s *current_process = current_process_node->data;
@@ -1213,6 +1218,17 @@ void RELEASE_MUTEX (
         yield_to_partition(partition, current_process);
     }
         *RETURN_CODE = NO_ERROR;
+}
+
+void RELEASE_MUTEX (
+       /*in */ MUTEX_ID_TYPE            MUTEX_ID,
+       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
+    if(MUTEX_ID == PREEMPTION_LOCK_MUTEX){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+    krnl_release_mutex(MUTEX_ID, RETURN_CODE);
+    return;
 }
 
 void RESET_MUTEX (

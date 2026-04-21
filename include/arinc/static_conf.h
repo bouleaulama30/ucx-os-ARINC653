@@ -10,10 +10,10 @@
 #define BUFFER_MAX_MESSAGE_SIZE 64
 #define BUFFER_MAX_NB_MESSAGE 3
 
-extern void process_test0(void);
-extern void process_test1(void);
-extern void process_test2(void);
-extern void process_test3(void);
+extern void p1_process1(void);
+extern void p1_process2(void);
+extern void p1_process3(void);
+extern void p2_process1(void);
 extern void test_spatial_violation_p1(void);
 extern void test_spatial_violation_p2(void);
 extern void test_round_robin_A(void);
@@ -58,6 +58,7 @@ static volatile int32_t p1_semaphores_counter[MAX_NUMBER_OF_SEMAPHORES];
 static struct event_s p1_events[MAX_NUMBER_OF_EVENTS];
 
 static struct mutex_s p1_mutexes[MAX_NUMBER_OF_MUTEXES];
+static struct mutex_s p2_mutexes[MAX_NUMBER_OF_MUTEXES];
 
 // Hardcoded partition configuration
 struct PartitionConfig {
@@ -181,8 +182,8 @@ static const struct PartitionConfig P2_CONFIG = {
     .max_events = 0,
     .event_count = 0,
 
-    .mutexes = NULL,
-    .max_mutexes = 0,
+    .mutexes = p2_mutexes,
+    .max_mutexes = MAX_NUMBER_OF_MUTEXES,
     .mutex_count = 0,
 };
 
@@ -226,48 +227,48 @@ static const window_partition_type DEFAULT_WINDOWS[] = {
 static const uint32_t DEFAULT_WINDOWS_COUNT = sizeof(DEFAULT_WINDOWS) / sizeof(DEFAULT_WINDOWS[0]);
 
 
-// Default process configuration
-static const PROCESS_ATTRIBUTE_TYPE DEFAULT_PROCESS_CONFIG = {
+// P1 process 1 configuration
+static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_1_CONFIG = {
     .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
-    .ENTRY_POINT = process_test0,             // To be set by partition initialization
-    .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 1,            // Medium priority (1-239)
-    .DEADLINE = SOFT,                // Soft deadline
-    .NAME = "DefaultProcess"
-};
-
-// process 1 configuration
-static const PROCESS_ATTRIBUTE_TYPE PROCESS_1_CONFIG = {
-    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
-    .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
-    .ENTRY_POINT = process_test1,             // To be set by partition initialization
+    .ENTRY_POINT = p1_process1,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
     .BASE_PRIORITY = 1,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "Process 1"
 };
 
-// process 2 configuration
-static const PROCESS_ATTRIBUTE_TYPE PROCESS_2_CONFIG = {
+// P1 process 2 configuration
+static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_2_CONFIG = {
     .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
-    .ENTRY_POINT = process_test2,             // To be set by partition initialization
+    .ENTRY_POINT = p1_process2,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 3,            // Medium priority (1-239)
+    .BASE_PRIORITY = 1,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "Process 2"
 };
 
-// process 3 configuration
-static const PROCESS_ATTRIBUTE_TYPE PROCESS_3_CONFIG = {
+// P1 process 3 configuration
+static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_3_CONFIG = {
     .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 10,       // 10ms in nanoseconds
-    .ENTRY_POINT = process_test3,             // To be set by partition initialization
+    .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
+    .ENTRY_POINT = p1_process3,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
     .BASE_PRIORITY = 3,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "Process 3"
+};
+
+// P2 process 1 configuration
+static const PROCESS_ATTRIBUTE_TYPE P2_PROCESS_1_CONFIG = {
+    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
+    .TIME_CAPACITY = 10,       // 10ms in nanoseconds
+    .ENTRY_POINT = p2_process1,             // To be set by partition initialization
+    .STACK_SIZE = 4096,              // 4KB stack
+    .BASE_PRIORITY = 3,            // Medium priority (1-239)
+    .DEADLINE = SOFT,                // Soft deadline
+    .NAME = "Process 1"
 };
 
 
@@ -371,7 +372,6 @@ struct mutexConfig {
 
 static const struct mutexConfig mutex_configs[] = {
     {.mutex_name = "Mutex1", .mutex_priority = 2, .queuing_discipline = FIFO},
-    {.mutex_name = "Mutex2", .mutex_priority = 2, .queuing_discipline = FIFO},
 };
 
 #endif 

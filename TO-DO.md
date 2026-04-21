@@ -61,9 +61,7 @@
     * current process owns a mutex
 
 * Mutex:
-    * voir si pb avec null process id et le process 0
     * MUTEX_STATUS := (MUTEX_OWNER => identifier of the owning process);
-    * define and implem preemption lock mutex
     * mutex acquire:
         * when (current process is the error handler process) =>
         * positioning the process as being in the ready state for the longest elapsed time at that priority (i.e., other processes at the same priority
@@ -71,7 +69,6 @@
         * and the current process is not the error handler process) =>
         * when (the current process is not the error handler process and the current process is not the identified process) => -- mutex can only be reset by the error handler or ownin
         * -- for preemption lock, sets the -- partition’s LOCK_LEVEL to zero
-    * voir pour implementer clairement le lock mutex
     * gerer le lock level pour les partitions
 * VOIR QUAND LE TIME EST INFINIE POUR LA FONCTION DE CALCUL OVERFLOW
 ## HM

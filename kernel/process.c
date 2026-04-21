@@ -18,7 +18,8 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 	new_tcb->rt_prio = 0;
 	new_tcb->delay = 0;
 	new_tcb->stack_sz = stack_size;
-	new_tcb->id = current_partition->id_next++;
+    current_partition->id_next++;
+	new_tcb->id = current_partition->id_next;
 
 	new_tcb->stack = current_partition->next_stack_addr;
 	current_partition->next_stack_addr += stack_size;

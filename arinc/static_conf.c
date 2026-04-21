@@ -11,9 +11,9 @@ void p1_main_process(struct pcb_s *partition){
     PROCESS_ID_TYPE process_id_1;
     PROCESS_ID_TYPE process_id_2;
 
-    CREATE_PROCESS(&DEFAULT_PROCESS_CONFIG, &process_id_0, &return_code0);
-    CREATE_PROCESS(&PROCESS_1_CONFIG, &process_id_1, &return_code1);
-    CREATE_PROCESS(&PROCESS_2_CONFIG, &process_id_2, &return_code0);
+    CREATE_PROCESS(&P1_PROCESS_1_CONFIG, &process_id_0, &return_code0);
+    CREATE_PROCESS(&P1_PROCESS_2_CONFIG, &process_id_1, &return_code1);
+    CREATE_PROCESS(&P1_PROCESS_3_CONFIG, &process_id_2, &return_code0);
 
     // printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
     // printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);      
@@ -52,10 +52,7 @@ void p1_main_process(struct pcb_s *partition){
     CREATE_EVENT(event_configs->event_name, &port_id, &return_code1);
     printf("return code event %d, event id %d\n", return_code1, port_id);
 
-    CREATE_MUTEX(mutex_configs->mutex_name, mutex_configs->mutex_priority, mutex_configs->queuing_discipline, &port_id, &return_code0);
-    printf("return code mutex %d, mutex id %d\n", return_code0, port_id);
-
-    CREATE_MUTEX(mutex_configs[1].mutex_name, mutex_configs[1].mutex_priority, mutex_configs[1].queuing_discipline, &port_id, &return_code0);
+    CREATE_MUTEX(mutex_configs[0].mutex_name, mutex_configs[0].mutex_priority, mutex_configs[0].queuing_discipline, &port_id, &return_code0);
     printf("return code mutex %d, mutex id %d\n", return_code0, port_id);
     
     SET_PARTITION_MODE(NORMAL, &return_code0);
@@ -68,7 +65,7 @@ void p2_main_process(struct pcb_s *partition){
     PROCESS_ID_TYPE process_id_0;
     PROCESS_ID_TYPE process_id_1;
 
-    CREATE_PROCESS(&PROCESS_3_CONFIG, &process_id_1, &return_code1);
+    CREATE_PROCESS(&P2_PROCESS_1_CONFIG, &process_id_1, &return_code1);
 
     printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
     printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);
