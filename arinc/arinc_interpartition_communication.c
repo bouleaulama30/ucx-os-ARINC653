@@ -360,7 +360,7 @@ void SEND_QUEUING_MESSAGE (
 
        struct queuing_port_s *queuing_port = queuing_port_node->data;
 
-       if(TIME_OUT < 0 || time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT)){
+       if(TIME_OUT < INFINITE_TIME_VALUE || (TIME_OUT >= 0 && time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT))){
               *RETURN_CODE = INVALID_PARAM;
               return;
        }
@@ -446,7 +446,7 @@ void RECEIVE_QUEUING_MESSAGE (
 
        struct queuing_port_s *queuing_port = queuing_port_node->data;
 
-       if(TIME_OUT < 0 || time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT)){
+       if(TIME_OUT < INFINITE_TIME_VALUE || (TIME_OUT >= 0 && time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT))){
               *RETURN_CODE = INVALID_PARAM;
               return;
        }

@@ -70,7 +70,6 @@
         * when (the current process is not the error handler process and the current process is not the identified process) => -- mutex can only be reset by the error handler or ownin
         * -- for preemption lock, sets the -- partition’s LOCK_LEVEL to zero
     * gerer le lock level pour les partitions
-* VOIR QUAND LE TIME EST INFINIE POUR LA FONCTION DE CALCUL OVERFLOW
 ## HM
 * faire en sorte de mettre toutes les metriques en ns car le lsb de system_time_type est 1 ns
 * implem is_executing_error_handler pour get_my_id et get_my_index

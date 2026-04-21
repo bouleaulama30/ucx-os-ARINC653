@@ -223,7 +223,7 @@ void READ_BLACKBOARD (
         return;
     }
 
-    if(TIME_OUT < 0 || time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT)){
+    if(TIME_OUT < INFINITE_TIME_VALUE || (TIME_OUT >= 0 && time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT))){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -400,7 +400,7 @@ void SEND_BUFFER (
             return;
     }
 
-    if(TIME_OUT < 0 || time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT)){
+    if(TIME_OUT < INFINITE_TIME_VALUE || (TIME_OUT >= 0 && time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT))){
             *RETURN_CODE = INVALID_PARAM;
             return;
     }
@@ -494,7 +494,7 @@ void RECEIVE_BUFFER (
         return;
     }
 
-    if (TIME_OUT < 0 || time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT)){
+    if (TIME_OUT < INFINITE_TIME_VALUE || (TIME_OUT >= 0 && time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT))){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -679,7 +679,7 @@ void WAIT_SEMAPHORE (
         return;
     }
 
-    if (TIME_OUT < 0 || time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT)){
+    if (TIME_OUT < INFINITE_TIME_VALUE || (TIME_OUT >= 0 && time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT))){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -895,7 +895,7 @@ void WAIT_EVENT (
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
-    if (TIME_OUT < 0 || time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT)){
+    if (TIME_OUT < INFINITE_TIME_VALUE || (TIME_OUT >= 0 && time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT))){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -1073,7 +1073,7 @@ void krnl_acquire_mutex(/*in */ MUTEX_ID_TYPE            MUTEX_ID,
     }
 
 
-    if (TIME_OUT < -1 || (TIME_OUT != INFINITE_TIME_VALUE && time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT))){
+    if (TIME_OUT < INFINITE_TIME_VALUE || (TIME_OUT >= 0 && time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT))){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
