@@ -238,7 +238,11 @@ void READ_BLACKBOARD (
         *LENGTH = 0;
         *RETURN_CODE = NOT_AVAILABLE;
     }
-    // to do mutex or error handler
+    // to do error handler
+    else if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+        *LENGTH = 0;
+        *RETURN_CODE = INVALID_MODE;
+    } 
     else if (TIME_OUT == INFINITE_TIME_VALUE) {
         current_process->processus_status->PROCESS_STATE = WAITING;
         bb->blackboard_status.WAITING_PROCESSES++;
@@ -434,8 +438,10 @@ void SEND_BUFFER (
     else if (TIME_OUT == 0){
         *RETURN_CODE = NOT_AVAILABLE;
     }
-    // cd current process own mutex
-    // else if ()
+    // cd current process error handler
+    else if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+        *RETURN_CODE = INVALID_MODE;
+    }
     else if (TIME_OUT == INFINITE_TIME_VALUE){
         current_process->processus_status->PROCESS_STATE = WAITING;
         buf->buffer_status.WAITING_PROCESSES++;
@@ -535,7 +541,11 @@ void RECEIVE_BUFFER (
         *LENGTH = 0;
         *RETURN_CODE = NOT_AVAILABLE;
     }
-    // to do mutex or error handler
+    // to do  error handler
+    else if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+        *LENGTH = 0;
+        *RETURN_CODE = INVALID_MODE;
+    } 
     else if (TIME_OUT == INFINITE_TIME_VALUE){
         current_process->processus_status->PROCESS_STATE = WAITING;
         buf->buffer_status.WAITING_PROCESSES++;
@@ -685,6 +695,7 @@ void WAIT_SEMAPHORE (
     }
 
     struct semaphore_s *sem = &partition->semaphores[index];
+    struct process_s *current_process = partition->process_current->data;
     if (sem->semaphore_status.CURRENT_VALUE > 0){
         sem->semaphore_status.CURRENT_VALUE--;
         *RETURN_CODE = NO_ERROR;
@@ -692,14 +703,14 @@ void WAIT_SEMAPHORE (
     else if (TIME_OUT == 0){
         *RETURN_CODE = NOT_AVAILABLE;
     }
-    // to do mutex or error handler
+    // to do error handler
+    else if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+        *RETURN_CODE = INVALID_MODE;
+    } 
     else if (TIME_OUT == INFINITE_TIME_VALUE){
-        struct process_s *current_process = partition->process_current->data;
         current_process->processus_status->PROCESS_STATE = WAITING;
         sem->semaphore_status.WAITING_PROCESSES++;
-        // to do implementer selon la discipline de la file d'attente
         if (sem->queuing_discipline == PRIORITY){
-            // to do insert process in waiting_processes list according to its priority
             list_insert_sorted(sem->waiting_processes, current_process);
         }
         else {
@@ -708,13 +719,10 @@ void WAIT_SEMAPHORE (
         yield_to_partition(partition, current_process);
         *RETURN_CODE = NO_ERROR;
     } else {
-        struct process_s *current_process = partition->process_current->data;
         current_process->processus_status->PROCESS_STATE = WAITING;
         sem->semaphore_status.WAITING_PROCESSES++;
         current_process->waiting_semaphore = sem;
-        // to do implementer selon la discipline de la file d'attente
         if (sem->queuing_discipline == PRIORITY){
-            // to do insert process in waiting_processes list according to its priority
             list_insert_sorted(sem->waiting_processes, current_process);
         }
         else {
@@ -901,15 +909,19 @@ void WAIT_EVENT (
     }
 
     struct event_s *event = &partition->events[index];
+    struct process_s *current_process = partition->process_current->data;
     if (event->event_status.EVENT_STATE == UP){
         *RETURN_CODE = NO_ERROR;
     }
     else if (TIME_OUT == 0){
         *RETURN_CODE = NOT_AVAILABLE;
     }
-    // to do mutex or error handler
+    // to do error handler
+    else if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
     else if (TIME_OUT == INFINITE_TIME_VALUE){
-        struct process_s *current_process = partition->process_current->data;
         current_process->processus_status->PROCESS_STATE = WAITING;
         event->event_status.WAITING_PROCESSES++;
         current_process->waiting_event = event;
@@ -917,7 +929,6 @@ void WAIT_EVENT (
         yield_to_partition(partition, current_process);
         *RETURN_CODE = NO_ERROR;
     } else {
-        struct process_s *current_process = partition->process_current->data;
         current_process->processus_status->PROCESS_STATE = WAITING;
         event->event_status.WAITING_PROCESSES++;
         current_process->waiting_event = event;
@@ -986,9 +997,12 @@ void APERIODIC_WAIT_EVENT (
         return;
     }
 
-    // to do current process owns a mutex
-
     struct event_s *event = &partition->events[index];
+    if (current_process->owned_mutex_id != NO_MUTEX_OWNED && event->event_status.EVENT_STATE == DOWN){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+
     current_process->processus_status->DEADLINE_TIME = INFINITE_TIME_VALUE;
 
     if (event->event_status.EVENT_STATE == UP){
@@ -1270,6 +1284,9 @@ void RESET_MUTEX (
 
     struct mutex_s *mutex = &partition->mutexes[index];
     mutex->mutex_status.LOCK_COUNT = 0;
+    if (mutex->mutex_id == PREEMPTION_LOCK_MUTEX)
+        partition->status->LOCK_LEVEL = 0;
+
     mutex->mutex_status.MUTEX_STATE = AVAILABLE;
     process->owned_mutex_id = NO_MUTEX_OWNED;
     mutex->mutex_status.MUTEX_OWNER = NULL_PROCESS_ID;

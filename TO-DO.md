@@ -41,40 +41,36 @@
 ### inter communication
 * faire allocation des spaces (cf message felipe pour les ports) comme pour le intrapartition
 * SEND_QUEUING_MESSAGE:
-    * voir current process own mutex
+    * voir current process error handler
 * RECEIVE_QUEUING_MESSAGE:
-    * voir current process own mutex
+    * voir current process error handler
 * faire tout en unicast ?
 
 ### intra communication
 * send buffer:
-    * to do mutex or error handler
+    * to do error handler
 
 * receive buffer:
-    * to do mutex or error handler
+    * to do error handler
 
 * read bb:
-    * to do mutex or error handler
+    * to do error handler
 
 * wait semaphore:
-    * to do mutex or error handler
+    * to do error handler
 
 * wait_event:
-    * to do mutex or error handler
+    * to do error handler
 
 * wait_periodic_event:
     * current process is error handler process
-    * current process owns a mutex
 
 * Mutex:
     * mutex acquire:
         * when (current process is the error handler process) =>
-        * positioning the process as being in the ready state for the longest elapsed time at that priority (i.e., other processes at the same priority
     * mutex reset:
         * and the current process is not the error handler process) =>
         * when (the current process is not the error handler process and the current process is not the identified process) => -- mutex can only be reset by the error handler or ownin
-        * -- for preemption lock, sets the -- partition’s LOCK_LEVEL to zero
-    * gerer le lock level pour les partitions
 ## HM
 * faire en sorte de mettre toutes les metriques en ns car le lsb de system_time_type est 1 ns
 * implem is_executing_error_handler pour get_my_id et get_my_index

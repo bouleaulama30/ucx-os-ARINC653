@@ -393,8 +393,11 @@ void SEND_QUEUING_MESSAGE (
        else if (TIME_OUT == 0){
               *RETURN_CODE = NOT_AVAILABLE;
        }
-       // cd current process own mutex
-       // else if ()
+       // cd current process error handler
+       
+       else if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+              *RETURN_CODE = INVALID_MODE;
+       } 
        else {
               if (TIME_OUT != INFINITE_TIME_VALUE){
                      current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
@@ -470,8 +473,11 @@ void RECEIVE_QUEUING_MESSAGE (
               *LENGTH = 0;
               *RETURN_CODE = NOT_AVAILABLE;
        }
-       // cd current process own mutex
-       // else if ()
+       // cd current process error handler
+       else if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+              *LENGTH = 0;
+              *RETURN_CODE = INVALID_MODE;
+    } 
        else {
               if (TIME_OUT != INFINITE_TIME_VALUE){
                      current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
