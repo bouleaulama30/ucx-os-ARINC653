@@ -17,17 +17,18 @@
 * Unlock_preemption:
     * current process is error handler process
 
+* suspend self  error handler
+
+* refaire un test de suspend/self, resume, stop/self pour voir si c'est toujours ok:
+    * le faire aussi quand il y a un mutex ou une ressource en attente
+
 ## partition communication
-* coder tout ce qui est relatif au lock preemption mutex pour les process
-    * suspend self  error handler
-    * TIMED_WAIT:
-        * gerer le cas des mutexes
-    * PERIODIC_WAIT:
-        * gerer le cas des mutexes
-    * REPLENISH:
-        * gerer le cas avec le error handler
-    * plus tard repassser sur toute les fonctions pour gerer les processes queue quand elles seront implem
-    * implem la waiting queue (quand on aura implem la partie intra et inter communication)
+* TIMED_WAIT:
+    * gerer le cas error handler
+* PERIODIC_WAIT:
+    * gerer le cas error handler
+* REPLENISH:
+    * gerer le cas avec le error handler
 
 ### inter communication
 * faire allocation des spaces (cf message felipe pour les ports) comme pour le intrapartition
@@ -35,7 +36,6 @@
     * voir current process error handler
 * RECEIVE_QUEUING_MESSAGE:
     * voir current process error handler
-* faire tout en unicast ?
 
 ### intra communication
 * send buffer:

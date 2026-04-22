@@ -99,6 +99,12 @@ extern void TIMED_WAIT (
     struct node_s *current_process_node = partition->process_current; 
     struct process_s *current_process = current_process_node->data;
     
+    //TODO error handler
+    if(current_process->owned_mutex_id != NO_MUTEX_OWNED){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+
     uint64_t uptime = ucx_uptime();
     if (DELAY_TIME < INFINITE_TIME_VALUE ||
         (DELAY_TIME >= 0 && time_overflow(uptime + (uint64_t)DELAY_TIME))){
@@ -136,6 +142,12 @@ extern void PERIODIC_WAIT (
     struct node_s *current_process_node = partition->process_current; 
     struct process_s *current_process = current_process_node->data;
     
+    //TODO error handler
+    if(current_process->owned_mutex_id != NO_MUTEX_OWNED){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+
     if(current_process->processus_status->ATTRIBUTES.PERIOD == INFINITE_TIME_VALUE){
         *RETURN_CODE = INVALID_MODE;
         return;
