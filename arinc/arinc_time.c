@@ -29,17 +29,6 @@ static struct node_s *check_and_release_periodic_waiting_processes(struct node_s
     return 0;
 }
 
-static struct node_s *find_waiting_process_node(struct node_s *node, void *arg)
-{
-    struct process_s *process = node->data;
-    struct process_s *target = arg;
-
-    if (process == target)
-        return node;
-
-    return 0;
-}
-
 static struct node_s *check_timeouts(struct node_s *node, void *arg) {
     struct process_s *process = node->data;
     SYSTEM_TIME_TYPE current_time = (SYSTEM_TIME_TYPE)ucx_uptime();
@@ -48,52 +37,7 @@ static struct node_s *check_timeouts(struct node_s *node, void *arg) {
     if (process->time_counter != 0) {
         if (current_time >= process->time_counter && process->time_counter != INFINITE_TIME_VALUE) {
             // si le process a un chrono lie a une ressource en attente alors faire en sorte de le retirer de la liste d'attente de la ressource( utiliser le waiting on port du process_s pour trouver la ressource) et de le mettre en ready
-            if(process->waiting_queuing_port) {
-                struct queuing_port_s *queuing_port = process->waiting_queuing_port;
-                struct node_s *waiting_node = list_foreach(queuing_port->waiting_processes, find_waiting_process_node, process);
-                if (waiting_node){ 
-                    list_remove(queuing_port->waiting_processes, waiting_node);
-                    queuing_port->queuing_port_status->WAITING_PROCESSES--;
-                }
-                process->waiting_queuing_port = NULL;
-            }
-
-            if(process->waiting_blackboard) {
-                struct blackboard_s *bb = process->waiting_blackboard;
-                struct node_s *waiting_node = list_foreach(bb->waiting_processes, find_waiting_process_node, process);
-                if (waiting_node){ 
-                    list_remove(bb->waiting_processes, waiting_node);
-                    bb->blackboard_status.WAITING_PROCESSES--;
-                }
-                process->waiting_blackboard = NULL;
-            }
-            
-            if(process->waiting_buffer) {
-                struct buffer_s *buf = process->waiting_buffer;
-                struct node_s *waiting_reader_node = list_foreach(buf->waiting_readers, find_waiting_process_node, process);
-                if (waiting_reader_node){ 
-                    list_remove(buf->waiting_readers, waiting_reader_node);
-                    buf->buffer_status.WAITING_PROCESSES--;
-                }
-
-                struct node_s *waiting_writer_node = list_foreach(buf->waiting_writers, find_waiting_process_node, process);
-                if (waiting_writer_node){ 
-                    list_remove(buf->waiting_writers, waiting_writer_node);
-                    buf->buffer_status.WAITING_PROCESSES--;
-                }
-                process->waiting_buffer = NULL;
-            }
-
-            if(process->waiting_semaphore) {
-                struct semaphore_s *sem = process->waiting_semaphore;
-                struct node_s *waiting_node = list_foreach(sem->waiting_processes, find_waiting_process_node, process);
-                if (waiting_node){ 
-                    list_remove(sem->waiting_processes, waiting_node);
-                    sem->semaphore_status.WAITING_PROCESSES--;
-                }
-                process->waiting_semaphore = NULL;
-            }
-            
+            void remove_process_from_waiting_queue(struct process_s *process);
 
             process->is_suspended = false;
             process->time_counter = 0;

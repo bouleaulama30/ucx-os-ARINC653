@@ -32,6 +32,99 @@ struct node_s *is_process_id_existed(struct pcb_s *partition, PROCESS_ID_TYPE pr
     return 0;
 }
 
+int is_process_waiting_in_waiting_queue(struct process_s *process){
+    if (process->waiting_queuing_port != NULL || process->waiting_blackboard != NULL || process->waiting_buffer != NULL || process->waiting_mutex != NULL || process->waiting_semaphore != NULL || process->waiting_event != NULL){
+        return 1;
+    }
+    return 0;
+}
+
+int is_process_waiting_in_mutex_queue(struct process_s *process){
+    if (process->waiting_mutex != NULL){
+        return 1;
+    }
+    return 0;
+}
+
+struct node_s *find_waiting_process_node(struct node_s *node, void *arg)
+{
+    struct process_s *process = node->data;
+    struct process_s *target = arg;
+
+    if (process == target)
+        return node;
+
+    return 0;
+}
+
+void remove_process_from_waiting_queue(struct process_s *process){
+    if(process->waiting_queuing_port) {
+        struct queuing_port_s *queuing_port = process->waiting_queuing_port;
+        struct node_s *waiting_node = list_foreach(queuing_port->waiting_processes, find_waiting_process_node, process);
+        if (waiting_node){ 
+            list_remove(queuing_port->waiting_processes, waiting_node);
+            queuing_port->queuing_port_status->WAITING_PROCESSES--;
+        }
+        process->waiting_queuing_port = NULL;
+    }
+
+    if(process->waiting_blackboard) {
+        struct blackboard_s *bb = process->waiting_blackboard;
+        struct node_s *waiting_node = list_foreach(bb->waiting_processes, find_waiting_process_node, process);
+        if (waiting_node){ 
+            list_remove(bb->waiting_processes, waiting_node);
+            bb->blackboard_status.WAITING_PROCESSES--;
+        }
+        process->waiting_blackboard = NULL;
+    }
+
+    if(process->waiting_buffer) {
+        struct buffer_s *buf = process->waiting_buffer;
+        struct node_s *waiting_reader_node = list_foreach(buf->waiting_readers, find_waiting_process_node, process);
+        if (waiting_reader_node){ 
+            list_remove(buf->waiting_readers, waiting_reader_node);
+            buf->buffer_status.WAITING_PROCESSES--;
+        }
+
+        struct node_s *waiting_writer_node = list_foreach(buf->waiting_writers, find_waiting_process_node, process);
+        if (waiting_writer_node){ 
+            list_remove(buf->waiting_writers, waiting_writer_node);
+            buf->buffer_status.WAITING_PROCESSES--;
+        }
+        process->waiting_buffer = NULL;
+    }
+
+    if(process->waiting_semaphore) {
+        struct semaphore_s *sem = process->waiting_semaphore;
+        struct node_s *waiting_node = list_foreach(sem->waiting_processes, find_waiting_process_node, process);
+        if (waiting_node){ 
+            list_remove(sem->waiting_processes, waiting_node);
+            sem->semaphore_status.WAITING_PROCESSES--;
+        }
+        process->waiting_semaphore = NULL;
+    }
+
+    if(process->waiting_event) {
+        struct event_s *event = process->waiting_event;
+        struct node_s *waiting_node = list_foreach(event->waiting_processes, find_waiting_process_node, process);
+        if (waiting_node){ 
+            list_remove(event->waiting_processes, waiting_node);
+            event->event_status.WAITING_PROCESSES--;
+        }
+        process->waiting_event = NULL;
+    }
+
+    if (process->waiting_mutex) {
+        struct mutex_s *mutex = process->waiting_mutex;
+        struct node_s *waiting_node = list_foreach(mutex->waiting_processes, find_waiting_process_node, process);
+        if (waiting_node){ 
+            list_remove(mutex->waiting_processes, waiting_node);
+            mutex->mutex_status.WAITING_PROCESSES--;
+        }
+        process->waiting_mutex = NULL;
+    }
+}
+
 void CREATE_PROCESS (
        /*in */ PROCESS_ATTRIBUTE_TYPE   *ATTRIBUTES,
        /*out*/ PROCESS_ID_TYPE          *PROCESS_ID,
@@ -135,15 +228,14 @@ void SET_PRIORITY (
         return;
     }
 
-//     normal
-// if (the specified process owns a mutex) thenARINC SPECIFICATION 653 PART 1 – PAGE 61
-// 3.0 SERVICE REQUIREMENTS
-// -- current priority of the process cannot be modified without
-// -- impacting mutex properties
-// set the retained priority of the specified process to PRIORITY;
-// else
-
-    process->processus_status->CURRENT_PRIORITY = PRIORITY;
+    if (process->owned_mutex_id != NO_MUTEX_OWNED){
+        int index = find_mutex_by_id(partition, process->owned_mutex_id);
+        struct mutex_s *mutex = &partition->mutexes[index];
+        mutex->saved_owner_priority = PRIORITY;
+    }
+    else {
+        process->processus_status->CURRENT_PRIORITY = PRIORITY;
+    }
 
     // sauvegarde du context du process actuel et on reschedule
     if (process->processus_status->PROCESS_STATE == READY || process->processus_status->PROCESS_STATE == RUNNING){
@@ -170,7 +262,11 @@ void SUSPEND_SELF (
     struct node_s *process_node = partition->process_current;
     struct process_s *current_process = process_node->data;
     
-    // when (TIME_OUT calculation is out of range) => INVALID_CONFIG
+    // TODO error handler
+    if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
     uint64_t uptime = ucx_uptime();
     if (TIME_OUT < INFINITE_TIME_VALUE ||
         (TIME_OUT >= 0 && time_overflow(uptime + (uint64_t)TIME_OUT))){
@@ -208,6 +304,11 @@ void SUSPEND (
     struct process_s *current_process = partition->process_current->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
     struct process_s *process = process_node->data;
+    if(process->owned_mutex_id != NO_MUTEX_OWNED || is_process_waiting_in_mutex_queue(process)){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+    
     if(!process_node || process->process_id == current_process->process_id){
         *RETURN_CODE = INVALID_PARAM;
         return;
@@ -261,7 +362,6 @@ void RESUME (
         *RETURN_CODE = NO_ACTION;
     }
 
-    //checker le time out avec un if
     if(process->is_suspended){
         process->is_suspended = false;
         process->time_counter = 0;
@@ -269,7 +369,7 @@ void RESUME (
 
     // checker if (the specified process is not waiting on a process queue or TIMED_WAIT
     // time delay or DELAYED_START time delay) then
-    if(!process->time_counter){
+    if(!process->time_counter || !is_process_waiting_in_waiting_queue(process)){
         process->processus_status->PROCESS_STATE = READY;
         // rescheduling
         yield_to_partition(partition, current_process);
@@ -285,10 +385,51 @@ void STOP_SELF (void){
     struct node_s *process_node = partition->process_current;
     struct process_s *current_process = process_node->data;
 
+    current_process->processus_status->DEADLINE_TIME = INFINITE_TIME_VALUE;
+
+    if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+        int index = find_mutex_by_id(partition, current_process->owned_mutex_id);
+        struct mutex_s *mutex = &partition->mutexes[index];
+        mutex->mutex_status.LOCK_COUNT = 0;
+        if (mutex->mutex_id == PREEMPTION_LOCK_MUTEX)
+            partition->status->LOCK_LEVEL = 0;
+
+        mutex->mutex_status.MUTEX_STATE = AVAILABLE;
+        current_process->owned_mutex_id = NO_MUTEX_OWNED;
+        mutex->mutex_status.MUTEX_OWNER = NULL_PROCESS_ID;
+        current_process->processus_status->CURRENT_PRIORITY = mutex->saved_owner_priority;
+        
+        list_remove(partition->processes, process_node);
+        struct node_s *new_process_node = list_push(partition->processes, current_process);
+        struct process_s *new_process = new_process_node->data;
+        if(new_process->processus_status->PROCESS_STATE == RUNNING)
+                partition->process_current = new_process_node;        
+                
+        if(mutex->waiting_processes->length > 0){
+            struct node_s *first_node = mutex->waiting_processes->head->next;
+            list_remove(mutex->waiting_processes, first_node);
+            struct process_s *woken_process = first_node->data;
+            mutex->mutex_status.WAITING_PROCESSES--;
+            if (woken_process->time_counter != 0) {
+                woken_process->time_counter = INFINITE_TIME_VALUE;
+            }
+            mutex->mutex_status.MUTEX_STATE = OWNED;
+            mutex->mutex_status.LOCK_COUNT ++;
+            mutex->mutex_status.MUTEX_OWNER = woken_process->process_id;
+            woken_process->owned_mutex_id = mutex->mutex_id;
+            mutex->saved_owner_priority = woken_process->processus_status->CURRENT_PRIORITY;
+            woken_process->processus_status->CURRENT_PRIORITY = mutex->mutex_status.MUTEX_PRIORITY;
+            woken_process->waiting_mutex = NULL;
+
+            struct node_s *woken_process_node = is_process_id_existed(partition, woken_process->process_id);
+            list_remove(partition->processes, woken_process_node);
+            list_push(partition->processes, woken_process);
+            woken_process->processus_status->PROCESS_STATE = READY;
+        }
+    }
     current_process->processus_status->PROCESS_STATE = DORMANT;
     current_process->time_counter = 0;
     current_process->is_suspended = false;
-    current_process->processus_status->DEADLINE_TIME = INFINITE_TIME_VALUE;
     // on reschedule        
     longjmp(partition->partition_context, 1);
 }
@@ -311,6 +452,10 @@ void STOP (
         return;
     }
 
+    if (is_process_waiting_in_waiting_queue(process)){
+        remove_process_from_waiting_queue(process);
+    }
+
     process->processus_status->PROCESS_STATE = DORMANT;
     process->time_counter = 0;
     process->is_suspended = false;
@@ -318,7 +463,11 @@ void STOP (
     
     yield_to_partition(partition, current_process);
 
-    *RETURN_CODE = NO_ERROR;
+    if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+        *RETURN_CODE = INVALID_MODE;
+    } else {
+        *RETURN_CODE = NO_ERROR;
+    }
 }
 
 

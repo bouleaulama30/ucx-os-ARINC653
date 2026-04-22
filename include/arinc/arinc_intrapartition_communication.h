@@ -324,6 +324,8 @@ struct mutex_s {
        struct list_s *waiting_processes;
 };
 
+int find_mutex_by_id(struct pcb_s *partition, MUTEX_ID_TYPE id);
+
 void krnl_acquire_mutex(/*in */ MUTEX_ID_TYPE            MUTEX_ID,
        /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE);

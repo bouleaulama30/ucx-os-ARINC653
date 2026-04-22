@@ -11,8 +11,6 @@
 
 ## Process
 
-* voir pour faire les processes dans des spaces aussi ?
-
 * Lock_preemption:
     * current process is error handler process
 
@@ -21,22 +19,15 @@
 
 ## partition communication
 * coder tout ce qui est relatif au lock preemption mutex pour les process
-
-            * get_process_status cf si le process possede le lock preemption alors renvoyer la priorite max pour la current_priority
-            * set_priority voir dans le cas ou le process own a mutex et ne pas rescheduler s'il n a pas de preemption lock
-            * stop self, liberer les ressources comme le mutex ou autre
-            * stop  gerer les mutex, remove process de la waiting queue s il etait dans l etat waiting
-            * suspend  gerer le lock mutex/mutex
-            * suspend self  gerer le lock mutex/mutex
-            * resume  checker s il attend avec un time wait etc..., gerer le lock mutex et le check avec les ressources et les timer
-            * TIMED_WAIT:
-                * gerer le cas des mutexes
-            * PERIODIC_WAIT:
-                * gerer le cas des mutexes
-            * REPLENISH:
-                * gerer le cas avec le error handler
-            * plus tard repassser sur toute les fonctions pour gerer les processes queue quand elles seront implem
-            * implem la waiting queue (quand on aura implem la partie intra et inter communication)
+    * suspend self  error handler
+    * TIMED_WAIT:
+        * gerer le cas des mutexes
+    * PERIODIC_WAIT:
+        * gerer le cas des mutexes
+    * REPLENISH:
+        * gerer le cas avec le error handler
+    * plus tard repassser sur toute les fonctions pour gerer les processes queue quand elles seront implem
+    * implem la waiting queue (quand on aura implem la partie intra et inter communication)
 
 ### inter communication
 * faire allocation des spaces (cf message felipe pour les ports) comme pour le intrapartition

@@ -104,6 +104,8 @@ static inline void update_process_deadline(struct process_s *process, SYSTEM_TIM
 struct pcb_s;
 struct node_s *find_processes_by_id(struct node_s *node, void *arg);
 struct node_s *is_process_id_existed(struct pcb_s *partition, PROCESS_ID_TYPE process_id);
+struct node_s *find_waiting_process_node(struct node_s *node, void *arg);
+void remove_process_from_waiting_queue(struct process_s *process);
 
 
 extern void CREATE_PROCESS (
