@@ -20,6 +20,11 @@ extern int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         SYSTEM_ADDRESS_TYPE entry_point,
                         BOOLEAN_TYPE is_system_partition,
                         
+                        struct sampling_port_s *sampling_ports,
+                        APEX_INTEGER max_sampling_ports,
+                        APEX_INTEGER sampling_port_count,
+                        APEX_INTEGER max_sampling_port_data_size,
+
                         struct blackboard_s *blackboards,
                         APEX_INTEGER max_blackboards,
                         APEX_INTEGER blackboard_count,

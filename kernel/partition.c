@@ -28,6 +28,11 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         SYSTEM_ADDRESS_TYPE entry_point,
                         BOOLEAN_TYPE is_system_partition,
                         
+                        struct sampling_port_s *sampling_ports,
+                        APEX_INTEGER max_sampling_ports,
+                        APEX_INTEGER sampling_port_count,
+                        APEX_INTEGER max_sampling_port_data_size,
+                        
                         struct blackboard_s *blackboards,
                         APEX_INTEGER max_blackboards,
                         APEX_INTEGER blackboard_count,
@@ -134,11 +139,16 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->id_next = 0;
     new_pcb->next_stack_addr = memory_requirements->memory[DATA].base + PARTIION_OS_AND_MAIN_PROCESS_STACK_SIZE;
     new_pcb->processes = list_create();
-    new_pcb->communication_sampling_ports = list_create();
     new_pcb->communication_queuing_ports = list_create();
-    new_pcb->sampling_port_count = 0;
     new_pcb->queuing_port_count = 0;
 
+
+    new_pcb->communication_sampling_ports = list_create();
+    new_pcb->sampling_ports = sampling_ports;
+    new_pcb->max_sampling_ports = max_sampling_ports;
+    new_pcb->sampling_port_count = sampling_port_count;
+    new_pcb->max_sampling_port_data_size = max_sampling_port_data_size;
+    
     //bb
     new_pcb->blackboards = blackboards;
     new_pcb->max_blackboards = max_blackboards;

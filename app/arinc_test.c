@@ -53,40 +53,41 @@ __attribute__((section(".p1_code")))
 void p1_process1(void)
 {   
 	RETURN_CODE_TYPE return_code;
-	RETURN_CODE_TYPE return_code1;
+	APEX_INTEGER partition_id;
 	APEX_INTEGER process_id;
-	MUTEX_ID_TYPE mutex_id;
-	MUTEX_STATUS_TYPE mutex_status;
+	SAMPLING_PORT_ID_TYPE sampling_port_id;
+	MESSAGE_SIZE_TYPE message_length;
+	char message[64];
+	uint32_t seq = 0;
 
+	GET_MY_PARTITION_ID(&partition_id, &return_code);
 	GET_MY_ID(&process_id, &return_code);
-	printf("\n--- START TEST ACQUIRE/RELEASE/RESET_MUTEX (P1: p0,p1,p2) ---\n");
 
 	while (1) {
-		GET_MUTEX_ID("Mutex1", &mutex_id, &return_code);
+		GET_SAMPLING_PORT_ID("P1_OUT_TEMP", &sampling_port_id, &return_code);
 		if (return_code == NO_ERROR) {
 			break;
 		}
-		printf("[P1/Process1] GET_MUTEX_ID('Mutex1') rc=%d (retry)\n", return_code);
+		printf("[P1/Process1] GET_SAMPLING_PORT_ID('P1_OUT_TEMP') rc=%d (retry)\n", return_code);
 		TIMED_WAIT(2, &return_code);
 	}
 
-	printf("[P1/Process1] mutex ready id=%d pid=%d\n", mutex_id, process_id);
-	ACQUIRE_MUTEX(mutex_id, INFINITE_TIME_VALUE, &return_code1);
-	GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
-	printf("[P1/Process1] ACQUIRE_MUTEX rc=%d owner=%d lock=%d waiting=%d\n",
-	       return_code1,
-	       mutex_status.MUTEX_OWNER,
-	       mutex_status.LOCK_COUNT,
-	       mutex_status.WAITING_PROCESSES);
+	printf("\n--- START TEST SAMPLING PORT (P1 write -> P2 read) ---\n");
+	printf("[P1/Process1] partition=%d pid=%d sampling_port_id=%d\n", partition_id, process_id, sampling_port_id);
 
 	while (1) {
-		TIMED_WAIT(0, &return_code);
-		GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
-		printf("[P1/Process1] status rc=%d owner=%d lock=%d waiting=%d\n",
+		seq++;
+		sprintf(message, "temp=%luC from=P1", (unsigned long)(20 + (seq % 10)));
+		message_length = (MESSAGE_SIZE_TYPE)(strlen(message) + 1);
+
+		WRITE_SAMPLING_MESSAGE(sampling_port_id, (MESSAGE_ADDR_TYPE)message, message_length, &return_code);
+		printf("[P1/Process1] WRITE_SAMPLING_MESSAGE rc=%d seq=%lu len=%d msg='%s'\n",
 		       return_code,
-		       mutex_status.MUTEX_OWNER,
-		       mutex_status.LOCK_COUNT,
-		       mutex_status.WAITING_PROCESSES);
+		       (unsigned long)seq,
+		       message_length,
+		       message);
+
+		TIMED_WAIT(10, &return_code);
 	}
 }
 
@@ -94,50 +95,10 @@ __attribute__((section(".p1_code")))
 void p1_process2(void)
 {   
 	RETURN_CODE_TYPE return_code;
-	RETURN_CODE_TYPE return_code1;
-	APEX_INTEGER process_id;
-	MUTEX_ID_TYPE mutex_id;
-	MUTEX_STATUS_TYPE mutex_status;
-	int released_once = 0;
-
-	GET_MY_ID(&process_id, &return_code);
+	printf("[P1/Process2] idle for sampling test\n");
 
 	while (1) {
-		GET_MUTEX_ID("Mutex1", &mutex_id, &return_code);
-		if (return_code == NO_ERROR) {
-			break;
-		}
-		printf("[P1/Process2] GET_MUTEX_ID('Mutex1') rc=%d (retry)\n", return_code);
-		TIMED_WAIT(2, &return_code);
-	}
-
-	printf("[P1/Process2] mutex ready id=%d pid=%d\n", mutex_id, process_id);
-	// TIMED_WAIT(6, &return_code);
-	printf("[P1/Process2] ACQUIRE_MUTEX (blocking) pid=%d\n", process_id);
-	LOCK_LEVEL_TYPE lock_level;
-	ACQUIRE_MUTEX(mutex_id, INFINITE_TIME_VALUE, &return_code1);
-	// LOCK_PREEMPTION(&lock_level, &return_code);
-	GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
-	printf("[P1/Process2] ACQUIRE_MUTEX return rc=%d owner=%d lock=%d waiting=%d\n",
-	       return_code,
-	       mutex_status.MUTEX_OWNER,
-	       mutex_status.LOCK_COUNT,
-	       mutex_status.WAITING_PROCESSES);
-
-	if (released_once == 0) {
-		RELEASE_MUTEX(mutex_id, &return_code1);
-		// UNLOCK_PREEMPTION(&lock_level, &return_code1);
-		GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
-		printf("[P1/Process2] RELEASE_MUTEX rc=%d owner=%d lock=%d waiting=%d\n",
-		       return_code1,
-		       mutex_status.MUTEX_OWNER,
-		       mutex_status.LOCK_COUNT,
-		       mutex_status.WAITING_PROCESSES);
-		released_once = 1;
-	}
-
-	while (1) {
-		// TIMED_WAIT(20, &return_code);
+		TIMED_WAIT(20, &return_code);
 	}
 }
 
@@ -145,36 +106,7 @@ __attribute__((section(".p1_code")))
 void p1_process3(void)
 {   
 	RETURN_CODE_TYPE return_code;
-	RETURN_CODE_TYPE return_code1;
-	APEX_INTEGER process_id;
-	MUTEX_ID_TYPE mutex_id;
-	MUTEX_STATUS_TYPE mutex_status;
-	int reset_done = 0;
-
-	GET_MY_ID(&process_id, &return_code);
-
-	while (1) {
-		GET_MUTEX_ID("Mutex1", &mutex_id, &return_code);
-		if (return_code == NO_ERROR) {
-			break;
-		}
-		printf("[P1/Process3] GET_MUTEX_ID('Mutex1') rc=%d (retry)\n", return_code);
-		TIMED_WAIT(2, &return_code);
-	}
-
-	printf("[P1/Process3] mutex ready id=%d pid=%d\n", mutex_id, process_id);
-	TIMED_WAIT(2, &return_code);
-
-	if (reset_done == 0) {
-		RESET_MUTEX(mutex_id, 1, &return_code1);
-		GET_MUTEX_STATUS(mutex_id, &mutex_status, &return_code);
-		printf("[P1/Process3] RESET_MUTEX(target=1) rc=%d owner=%d lock=%d waiting=%d\n",
-		       return_code1,
-		       mutex_status.MUTEX_OWNER,
-		       mutex_status.LOCK_COUNT,
-		       mutex_status.WAITING_PROCESSES);
-		reset_done = 1;
-	}
+	printf("[P1/Process3] idle for sampling test\n");
 
 	while (1) {
 		TIMED_WAIT(20, &return_code);
@@ -187,32 +119,46 @@ void p2_process1(void)
 	RETURN_CODE_TYPE return_code;
 	APEX_INTEGER partition_id;
 	APEX_INTEGER process_id;
-	QUEUING_PORT_ID_TYPE queuing_port_id;
+	SAMPLING_PORT_ID_TYPE sampling_port_id;
 	MESSAGE_SIZE_TYPE message_length;
-	uint32_t seq = 0;
-	char message[32];
+	VALIDITY_TYPE validity;
+	char message[64];
 
 	GET_MY_PARTITION_ID(&partition_id, &return_code);
 	GET_MY_ID(&process_id, &return_code);
-	GET_QUEUING_PORT_ID("P2_OUT_CMDS", &queuing_port_id, &return_code);
-
-	printf("[P2/Process1] GET_QUEUING_PORT_ID('P2_OUT_CMDS') rc=%d id=%d\n", return_code, queuing_port_id);
 
 	while (1) {
-		seq++;
-		sprintf(message, "cmd-seq=%lu from=P2p1", (unsigned long)seq);
-		message_length = (MESSAGE_SIZE_TYPE)strlen(message);
+		GET_SAMPLING_PORT_ID("P2_IN_TEMP", &sampling_port_id, &return_code);
+		if (return_code == NO_ERROR) {
+			break;
+		}
+		printf("[P2/Process1] GET_SAMPLING_PORT_ID('P2_IN_TEMP') rc=%d (retry)\n", return_code);
+		TIMED_WAIT(2, &return_code);
+	}
 
-		SEND_QUEUING_MESSAGE(queuing_port_id, (MESSAGE_ADDR_TYPE)message, 18 + 1, 10, &return_code);
-		printf("[P2/Process1] SEND_QUEUING_MESSAGE rc=%d seq=%lu len=%d msg='%s'\n",
-			   return_code,
-			   (unsigned long)seq,
-			   message_length + 1,
-			   message);
+	printf("[P2/Process1] partition=%d pid=%d sampling_port_id=%d\n", partition_id, process_id, sampling_port_id);
 
-		TIMED_WAIT(0, &return_code);
+	while (1) {
+		READ_SAMPLING_MESSAGE(sampling_port_id,
+		                      (MESSAGE_ADDR_TYPE)message,
+		                      &message_length,
+		                      &validity,
+		                      &return_code);
+
+		if (return_code == NO_ERROR) {
+			printf("[P2/Process1] READ_SAMPLING_MESSAGE rc=%d validity=%d len=%d msg='%s'\n",
+			       return_code,
+			       validity,
+			       message_length,
+			       message);
+		} else {
+			printf("[P2/Process1] READ_SAMPLING_MESSAGE rc=%d validity=%d\n", return_code, validity);
+		}
+
+		TIMED_WAIT(10, &return_code);
 	}
 }
+
 
 int app_main(void)
 {
@@ -240,6 +186,12 @@ int app_main(void)
 				//    test_spatial_violation_p2,
 				   p1_main_process,
 				   DEFAULT_PARTITION_CONFIG.is_system_partition,
+
+				   DEFAULT_PARTITION_CONFIG.sampling_ports,
+				   DEFAULT_PARTITION_CONFIG.max_sampling_ports,
+				   DEFAULT_PARTITION_CONFIG.sampling_port_count,
+				   DEFAULT_PARTITION_CONFIG.max_sampling_port_data_size,
+				   
 				   DEFAULT_PARTITION_CONFIG.blackboards,
 				   DEFAULT_PARTITION_CONFIG.max_blackboards,
 				   DEFAULT_PARTITION_CONFIG.blackboard_count,
@@ -284,6 +236,12 @@ int app_main(void)
 				//    test_spatial_violation_p1,
 				   p2_main_process,
 				   P2_CONFIG.is_system_partition,
+
+					P2_CONFIG.sampling_ports,
+				   P2_CONFIG.max_sampling_ports,
+				   P2_CONFIG.sampling_port_count,
+				   P2_CONFIG.max_sampling_port_data_size,
+
 				   P2_CONFIG.blackboards,
 				   P2_CONFIG.max_blackboards,
 				   P2_CONFIG.blackboard_count,

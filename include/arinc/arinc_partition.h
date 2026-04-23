@@ -82,10 +82,14 @@ struct pcb_s {
    SYSTEM_ADDRESS_TYPE next_stack_addr;
 
    // port
-   struct list_s *communication_sampling_ports;
    struct list_s *communication_queuing_ports;
-   APEX_INTEGER sampling_port_count;
    APEX_INTEGER queuing_port_count;
+
+   struct list_s *communication_sampling_ports;
+   struct sampling_port_s *sampling_ports;
+   APEX_INTEGER max_sampling_ports;
+   APEX_INTEGER sampling_port_count;
+   APEX_INTEGER max_sampling_port_data_size;
 
    // bb
    struct blackboard_s *blackboards;

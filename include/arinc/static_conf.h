@@ -5,6 +5,9 @@
 #include "arinc/module_scheduler.h"
 #include "kernel/interpartition_communication.h"
 
+
+#define SAMPLING_PORT_MAX_MESSAGE_SIZE 512
+
 #define BLACKBOARD_MAX_MESSAGE_SIZE 512
 
 #define BUFFER_MAX_MESSAGE_SIZE 64
@@ -43,6 +46,8 @@ extern uint8_t _p2_code_end[];
 extern uint8_t _p2_data_start[];
 extern uint8_t _p2_data_end[];
 
+static struct sampling_port_s p1_sampling_ports[MAX_NUMBER_OF_SAMPLING_PORTS];
+static struct sampling_port_s p2_sampling_ports[MAX_NUMBER_OF_SAMPLING_PORTS];
 
 static struct blackboard_s p1_blackboards[MAX_NUMBER_OF_BLACKBOARDS];
 static uint8_t p1_blackboards_data[MAX_NUMBER_OF_BLACKBOARDS * BLACKBOARD_MAX_MESSAGE_SIZE]; // 512 bytes par blackboard
@@ -77,6 +82,12 @@ struct PartitionConfig {
     ACCESS_TYPE access_data_mem;
     SYSTEM_ADDRESS_TYPE entry_point;
     BOOLEAN_TYPE is_system_partition;
+
+    struct sampling_port_s *sampling_ports;
+    APEX_INTEGER max_sampling_ports;
+    APEX_INTEGER sampling_port_count;
+    APEX_INTEGER max_sampling_port_data_size;
+
 
     struct blackboard_s *blackboards;
     APEX_INTEGER max_blackboards;
@@ -119,6 +130,11 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
     .access_data_mem = "RW",
     .is_system_partition = (BOOLEAN_TYPE)false,
 
+    .sampling_ports = p1_sampling_ports,
+    .max_sampling_ports = MAX_NUMBER_OF_SAMPLING_PORTS,
+    .sampling_port_count = 0,
+    .max_sampling_port_data_size = SAMPLING_PORT_MAX_MESSAGE_SIZE,
+
     .blackboards = p1_blackboards,
     .max_blackboards = MAX_NUMBER_OF_BLACKBOARDS,
     .blackboard_count = 0,
@@ -159,6 +175,12 @@ static const struct PartitionConfig P2_CONFIG = {
     .access_data_mem = "RW",
     .is_system_partition = (BOOLEAN_TYPE)true,
     
+    .sampling_ports = p2_sampling_ports,
+    .max_sampling_ports = MAX_NUMBER_OF_SAMPLING_PORTS,
+    .sampling_port_count = 0,
+    .max_sampling_port_data_size = SAMPLING_PORT_MAX_MESSAGE_SIZE,
+    
+
     .blackboards = NULL,
     .max_blackboards = 0,
     .blackboard_count = 0,
