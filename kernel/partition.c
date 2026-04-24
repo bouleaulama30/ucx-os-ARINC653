@@ -33,6 +33,11 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
                         APEX_INTEGER sampling_port_count,
                         APEX_INTEGER max_sampling_port_data_size,
                         
+                        struct queuing_port_s *queuing_ports,
+                        APEX_INTEGER max_queuing_ports,
+                        APEX_INTEGER queuing_port_count,
+                        APEX_INTEGER max_queuing_port_data_size,
+                        
                         struct blackboard_s *blackboards,
                         APEX_INTEGER max_blackboards,
                         APEX_INTEGER blackboard_count,
@@ -142,13 +147,18 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->communication_queuing_ports = list_create();
     new_pcb->queuing_port_count = 0;
 
-
-    new_pcb->communication_sampling_ports = list_create();
+    // sampling port
     new_pcb->sampling_ports = sampling_ports;
     new_pcb->max_sampling_ports = max_sampling_ports;
     new_pcb->sampling_port_count = sampling_port_count;
     new_pcb->max_sampling_port_data_size = max_sampling_port_data_size;
-    
+
+    // queuing port
+    new_pcb->queuing_ports = queuing_ports;
+    new_pcb->max_queuing_ports = max_queuing_ports;
+    new_pcb->queuing_port_count = queuing_port_count;
+    new_pcb->max_queuing_port_data_size = max_queuing_port_data_size;
+
     //bb
     new_pcb->blackboards = blackboards;
     new_pcb->max_blackboards = max_blackboards;

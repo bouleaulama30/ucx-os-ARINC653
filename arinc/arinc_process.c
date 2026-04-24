@@ -63,7 +63,7 @@ void remove_process_from_waiting_queue(struct process_s *process){
         struct node_s *waiting_node = list_foreach(queuing_port->waiting_processes, find_waiting_process_node, process);
         if (waiting_node){ 
             list_remove(queuing_port->waiting_processes, waiting_node);
-            queuing_port->queuing_port_status->WAITING_PROCESSES--;
+            queuing_port->queuing_port_status.WAITING_PROCESSES--;
         }
         process->waiting_queuing_port = NULL;
     }

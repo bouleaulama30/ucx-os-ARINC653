@@ -21,34 +21,26 @@ int find_sampling_port_by_id(struct pcb_s *partition, SAMPLING_PORT_ID_TYPE id){
     return -1;  
 }
 
-static struct node_s *find_queuing_port_by_name(struct node_s *node, void *arg){
-    struct queuing_port_s *port = node->data;
-    const char *name = (const char *) arg;
 
-    if(strcmp(port->queuing_port_name, name) == 0){
-        return node;
+int find_queuing_port_by_name(struct pcb_s *partition, char* name){
+    for (int i = 0; i < partition->queuing_port_count; i++){
+        struct queuing_port_s *port = &partition->queuing_ports[i];
+        if (strcmp(port->queuing_port_name, name) == 0){
+            return i;
+        }
     }
-    return 0;
+    return -1;  
 }
 
-static struct node_s *find_queuing_port_node_by_name(struct pcb_s *partition, QUEUING_PORT_NAME_TYPE QUEUING_PORT_NAME){
-       return list_foreach(partition->communication_queuing_ports, find_queuing_port_by_name, (void *)QUEUING_PORT_NAME);
-}
-
-static struct node_s *find_queuing_port_by_id(struct node_s *node, void *arg){
-    struct queuing_port_s *port = node->data;
-    QUEUING_PORT_ID_TYPE id = (QUEUING_PORT_ID_TYPE) arg;
-
-    if(id == port->queuing_port_id){
-       return node;
+int find_queuing_port_by_id(struct pcb_s *partition, QUEUING_PORT_ID_TYPE id){
+    for (int i = 0; i < partition->queuing_port_count; i++){
+        struct queuing_port_s *port = &partition->queuing_ports[i];
+        if (port->queuing_port_id == id){
+            return i;
+        }
     }
-    return 0;
+    return -1;  
 }
-
-static struct node_s *find_queuing_port_node_by_id(struct pcb_s *partition, QUEUING_PORT_ID_TYPE QUEUING_PORT_ID){
-       return list_foreach(partition->communication_queuing_ports, find_queuing_port_by_id, (void *)QUEUING_PORT_ID);
-}
-
 
 int check_port_in_conf_table(NAME_TYPE PORT_NAME){
        for(int i = 0; i<routing_table_size; i++){
@@ -129,7 +121,6 @@ void CREATE_SAMPLING_PORT (
        sampling_port->sampling_port_status.REFRESH_PERIOD = REFRESH_PERIOD;
        sampling_port->sampling_port_status.LAST_MSG_VALIDITY = INVALID;
        
-       list_pushback(partition->communication_sampling_ports, sampling_port);
        *SAMPLING_PORT_ID = sampling_port->sampling_port_id;
        *RETURN_CODE = NO_ERROR;
 
@@ -264,9 +255,9 @@ void CREATE_QUEUING_PORT (
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
 
        struct pcb_s *partition = get_current_partition();
-       if(partition->queuing_port_count + 1 > MAX_NUMBER_OF_QUEUING_PORTS){
-              *RETURN_CODE = INVALID_CONFIG;
-              return;
+       if(partition->queuing_port_count + 1 > partition->max_queuing_ports || partition->max_queuing_port_data_size < MAX_MESSAGE_SIZE){
+       *RETURN_CODE = INVALID_CONFIG;
+       return;
        }
 
        int index_conf_table = check_port_in_conf_table(QUEUING_PORT_NAME);
@@ -276,7 +267,7 @@ void CREATE_QUEUING_PORT (
        }
 
 
-       if (find_queuing_port_node_by_name(partition, QUEUING_PORT_NAME)){
+       if (find_queuing_port_by_name(partition, QUEUING_PORT_NAME) != -1){
               *RETURN_CODE = NO_ACTION;
               return;
        }
@@ -306,28 +297,22 @@ void CREATE_QUEUING_PORT (
               return;
        }
 
-       QUEUING_PORT_ID_TYPE port_ID = ++(partition->queuing_port_count);
-
-       struct queuing_port_s *queuing_port = malloc(sizeof(struct queuing_port_s));
-       QUEUING_PORT_STATUS_TYPE *queuing_port_status = malloc(sizeof(QUEUING_PORT_STATUS_TYPE));
-
-       queuing_port_status->MAX_MESSAGE_SIZE = MAX_MESSAGE_SIZE;
-       queuing_port_status->MAX_NB_MESSAGE = MAX_NB_MESSAGE;
-       queuing_port_status->PORT_DIRECTION = PORT_DIRECTION;
- 
-       queuing_port->queuing_port_status = queuing_port_status;
-       queuing_port->partition_id = system_port_table[index_conf_table].partition_id;
-       queuing_port->queuing_port_id = port_ID;
-       queuing_port->QUEUING_DISCIPLINE = QUEUING_DISCIPLINE;
-       queuing_port->waiting_processes = list_create();
+       struct queuing_port_s *queuing_port = &partition->queuing_ports[partition->queuing_port_count++];
 
        strncpy(queuing_port->queuing_port_name, QUEUING_PORT_NAME, sizeof(queuing_port->queuing_port_name) - 1);
        queuing_port->queuing_port_name[sizeof(queuing_port->queuing_port_name) - 1] = '\0';
-       
+       queuing_port->queuing_port_id = partition->queuing_port_count;
+       queuing_port->partition_id = partition->status->IDENTIFIER;
        queuing_port->channel = system_port_table[index_conf_table].queuing_channel;
+       queuing_port->QUEUING_DISCIPLINE = QUEUING_DISCIPLINE;
+       queuing_port->waiting_processes = list_create();
+
+       queuing_port->queuing_port_status.MAX_MESSAGE_SIZE = MAX_MESSAGE_SIZE;
+       queuing_port->queuing_port_status.MAX_NB_MESSAGE = MAX_NB_MESSAGE;
+       queuing_port->queuing_port_status.PORT_DIRECTION = PORT_DIRECTION;
+       queuing_port->queuing_port_status.WAITING_PROCESSES = 0;
        
-       list_pushback(partition->communication_queuing_ports, queuing_port);
-       *QUEUING_PORT_ID = port_ID;
+       *QUEUING_PORT_ID = queuing_port->queuing_port_id;
        *RETURN_CODE = NO_ERROR;
 }
 
@@ -339,20 +324,21 @@ void SEND_QUEUING_MESSAGE (
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE){
 
        struct pcb_s *partition = get_current_partition();
-       struct node_s *queuing_port_node = find_queuing_port_node_by_id(partition, QUEUING_PORT_ID);
-       if (!queuing_port_node){
+
+       int index = find_queuing_port_by_id(partition, QUEUING_PORT_ID);
+       if (index == -1){
               *RETURN_CODE = INVALID_PARAM;
               return;
        }
 
-       struct queuing_port_s *queuing_port = queuing_port_node->data;
+       struct queuing_port_s *queuing_port = &partition->queuing_ports[index];
 
        if(TIME_OUT < INFINITE_TIME_VALUE || (TIME_OUT >= 0 && time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT))){
               *RETURN_CODE = INVALID_PARAM;
               return;
        }
 
-       if(LENGTH >= queuing_port->queuing_port_status->MAX_MESSAGE_SIZE){
+       if(LENGTH >= queuing_port->queuing_port_status.MAX_MESSAGE_SIZE){
               *RETURN_CODE = INVALID_CONFIG;
               return;
        }
@@ -362,7 +348,7 @@ void SEND_QUEUING_MESSAGE (
               return;
        }
 
-       if(queuing_port->queuing_port_status->PORT_DIRECTION != SOURCE){
+       if(queuing_port->queuing_port_status.PORT_DIRECTION != SOURCE){
               *RETURN_CODE = INVALID_MODE;
               return;
        }
@@ -390,7 +376,7 @@ void SEND_QUEUING_MESSAGE (
                      current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
               }
               current_process->processus_status->PROCESS_STATE = WAITING;
-              queuing_port->queuing_port_status->WAITING_PROCESSES++;
+              queuing_port->queuing_port_status.WAITING_PROCESSES++;
               // to do implementer selon la discipline de la file d'attente
               if (queuing_port->QUEUING_DISCIPLINE == PRIORITY){
                      // to do insert process in waiting_processes list according to its priority
@@ -428,20 +414,20 @@ void RECEIVE_QUEUING_MESSAGE (
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
 
        struct pcb_s *partition = get_current_partition();
-       struct node_s *queuing_port_node = find_queuing_port_node_by_id(partition, QUEUING_PORT_ID);
-       if (!queuing_port_node){
+       int index = find_queuing_port_by_id(partition, QUEUING_PORT_ID);
+       if (index == -1){
               *RETURN_CODE = INVALID_PARAM;
               return;
        }
 
-       struct queuing_port_s *queuing_port = queuing_port_node->data;
+       struct queuing_port_s *queuing_port = &partition->queuing_ports[index];
 
        if(TIME_OUT < INFINITE_TIME_VALUE || (TIME_OUT >= 0 && time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT))){
               *RETURN_CODE = INVALID_PARAM;
               return;
        }
 
-       if(queuing_port->queuing_port_status->PORT_DIRECTION != DESTINATION){
+       if(queuing_port->queuing_port_status.PORT_DIRECTION != DESTINATION){
               *RETURN_CODE = INVALID_MODE;
               return;
        }
@@ -470,7 +456,7 @@ void RECEIVE_QUEUING_MESSAGE (
                      current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
               }
               current_process->processus_status->PROCESS_STATE = WAITING;
-              queuing_port->queuing_port_status->WAITING_PROCESSES++;
+              queuing_port->queuing_port_status.WAITING_PROCESSES++;
               if (queuing_port->QUEUING_DISCIPLINE == PRIORITY){
                      // to do insert process in waiting_processes list according to its priority
                      list_insert_sorted(queuing_port->waiting_processes, current_process);
@@ -506,13 +492,13 @@ void GET_QUEUING_PORT_ID (
 
        struct pcb_s* partition = get_current_partition();
        
-       struct node_s *queuing_port_node = find_queuing_port_node_by_name(partition, QUEUING_PORT_NAME); 
-       if (!queuing_port_node){
+       int index = find_queuing_port_by_name(partition, QUEUING_PORT_NAME);
+       if (index == -1){
               *RETURN_CODE = INVALID_CONFIG;
               return;
        }
 
-       struct queuing_port_s* queuing_port = queuing_port_node->data;
+       struct queuing_port_s* queuing_port = &partition->queuing_ports[index];
        *QUEUING_PORT_ID = queuing_port->queuing_port_id;
 
        *RETURN_CODE = NO_ERROR;
@@ -524,14 +510,14 @@ void GET_QUEUING_PORT_STATUS (
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
        struct pcb_s* partition = get_current_partition();
        
-       struct node_s *queuing_port_node = find_queuing_port_node_by_id(partition, QUEUING_PORT_ID); 
-       if (!queuing_port_node){
+       int index = find_queuing_port_by_id(partition, QUEUING_PORT_ID);
+       if (index == -1){
               *RETURN_CODE = INVALID_PARAM;
               return;
        }
 
-       struct queuing_port_s *queuing_port = queuing_port_node->data;
-       *QUEUING_PORT_STATUS = *queuing_port->queuing_port_status;
+       struct queuing_port_s *queuing_port = &partition->queuing_ports[index];
+       *QUEUING_PORT_STATUS = queuing_port->queuing_port_status;
        *RETURN_CODE = NO_ERROR;
 }
 
@@ -542,15 +528,15 @@ void CLEAR_QUEUING_PORT (
        
        struct pcb_s* partition = get_current_partition();
        
-       struct node_s *queuing_port_node = find_queuing_port_node_by_id(partition, QUEUING_PORT_ID); 
-       if (!queuing_port_node){
+       int index = find_queuing_port_by_id(partition, QUEUING_PORT_ID);
+       if (index == -1){
               *RETURN_CODE = INVALID_PARAM;
               return;
        }
 
-       struct queuing_port_s *queuing_port = queuing_port_node->data;
+       struct queuing_port_s *queuing_port = &partition->queuing_ports[index];
 
-       if(queuing_port->queuing_port_status->PORT_DIRECTION != DESTINATION){
+       if(queuing_port->queuing_port_status.PORT_DIRECTION != DESTINATION){
               *RETURN_CODE = INVALID_MODE;
               return;
        }

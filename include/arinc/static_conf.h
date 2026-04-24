@@ -7,7 +7,7 @@
 
 
 #define SAMPLING_PORT_MAX_MESSAGE_SIZE 512
-
+#define QUEUING_PORT_MAX_MESSAGE_SIZE 512
 #define BLACKBOARD_MAX_MESSAGE_SIZE 512
 
 #define BUFFER_MAX_MESSAGE_SIZE 64
@@ -49,6 +49,9 @@ extern uint8_t _p2_data_end[];
 static struct sampling_port_s p1_sampling_ports[MAX_NUMBER_OF_SAMPLING_PORTS];
 static struct sampling_port_s p2_sampling_ports[MAX_NUMBER_OF_SAMPLING_PORTS];
 
+static struct queuing_port_s p1_queuing_ports[MAX_NUMBER_OF_QUEUING_PORTS];
+static struct queuing_port_s p2_queuing_ports[MAX_NUMBER_OF_QUEUING_PORTS];
+
 static struct blackboard_s p1_blackboards[MAX_NUMBER_OF_BLACKBOARDS];
 static uint8_t p1_blackboards_data[MAX_NUMBER_OF_BLACKBOARDS * BLACKBOARD_MAX_MESSAGE_SIZE]; // 512 bytes par blackboard
 static uint32_t p1_blackboards_size_data[MAX_NUMBER_OF_BLACKBOARDS];
@@ -88,6 +91,10 @@ struct PartitionConfig {
     APEX_INTEGER sampling_port_count;
     APEX_INTEGER max_sampling_port_data_size;
 
+    struct queuing_port_s *queuing_ports;
+    APEX_INTEGER max_queuing_ports;
+    APEX_INTEGER queuing_port_count;
+    APEX_INTEGER max_queuing_port_data_size;
 
     struct blackboard_s *blackboards;
     APEX_INTEGER max_blackboards;
@@ -135,6 +142,11 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
     .sampling_port_count = 0,
     .max_sampling_port_data_size = SAMPLING_PORT_MAX_MESSAGE_SIZE,
 
+    .queuing_ports = p1_queuing_ports,
+    .max_queuing_ports = MAX_NUMBER_OF_QUEUING_PORTS,
+    .queuing_port_count = 0,
+    .max_queuing_port_data_size = QUEUING_PORT_MAX_MESSAGE_SIZE,
+
     .blackboards = p1_blackboards,
     .max_blackboards = MAX_NUMBER_OF_BLACKBOARDS,
     .blackboard_count = 0,
@@ -180,6 +192,10 @@ static const struct PartitionConfig P2_CONFIG = {
     .sampling_port_count = 0,
     .max_sampling_port_data_size = SAMPLING_PORT_MAX_MESSAGE_SIZE,
     
+    .queuing_ports = p2_queuing_ports,
+    .max_queuing_ports = MAX_NUMBER_OF_QUEUING_PORTS,
+    .queuing_port_count = 0,
+    .max_queuing_port_data_size = QUEUING_PORT_MAX_MESSAGE_SIZE,
 
     .blackboards = NULL,
     .max_blackboards = 0,

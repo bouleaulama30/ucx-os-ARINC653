@@ -81,15 +81,18 @@ struct pcb_s {
    MEMORY_REQUIREMENTS_TYPE *memory_requirements;
    SYSTEM_ADDRESS_TYPE next_stack_addr;
 
-   // port
-   struct list_s *communication_queuing_ports;
-   APEX_INTEGER queuing_port_count;
-
-   struct list_s *communication_sampling_ports;
+   // sampling port
    struct sampling_port_s *sampling_ports;
    APEX_INTEGER max_sampling_ports;
    APEX_INTEGER sampling_port_count;
    APEX_INTEGER max_sampling_port_data_size;
+
+   // queuing port
+   struct list_s *communication_queuing_ports;
+   struct queuing_port_s *queuing_ports;
+   APEX_INTEGER max_queuing_ports;
+   APEX_INTEGER queuing_port_count;
+   APEX_INTEGER max_queuing_port_data_size;
 
    // bb
    struct blackboard_s *blackboards;

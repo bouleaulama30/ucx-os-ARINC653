@@ -55,37 +55,40 @@ void p1_process1(void)
 	RETURN_CODE_TYPE return_code;
 	APEX_INTEGER partition_id;
 	APEX_INTEGER process_id;
-	SAMPLING_PORT_ID_TYPE sampling_port_id;
+	QUEUING_PORT_ID_TYPE queuing_port_id;
 	MESSAGE_SIZE_TYPE message_length;
 	char message[64];
-	uint32_t seq = 0;
 
 	GET_MY_PARTITION_ID(&partition_id, &return_code);
 	GET_MY_ID(&process_id, &return_code);
 
 	while (1) {
-		GET_SAMPLING_PORT_ID("P1_OUT_TEMP", &sampling_port_id, &return_code);
+		GET_QUEUING_PORT_ID("P1_IN_CMDS", &queuing_port_id, &return_code);
 		if (return_code == NO_ERROR) {
 			break;
 		}
-		printf("[P1/Process1] GET_SAMPLING_PORT_ID('P1_OUT_TEMP') rc=%d (retry)\n", return_code);
+		printf("[P1/Process1] GET_QUEUING_PORT_ID('P1_IN_CMDS') rc=%d (retry)\n", return_code);
 		TIMED_WAIT(2, &return_code);
 	}
 
-	printf("\n--- START TEST SAMPLING PORT (P1 write -> P2 read) ---\n");
-	printf("[P1/Process1] partition=%d pid=%d sampling_port_id=%d\n", partition_id, process_id, sampling_port_id);
+	printf("\n--- START TEST QUEUING PORT (P2 send -> P1 receive) ---\n");
+	printf("[P1/Process1] partition=%d pid=%d queuing_port_id=%d\n", partition_id, process_id, queuing_port_id);
 
 	while (1) {
-		seq++;
-		sprintf(message, "temp=%luC from=P1", (unsigned long)(20 + (seq % 10)));
-		message_length = (MESSAGE_SIZE_TYPE)(strlen(message) + 1);
+		RECEIVE_QUEUING_MESSAGE(queuing_port_id,
+		                       10,
+		                       (MESSAGE_ADDR_TYPE)message,
+		                       &message_length,
+		                       &return_code);
 
-		WRITE_SAMPLING_MESSAGE(sampling_port_id, (MESSAGE_ADDR_TYPE)message, message_length, &return_code);
-		printf("[P1/Process1] WRITE_SAMPLING_MESSAGE rc=%d seq=%lu len=%d msg='%s'\n",
-		       return_code,
-		       (unsigned long)seq,
-		       message_length,
-		       message);
+		if (return_code == NO_ERROR) {
+			printf("[P1/Process1] RECEIVE_QUEUING_MESSAGE rc=%d len=%d msg='%s'\n",
+			       return_code,
+			       message_length,
+			       message);
+		} else {
+			printf("[P1/Process1] RECEIVE_QUEUING_MESSAGE rc=%d\n", return_code);
+		}
 
 		TIMED_WAIT(10, &return_code);
 	}
@@ -95,7 +98,7 @@ __attribute__((section(".p1_code")))
 void p1_process2(void)
 {   
 	RETURN_CODE_TYPE return_code;
-	printf("[P1/Process2] idle for sampling test\n");
+	printf("[P1/Process2] idle for queuing test\n");
 
 	while (1) {
 		TIMED_WAIT(20, &return_code);
@@ -106,7 +109,7 @@ __attribute__((section(".p1_code")))
 void p1_process3(void)
 {   
 	RETURN_CODE_TYPE return_code;
-	printf("[P1/Process3] idle for sampling test\n");
+	printf("[P1/Process3] idle for queuing test\n");
 
 	while (1) {
 		TIMED_WAIT(20, &return_code);
@@ -119,40 +122,46 @@ void p2_process1(void)
 	RETURN_CODE_TYPE return_code;
 	APEX_INTEGER partition_id;
 	APEX_INTEGER process_id;
-	SAMPLING_PORT_ID_TYPE sampling_port_id;
+	QUEUING_PORT_ID_TYPE queuing_port_id;
 	MESSAGE_SIZE_TYPE message_length;
-	VALIDITY_TYPE validity;
 	char message[64];
+	uint32_t seq = 0;
 
 	GET_MY_PARTITION_ID(&partition_id, &return_code);
 	GET_MY_ID(&process_id, &return_code);
 
 	while (1) {
-		GET_SAMPLING_PORT_ID("P2_IN_TEMP", &sampling_port_id, &return_code);
+		GET_QUEUING_PORT_ID("P2_OUT_CMDS", &queuing_port_id, &return_code);
 		if (return_code == NO_ERROR) {
 			break;
 		}
-		printf("[P2/Process1] GET_SAMPLING_PORT_ID('P2_IN_TEMP') rc=%d (retry)\n", return_code);
+		printf("[P2/Process1] GET_QUEUING_PORT_ID('P2_OUT_CMDS') rc=%d (retry)\n", return_code);
 		TIMED_WAIT(2, &return_code);
 	}
 
-	printf("[P2/Process1] partition=%d pid=%d sampling_port_id=%d\n", partition_id, process_id, sampling_port_id);
+	printf("[P2/Process1] partition=%d pid=%d queuing_port_id=%d\n", partition_id, process_id, queuing_port_id);
 
 	while (1) {
-		READ_SAMPLING_MESSAGE(sampling_port_id,
-		                      (MESSAGE_ADDR_TYPE)message,
-		                      &message_length,
-		                      &validity,
-		                      &return_code);
+		seq++;
+		sprintf(message, "cmd=%lu from=P2", (unsigned long)seq);
+		message_length = (MESSAGE_SIZE_TYPE)(strlen(message) + 1);
+
+		SEND_QUEUING_MESSAGE(queuing_port_id,
+		                     (MESSAGE_ADDR_TYPE)message,
+		                     message_length,
+		                     0,
+		                     &return_code);
 
 		if (return_code == NO_ERROR) {
-			printf("[P2/Process1] READ_SAMPLING_MESSAGE rc=%d validity=%d len=%d msg='%s'\n",
+			printf("[P2/Process1] SEND_QUEUING_MESSAGE rc=%d seq=%lu len=%d msg='%s'\n",
 			       return_code,
-			       validity,
+			       (unsigned long)seq,
 			       message_length,
 			       message);
 		} else {
-			printf("[P2/Process1] READ_SAMPLING_MESSAGE rc=%d validity=%d\n", return_code, validity);
+			printf("[P2/Process1] SEND_QUEUING_MESSAGE rc=%d seq=%lu\n",
+			       return_code,
+			       (unsigned long)seq);
 		}
 
 		TIMED_WAIT(10, &return_code);
@@ -191,6 +200,11 @@ int app_main(void)
 				   DEFAULT_PARTITION_CONFIG.max_sampling_ports,
 				   DEFAULT_PARTITION_CONFIG.sampling_port_count,
 				   DEFAULT_PARTITION_CONFIG.max_sampling_port_data_size,
+				   
+				   DEFAULT_PARTITION_CONFIG.queuing_ports,
+				   DEFAULT_PARTITION_CONFIG.max_queuing_ports,
+				   DEFAULT_PARTITION_CONFIG.queuing_port_count,
+				   DEFAULT_PARTITION_CONFIG.max_queuing_port_data_size,
 				   
 				   DEFAULT_PARTITION_CONFIG.blackboards,
 				   DEFAULT_PARTITION_CONFIG.max_blackboards,
@@ -241,6 +255,11 @@ int app_main(void)
 				   P2_CONFIG.max_sampling_ports,
 				   P2_CONFIG.sampling_port_count,
 				   P2_CONFIG.max_sampling_port_data_size,
+
+				   P2_CONFIG.queuing_ports,
+				   P2_CONFIG.max_queuing_ports,
+				   P2_CONFIG.queuing_port_count,
+				   P2_CONFIG.max_queuing_port_data_size,
 
 				   P2_CONFIG.blackboards,
 				   P2_CONFIG.max_blackboards,
