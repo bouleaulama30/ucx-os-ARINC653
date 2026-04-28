@@ -63,6 +63,12 @@
         * and the current process is not the error handler process) =>
         * when (the current process is not the error handler process and the current process is not the identified process) => -- mutex can only be reset by the error handler or ownin
 ## HM
+* implem l'apex du HM et la test
+* adapter le reste de l apex a ca
+* faire les fonctions kernel pour gerer les erreurs dans le cas ou il n y a pas de error process:
+    * passage de l erreur au niveau partition 
+    * passage de l erreur au niveau module
+* gerer le cas ou l'irq handler catch l erreur (pour la rediriger vers les bonnes fonctions)
 * faire en sorte de mettre toutes les metriques en ns car le lsb de system_time_type est 1 ns
 * implem is_executing_error_handler pour get_my_id et get_my_index
 * implem is_main_process (trouver une condition necessaire et suffisante genre il n y a pas de current process) pour get_my_id et get_my_index
