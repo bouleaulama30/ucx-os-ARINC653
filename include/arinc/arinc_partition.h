@@ -127,6 +127,8 @@ struct pcb_s {
    APEX_INTEGER mutex_count;
    
    // Partion HM Table
+   struct process_s *error_handler_process;
+   
    SYSTEM_ADDRESS_TYPE entry_point;
    BOOLEAN_TYPE is_system_partition;
    APEX_UNSIGNED nbr_processes;

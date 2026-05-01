@@ -1,7 +1,7 @@
 #include "ucx.h"
 
 
-int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *process, struct pcb_s *current_partition)
+int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *process, struct pcb_s *current_partition, int is_error_handler)
 {
 	struct tcb_s *new_tcb;
 	struct node_s *new_task;
@@ -18,8 +18,11 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 	new_tcb->rt_prio = 0;
 	new_tcb->delay = 0;
 	new_tcb->stack_sz = stack_size;
-    current_partition->id_next++;
-	new_tcb->id = current_partition->id_next;
+
+    if (!is_error_handler) {
+        current_partition->id_next++;
+        new_tcb->id = current_partition->id_next;
+    }
 
 	new_tcb->stack = current_partition->next_stack_addr;
 	current_partition->next_stack_addr += stack_size;

@@ -17,6 +17,7 @@ extern void p1_process1(void);
 extern void p1_process2(void);
 extern void p1_process3(void);
 extern void p2_process1(void);
+extern void error_handler_function(void);
 extern void test_spatial_violation_p1(void);
 extern void test_spatial_violation_p2(void);
 extern void test_round_robin_A(void);
@@ -309,6 +310,15 @@ static const PROCESS_ATTRIBUTE_TYPE P2_PROCESS_1_CONFIG = {
     .NAME = "Process 1"
 };
 
+struct error_handler_config {
+    SYSTEM_ADDRESS_TYPE entry_point;
+    STACK_SIZE_TYPE stack_size;
+};
+
+static const struct error_handler_config DEFAULT_ERROR_HANDLER_CONFIG = {
+    .entry_point = error_handler_function, // To be set by partition initialization
+    .stack_size = 4096,  // 4KB stack
+};
 
 static uint8_t buffer_temperature[64];
 

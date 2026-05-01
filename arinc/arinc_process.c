@@ -187,7 +187,7 @@ void CREATE_PROCESS (
 
         new_process->processus_status = status;
 
-        int32_t id = ucx_process_spawn(ATTRIBUTES->ENTRY_POINT, ATTRIBUTES->STACK_SIZE, new_process, partition);
+        int32_t id = ucx_process_spawn(ATTRIBUTES->ENTRY_POINT, ATTRIBUTES->STACK_SIZE, new_process, partition, 0);
         new_process->process_id = id;
         new_process->process_index = partition->nbr_processes;
         new_process->processor_core_affinity = DEFAULT_PROCESS_CORE_AFFINITY;

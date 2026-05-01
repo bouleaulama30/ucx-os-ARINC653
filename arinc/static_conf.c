@@ -15,7 +15,9 @@ void p1_main_process(struct pcb_s *partition){
     CREATE_PROCESS(&P1_PROCESS_2_CONFIG, &process_id_1, &return_code1);
     CREATE_PROCESS(&P1_PROCESS_3_CONFIG, &process_id_2, &return_code0);
 
-    // printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);
+    CREATE_ERROR_HANDLER(DEFAULT_ERROR_HANDLER_CONFIG.entry_point, DEFAULT_ERROR_HANDLER_CONFIG.stack_size, &return_code1);
+
+    printf("CREATE ERROR HANDLER PROCESS Error code is %d\n", return_code1);
     // printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);      
 
     // DELAYED_START(process_id_0, 18, &return_code0);  

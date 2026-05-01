@@ -64,6 +64,13 @@
         * when (the current process is not the error handler process and the current process is not the identified process) => -- mutex can only be reset by the error handler or ownin
 ## HM
 * implem l'apex du HM et la test
+
+* create error handler process:
+    * faire en sorte qu il ne se fasse pas preempte par le lock preemption
+    * configure this partition so that processes on other processor cores do not make progress (i.e., pause) when the error handler process is scheduled;
+    * Set the error process list to empty;
+    * deplacer le contexte init dans le raise application_error
+    
 * adapter le reste de l apex a ca
 * faire les fonctions kernel pour gerer les erreurs dans le cas ou il n y a pas de error process:
     * passage de l erreur au niveau partition 

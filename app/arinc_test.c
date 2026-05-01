@@ -168,6 +168,12 @@ void p2_process1(void)
 	}
 }
 
+void error_handler_function(void) {
+	printf("[ERROR HANDLER] Error handler is executing.\n");
+	while (1) {
+		// Loop indefinitely to simulate error handling
+	}
+}
 
 int app_main(void)
 {
