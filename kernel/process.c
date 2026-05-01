@@ -42,9 +42,27 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 	return new_tcb->id;
 }
 
+// TODO
+struct node_s *find_process_by_pointer(struct node_s *node, void *arg){
+    struct process_s *process = node->data;
+    struct process_s *target = (struct process_s *) arg;
+    
+    if(process == target){
+        return node;
+    }
+    return 0;
+}
+
 uint16_t process_schedule(void)
 {
     struct pcb_s *partition = get_current_partition();
+
+    // TODO
+    // if(partition->error_handler_process != NULL && partition->error_handler_process->processus_status->PROCESS_STATE == READY){
+    //     partition->process_current = list(partition->processes, partition->error_handler_process);
+    //     partition->error_handler_process->processus_status->PROCESS_STATE = RUNNING;
+    //     return partition->error_handler_process->tcb.id;
+    // }
 
     struct node_s *node;
     

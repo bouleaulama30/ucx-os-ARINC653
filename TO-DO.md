@@ -66,7 +66,8 @@
 * implem l'apex du HM et la test
 
 * create error handler process:
-    * faire en sorte qu il ne se fasse pas preempte par le lock preemption
+    * faire en sorte qu il ne se fasse pas preempte par le lock preemption:
+        * continuer le travail en cours dans process schedule (faire une recherche d un process par pointeur dans la liste pour trouver le error handler process)
     * configure this partition so that processes on other processor cores do not make progress (i.e., pause) when the error handler process is scheduled;
     * Set the error process list to empty;
     * deplacer le contexte init dans le raise application_error
