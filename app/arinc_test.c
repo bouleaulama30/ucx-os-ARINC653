@@ -237,7 +237,11 @@ int app_main(void)
 
 				   DEFAULT_PARTITION_CONFIG.mutexes,
 				   DEFAULT_PARTITION_CONFIG.max_mutexes,
-				   DEFAULT_PARTITION_CONFIG.mutex_count
+				   DEFAULT_PARTITION_CONFIG.mutex_count,
+
+				   DEFAULT_PARTITION_CONFIG.error_list,
+				   DEFAULT_PARTITION_CONFIG.error_list_cb,
+				   DEFAULT_PARTITION_CONFIG.max_errors
 				   );
 
 	partition_init(P2_CONFIG.period,
@@ -292,7 +296,11 @@ int app_main(void)
 
 				   P2_CONFIG.mutexes,
 				   P2_CONFIG.max_mutexes,
-				   P2_CONFIG.mutex_count
+				   P2_CONFIG.mutex_count,
+
+				   P2_CONFIG.error_list,
+				   P2_CONFIG.error_list_cb,
+				   P2_CONFIG.max_errors
 
 				   );
 

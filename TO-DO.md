@@ -67,8 +67,9 @@
 
 * create error handler process:
     * configure this partition so that processes on other processor cores do not make progress (i.e., pause) when the error handler process is scheduled; (a faire quand on fera du multi core)
-    * Set the error process list to empty;
     * deplacer le contexte init dans le raise application_error
+* gestion de la list des error processes:
+    * ajouter un pending_error_code pour les processes et laisser l"os ajouter l'erreur dans la liste au moment du get error (cf gemini)
     
 * adapter le reste de l apex a ca
 * faire les fonctions kernel pour gerer les erreurs dans le cas ou il n y a pas de error process:
@@ -89,6 +90,7 @@
 
 ## refactoring
 
+* enlever les reference aux communication port dans partition init 
 * sampling_port_s -> sp_s ?
 * mettre des commentaires
 * voir si pour les ressources comme bb, la reference vers la partition ou le waiting_blackboard est necessaire dans la struct

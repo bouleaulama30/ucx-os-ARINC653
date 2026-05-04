@@ -61,6 +61,12 @@ void CREATE_ERROR_HANDLER (
 
        list_pushback(partition->processes, new_process);
 
+       // Set the error process list to empty;
+       partition->error_handler_process = new_process;
+       partition->error_list_cb->read_index = 0;
+       partition->error_list_cb->write_index = 0;
+       partition->error_list_cb->nb_errors = 0;
+
        _context_init(&new_process->tcb.context, (size_t)new_process->tcb.stack,new_process->tcb.stack_sz, (size_t)new_process->tcb.task);
 
        

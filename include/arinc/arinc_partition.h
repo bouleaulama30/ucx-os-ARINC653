@@ -128,6 +128,8 @@ struct pcb_s {
    
    // Partion HM Table
    struct process_s *error_handler_process;
+   struct error_list_s *error_list_cb;
+
    
    SYSTEM_ADDRESS_TYPE entry_point;
    BOOLEAN_TYPE is_system_partition;

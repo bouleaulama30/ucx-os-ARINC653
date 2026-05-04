@@ -1,6 +1,7 @@
 
 #include "../arinc/arinc_partition.h"
 #include "../arinc/arinc_apex_types.h"
+#include "../arinc/arinc_HM.h"
 
 #ifndef PARTITION
 #define PARTITION
@@ -55,7 +56,11 @@ extern int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 
                         struct mutex_s *mutexes,
                         APEX_INTEGER max_mutexes,
-                        APEX_INTEGER mutex_count
+                        APEX_INTEGER mutex_count,
+
+                        ERROR_STATUS_TYPE *process_error_list,
+                        struct error_list_s *error_list_cb,
+                        APEX_INTEGER max_errors
                         );
 
 extern int32_t krnl_partition_switch(PARTITION_ID_TYPE IDENTIFIER);

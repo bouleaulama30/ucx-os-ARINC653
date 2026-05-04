@@ -45,6 +45,16 @@ typedef
    } ERROR_HANDLER_CONCURRENCY_CONTROL_TYPE;
 
 
+struct error_list_s {
+    uint32_t read_index;
+    uint32_t write_index;
+    APEX_INTEGER nb_errors;
+    APEX_INTEGER max_errors;
+    ERROR_STATUS_TYPE *process_error_list;
+    struct list_s *error_processes_waiting_queue; // Ceux qui attendent un message
+};
+
+
 extern void REPORT_APPLICATION_MESSAGE (
        /*in */   MESSAGE_ADDR_TYPE        MESSAGE_ADDR,
        /*in */   MESSAGE_SIZE_TYPE        LENGTH,

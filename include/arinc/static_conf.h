@@ -13,6 +13,8 @@
 #define BUFFER_MAX_MESSAGE_SIZE 64
 #define BUFFER_MAX_NB_MESSAGE 3
 
+#define MAX_NUMBER_OF_ERRORS 10
+
 extern void p1_process1(void);
 extern void p1_process2(void);
 extern void p1_process3(void);
@@ -69,6 +71,12 @@ static struct event_s p1_events[MAX_NUMBER_OF_EVENTS];
 static struct mutex_s p1_mutexes[MAX_NUMBER_OF_MUTEXES];
 static struct mutex_s p2_mutexes[MAX_NUMBER_OF_MUTEXES];
 
+static struct error_list_s p1_error_list_cb;
+static ERROR_STATUS_TYPE p1_process_error_list[MAX_NUMBER_OF_ERRORS];
+
+static struct error_list_s p2_error_list_cb;
+static ERROR_STATUS_TYPE p2_process_error_list[MAX_NUMBER_OF_ERRORS];
+
 // Hardcoded partition configuration
 struct PartitionConfig {
     SYSTEM_TIME_TYPE period;
@@ -123,6 +131,10 @@ struct PartitionConfig {
     struct mutex_s *mutexes;
     APEX_INTEGER max_mutexes;
     APEX_INTEGER mutex_count;
+
+    ERROR_STATUS_TYPE *error_list;
+    struct error_list_s *error_list_cb;
+    APEX_INTEGER max_errors;
 };
 
 // Default hardcoded partition configuration et voir le ldscript pour la conf mémoire
@@ -174,6 +186,10 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
     .mutexes = p1_mutexes,
     .max_mutexes = MAX_NUMBER_OF_MUTEXES,
     .mutex_count = 0,
+
+    .error_list = p1_process_error_list,
+    .error_list_cb = &p1_error_list_cb,
+    .max_errors = MAX_NUMBER_OF_ERRORS,
 };
 
 static const struct PartitionConfig P2_CONFIG = {
@@ -224,6 +240,10 @@ static const struct PartitionConfig P2_CONFIG = {
     .mutexes = p2_mutexes,
     .max_mutexes = MAX_NUMBER_OF_MUTEXES,
     .mutex_count = 0,
+
+    .error_list = p2_process_error_list,
+    .error_list_cb = &p2_error_list_cb,
+    .max_errors = MAX_NUMBER_OF_ERRORS,
 };
 
 // Static module scheduler configuration

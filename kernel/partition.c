@@ -63,7 +63,11 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 
                         struct mutex_s *mutexes,
                         APEX_INTEGER max_mutexes,
-                        APEX_INTEGER mutex_count
+                        APEX_INTEGER mutex_count,
+
+                        ERROR_STATUS_TYPE *process_error_list,
+                        struct error_list_s *error_list_cb,
+                        APEX_INTEGER max_errors
                         )
 {
     // déclaration des structures
@@ -190,6 +194,15 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->mutexes = mutexes;
     new_pcb->max_mutexes = max_mutexes;
     new_pcb->mutex_count = mutex_count;
+
+    // HM error list cb
+    new_pcb->error_list_cb = error_list_cb;
+    new_pcb->error_list_cb->max_errors = max_errors;
+    new_pcb->error_list_cb->error_processes_waiting_queue = list_create();
+    new_pcb->error_list_cb->process_error_list = process_error_list;
+    new_pcb->error_list_cb->read_index = 0;
+    new_pcb->error_list_cb->write_index = 0;
+    new_pcb->error_list_cb->nb_errors = 0;
 
     CRITICAL_LEAVE();
 
