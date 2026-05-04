@@ -272,7 +272,7 @@ static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_1_CONFIG = {
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = p1_process1,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 1,            // Medium priority (1-239)
+    .BASE_PRIORITY = MAX_PRIORITY_VALUE,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "Process 1"
 };
