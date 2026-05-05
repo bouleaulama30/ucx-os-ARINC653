@@ -1,6 +1,5 @@
 #include "ucx.h"
 
-
 void REPORT_APPLICATION_MESSAGE (
        /*in */   MESSAGE_ADDR_TYPE        MESSAGE_ADDR,
        /*in */   MESSAGE_SIZE_TYPE        LENGTH,
@@ -75,7 +74,32 @@ void CREATE_ERROR_HANDLER (
 
 void GET_ERROR_STATUS (
        /*out*/   ERROR_STATUS_TYPE        *ERROR_STATUS,
-       /*out*/   RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/   RETURN_CODE_TYPE         *RETURN_CODE ){
+       struct pcb_s *partition = get_current_partition();
+       struct process_s *current_process = partition->process_current->data;
+       if (current_process != partition->error_handler_process){
+            *RETURN_CODE = INVALID_MODE;
+            return;
+       }
+       if (partition->error_list_cb->nb_errors == 0){
+            *RETURN_CODE = NO_ACTION;
+            return;
+       }
+       struct error_list_s *error_list_cb = partition->error_list_cb;
+       hm_read_error(error_list_cb, ERROR_STATUS);
+
+       if(error_list_cb->error_processes_waiting_queue->length > 0){
+              struct node_s *error_waiting_process_node = error_list_cb->error_processes_waiting_queue->head->next;
+              struct process_s *error_waiting_process = error_waiting_process_node->data;
+              list_remove(error_list_cb->error_processes_waiting_queue, error_waiting_process_node);
+              error_waiting_process->processus_status->PROCESS_STATE = READY;     
+
+              // ajout de l'erreur dans du process qui etait en attente dans la liste des erreurs
+              ERROR_STATUS_TYPE error = error_waiting_process->pending_error;
+              hm_write_error(error_list_cb, &error);
+       }
+       *RETURN_CODE = NO_ERROR;
+}
 
 void RAISE_APPLICATION_ERROR (
        /*in */   ERROR_CODE_TYPE          ERROR_CODE,

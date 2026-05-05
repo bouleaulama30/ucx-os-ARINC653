@@ -88,6 +88,9 @@ typedef  long long     	 APEX_LONG_INTEGER;     /* 64-bit signed   */
 typedef  long            APEX_NATIVE_INTEGER; 
 typedef  unsigned long   APEX_NATIVE_UNSIGNED; 
 
+typedef  APEX_INTEGER    PROCESS_ID_TYPE;
+typedef  APEX_UNSIGNED   STACK_SIZE_TYPE;
+
 
 /*----------------------*/
 /* General APEX types   */

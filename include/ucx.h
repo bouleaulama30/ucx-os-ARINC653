@@ -12,6 +12,7 @@
 #include <kernel/kernel.h>
 #include <kernel/process.h>
 #include <kernel/partition.h>
+#include <kernel/hm.h>
 #include <kernel/coroutine.h>
 #include <kernel/errno.h>
 #include <kernel/stat.h>

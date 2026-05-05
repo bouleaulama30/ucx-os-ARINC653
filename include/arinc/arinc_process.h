@@ -5,6 +5,7 @@
 /*----------------------------------------------------------------*/
 
 #include "arinc_apex_types.h"
+#include "arinc_HM.h"
 
 #ifndef APEX_PROCESS
 #define APEX_PROCESS
@@ -22,7 +23,6 @@
 
 typedef  NAME_TYPE            PROCESS_NAME_TYPE;
 
-typedef  APEX_INTEGER       PROCESS_ID_TYPE;
 #define  NULL_PROCESS_ID          0
 #define  MAIN_PROCESS_ID          1
 
@@ -30,7 +30,6 @@ typedef  APEX_INTEGER		PROCESS_INDEX_TYPE;
 
 typedef  APEX_INTEGER         LOCK_LEVEL_TYPE;
 
-typedef  APEX_UNSIGNED        STACK_SIZE_TYPE;
 
 typedef  APEX_INTEGER         WAITING_RANGE_TYPE;
 
@@ -69,6 +68,7 @@ typedef
       PROCESS_ATTRIBUTE_TYPE  ATTRIBUTES;
    } PROCESS_STATUS_TYPE;
 
+
 struct process_s
 {
     struct tcb_s tcb;
@@ -88,7 +88,8 @@ struct process_s
     struct semaphore_s *waiting_semaphore;
     struct event_s *waiting_event;
     struct mutex_s *waiting_mutex; 
-    MUTEX_ID_TYPE owned_mutex_id;    
+    MUTEX_ID_TYPE owned_mutex_id;
+    ERROR_STATUS_TYPE pending_error;  
 };
 
 static inline void update_process_deadline(struct process_s *process, SYSTEM_TIME_TYPE base_time) {
