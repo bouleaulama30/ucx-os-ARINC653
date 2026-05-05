@@ -39,6 +39,7 @@ struct kcb_s {
 	volatile uint32_t ticks;
 	uint16_t id_next;
 	char preemptive;
+	struct hm_cb_s *hm_cb;
 };
 
 #ifndef MULTICORE

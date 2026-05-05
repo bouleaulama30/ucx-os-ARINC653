@@ -3,7 +3,17 @@
 void REPORT_APPLICATION_MESSAGE (
        /*in */   MESSAGE_ADDR_TYPE        MESSAGE_ADDR,
        /*in */   MESSAGE_SIZE_TYPE        LENGTH,
-       /*out*/   RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/   RETURN_CODE_TYPE         *RETURN_CODE ){
+       struct pcb_s *partition = get_current_partition();
+
+       if (LENGTH <= 0){
+            *RETURN_CODE = INVALID_PARAM;
+            return;
+       }
+
+       hm_log_event(partition->status->IDENTIFIER, (char *)MESSAGE_ADDR);
+       *RETURN_CODE = NO_ERROR;
+}
 
 void CREATE_ERROR_HANDLER (
        /*in */   SYSTEM_ADDRESS_TYPE      ENTRY_POINT,

@@ -15,6 +15,9 @@
 
 #define MAX_NUMBER_OF_ERRORS 10
 
+#define MAX_LOG_ENTRIES 100
+#define MAX_LOG_ENTRY_SIZE 256
+
 extern void p1_process1(void);
 extern void p1_process2(void);
 extern void p1_process3(void);
@@ -76,6 +79,8 @@ static ERROR_STATUS_TYPE p1_process_error_list[MAX_NUMBER_OF_ERRORS];
 
 static struct error_list_s p2_error_list_cb;
 static ERROR_STATUS_TYPE p2_process_error_list[MAX_NUMBER_OF_ERRORS];
+
+extern char hm_log_buffer[MAX_LOG_ENTRIES][MAX_LOG_ENTRY_SIZE];
 
 // Hardcoded partition configuration
 struct PartitionConfig {

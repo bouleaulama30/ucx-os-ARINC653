@@ -13,6 +13,7 @@ static volatile int boot = 0;
 #endif
 
 static int init = 1;
+char hm_log_buffer[MAX_LOG_ENTRIES][MAX_LOG_ENTRY_SIZE];
 
 int main(void)
 {
@@ -23,7 +24,10 @@ int main(void)
 	int pr;
 	
 	_hardware_init();
-
+	
+	struct hm_cb_s hm_cb;
+	hm_init(&hm_cb, (char *)hm_log_buffer);
+	
 	//init pmp
 	_pmp_partition_activate((uint32_t)_kernel_end, (uint32_t)0, (uint32_t)0);
 	_mprv_activate();
