@@ -76,6 +76,7 @@
     * test le comportement quand il y a des processes en attente
 
 * adapter le reste de l apex a ca
+
 * faire les fonctions kernel pour gerer les erreurs dans le cas ou il n y a pas de error process:
     * passage de l erreur au niveau partition 
     * passage de l erreur au niveau module

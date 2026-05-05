@@ -126,9 +126,47 @@ void p2_process1(void)
 	MESSAGE_SIZE_TYPE message_length;
 	char message[64];
 	uint32_t seq = 0;
+	static const char *hm_test_messages[] = {
+		"HM_TEST_P2_0",
+		"HM_TEST_P2_1",
+		"HM_TEST_P2_2"
+	};
+	uint32_t log_slot;
+	size_t message_index;
+	int message_found;
+	char *log_entry;
 
 	GET_MY_PARTITION_ID(&partition_id, &return_code);
 	GET_MY_ID(&process_id, &return_code);
+
+	for (message_index = 0; message_index < sizeof(hm_test_messages) / sizeof(hm_test_messages[0]); ++message_index) {
+		REPORT_APPLICATION_MESSAGE((MESSAGE_ADDR_TYPE)hm_test_messages[message_index],
+		                          (MESSAGE_SIZE_TYPE)(strlen(hm_test_messages[message_index]) + 1),
+		                          &return_code);
+		printf("[P2/Process1] REPORT_APPLICATION_MESSAGE rc=%d msg='%s'\n",
+		       return_code,
+		       hm_test_messages[message_index]);
+	}
+
+	for (message_index = 0; message_index < sizeof(hm_test_messages) / sizeof(hm_test_messages[0]); ++message_index) {
+		message_found = 0;
+		for (log_slot = 0; log_slot < MAX_LOG_ENTRIES; ++log_slot) {
+			log_entry = hm_log_buffer[log_slot];
+			if (memcmp(log_entry, &partition_id, sizeof(PARTITION_ID_TYPE)) == 0 &&
+			    strcmp(log_entry + sizeof(PARTITION_ID_TYPE), hm_test_messages[message_index]) == 0) {
+				printf("[P2/Process1] HM log hit at slot %lu for '%s'\n",
+				       (unsigned long)log_slot,
+				       hm_test_messages[message_index]);
+				message_found = 1;
+				break;
+			}
+		}
+
+		if (!message_found) {
+			printf("[P2/Process1] HM log message not found in hm_log_buffer: '%s'\n",
+			       hm_test_messages[message_index]);
+		}
+	}
 
 	while (1) {
 		GET_QUEUING_PORT_ID("P2_OUT_CMDS", &queuing_port_id, &return_code);

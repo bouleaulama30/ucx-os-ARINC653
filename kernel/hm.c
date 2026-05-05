@@ -16,23 +16,33 @@ void hm_init(struct hm_cb_s *hm_cb, char *log_buffer){
 #endif
 }
 
-struct hm_cb_s get_hm_cb(){
+struct hm_cb_s *get_hm_cb(){
 #ifndef MULTICORE
-    return *kcb->hm_cb;
+    return kcb->hm_cb;
 #else
-    return *kcb[_cpu_id()]->hm_cb;
+    return kcb[_cpu_id()]->hm_cb;
 #endif
 }
 
 void hm_log_event(PARTITION_ID_TYPE partition_id, char *msg){
-    struct hm_cb_s hm_cb = get_hm_cb();
-    char *log_buffer = hm_cb.log_buffer;
-    int write_index = hm_cb.write_index;
-    int max_log_entry_size = hm_cb.max_log_entry_size;
-    int max_entries = hm_cb.max_log_entries;
+    struct hm_cb_s *hm_cb = get_hm_cb();
+    char *log_buffer;
+    char *dest;
+    int write_index;
+    int max_log_entry_size;
+    int max_entries;
+
+    if (hm_cb == NULL || hm_cb->log_buffer == NULL) {
+        return;
+    }
+
+    log_buffer = hm_cb->log_buffer;
+    write_index = hm_cb->write_index;
+    max_log_entry_size = hm_cb->max_log_entry_size;
+    max_entries = hm_cb->max_log_entries;
 
     // Structure : [PARTITION_ID (4 bytes)] [ERROR_CODE (4 bytes)] [MSG (le reste)]
-    char *dest = &log_buffer[write_index * max_log_entry_size];
+    dest = &log_buffer[write_index * max_log_entry_size];
 
     memcpy(dest, &partition_id, sizeof(PARTITION_ID_TYPE));
     dest += sizeof(PARTITION_ID_TYPE);
@@ -51,7 +61,7 @@ void hm_log_event(PARTITION_ID_TYPE partition_id, char *msg){
     dest[i] = '\0'; 
 
     // 4. Mise à jour de l'index d'écriture (Buffer Circulaire)
-    hm_cb.write_index = (write_index + 1) % max_entries;
+    hm_cb->write_index = (write_index + 1) % max_entries;
 }
 
 void hm_write_error(struct error_list_s *error_list_cb, ERROR_STATUS_TYPE *error_status){

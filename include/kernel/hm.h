@@ -11,7 +11,7 @@ struct hm_cb_s {
 };
 
 void hm_init(struct hm_cb_s *hm_cb, char *log_buffer);
-struct hm_cb_s get_hm_cb();
+struct hm_cb_s *get_hm_cb();
 
 void hm_log_event(PARTITION_ID_TYPE partition_id, char *msg);
 
