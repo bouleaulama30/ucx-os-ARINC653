@@ -61,6 +61,16 @@ void p1_process1(void)
 
 	GET_MY_PARTITION_ID(&partition_id, &return_code);
 	GET_MY_ID(&process_id, &return_code);
+	while(1)
+	{
+		static char hm_error_message[] = "P1 HM test: raise/get error status";
+		RAISE_APPLICATION_ERROR(APPLICATION_ERROR,
+		                        (MESSAGE_ADDR_TYPE)hm_error_message,
+		                        (ERROR_MESSAGE_SIZE_TYPE)(strlen(hm_error_message) + 1),
+		                        &return_code);
+		printf("[P1/Process1] RAISE_APPLICATION_ERROR rc=%d\n", return_code);
+		TIMED_WAIT(0, &return_code); 
+	}
 
 	while (1) {
 		GET_QUEUING_PORT_ID("P1_IN_CMDS", &queuing_port_id, &return_code);
@@ -98,10 +108,23 @@ __attribute__((section(".p1_code")))
 void p1_process2(void)
 {   
 	RETURN_CODE_TYPE return_code;
-	printf("[P1/Process2] idle for queuing test\n");
+	PROCESS_STATUS_TYPE proc_status;
+
+	printf("[P1/Process2] querying status for process 1\n");
 
 	while (1) {
-		TIMED_WAIT(20, &return_code);
+		GET_PROCESS_STATUS(1, &proc_status, &return_code);
+		if (return_code == NO_ERROR) {
+			printf("[P1/Process2] GET_PROCESS_STATUS rc=%d name=%s state=%d cur_prio=%d base_prio=%d\n",
+				   return_code,
+				   proc_status.ATTRIBUTES.NAME,
+				   proc_status.PROCESS_STATE,
+				   proc_status.CURRENT_PRIORITY,
+				   proc_status.ATTRIBUTES.BASE_PRIORITY);
+		} else {
+			printf("[P1/Process2] GET_PROCESS_STATUS rc=%d\n", return_code);
+		}
+		TIMED_WAIT(0, &return_code);
 	}
 }
 
@@ -207,10 +230,22 @@ void p2_process1(void)
 }
 
 void error_handler_function(void) {
+	RETURN_CODE_TYPE return_code;
+	ERROR_STATUS_TYPE error_status;
+
 	printf("[ERROR HANDLER] Error handler is executing.\n");
-	while (1) {
-		// Loop indefinitely to simulate error handling
+	GET_ERROR_STATUS(&error_status, &return_code);
+	if (return_code == NO_ERROR) {
+		printf("[ERROR HANDLER] GET_ERROR_STATUS rc=%d code=%d failed_pid=%d len=%d msg='%s'\n",
+				return_code,
+				error_status.ERROR_CODE,
+				error_status.FAILED_PROCESS_ID,
+				error_status.LENGTH,
+				(char *)error_status.MESSAGE);
+	} else if (return_code != NO_ACTION) {
+		printf("[ERROR HANDLER] GET_ERROR_STATUS rc=%d\n", return_code);
 	}
+	STOP_SELF();
 }
 
 int app_main(void)

@@ -67,12 +67,10 @@
 
 * create error handler process:
     * configure this partition so that processes on other processor cores do not make progress (i.e., pause) when the error handler process is scheduled; (a faire quand on fera du multi core)
-    * deplacer le contexte init dans le raise application_error
 * gestion de la list des error processes:
-    * dans le raise application erreur bien faire la gestion de l'ecriture
+    * faire en sorte de deleguer a la partition hm si le raise error ne peut pas traiter l erreur
 
 * get_error_status
-    * test la fonction
     * test le comportement quand il y a des processes en attente
 
 * adapter le reste de l apex a ca

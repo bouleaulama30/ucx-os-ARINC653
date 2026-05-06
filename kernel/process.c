@@ -57,11 +57,6 @@ uint16_t process_schedule(void)
 {
     struct pcb_s *partition = get_current_partition();
 
-    if(partition->error_handler_process != NULL && partition->error_handler_process->processus_status->PROCESS_STATE == READY){
-        partition->process_current = list_foreach(partition->processes, find_process_by_pointer, partition->error_handler_process);
-        partition->error_handler_process->processus_status->PROCESS_STATE = RUNNING;
-        return partition->error_handler_process->tcb.id;
-    }
 
     struct node_s *node;
     
@@ -74,6 +69,13 @@ uint16_t process_schedule(void)
         if (current_process->processus_status->PROCESS_STATE == RUNNING) {
             current_process->processus_status->PROCESS_STATE = READY;
         }
+    }
+
+    // 1. PRIORITÉ ABSOLUE : Si le processus de gestion des erreurs est prêt, il doit être exécuté immédiatement
+    if(partition->error_handler_process != NULL && partition->error_handler_process->processus_status->PROCESS_STATE == READY){
+        partition->process_current = list_foreach(partition->processes, find_process_by_pointer, partition->error_handler_process);
+        partition->error_handler_process->processus_status->PROCESS_STATE = RUNNING;
+        return partition->error_handler_process->tcb.id;
     }
 
     // 2. PARCOURS UNIQUE : On cherche strictement le processus READY avec le plus grand chiffre

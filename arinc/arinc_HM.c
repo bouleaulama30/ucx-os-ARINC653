@@ -55,7 +55,7 @@ void CREATE_ERROR_HANDLER (
        status->ATTRIBUTES.DEADLINE = INFINITE_TIME_VALUE;
        status->ATTRIBUTES.BASE_PRIORITY = MAX_PRIORITY_VALUE;
        status->CURRENT_PRIORITY = MAX_PRIORITY_VALUE;
-       status->PROCESS_STATE = READY;
+       status->PROCESS_STATE = DORMANT;
        status->ATTRIBUTES.NAME[0] = '\0';
        new_process->processus_status = status;
 
@@ -75,9 +75,6 @@ void CREATE_ERROR_HANDLER (
        partition->error_list_cb->read_index = 0;
        partition->error_list_cb->write_index = 0;
        partition->error_list_cb->nb_errors = 0;
-
-       _context_init(&new_process->tcb.context, (size_t)new_process->tcb.stack,new_process->tcb.stack_sz, (size_t)new_process->tcb.task);
-
        
        *RETURN_CODE = NO_ERROR;
 }
@@ -97,7 +94,7 @@ void GET_ERROR_STATUS (
        }
        struct error_list_s *error_list_cb = partition->error_list_cb;
        hm_read_error(error_list_cb, ERROR_STATUS);
-
+   
        if(error_list_cb->error_processes_waiting_queue->length > 0){
               struct node_s *error_waiting_process_node = error_list_cb->error_processes_waiting_queue->head->next;
               struct process_s *error_waiting_process = error_waiting_process_node->data;
@@ -115,7 +112,43 @@ void RAISE_APPLICATION_ERROR (
        /*in */   ERROR_CODE_TYPE          ERROR_CODE,
        /*in */   MESSAGE_ADDR_TYPE        MESSAGE_ADDR,
        /*in */   ERROR_MESSAGE_SIZE_TYPE  LENGTH,
-       /*out*/   RETURN_CODE_TYPE         *RETURN_CODE );
+       /*out*/   RETURN_CODE_TYPE         *RETURN_CODE ){
+       struct pcb_s *partition = get_current_partition();
+       struct process_s *current_process = partition->process_current->data;
+       if (LENGTH < 0 || LENGTH > MAX_ERROR_MESSAGE_SIZE){
+            *RETURN_CODE = INVALID_PARAM;
+            return;
+       }
+       if(ERROR_CODE != APPLICATION_ERROR){
+            *RETURN_CODE = INVALID_PARAM;
+            return;
+       }
+
+       if (current_process == partition->error_handler_process || partition->error_handler_process == NULL){
+              printf("Passage du message: %s et de l'erreur: %d au niveau superieur", MESSAGE_ADDR, ERROR_CODE);
+       }
+       else {
+              ERROR_STATUS_TYPE error_status;
+              error_status.ERROR_CODE = ERROR_CODE;
+              error_status.FAILED_PROCESS_ID = current_process->process_id;
+              error_status.LENGTH = LENGTH;
+              memcpy(error_status.MESSAGE, MESSAGE_ADDR, LENGTH);
+              if(partition->error_list_cb->nb_errors == partition->error_list_cb->max_errors){
+                     current_process->processus_status->PROCESS_STATE = WAITING;
+                     current_process->pending_error = error_status;
+                     list_push(partition->error_list_cb->error_processes_waiting_queue, current_process);
+                     yield_to_partition(partition, current_process);
+              }
+              hm_write_error(partition->error_list_cb, &error_status);
+              struct process_s *error_process = partition->error_handler_process;
+              if (error_process && error_process->processus_status->PROCESS_STATE == DORMANT || error_process->processus_status->PROCESS_STATE == WAITING){
+                     error_process->processus_status->PROCESS_STATE = READY;
+                     _context_init(&error_process->tcb.context, (size_t)error_process->tcb.stack,error_process->tcb.stack_sz, (size_t)error_process->tcb.task);
+                     yield_to_partition(partition, current_process);
+              }
+       }
+       *RETURN_CODE = NO_ERROR;
+}
 
 
 // TODO when multicore
