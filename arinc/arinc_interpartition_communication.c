@@ -368,7 +368,7 @@ void SEND_QUEUING_MESSAGE (
        }
        // cd current process error handler
        
-       else if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+       else if (current_process->owned_mutex_id != NO_MUTEX_OWNED || partition->error_handler_process == current_process){
               *RETURN_CODE = INVALID_MODE;
        } 
        else {
@@ -447,7 +447,7 @@ void RECEIVE_QUEUING_MESSAGE (
               *RETURN_CODE = NOT_AVAILABLE;
        }
        // cd current process error handler
-       else if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+       else if (current_process->owned_mutex_id != NO_MUTEX_OWNED || partition->error_handler_process == current_process){
               *LENGTH = 0;
               *RETURN_CODE = INVALID_MODE;
     } 

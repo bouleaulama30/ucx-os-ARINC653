@@ -4,76 +4,25 @@
 
 ## Partition implem
 
-* implémentation set_operating_mode:
-    * faire les actions quand elle passe en normal
-        * -- a DEADLINE_TIME calculation may cause an overflow of the underlying -- clock. If this occurs, HM is invoked with an illegal request error code set the partition’s lock level to zero;
-        * if (an error handler process has been created) then enable the error handler process for execution and fault processing;
+* set_operating_mode:
+    * -- a DEADLINE_TIME calculation may cause an overflow of the underlying -- clock. If this occurs, HM is invoked with an illegal request error code set the partition’s lock level to zero;
 
 ## Process
-
-* Lock_preemption:
-    * current process is error handler process
-
-* Unlock_preemption:
-    * current process is error handler process
-
-* suspend self  error handler
-
 * refaire un test de suspend/self, resume, stop/self pour voir si c'est toujours ok:
     * le faire aussi quand il y a un mutex ou une ressource en attente
 
 ## partition communication
-* TIMED_WAIT:
-    * gerer le cas error handler
-* PERIODIC_WAIT:
-    * gerer le cas error handler
-* REPLENISH:
-    * gerer le cas avec le error handler
 
 ### inter communication
-* faire allocation des spaces (cf message felipe pour les ports) comme pour le intrapartition
-* SEND_QUEUING_MESSAGE:
-    * voir current process error handler
-* RECEIVE_QUEUING_MESSAGE:
-    * voir current process error handler
 
 ### intra communication
-* send buffer:
-    * to do error handler
 
-* receive buffer:
-    * to do error handler
-
-* read bb:
-    * to do error handler
-
-* wait semaphore:
-    * to do error handler
-
-* wait_event:
-    * to do error handler
-
-* wait_periodic_event:
-    * current process is error handler process
-
-* Mutex:
-    * mutex acquire:
-        * when (current process is the error handler process) =>
-    * mutex reset:
-        * and the current process is not the error handler process) =>
-        * when (the current process is not the error handler process and the current process is not the identified process) => -- mutex can only be reset by the error handler or ownin
 ## HM
-* implem l'apex du HM et la test
 
 * create error handler process:
     * configure this partition so that processes on other processor cores do not make progress (i.e., pause) when the error handler process is scheduled; (a faire quand on fera du multi core)
 * gestion de la list des error processes:
     * faire en sorte de deleguer a la partition hm si le raise error ne peut pas traiter l erreur
-
-* get_error_status
-    * test le comportement quand il y a des processes en attente
-
-* adapter le reste de l apex a ca
 
 * faire les fonctions kernel pour gerer les erreurs dans le cas ou il n y a pas de error process:
     * passage de l erreur au niveau partition 

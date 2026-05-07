@@ -262,8 +262,7 @@ void SUSPEND_SELF (
     struct node_s *process_node = partition->process_current;
     struct process_s *current_process = process_node->data;
     
-    // TODO error handler
-    if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+    if (current_process->owned_mutex_id != NO_MUTEX_OWNED || current_process == partition->error_handler_process){
         *RETURN_CODE = INVALID_MODE;
         return;
     }
@@ -640,7 +639,8 @@ void LOCK_PREEMPTION (
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
     // to do
     struct pcb_s *partition = get_current_partition();
-    if (partition->status->OPERATING_MODE != NORMAL){
+    struct process_s *current_process = partition->process_current->data;
+    if (current_process == partition->error_handler_process || partition->status->OPERATING_MODE != NORMAL){
         *LOCK_LEVEL = partition->status->LOCK_LEVEL;
         *RETURN_CODE = NO_ACTION;
         return;
@@ -666,7 +666,7 @@ void UNLOCK_PREEMPTION (
     // to do 
     struct pcb_s *partition = get_current_partition();
     struct process_s *current_process = partition->process_current->data;
-    if (partition->status->OPERATING_MODE != NORMAL && partition->status->LOCK_LEVEL == 0){
+    if (current_process == partition->error_handler_process || partition->status->OPERATING_MODE != NORMAL || partition->status->LOCK_LEVEL == 0){
         *RETURN_CODE = NO_ACTION;
         *LOCK_LEVEL = partition->status->LOCK_LEVEL;
         return;
@@ -690,10 +690,6 @@ void UNLOCK_PREEMPTION (
 }
 
 
-// to do 
-int is_executing_error_handler(){
-    return 0;
-}
 void GET_MY_ID (
        /*out*/ PROCESS_ID_TYPE          *PROCESS_ID,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE )
@@ -701,8 +697,7 @@ void GET_MY_ID (
     struct pcb_s *partition = get_current_partition();
     struct process_s *process = partition->process_current->data;
 
-    // 2. Vérifier si le code actuel est le Error Handler (tâche spéciale)
-    if (is_executing_error_handler()) {
+    if (*PROCESS_ID == NULL_PROCESS_ID || process == partition->error_handler_process) {
         *RETURN_CODE = INVALID_MODE;
         return;
     }
@@ -786,8 +781,7 @@ void GET_MY_INDEX (
     struct pcb_s *partition = get_current_partition();
     struct process_s *process = partition->process_current->data;
 
-    // 2. Vérifier si le code actuel est le Error Handler (tâche spéciale) ou si le main process la appele
-    if (is_executing_error_handler()) {
+    if (*PROCESS_INDEX == NULL_PROCESS_ID || process == partition->error_handler_process){
         *RETURN_CODE = INVALID_MODE;
         return;
     }

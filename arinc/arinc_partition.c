@@ -168,6 +168,11 @@ void SET_PARTITION_MODE (
 
         SYSTEM_TIME_TYPE first_release_point = arinc_time_find_first_release_point(partition);
         list_foreach(partition->processes, start_process, (void *)first_release_point);
+        partition->status->LOCK_LEVEL = 0;
+        if (partition->error_handler_process != NULL){
+            struct process_s *error_process = partition->error_handler_process;
+            _context_init(&error_process->tcb.context, (size_t)error_process->tcb.stack,error_process->tcb.stack_sz, (size_t)error_process->tcb.task);
+        }
         longjmp(partition->partition_context, 1);
     }
     

@@ -238,8 +238,7 @@ void READ_BLACKBOARD (
         *LENGTH = 0;
         *RETURN_CODE = NOT_AVAILABLE;
     }
-    // to do error handler
-    else if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+    else if (current_process->owned_mutex_id != NO_MUTEX_OWNED || partition->error_handler_process == current_process){
         *LENGTH = 0;
         *RETURN_CODE = INVALID_MODE;
     } 
@@ -439,7 +438,7 @@ void SEND_BUFFER (
         *RETURN_CODE = NOT_AVAILABLE;
     }
     // cd current process error handler
-    else if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+    else if (current_process->owned_mutex_id != NO_MUTEX_OWNED || partition->error_handler_process == current_process){
         *RETURN_CODE = INVALID_MODE;
     }
     else if (TIME_OUT == INFINITE_TIME_VALUE){
@@ -541,8 +540,7 @@ void RECEIVE_BUFFER (
         *LENGTH = 0;
         *RETURN_CODE = NOT_AVAILABLE;
     }
-    // to do  error handler
-    else if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+    else if (current_process->owned_mutex_id != NO_MUTEX_OWNED || partition->error_handler_process == current_process){
         *LENGTH = 0;
         *RETURN_CODE = INVALID_MODE;
     } 
@@ -703,8 +701,7 @@ void WAIT_SEMAPHORE (
     else if (TIME_OUT == 0){
         *RETURN_CODE = NOT_AVAILABLE;
     }
-    // to do error handler
-    else if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+    else if (current_process->owned_mutex_id != NO_MUTEX_OWNED || partition->error_handler_process == current_process){
         *RETURN_CODE = INVALID_MODE;
     } 
     else if (TIME_OUT == INFINITE_TIME_VALUE){
@@ -917,7 +914,7 @@ void WAIT_EVENT (
         *RETURN_CODE = NOT_AVAILABLE;
     }
     // to do error handler
-    else if (current_process->owned_mutex_id != NO_MUTEX_OWNED){
+    else if (current_process->owned_mutex_id != NO_MUTEX_OWNED || partition->error_handler_process == current_process){
         *RETURN_CODE = INVALID_MODE;
         return;
     }
@@ -981,7 +978,7 @@ void APERIODIC_WAIT_EVENT (
     struct pcb_s *partition = get_current_partition();
     struct process_s *current_process = partition->process_current->data;
     // to do 
-    if (partition->status->OPERATING_MODE == NORMAL){
+    if (current_process != partition->error_handler_process || partition->status->OPERATING_MODE != NORMAL){
          *RETURN_CODE = INVALID_MODE;
          return;
     }
@@ -1099,7 +1096,11 @@ void krnl_acquire_mutex(/*in */ MUTEX_ID_TYPE            MUTEX_ID,
         return;
     }
     
-    // to do 
+    if (current_process != partition->error_handler_process){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
+        
     struct mutex_s *mutex = &partition->mutexes[index];
     if (current_process->processus_status->CURRENT_PRIORITY >= mutex->mutex_status.MUTEX_PRIORITY){
         *RETURN_CODE = INVALID_MODE;
@@ -1191,7 +1192,6 @@ void krnl_release_mutex(/*in */ MUTEX_ID_TYPE            MUTEX_ID,
         return;
     }
 
-
     struct node_s *current_process_node = partition->process_current;
     struct process_s *current_process = current_process_node->data;
     if (current_process->owned_mutex_id != MUTEX_ID){
@@ -1251,6 +1251,8 @@ void RESET_MUTEX (
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
 
     struct pcb_s *partition = get_current_partition();
+    struct process_s *current_process = partition->process_current->data;
+
     if(partition->status->OPERATING_MODE != NORMAL){
         *RETURN_CODE = INVALID_MODE;
         return;
@@ -1262,8 +1264,7 @@ void RESET_MUTEX (
         return;
     }
 
-    //to do 
-    if(MUTEX_ID == PREEMPTION_LOCK_MUTEX){
+    if(MUTEX_ID == PREEMPTION_LOCK_MUTEX && current_process != partition->error_handler_process){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -1281,6 +1282,10 @@ void RESET_MUTEX (
     }
 
     // to do
+    if (current_process != partition->error_handler_process && current_process->process_id != PROCESS_ID){
+        *RETURN_CODE = INVALID_MODE;
+        return;
+    }
 
     struct mutex_s *mutex = &partition->mutexes[index];
     mutex->mutex_status.LOCK_COUNT = 0;
@@ -1319,7 +1324,6 @@ void RESET_MUTEX (
         list_push(partition->processes, woken_process);
         woken_process->processus_status->PROCESS_STATE = READY;
     }
-    struct process_s *current_process = partition->process_current->data;
     yield_to_partition(partition, current_process);
     *RETURN_CODE = NO_ERROR;
 }
