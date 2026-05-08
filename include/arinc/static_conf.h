@@ -3,6 +3,7 @@
 
 #include "arinc/arinc_partition.h"
 #include "arinc/module_scheduler.h"
+#include "arinc/arinc_apex_types.h"
 #include "kernel/interpartition_communication.h"
 
 
@@ -82,6 +83,9 @@ static ERROR_STATUS_TYPE p2_process_error_list[MAX_NUMBER_OF_ERRORS];
 
 extern char hm_log_buffer[MAX_LOG_ENTRIES][MAX_LOG_ENTRY_SIZE];
 
+extern const ERROR_ACTION_TYPE hm_table_partition_1[4][4];
+extern const ERROR_ACTION_TYPE hm_table_partition_2[4][4];
+
 // Hardcoded partition configuration
 struct PartitionConfig {
     SYSTEM_TIME_TYPE period;
@@ -139,6 +143,7 @@ struct PartitionConfig {
 
     ERROR_STATUS_TYPE *error_list;
     struct error_list_s *error_list_cb;
+    const ERROR_ACTION_TYPE (*partition_hm_table)[4];
     APEX_INTEGER max_errors;
 };
 
@@ -194,6 +199,7 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
 
     .error_list = p1_process_error_list,
     .error_list_cb = &p1_error_list_cb,
+    .partition_hm_table = hm_table_partition_1,
     .max_errors = MAX_NUMBER_OF_ERRORS,
 };
 
@@ -249,6 +255,7 @@ static const struct PartitionConfig P2_CONFIG = {
     .error_list = p2_process_error_list,
     .error_list_cb = &p2_error_list_cb,
     .max_errors = MAX_NUMBER_OF_ERRORS,
+    .partition_hm_table = hm_table_partition_2,
 };
 
 // Static module scheduler configuration

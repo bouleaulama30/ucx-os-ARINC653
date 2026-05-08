@@ -9,7 +9,9 @@
 #include <lib/libc.h>
 #include <lib/list.h>
 #include <kernel/kernel.h>
+#include <kernel/hm.h>
 #include <arinc/arinc_partition.h>
+#include <arinc/arinc_HM.h>
 #include <riscv.h>
 
 /* hardware platform dependent stuff */
@@ -148,6 +150,8 @@ void _irq_handler(uint32_t cause, uint32_t epc)
         mepc = read_csr(mepc);
         mtval = read_csr(mtval);
         mstatus = read_csr(mstatus);
+
+		ERROR_CODE_TYPE apex_error = HARDWARE_FAULT; 
         printf("[FAULT] mcause=%x, mepc=%x, mtval=%x, mstatus=%x\n", val, mepc, mtval, mstatus);
         printf("  mcause: %s\n", 
             val == 0 ? "Instruction address misaligned" :
@@ -160,8 +164,27 @@ void _irq_handler(uint32_t cause, uint32_t epc)
             val == 7 ? "Store access fault" :
             "Unknown");
         printf("  MPRV=%d, MPP=%d\n", (mstatus >> 17) & 1, (mstatus >> 11) & 3);
-        while(1);
-        _panic();
+		switch (val) {
+            case 0: // Instruction address misaligned
+            case 2: // Illegal instruction
+                apex_error = ILLEGAL_REQUEST;
+                break;
+            case 1: // Instruction access fault
+			case 3:
+				apex_error = NUMERIC_ERROR;
+				break;
+            case 4: // Load address misaligned
+            case 5: // Load access fault
+            case 6: // Store address misaligned
+            case 7: // Store access fault
+                apex_error = MEMORY_VIOLATION;
+                break;
+            // Note: RISC-V gère souvent la division par 0 de façon silencieuse, 
+            // mais si une extension matérielle lève un trap, ce serait NUMERIC_ERROR.
+        }
+
+		// On sauve le contexte uniquement si on interrompt une vraie partition
+		hm_raise_error(apex_error, "Hardware fault detected", 27);
     }
 }
 

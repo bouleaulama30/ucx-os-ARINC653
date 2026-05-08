@@ -123,16 +123,17 @@ void RAISE_APPLICATION_ERROR (
             *RETURN_CODE = INVALID_PARAM;
             return;
        }
+       ERROR_STATUS_TYPE error_status;
+       error_status.ERROR_CODE = ERROR_CODE;
+       error_status.FAILED_PROCESS_ID = current_process->process_id;
+       error_status.LENGTH = LENGTH;
+       memcpy(error_status.MESSAGE, MESSAGE_ADDR, LENGTH);
 
        if (current_process == partition->error_handler_process || partition->error_handler_process == NULL){
-              printf("Passage du message: %s et de l'erreur: %d au niveau superieur", MESSAGE_ADDR, ERROR_CODE);
+              printf("Passage du message: %s et de l'erreur: %d au niveau superieur\n", MESSAGE_ADDR, ERROR_CODE);
+              hm_raise_partition_error(&error_status);
        }
        else {
-              ERROR_STATUS_TYPE error_status;
-              error_status.ERROR_CODE = ERROR_CODE;
-              error_status.FAILED_PROCESS_ID = current_process->process_id;
-              error_status.LENGTH = LENGTH;
-              memcpy(error_status.MESSAGE, MESSAGE_ADDR, LENGTH);
               if(partition->error_list_cb->nb_errors == partition->error_list_cb->max_errors){
                      current_process->processus_status->PROCESS_STATE = WAITING;
                      current_process->pending_error = error_status;

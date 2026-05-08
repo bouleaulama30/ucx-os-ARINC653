@@ -124,6 +124,10 @@ void p1_process2(void)
 		} else {
 			printf("[P1/Process2] GET_PROCESS_STATUS rc=%d\n", return_code);
 		}
+		int a = 3;
+		a = a/0;
+		printf("This line should never be printed (a=%d)\n", a);
+
 		TIMED_WAIT(0, &return_code);
 	}
 }
@@ -242,11 +246,34 @@ void error_handler_function(void) {
 				error_status.FAILED_PROCESS_ID,
 				error_status.LENGTH,
 				(char *)error_status.MESSAGE);
-	} else if (return_code != NO_ACTION) {
+
+		switch (error_status.ERROR_CODE)
+		{
+		case APPLICATION_ERROR:
+			printf("[ERROR HANDLER] Handling application error\n");
+			break;
+		// case NUMERIC_ERROR:
+		// 	printf("[ERROR HANDLER] Handling numeric error\n");
+		// 	break;
+		case DEADLINE_MISSED:
+			printf("[ERROR HANDLER] Handling deadline missed error\n");
+			break;
+		default:
+			printf("[ERROR HANDLER] Handling unknown error code %d\n", error_status.ERROR_CODE);
+			RAISE_APPLICATION_ERROR(APPLICATION_ERROR,
+			                        (MESSAGE_ADDR_TYPE)"Unknown error code received in error handler",
+			                        56,
+			                        &return_code);
+			break;
+		}
+
+	}
+	else if (return_code != NO_ACTION) {
 		printf("[ERROR HANDLER] GET_ERROR_STATUS rc=%d\n", return_code);
 	}
 	STOP_SELF();
 }
+
 
 int app_main(void)
 {
@@ -314,6 +341,7 @@ int app_main(void)
 
 				   DEFAULT_PARTITION_CONFIG.error_list,
 				   DEFAULT_PARTITION_CONFIG.error_list_cb,
+				   DEFAULT_PARTITION_CONFIG.partition_hm_table,
 				   DEFAULT_PARTITION_CONFIG.max_errors
 				   );
 
@@ -373,6 +401,7 @@ int app_main(void)
 
 				   P2_CONFIG.error_list,
 				   P2_CONFIG.error_list_cb,
+				   P2_CONFIG.partition_hm_table,
 				   P2_CONFIG.max_errors
 
 				   );

@@ -129,8 +129,8 @@ struct pcb_s {
    // Partion HM Table
    struct process_s *error_handler_process;
    struct error_list_s *error_list_cb;
+   const ERROR_ACTION_TYPE (*partition_hm_table)[4];
 
-   
    SYSTEM_ADDRESS_TYPE entry_point;
    BOOLEAN_TYPE is_system_partition;
    APEX_UNSIGNED nbr_processes;

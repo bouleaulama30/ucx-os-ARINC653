@@ -60,6 +60,7 @@ extern int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 
                         ERROR_STATUS_TYPE *process_error_list,
                         struct error_list_s *error_list_cb,
+                        const ERROR_ACTION_TYPE (*partition_hm_table)[4],
                         APEX_INTEGER max_errors
                         );
 
