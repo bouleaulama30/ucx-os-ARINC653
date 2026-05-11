@@ -63,10 +63,10 @@ void hm_log_event(PARTITION_ID_TYPE partition_id, char *msg){
     hm_cb->write_index = (write_index + 1) % max_entries;
 }
 
-void hm_raise_error(ERROR_CODE_TYPE ERROR_CODE, MESSAGE_ADDR_TYPE MESSAGE_ADDR, ERROR_MESSAGE_SIZE_TYPE LENGTH){
+void hm_raise_error(ERROR_CODE_TYPE ERROR_CODE, MESSAGE_ADDR_TYPE MESSAGE_ADDR, ERROR_MESSAGE_SIZE_TYPE LENGTH, struct node_s *failed_process_node){
     struct pcb_s *partition = get_current_partition();
-    struct process_s *current_process = partition->process_current->data;
-    current_process->processus_status->PROCESS_STATE = FAULTED;
+    struct process_s *process = failed_process_node->data;
+    process->processus_status->PROCESS_STATE = FAULTED;
 
     if (LENGTH < 0 || LENGTH > MAX_ERROR_MESSAGE_SIZE){
         printf("Invalid error message length: %d\n", LENGTH);
@@ -74,11 +74,11 @@ void hm_raise_error(ERROR_CODE_TYPE ERROR_CODE, MESSAGE_ADDR_TYPE MESSAGE_ADDR, 
 
     ERROR_STATUS_TYPE error_status;
     error_status.ERROR_CODE = ERROR_CODE;
-    error_status.FAILED_PROCESS_ID = current_process->process_id;
+    error_status.FAILED_PROCESS_ID = process->process_id;
     error_status.LENGTH = LENGTH;
     memcpy(error_status.MESSAGE, MESSAGE_ADDR, LENGTH);
 
-    if (current_process == partition->error_handler_process || partition->error_handler_process == NULL){
+    if (process == partition->error_handler_process || partition->error_handler_process == NULL){
         printf("Passage du message: %s et de l'erreur: %d au niveau superieur\n", MESSAGE_ADDR, ERROR_CODE);
         hm_raise_partition_error(&error_status);
         longjmp(partition->partition_context, 1);
@@ -121,6 +121,7 @@ void hm_raise_partition_error(ERROR_STATUS_TYPE *error_status){
     case PROCESS_RESTART:
         printf("HM Partition Action: PROCESS_RESTART\n");
         // RETURN_CODE_TYPE return_code;
+        // SET_PARTITION_MODE(COLD_START, &return_code);
         // struct node_s *process_node = is_process_id_existed(partition, error_status->FAILED_PROCESS_ID);
         // struct process_s *process = process_node->data;
         // process->processus_status->PROCESS_STATE = DORMANT;

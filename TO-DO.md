@@ -19,10 +19,11 @@
 
 ## HM
 
-* definir dans la conf static la table au niveau process, partition et module
+* definir dans la conf static la table au niveau process, partition et module (conforme avec les errors recovery action possiblent)
+
 * tester plusieurs erreurs a plusieurs niveau et leur recovery:
     * deadline missed:
-        * avec et sans error handler process (recovery resplenish)
+        * avec et sans error handler process (stop ou ignore)
     * application_error:
         * avec error handler (recovery a voir)
     * memory violation:

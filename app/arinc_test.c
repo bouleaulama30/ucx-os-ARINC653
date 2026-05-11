@@ -257,11 +257,11 @@ void error_handler_function(void) {
 			break;
 		// case NUMERIC_ERROR:
 		// 	printf("[ERROR HANDLER] Handling numeric error\n");
-		// 	STOP(1, &return_code);
-		// 	printf("[ERROR HANDLER] STOP(1) rc=%d\n", return_code);
-		// 	START(1, &return_code);
-		// 	printf("[ERROR HANDLER] START(1) rc=%d\n", return_code);
-		// 	break;
+			// STOP(1, &return_code);
+			// printf("[ERROR HANDLER] STOP(1) rc=%d\n", return_code);
+			// START(1, &return_code);
+			// printf("[ERROR HANDLER] START(1) rc=%d\n", return_code);
+			// break;
 		case DEADLINE_MISSED:
 			printf("[ERROR HANDLER] Handling deadline missed error\n");
 			break;
@@ -271,9 +271,7 @@ void error_handler_function(void) {
 			//                         (MESSAGE_ADDR_TYPE)"Unknown error code received in error handler",
 			//                         56,
 			//                         &return_code);
-			hm_raise_error(error_status.ERROR_CODE,
-			               (MESSAGE_ADDR_TYPE)"Unknown error code received in error handler",
-			               56);
+			hm_raise_partition_error(&error_status);
 			break;
 		}
 

@@ -17,7 +17,6 @@ static struct node_s *check_available_resources_on_port(struct node_s *node, voi
         queuing_port->queuing_port_status.WAITING_PROCESSES--;
         waiting_process->waiting_queuing_port = NULL;
     }
-
     return 0;
 }
 
@@ -148,7 +147,8 @@ void SET_PARTITION_MODE (
         partition->nbr_processes = 0;
         partition->id_next = 0;
         partition->next_stack_addr = partition->memory_requirements->memory[DATA].base + PARTIION_OS_AND_MAIN_PROCESS_STACK_SIZE;
-
+        partition->error_handler_process = NULL;
+        
         // on vide la liste des processes de la partition
         while (partition->processes->length != 0)
         {

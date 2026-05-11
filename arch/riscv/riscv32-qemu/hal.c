@@ -184,8 +184,25 @@ void _irq_handler(uint32_t cause, uint32_t epc)
         }
 
 		// On sauve le contexte uniquement si on interrompt une vraie partition
-		hm_raise_error(apex_error, "Hardware fault detected", 27);
-    }
+# ifndef MULTICORE
+		if (kcb->partition_current != NULL) {
+			struct pcb_s *current_partition = kcb->partition_current->data;
+			hm_raise_error(apex_error, "Hardware fault detected", 27, current_partition->process_current);
+		} else {
+			printf("Hardware fault detected and no partition available so panic\n");
+			_panic();
+		}
+# else
+		int core_id = _cpu_id();
+		if (kcb[core_id]->partition_current != NULL) {
+			struct pcb_s *current_partition = kcb[core_id]->partition_current->data;
+			hm_raise_error(apex_error, "Hardware fault detected", 27, current_partition->process_current);
+		} else {
+			printf("Hardware fault detected and no partition available so panic\n");
+			_panic();
+		}
+	}
+#endif
 }
 
 uint32_t _readcounter(void)

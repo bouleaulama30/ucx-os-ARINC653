@@ -53,6 +53,12 @@ static struct node_s *check_deadlines(struct node_s *node, void *arg) {
     SYSTEM_TIME_TYPE current_time = (SYSTEM_TIME_TYPE)ucx_uptime();
 
     if (current_time >= process->processus_status->DEADLINE_TIME && process->processus_status->DEADLINE_TIME != INFINITE_TIME_VALUE) {
+        ERROR_STATUS_TYPE error_status;
+        error_status.ERROR_CODE = DEADLINE_MISSED;
+        error_status.FAILED_PROCESS_ID = process->process_id;
+        // hm_raise_error(error_status.ERROR_CODE,
+        //                (MESSAGE_ADDR_TYPE)"Deadline missed",
+        //                15);
         // printf("ATTENTION LE PROCESS %d A DEPASSE SA DEADLINE QUI ETAIT DE %d\n", process->process_id, process->processus_status->DEADLINE_TIME);
     }
     return 0;
