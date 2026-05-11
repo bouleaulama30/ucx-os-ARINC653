@@ -133,6 +133,9 @@ void hm_raise_partition_error(ERROR_STATUS_TYPE *error_status){
     case PARTITION_STOP:
         printf("HM Partition Action: PARTITION_STOP\n");
         break;
+    case IGNORE:
+        printf("HM Partition Action: IGNORE\n");
+        break;
     default:
         printf("HM Partition Action: Passage au niveau du module\n");
         hm_raise_module_error(error_status);

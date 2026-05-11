@@ -21,29 +21,23 @@
 
 * definir dans la conf static la table au niveau process, partition et module (conforme avec les errors recovery action possiblent)
 
-* tester plusieurs erreurs a plusieurs niveau et leur recovery:
-    * deadline missed:
-        * avec et sans error handler process (stop ou ignore)
-    * application_error:
-        * avec error handler (recovery a voir)
-    * memory violation:
-        * avec et sans error handler process (recovery stop ou restart le process)
-    * en tester certains pendant le cold/warm start de la partition
-
 * create error handler process:
     * configure this partition so that processes on other processor cores do not make progress (i.e., pause) when the error handler process is scheduled; (a faire quand on fera du multi core)
 
 * gerer le cas ou l'irq handler catch l erreur et que ca vient de l os (pas de partition courante et tout) alors faire un panic de l os ( sinon ca va loop sur les erreurs)
+
 * faire en sorte de mettre toutes les metriques en ns car le lsb de system_time_type est 1 ns
 
-* voir ce qu on fait de START_CONDITION_TYPE
+* voir ce qu on fait de START_CONDITION_TYPE et du demarrage de la partition (si elle était restart par le hm ou demarrage normal)
 
 ## Optimisation
 
 * retirer les mallocs et les free en utilisant le pool allocator utiliser durant la communication inter et intra partition
+
 * ajouter un mecanisme pour dire a une partition que des ressources sont dispo pour une autre partition comme ca on ne verifie pas a chaque tick les ressources des port
 
 * essayer de rassembler les parcours de liste a chaque tick en une seule fonction
+
 * appeler les checks dynamiquement selon la period la plus petite pour eviter les parcours de liste a chaque tick
 
 ## refactoring
@@ -56,14 +50,14 @@
 
 ## Choses dependante de l archi
 * protection memoire avec pmp_activate et mprv_activate (lie a riscv32)
-* logique des longjmp et setjmp dans l'irq_handler afin d'executer les fonctions de scheduling dans la stack du kernel
-
+* logique des longjmp et setjmp dans l'irq_handler afin d'executer les fonctions de scheduling dans la stack du kernel 
+* l'irq handler pour la traduction des erreurs os en arinc
 
 ## Warning
 * beaucoup d'utilisation de malloc, voir si necessaire d'enlever tous les mallocs
     * mais alors comment faire pour les liste et tout
-## remind debug
 
+## remind debug
 * build:
     * make ucx ARCH=riscv/riscv32-qemu
     * make l'app

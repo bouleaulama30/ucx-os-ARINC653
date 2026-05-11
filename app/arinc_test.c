@@ -131,7 +131,7 @@ void p1_process2(void)
 			printf("[P1/Process2] GET_PROCESS_STATUS rc=%d\n", return_code);
 		}
 
-		TIMED_WAIT(0, &return_code);
+		TIMED_WAIT(20, &return_code);
 	}
 }
 
@@ -139,10 +139,10 @@ __attribute__((section(".p1_code")))
 void p1_process3(void)
 {   
 	RETURN_CODE_TYPE return_code;
-	printf("[P1/Process3] idle for queuing test\n");
 
 	while (1) {
-		TIMED_WAIT(20, &return_code);
+		printf("[P1/Process3] Peridic process\n");
+		PERIODIC_WAIT(&return_code);
 	}
 }
 
@@ -255,16 +255,16 @@ void error_handler_function(void) {
 		case APPLICATION_ERROR:
 			printf("[ERROR HANDLER] Handling application error\n");
 			break;
-		// case NUMERIC_ERROR:
-		// 	printf("[ERROR HANDLER] Handling numeric error\n");
-			// STOP(1, &return_code);
-			// printf("[ERROR HANDLER] STOP(1) rc=%d\n", return_code);
+		case NUMERIC_ERROR:
+			printf("[ERROR HANDLER] Handling numeric error\n");
+			STOP(1, &return_code);
+			printf("[ERROR HANDLER] STOP(1) rc=%d\n", return_code);
 			// START(1, &return_code);
 			// printf("[ERROR HANDLER] START(1) rc=%d\n", return_code);
-			// break;
-		case DEADLINE_MISSED:
-			printf("[ERROR HANDLER] Handling deadline missed error\n");
 			break;
+		// case DEADLINE_MISSED:
+		// 	printf("[ERROR HANDLER] Handling deadline missed error\n");
+		// 	break;
 		default:
 			printf("[ERROR HANDLER] Handling unknown error code %d\n", error_status.ERROR_CODE);
 			// RAISE_APPLICATION_ERROR(APPLICATION_ERROR,
