@@ -23,23 +23,15 @@
 * tester plusieurs erreurs a plusieurs niveau et leur recovery:
     * deadline missed:
         * avec et sans error handler process (recovery resplenish)
-    * Numeric_Error:
-        * avec et sans error handler process (recovery stop process)
     * application_error:
         * avec error handler (recovery a voir)
     * memory violation:
         * avec et sans error handler process (recovery stop ou restart le process)
-    * Numeric_error special qui ira au niveau module pour voir si la table fonctionne bien
     * en tester certains pendant le cold/warm start de la partition
 
 * create error handler process:
     * configure this partition so that processes on other processor cores do not make progress (i.e., pause) when the error handler process is scheduled; (a faire quand on fera du multi core)
-* gestion de la list des error processes:
-    * faire en sorte de deleguer a la partition hm si le raise error ne peut pas traiter l erreur
 
-* faire les fonctions kernel pour gerer les erreurs dans le cas ou il n y a pas de error process:
-    * passage de l erreur au niveau module
-    
 * gerer le cas ou l'irq handler catch l erreur et que ca vient de l os (pas de partition courante et tout) alors faire un panic de l os ( sinon ca va loop sur les erreurs)
 * faire en sorte de mettre toutes les metriques en ns car le lsb de system_time_type est 1 ns
 

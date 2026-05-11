@@ -86,6 +86,8 @@ extern char hm_log_buffer[MAX_LOG_ENTRIES][MAX_LOG_ENTRY_SIZE];
 extern const ERROR_ACTION_TYPE hm_table_partition_1[4][4];
 extern const ERROR_ACTION_TYPE hm_table_partition_2[4][4];
 
+extern const ERROR_ACTION_TYPE hm_table_module[1][4];
+
 // Hardcoded partition configuration
 struct PartitionConfig {
     SYSTEM_TIME_TYPE period;

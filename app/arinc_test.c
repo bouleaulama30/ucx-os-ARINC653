@@ -61,6 +61,12 @@ void p1_process1(void)
 
 	GET_MY_PARTITION_ID(&partition_id, &return_code);
 	GET_MY_ID(&process_id, &return_code);
+
+	int a = 3;
+	printf("This line should never be printed (a=%d)\n", a);
+	a = a/0;
+	printf("This line should never be printed (a=%d)\n", a);
+
 	while(1)
 	{
 		static char hm_error_message[] = "P1 HM test: raise/get error status";
@@ -124,9 +130,6 @@ void p1_process2(void)
 		} else {
 			printf("[P1/Process2] GET_PROCESS_STATUS rc=%d\n", return_code);
 		}
-		int a = 3;
-		a = a/0;
-		printf("This line should never be printed (a=%d)\n", a);
 
 		TIMED_WAIT(0, &return_code);
 	}
@@ -254,16 +257,23 @@ void error_handler_function(void) {
 			break;
 		// case NUMERIC_ERROR:
 		// 	printf("[ERROR HANDLER] Handling numeric error\n");
+		// 	STOP(1, &return_code);
+		// 	printf("[ERROR HANDLER] STOP(1) rc=%d\n", return_code);
+		// 	START(1, &return_code);
+		// 	printf("[ERROR HANDLER] START(1) rc=%d\n", return_code);
 		// 	break;
 		case DEADLINE_MISSED:
 			printf("[ERROR HANDLER] Handling deadline missed error\n");
 			break;
 		default:
 			printf("[ERROR HANDLER] Handling unknown error code %d\n", error_status.ERROR_CODE);
-			RAISE_APPLICATION_ERROR(APPLICATION_ERROR,
-			                        (MESSAGE_ADDR_TYPE)"Unknown error code received in error handler",
-			                        56,
-			                        &return_code);
+			// RAISE_APPLICATION_ERROR(APPLICATION_ERROR,
+			//                         (MESSAGE_ADDR_TYPE)"Unknown error code received in error handler",
+			//                         56,
+			//                         &return_code);
+			hm_raise_error(error_status.ERROR_CODE,
+			               (MESSAGE_ADDR_TYPE)"Unknown error code received in error handler",
+			               56);
 			break;
 		}
 

@@ -34,6 +34,21 @@ const ERROR_ACTION_TYPE hm_table_partition_2[4][4] = {
     { PROCESS_REPLENISH, PROCESS_STOP, PROCESS_RESTART, PROCESS_STOP }
 };
 
+const ERROR_ACTION_TYPE hm_table_module[1][4] = {
+    // Colonnes : DEADLINE_MISSED, APPLICATION_ERROR, NUMERIC_ERROR, DEFAULT
+    
+    // // Ligne 0 : État IDLE
+    // {  PROCESS_RESTART, PROCESS_STOP, PARTITION_RESTART, PROCESS_STOP },
+
+    // // Ligne 1 : État COLD_START
+    // {  PROCESS_RESTART, PROCESS_STOP, PARTITION_RESTART, PROCESS_STOP },
+
+    // // Ligne 2 : État WARM_START
+    // {  PROCESS_RESTART, PROCESS_STOP, PARTITION_RESTART, PROCESS_STOP },
+    
+    // Ligne 3 : État NORMAL
+    { PROCESS_REPLENISH, PROCESS_STOP, PROCESS_RESTART, PROCESS_STOP }
+};
 
 __attribute__((section(".p1_code")))
 void p1_main_process(struct pcb_s *partition){
@@ -47,9 +62,9 @@ void p1_main_process(struct pcb_s *partition){
     CREATE_PROCESS(&P1_PROCESS_2_CONFIG, &process_id_1, &return_code1);
     CREATE_PROCESS(&P1_PROCESS_3_CONFIG, &process_id_2, &return_code0);
 
-    // CREATE_ERROR_HANDLER(DEFAULT_ERROR_HANDLER_CONFIG.entry_point, DEFAULT_ERROR_HANDLER_CONFIG.stack_size, &return_code1);
+    // // CREATE_ERROR_HANDLER(DEFAULT_ERROR_HANDLER_CONFIG.entry_point, DEFAULT_ERROR_HANDLER_CONFIG.stack_size, &return_code1);
 
-    // printf("CREATE ERROR HANDLER PROCESS Error code is %d\n", return_code1);
+    // // printf("CREATE ERROR HANDLER PROCESS Error code is %d\n", return_code1);
     // printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code1);      
 
     // DELAYED_START(process_id_0, 18, &return_code0);  

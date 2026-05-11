@@ -1,7 +1,6 @@
 #include "ucx.h"
 
 
-
 void hm_init(struct hm_cb_s *hm_cb, char *log_buffer){
     hm_cb->log_buffer = log_buffer;
     hm_cb->write_index = 0;
@@ -82,17 +81,18 @@ void hm_raise_error(ERROR_CODE_TYPE ERROR_CODE, MESSAGE_ADDR_TYPE MESSAGE_ADDR, 
     if (current_process == partition->error_handler_process || partition->error_handler_process == NULL){
         printf("Passage du message: %s et de l'erreur: %d au niveau superieur\n", MESSAGE_ADDR, ERROR_CODE);
         hm_raise_partition_error(&error_status);
-        longjmp(partition->tcb.context, 1);
+        longjmp(partition->partition_context, 1);
         return;
     }
 
     hm_write_error(partition->error_list_cb, &error_status);
     struct process_s *error_process = partition->error_handler_process;
-    if (error_process && error_process->processus_status->PROCESS_STATE == DORMANT || error_process->processus_status->PROCESS_STATE == WAITING){
+    if (error_process && (error_process->processus_status->PROCESS_STATE == DORMANT || error_process->processus_status->PROCESS_STATE == WAITING)){
         error_process->processus_status->PROCESS_STATE = READY;
         _context_init(&error_process->tcb.context, (size_t)error_process->tcb.stack,error_process->tcb.stack_sz, (size_t)error_process->tcb.task);
     }
-    longjmp(partition->tcb.context, 1);
+    longjmp(partition->partition_context, 1);
+    return;
 }
 
 void hm_raise_partition_error(ERROR_STATUS_TYPE *error_status){
@@ -118,19 +118,63 @@ void hm_raise_partition_error(ERROR_STATUS_TYPE *error_status){
     ERROR_ACTION_TYPE action = partition->partition_hm_table[operating_mode][error_status->ERROR_CODE];
     switch (action)
     {
-    case PROCESS_STOP:
-        printf("HM Action: PROCESS_STOP\n");
+    case PROCESS_RESTART:
+        printf("HM Partition Action: PROCESS_RESTART\n");
+        // RETURN_CODE_TYPE return_code;
+        // struct node_s *process_node = is_process_id_existed(partition, error_status->FAILED_PROCESS_ID);
+        // struct process_s *process = process_node->data;
+        // process->processus_status->PROCESS_STATE = DORMANT;
+        // printf("HM Partition stop process %d rc=%d\n", error_status->FAILED_PROCESS_ID, return_code);
         break;
     case PROCESS_REPLENISH:
-        printf("HM Action: PROCESS_REPLENISH\n");
+        printf("HM Partition Action: PROCESS_REPLENISH\n");
         break;
     case PARTITION_STOP:
-        printf("HM Action: PARTITION_STOP\n");
+        printf("HM Partition Action: PARTITION_STOP\n");
         break;
     default:
-        printf("HM Action: Passage au niveau du module\n");
+        printf("HM Partition Action: Passage au niveau du module\n");
+        hm_raise_module_error(error_status);
         break;
     }
+    return;
+}
+
+void hm_raise_module_error(ERROR_STATUS_TYPE *error_status){
+    uint32_t action_index;
+    // switch (error_status->ERROR_CODE)
+    // {
+    // case DEADLINE_MISSED:
+    //     action_index = 0;
+    //     break;
+    // case APPLICATION_ERROR:
+    //     action_index = 1;
+    //     break;
+    // case NUMERIC_ERROR:
+    //     action_index = 2;
+    //     break;
+    // default:
+    //     action_index = 3;
+    //     break;
+    // }
+
+    ERROR_ACTION_TYPE action = hm_table_module[0][error_status->ERROR_CODE];
+    switch (action)
+    {
+    case PROCESS_RESTART:
+        printf("HM Module Action: PROCESS_RESTART\n");
+        break;
+    case PROCESS_REPLENISH:
+        printf("HM Module Action: PROCESS_REPLENISH\n");
+        break;
+    case PARTITION_STOP:
+        printf("HM Module Action: PARTITION_STOP\n");
+        break;
+    default:
+        printf("HM Module Action: Passage au niveau du module error code: %d action: %d\n", error_status->ERROR_CODE, action);
+        break;
+    }
+    return;
 }
 
 void hm_write_error(struct error_list_s *error_list_cb, ERROR_STATUS_TYPE *error_status){

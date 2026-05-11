@@ -41,7 +41,6 @@ start_over:
         if(partition->status->OPERATING_MODE == COLD_START || partition->status->OPERATING_MODE == WARM_START){
             goto start_over;
         }
-
         uint32_t current_tick = ucx_ticks();
         if (current_tick != partition->last_tick) {
             partition->last_tick = current_tick;
