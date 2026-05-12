@@ -135,6 +135,11 @@ void hm_raise_partition_error(ERROR_STATUS_TYPE *error_status){
         break;
     case IGNORE:
         printf("HM Partition Action: IGNORE\n");
+        struct node_s *process_node = is_process_id_existed(partition, error_status->FAILED_PROCESS_ID);
+        if (process_node) {
+            struct process_s *process = process_node->data;
+            process->processus_status->PROCESS_STATE = READY;
+        }
         break;
     default:
         printf("HM Partition Action: Passage au niveau du module\n");

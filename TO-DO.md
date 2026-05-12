@@ -1,34 +1,30 @@
 # TO-DO
 
-* faire rouler sur la carte en materielle une fois que c'est bon toute la norme
+## matériel
+* installer les logiciels que felipe m'a dit sur windows
+* essayer de faire rouler l'os sur la carte de Felipe
 
-## Partition implem
+## test
+* faire une batterie de test unitaires pour voir si le comportement de toute les fonctions de l'apex est correct
+* design les tests 
+* faire un make test 
 
-* set_operating_mode:
-    * -- a DEADLINE_TIME calculation may cause an overflow of the underlying -- clock. If this occurs, HM is invoked with an illegal request error code set the partition’s lock level to zero;
+## related works
+* lire les documents de Tarek
+* voir s'ils sont pertinents (pas sur car j'ai l'impression que c'est un hv)
+* trouver le repo github et voir ce que ça fait
 
-## Process
-* refaire un test de suspend/self, resume, stop/self pour voir si c'est toujours ok:
-    * le faire aussi quand il y a un mutex ou une ressource en attente
+## refactoring
 
-## partition communication
+* enlever les reference aux communication port dans partition init 
+* mettre des commentaires
+* faire de la documentation 
 
-### inter communication
+<!-- à faire après test unitaire -->
+* sampling_port_s -> sp_s ?
+* voir si pour les ressources comme bb, la reference vers la partition ou le waiting_blackboard est necessaire dans la struct
+* voir pour mettre krnl acquire et release mutex dans un fichier du krnl
 
-### intra communication
-
-## HM
-
-* definir dans la conf static la table au niveau process, partition et module (conforme avec les errors recovery action possiblent)
-
-* create error handler process:
-    * configure this partition so that processes on other processor cores do not make progress (i.e., pause) when the error handler process is scheduled; (a faire quand on fera du multi core)
-
-* gerer le cas ou l'irq handler catch l erreur et que ca vient de l os (pas de partition courante et tout) alors faire un panic de l os ( sinon ca va loop sur les erreurs)
-
-* faire en sorte de mettre toutes les metriques en ns car le lsb de system_time_type est 1 ns
-
-* voir ce qu on fait de START_CONDITION_TYPE et du demarrage de la partition (si elle était restart par le hm ou demarrage normal)
 
 ## Optimisation
 
@@ -40,14 +36,19 @@
 
 * appeler les checks dynamiquement selon la period la plus petite pour eviter les parcours de liste a chaque tick
 
-## refactoring
+## Partition implem
+## Process
+## partition communication
+### inter communication
+### intra communication
+## HM
 
-* enlever les reference aux communication port dans partition init 
-* sampling_port_s -> sp_s ?
-* mettre des commentaires
-* voir si pour les ressources comme bb, la reference vers la partition ou le waiting_blackboard est necessaire dans la struct
-* voir pour mettre krnl acquire et release mutex dans un fichier du krnl
+* create error handler process:
+    * configure this partition so that processes on other processor cores do not make progress (i.e., pause) when the error handler process is scheduled; (a faire quand on fera du multi core)
 
+* gerer le cas ou l'irq handler catch l erreur et que ca vient de l os (pas de partition courante et tout) alors faire un panic de l os ( sinon ca va loop sur les erreurs)
+
+* faire en sorte de mettre toutes les metriques en ns car le lsb de system_time_type est 1 ns
 ## Choses dependante de l archi
 * protection memoire avec pmp_activate et mprv_activate (lie a riscv32)
 * logique des longjmp et setjmp dans l'irq_handler afin d'executer les fonctions de scheduling dans la stack du kernel 
