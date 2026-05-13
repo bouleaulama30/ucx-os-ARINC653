@@ -162,8 +162,16 @@ arinc_test_api_partition: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_api_partition.o app/arinc_test_api_partition.c
 	@$(MAKE) --no-print-directory link
 
+arinc_test_process: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_process.o app/arinc_test_process.c
+	@$(MAKE) --no-print-directory link
+
 arinc_test_apex_process_and_time: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_apex_process_and_time.o app/arinc_test_apex_process_and_time.c
+	@$(MAKE) --no-print-directory link
+
+arinc_test_interpartition_communication: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_interpartition_communication.o app/arinc_test_interpartition_communication.c
 	@$(MAKE) --no-print-directory link
 
 coroutine_args: rebuild
@@ -425,6 +433,6 @@ test:
 all:
 	$(MAKE) veryclean
 	$(MAKE) ucx ARCH=riscv/riscv32-qemu
-	$(MAKE) arinc_app
+	$(MAKE) arinc_test_process
 	-timeout $(DURATION) qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:./debug/test.txt
 	head -n30 ./debug/test.txt
