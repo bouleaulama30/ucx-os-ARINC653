@@ -1,4 +1,5 @@
 #include <ucx.h>
+#include "arinc_test_support.h"
 
 // Déclaration des symboles du linker script de la p1
 extern uint8_t _p1_code_start[];
@@ -22,10 +23,16 @@ static const char *return_code_to_str(RETURN_CODE_TYPE rc)
 		return "NO_ERROR";
 	case INVALID_PARAM:
 		return "INVALID_PARAM";
+	case NOT_AVAILABLE:
+		return "NOT_AVAILABLE";
 	case NO_ACTION:
 		return "NO_ACTION";
+	case INVALID_CONFIG:
+		return "INVALID_CONFIG";
 	case INVALID_MODE:
 		return "INVALID_MODE";
+	case TIMED_OUT:
+		return "TIMED_OUT";
 	default:
 		return "UNKNOWN";
 	}
@@ -51,115 +58,89 @@ static const char *operating_mode_to_str(OPERATING_MODE_TYPE mode)
 
 // Fonction de test pour les opérations de partition
 __attribute__((section(".p1_code")))
-void test_partition_operations(void) {
+static int test_partition_operations(void) {
+    arinc_test_suite_result_t suite;
     APEX_INTEGER partition_id;
     RETURN_CODE_TYPE return_code;
     PARTITION_STATUS_TYPE status;
-    int test_num = 1;
     int pass = 1;
-    
-    printf("\n--- START TEST SEQUENCE P1 ---\n");
+	int case_pass;
+
+	arinc_test_suite_begin(&suite, "partition_api");
     
     // TEST 1: GET_MY_PARTITION_ID
-    printf("[TEST %d] GET_MY_PARTITION_ID...\n", test_num);
     GET_MY_PARTITION_ID(&partition_id, &return_code);
-    printf("-> Expected: 1, Received: %d [%s]\n", 
-           partition_id, (partition_id == 1) ? "PASS" : "FAIL");
-    test_num++;
-    
-    // TEST 2: GET_PARTITION_STATUS (Initial)
-    printf("[TEST %d] GET_PARTITION_STATUS (Initial)...\n", test_num);
+		printf("[ARINC_TEST] step=after_get_my_partition_id\n");
+	case_pass = arinc_test_check_int(1, partition_id);
+	case_pass &= arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+    arinc_test_suite_check(&suite, "GET_MY_PARTITION_ID", case_pass);
+    pass &= case_pass;
+
+		// TEST 2: GET_PARTITION_STATUS (Initial)
     GET_PARTITION_STATUS(&status, &return_code);
-    const char* mode_str = (status.OPERATING_MODE == IDLE) ? "IDLE" : 
-                           (status.OPERATING_MODE == NORMAL) ? "NORMAL" : "COLD_START";
-    printf("-> Expected: IDLE, Received: %s [%s]\n", 
-           mode_str, (status.OPERATING_MODE == IDLE) ? "PASS" : "FAIL");
-    test_num++;
-    
-    // TEST 3: SET_PARTITION_MODE(NORMAL)
-    printf("[TEST %d] SET_PARTITION_MODE(NORMAL)...\n", test_num);
-    SET_PARTITION_MODE(NORMAL, &return_code);
-    printf("-> Return Code: %s [%s]\n", 
-           (return_code == NO_ERROR) ? "NO_ERROR" : "ERROR", 
-           (return_code == NO_ERROR) ? "PASS" : "FAIL");
-    test_num++;
-    
-    // TEST 4: GET_PARTITION_STATUS (Post-Switch)
-    printf("[TEST %d] GET_PARTITION_STATUS (Post-Switch)...\n", test_num);
-    GET_PARTITION_STATUS(&status, &return_code);
-    mode_str = (status.OPERATING_MODE == IDLE) ? "IDLE" : 
-               (status.OPERATING_MODE == NORMAL) ? "NORMAL" : "COLD_START";
-    printf("-> Expected: NORMAL, Received: %s [%s]\n", 
-           mode_str, (status.OPERATING_MODE == NORMAL) ? "PASS" : "FAIL");
-    
-    printf("--- END TEST SEQUENCE P1 ---\n\n");
+		printf("[ARINC_TEST] step=after_get_partition_status_initial\n");
+    case_pass = arinc_test_check_str(operating_mode_to_str(COLD_START), operating_mode_to_str(status.OPERATING_MODE));
+    case_pass &= arinc_test_check_str(return_code_to_str(NOT_AVAILABLE), return_code_to_str(return_code));
+    arinc_test_suite_check(&suite, "GET_PARTITION_STATUS(initial)", case_pass);
+    pass &= case_pass;
+
+	arinc_test_suite_end(&suite);
+	printf("[ARINC_TEST] completed suite partition_api\n");
+
+	return pass;
 }
 
-// Fonction de test dédiée à SET_PARTITION_MODE
+// Fonction de test dédiée aux cas sûrs de SET_PARTITION_MODE en COLD_START.
+// Les transitions vers NORMAL/IDLE/WARM_START ne peuvent pas être testées ici
+// car elles redonnent le contrôle au scheduler via longjmp().
 __attribute__((section(".p1_code")))
-void test_set_partition_mode(void)
+static int test_set_partition_mode(void)
 {
+	arinc_test_suite_result_t suite;
 	RETURN_CODE_TYPE return_code;
-	PARTITION_STATUS_TYPE status;
-	int test_num = 1;
+	int pass = 1;
+	int case_pass;
 
-	printf("\n--- START TEST SET_PARTITION_MODE ---\n");
+	arinc_test_suite_begin(&suite, "set_partition_mode_cold_start");
 
 	// TEST 1: Invalid parameter
-	printf("[TEST %d] SET_PARTITION_MODE(INVALID_PARAM)...\n", test_num++);
 	SET_PARTITION_MODE((OPERATING_MODE_TYPE)99, &return_code);
-	printf("-> Expected: INVALID_PARAM, Received: %s [%s]\n",
-		   return_code_to_str(return_code),
-		   (return_code == INVALID_PARAM) ? "PASS" : "FAIL");
+	printf("[ARINC_TEST] step=after_set_partition_mode_invalid_param\n");
+	case_pass = arinc_test_check_str(return_code_to_str(INVALID_PARAM), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "SET_PARTITION_MODE(INVALID_PARAM)", case_pass);
+	pass &= case_pass;
 
-	// TEST 2: Set to NORMAL from IDLE/COLD_START
-	printf("[TEST %d] SET_PARTITION_MODE(NORMAL)...\n", test_num++);
-	SET_PARTITION_MODE(NORMAL, &return_code);
-	printf("-> Expected: NO_ERROR, Received: %s [%s]\n",
-		   return_code_to_str(return_code),
-		   (return_code == NO_ERROR) ? "PASS" : "FAIL");
-	GET_PARTITION_STATUS(&status, &return_code);
-	printf("-> Expected Mode: NORMAL, Received: %s [%s]\n",
-		   operating_mode_to_str(status.OPERATING_MODE),
-		   (status.OPERATING_MODE == NORMAL) ? "PASS" : "FAIL");
-
-	// TEST 3: Set to NORMAL again (NO_ACTION)
-	printf("[TEST %d] SET_PARTITION_MODE(NORMAL) again...\n", test_num++);
-	SET_PARTITION_MODE(NORMAL, &return_code);
-	printf("-> Expected: NO_ACTION, Received: %s [%s]\n",
-		   return_code_to_str(return_code),
-		   (return_code == NO_ACTION) ? "PASS" : "FAIL");
-
-	// TEST 4: Set to COLD_START then WARM_START (INVALID_MODE)
-	printf("[TEST %d] SET_PARTITION_MODE(COLD_START)...\n", test_num++);
-	SET_PARTITION_MODE(COLD_START, &return_code);
-	printf("-> Expected: NO_ERROR, Received: %s [%s]\n",
-		   return_code_to_str(return_code),
-		   (return_code == NO_ERROR) ? "PASS" : "FAIL");
-
-	printf("[TEST %d] SET_PARTITION_MODE(WARM_START) from COLD_START...\n", test_num++);
+	// TEST 2: WARM_START is invalid while the partition is still in COLD_START.
 	SET_PARTITION_MODE(WARM_START, &return_code);
-	printf("-> Expected: INVALID_MODE, Received: %s [%s]\n",
-		   return_code_to_str(return_code),
-		   (return_code == INVALID_MODE) ? "PASS" : "FAIL");
+	printf("[ARINC_TEST] step=after_set_partition_mode_warm_start\n");
+	case_pass = arinc_test_check_str(return_code_to_str(INVALID_MODE), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "SET_PARTITION_MODE(WARM_START from COLD_START)", case_pass);
+	pass &= case_pass;
 
-	// Restore to IDLE for subsequent tests
+	arinc_test_suite_end(&suite);
+	printf("[ARINC_TEST] completed suite set_partition_mode_cold_start\n");
+
+	return pass;
+}
+
+__attribute__((section(".p1_code")))
+static void run_partition_api_suite(void)
+{
+	(void)test_partition_operations();
+	(void)test_set_partition_mode();
+
+	RETURN_CODE_TYPE return_code;
 	SET_PARTITION_MODE(IDLE, &return_code);
-
-	printf("--- END TEST SET_PARTITION_MODE ---\n\n");
 }
 int app_main(void)
 {
 	// la partie data est pour l'instant la stack de la task de l'entry point de P1 donc elle grandit vers le bas
 	size_t p1_data_size =  _p1_data_end -_p1_data_start;
 	size_t p1_code_size =  _p1_code_end -_p1_code_start;
-
-	// la partie data est pour l'instant la stack de la task de l'entry point de P1 donc elle grandit vers le bas
-	size_t p2_data_size =  _p2_data_end -_p2_data_start;
-	size_t p2_code_size =  _p2_code_end -_p2_code_start;
+	SYSTEM_TIME_TYPE test_duration = DEFAULT_PARTITION_CONFIG.duration * 8;
 
 	partition_init(DEFAULT_PARTITION_CONFIG.period,
-				   DEFAULT_PARTITION_CONFIG.duration,
+				   test_duration,
 				   DEFAULT_PARTITION_CONFIG.identifier,
 				   DEFAULT_PARTITION_CONFIG.num_assigned_cores,
 				   DEFAULT_PARTITION_CONFIG.name,
@@ -171,8 +152,51 @@ int app_main(void)
 				   (void*)_p1_data_start,
 				   p1_data_size,
 				   DEFAULT_PARTITION_CONFIG.access_data_mem,
-				   test_set_partition_mode,
-				   DEFAULT_PARTITION_CONFIG.is_system_partition);
+				   run_partition_api_suite,
+				   DEFAULT_PARTITION_CONFIG.is_system_partition,
+
+				   DEFAULT_PARTITION_CONFIG.sampling_ports,
+				   DEFAULT_PARTITION_CONFIG.max_sampling_ports,
+				   DEFAULT_PARTITION_CONFIG.sampling_port_count,
+				   DEFAULT_PARTITION_CONFIG.max_sampling_port_data_size,
+
+				   DEFAULT_PARTITION_CONFIG.queuing_ports,
+				   DEFAULT_PARTITION_CONFIG.max_queuing_ports,
+				   DEFAULT_PARTITION_CONFIG.queuing_port_count,
+				   DEFAULT_PARTITION_CONFIG.max_queuing_port_data_size,
+
+				   DEFAULT_PARTITION_CONFIG.blackboards,
+				   DEFAULT_PARTITION_CONFIG.max_blackboards,
+				   DEFAULT_PARTITION_CONFIG.blackboard_count,
+				   DEFAULT_PARTITION_CONFIG.max_blackboard_data_size,
+				   DEFAULT_PARTITION_CONFIG.blackboards_data,
+				   DEFAULT_PARTITION_CONFIG.blackboards_size_data,
+
+				   DEFAULT_PARTITION_CONFIG.buffers,
+				   DEFAULT_PARTITION_CONFIG.max_buffers,
+				   DEFAULT_PARTITION_CONFIG.buffer_count,
+				   DEFAULT_PARTITION_CONFIG.max_buffer_data_size,
+				   DEFAULT_PARTITION_CONFIG.buffers_data,
+				   DEFAULT_PARTITION_CONFIG.buffers_size_data,
+
+				   DEFAULT_PARTITION_CONFIG.semaphores,
+				   DEFAULT_PARTITION_CONFIG.max_semaphores,
+				   DEFAULT_PARTITION_CONFIG.semaphore_count,
+				   DEFAULT_PARTITION_CONFIG.semaphores_counter,
+
+				   DEFAULT_PARTITION_CONFIG.events,
+				   DEFAULT_PARTITION_CONFIG.max_events,
+				   DEFAULT_PARTITION_CONFIG.event_count,
+
+				   DEFAULT_PARTITION_CONFIG.mutexes,
+				   DEFAULT_PARTITION_CONFIG.max_mutexes,
+				   DEFAULT_PARTITION_CONFIG.mutex_count,
+
+				   DEFAULT_PARTITION_CONFIG.error_list,
+				   DEFAULT_PARTITION_CONFIG.error_list_cb,
+				   DEFAULT_PARTITION_CONFIG.partition_hm_table,
+				   DEFAULT_PARTITION_CONFIG.max_errors
+				   );
 
 	return 1;
 }

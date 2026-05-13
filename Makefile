@@ -152,9 +152,11 @@ endif
 	hexdump -v -e '4/1 "%02x" "\n"' $(BUILD_TARGET_DIR)/image.bin > $(BUILD_TARGET_DIR)/code.txt
 
 ## applications
-arinc_test: rebuild
-	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test.o app/arinc_test.c
+arinc_app: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_app.o app/arinc_app.c
 	@$(MAKE) --no-print-directory link
+
+arinc_test: arinc_app
 
 arinc_test_api_partition: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_api_partition.o app/arinc_test_api_partition.c
@@ -423,6 +425,6 @@ test:
 all:
 	$(MAKE) veryclean
 	$(MAKE) ucx ARCH=riscv/riscv32-qemu
-	$(MAKE) arinc_test
+	$(MAKE) arinc_app
 	-timeout $(DURATION) qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:./debug/test.txt
 	head -n30 ./debug/test.txt
