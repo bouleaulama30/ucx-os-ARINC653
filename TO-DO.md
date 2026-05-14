@@ -19,6 +19,7 @@
     * faire une app ou on communique entre partition
     * faire une app ou on a une erreur avec le HM (reprendre celle que l'on a deja)
     * faire une app avec les resume suspend etc... (reprendre celle que l on a deja)
+
 <!-- à faire après test unitaire -->
 * sampling_port_s -> sp_s ?
 * voir si pour les ressources comme bb, la reference vers la partition ou le waiting_blackboard est necessaire dans la struct
