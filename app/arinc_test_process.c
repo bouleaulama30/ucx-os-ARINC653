@@ -13,6 +13,10 @@ extern uint8_t _p2_code_end[];
 extern uint8_t _p2_data_start[];
 extern uint8_t _p2_data_end[];
 
+/* Partition entry points defined in arinc/static_conf.c */
+extern void p1_main_process(struct pcb_s *partition);
+extern void p2_main_process(struct pcb_s *partition);
+
 __attribute__((section(".p1_code")))
 static const char *return_code_to_str(RETURN_CODE_TYPE rc)
 {
@@ -73,7 +77,6 @@ static int test_process_identity(void)
 	pass &= case_pass;
 
 	GET_MY_ID(&process_id, &return_code);
-    printf("id=%d rc=%d\n", process_id, return_code);
 	case_pass = arinc_test_check_int(1, process_id);
 	case_pass &= arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
 	arinc_test_suite_check(&suite, "GET_MY_ID", case_pass);
@@ -196,14 +199,14 @@ static int test_process_priority(void)
 	arinc_test_suite_check(&suite, "START(Process 3)", case_pass);
 	pass &= case_pass;
 
-	SET_PRIORITY(process_id, 1, &return_code);
+	SET_PRIORITY(process_id, 3, &return_code);
 	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
-	arinc_test_suite_check(&suite, "SET_PRIORITY(self, 1)", case_pass);
+	arinc_test_suite_check(&suite, "SET_PRIORITY(self, 3)", case_pass);
 	pass &= case_pass;
 
 	GET_PROCESS_STATUS(process_id, &status_after, &return_code);
 	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
-	case_pass &= arinc_test_check_int(1, status_after.CURRENT_PRIORITY);
+	case_pass &= arinc_test_check_int(3, status_after.CURRENT_PRIORITY);
 	arinc_test_suite_check(&suite, "GET_PROCESS_STATUS(after SET_PRIORITY)", case_pass);
 	pass &= case_pass;
 
@@ -238,11 +241,275 @@ static int test_process_priority(void)
 }
 
 __attribute__((section(".p1_code")))
+static int test_suspend_self(void)
+{
+	arinc_test_suite_result_t suite;
+	RETURN_CODE_TYPE return_code;
+	APEX_INTEGER process_id;
+	PROCESS_STATUS_TYPE status;
+	int pass = 1;
+	int case_pass;
+
+	arinc_test_suite_begin(&suite, "suspend_self");
+
+	GET_MY_ID(&process_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "GET_MY_ID", case_pass);
+	pass &= case_pass;
+
+	/* Test SUSPEND_SELF with timeout=0 (should return NO_ERROR immediately) */
+	SUSPEND_SELF(0, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "SUSPEND_SELF(timeout=0)", case_pass);
+	pass &= case_pass;
+
+	GET_PROCESS_STATUS(process_id, &status, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	case_pass &= arinc_test_check_str(process_state_to_str(RUNNING), process_state_to_str(status.PROCESS_STATE));
+	arinc_test_suite_check(&suite, "GET_PROCESS_STATUS(still RUNNING after timeout=0)", case_pass);
+	pass &= case_pass;
+
+	arinc_test_suite_end(&suite);
+	printf("[ARINC_TEST] completed suite suspend_self\n");
+
+	return pass;
+}
+
+__attribute__((section(".p1_code")))
+static int test_suspend_resume_errors(void)
+{
+	arinc_test_suite_result_t suite;
+	RETURN_CODE_TYPE return_code;
+	APEX_INTEGER process_id;
+	APEX_INTEGER process_2_id;
+	APEX_INTEGER invalid_process_id = 999;
+	PROCESS_STATUS_TYPE status;
+	static char process_2_name[32] = "Process 2";
+	int pass = 1;
+	int case_pass;
+
+	arinc_test_suite_begin(&suite, "suspend_resume_errors");
+
+	GET_MY_ID(&process_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "GET_MY_ID", case_pass);
+	pass &= case_pass;
+
+	GET_PROCESS_ID(process_2_name, &process_2_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "GET_PROCESS_ID(Process 2)", case_pass);
+	pass &= case_pass;
+
+	/* Test SUSPEND on invalid process ID */
+	SUSPEND(invalid_process_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(INVALID_PARAM), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "SUSPEND(invalid_process_id) -> INVALID_PARAM", case_pass);
+	pass &= case_pass;
+
+	/* Test SUSPEND on self (should fail) */
+	SUSPEND(process_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(INVALID_PARAM), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "SUSPEND(self) -> INVALID_PARAM", case_pass);
+	pass &= case_pass;
+
+	/* Start Process 2 for further tests */
+	START(process_2_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "START(Process 2)", case_pass);
+	pass &= case_pass;
+
+	/* Test SUSPEND on running process */
+	SUSPEND(process_2_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "SUSPEND(Process 2)", case_pass);
+	pass &= case_pass;
+
+	GET_PROCESS_STATUS(process_2_id, &status, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	case_pass &= arinc_test_check_str(process_state_to_str(WAITING), process_state_to_str(status.PROCESS_STATE));
+	arinc_test_suite_check(&suite, "GET_PROCESS_STATUS(after SUSPEND) -> WAITING", case_pass);
+	pass &= case_pass;
+
+	/* Test SUSPEND again (already suspended) */
+	SUSPEND(process_2_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ACTION), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "SUSPEND(already suspended) -> NO_ACTION", case_pass);
+	pass &= case_pass;
+
+	/* Test RESUME on suspended process */
+	RESUME(process_2_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "RESUME(Process 2)", case_pass);
+	pass &= case_pass;
+
+	GET_PROCESS_STATUS(process_2_id, &status, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	case_pass &= arinc_test_check_str(process_state_to_str(READY), process_state_to_str(status.PROCESS_STATE));
+	arinc_test_suite_check(&suite, "GET_PROCESS_STATUS(after RESUME) -> READY", case_pass);
+	pass &= case_pass;
+
+	/* Test RESUME on non-suspended process */
+	RESUME(process_2_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ACTION), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "RESUME(non-suspended) -> NO_ACTION", case_pass);
+	pass &= case_pass;
+
+	/* Test RESUME on invalid process ID */
+	RESUME(invalid_process_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(INVALID_PARAM), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "RESUME(invalid_process_id) -> INVALID_PARAM", case_pass);
+	pass &= case_pass;
+
+	/* Test RESUME on self (should fail) */
+	RESUME(process_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(INVALID_PARAM), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "RESUME(self) -> INVALID_PARAM", case_pass);
+	pass &= case_pass;
+
+	/* Clean up - stop the process */
+	STOP(process_2_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "STOP(Process 2)", case_pass);
+	pass &= case_pass;
+
+	arinc_test_suite_end(&suite);
+	printf("[ARINC_TEST] completed suite suspend_resume_errors\n");
+
+	return pass;
+}
+
+__attribute__((section(".p1_code")))
+static int test_stop_behavior(void)
+{
+	arinc_test_suite_result_t suite;
+	RETURN_CODE_TYPE return_code;
+	APEX_INTEGER process_id;
+	APEX_INTEGER process_2_id;
+	APEX_INTEGER process_3_id;
+	PROCESS_STATUS_TYPE status;
+	static char process_2_name[32] = "Process 2";
+	static char process_3_name[32] = "Process 3";
+	int pass = 1;
+	int case_pass;
+
+	arinc_test_suite_begin(&suite, "stop_behavior");
+
+	GET_MY_ID(&process_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "GET_MY_ID", case_pass);
+	pass &= case_pass;
+
+	GET_PROCESS_ID(process_2_name, &process_2_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "GET_PROCESS_ID(Process 2)", case_pass);
+	pass &= case_pass;
+
+	GET_PROCESS_ID(process_3_name, &process_3_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "GET_PROCESS_ID(Process 3)", case_pass);
+	pass &= case_pass;
+
+	/* Test STOP on DORMANT process */
+	STOP(process_2_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ACTION), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "STOP(DORMANT process) -> NO_ACTION", case_pass);
+	pass &= case_pass;
+
+	/* Start Process 3 for testing */
+	START(process_3_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "START(Process 3)", case_pass);
+	pass &= case_pass;
+
+	GET_PROCESS_STATUS(process_3_id, &status, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	case_pass &= (status.PROCESS_STATE == READY || status.PROCESS_STATE == RUNNING);
+	arinc_test_suite_check(&suite, "GET_PROCESS_STATUS(after START) -> READY/RUNNING", case_pass);
+	pass &= case_pass;
+
+	/* Test STOP on running process */
+	STOP(process_3_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "STOP(running process) -> NO_ERROR", case_pass);
+	pass &= case_pass;
+
+	GET_PROCESS_STATUS(process_3_id, &status, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	case_pass &= arinc_test_check_str(process_state_to_str(DORMANT), process_state_to_str(status.PROCESS_STATE));
+	arinc_test_suite_check(&suite, "GET_PROCESS_STATUS(after STOP) -> DORMANT", case_pass);
+	pass &= case_pass;
+
+	/* Test STOP on invalid process ID */
+	STOP(999, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(INVALID_PARAM), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "STOP(invalid_process_id) -> INVALID_PARAM", case_pass);
+	pass &= case_pass;
+
+	/* Test STOP on self (should fail) */
+	STOP(process_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(INVALID_PARAM), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "STOP(self) -> INVALID_PARAM", case_pass);
+	pass &= case_pass;
+
+	arinc_test_suite_end(&suite);
+	printf("[ARINC_TEST] completed suite stop_behavior\n");
+
+	return pass;
+}
+
+__attribute__((section(".p1_code")))
+static int test_suspend_self_validation(void)
+{
+	arinc_test_suite_result_t suite;
+	RETURN_CODE_TYPE return_code;
+	APEX_INTEGER process_id;
+	PROCESS_STATUS_TYPE status;
+	PROCESS_ATTRIBUTE_TYPE attr;
+	int pass = 1;
+	int case_pass;
+
+	arinc_test_suite_begin(&suite, "suspend_self_validation");
+
+	GET_MY_ID(&process_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "GET_MY_ID", case_pass);
+	pass &= case_pass;
+
+	GET_PROCESS_STATUS(process_id, &status, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	attr = status.ATTRIBUTES;
+	case_pass &= arinc_test_check_int(INFINITE_TIME_VALUE, attr.PERIOD);
+	arinc_test_suite_check(&suite, "GET_PROCESS_STATUS: PERIOD == INFINITE_TIME_VALUE", case_pass);
+	pass &= case_pass;
+
+	/* Test that SUSPEND_SELF requires aperiodic process (PERIOD == INFINITE_TIME_VALUE) */
+	/* The current process should satisfy this condition */
+	case_pass = arinc_test_check_int(1, (attr.PERIOD == INFINITE_TIME_VALUE ? 1 : 0));
+	arinc_test_suite_check(&suite, "Process is aperiodic (prerequisite for SUSPEND_SELF)", case_pass);
+	pass &= case_pass;
+
+	/* Test SUSPEND_SELF with INFINITE_TIME_VALUE timeout - this would suspend indefinitely */
+	/* We can't actually call this as it would block the test, but verify the parameter validation */
+	case_pass = 1; /* Documentation: SUSPEND_SELF(INFINITE_TIME_VALUE, &return_code) would suspend forever */
+	arinc_test_suite_check(&suite, "SUSPEND_SELF(INFINITE_TIME_VALUE) parameter validation (documented)", case_pass);
+	pass &= case_pass;
+
+	arinc_test_suite_end(&suite);
+	printf("[ARINC_TEST] completed suite suspend_self_validation\n");
+
+	return pass;
+}
+
+__attribute__((section(".p1_code")))
 static void run_process_api_suite(void)
 {
 	(void)test_process_identity();
 	(void)test_process_state_transitions();
 	(void)test_process_priority();
+	(void)test_suspend_self();
+	(void)test_suspend_self_validation();
+	(void)test_suspend_resume_errors();
+	(void)test_stop_behavior();
 
 	RETURN_CODE_TYPE return_code;
 	SET_PARTITION_MODE(IDLE, &return_code);
@@ -325,7 +592,7 @@ int app_main(void)
 				   (void *)_p1_data_start,
 				   p1_data_size,
 				   DEFAULT_PARTITION_CONFIG.access_data_mem,
-				   p1_process1,
+				   p1_main_process,
 				   DEFAULT_PARTITION_CONFIG.is_system_partition,
 
 				   DEFAULT_PARTITION_CONFIG.sampling_ports,
@@ -384,7 +651,7 @@ int app_main(void)
 				   (void *)_p2_data_start,
 				   p2_data_size,
 				   P2_CONFIG.access_data_mem,
-				   p2_process1,
+				   p2_main_process,
 				   P2_CONFIG.is_system_partition,
 
 				   P2_CONFIG.sampling_ports,

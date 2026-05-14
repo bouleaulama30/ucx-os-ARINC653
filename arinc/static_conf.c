@@ -59,7 +59,9 @@ void p1_main_process(struct pcb_s *partition){
     PROCESS_ID_TYPE process_id_2;
 
     CREATE_PROCESS(&P1_PROCESS_1_CONFIG, &process_id_0, &return_code0);
-    CREATE_PROCESS(&P1_PROCESS_2_CONFIG, &process_id_1, &return_code1);
+    printf("CREATE PROCESS %d and Error code is %d\n", process_id_0, return_code0);      
+    CREATE_PROCESS(&P1_PROCESS_2_CONFIG, &process_id_1, &return_code0);
+    printf("CREATE PROCESS %d and Error code is %d\n", process_id_1, return_code0);      
     CREATE_PROCESS(&P1_PROCESS_3_CONFIG, &process_id_2, &return_code0);
     printf("CREATE PROCESS %d and Error code is %d\n", process_id_2, return_code0);      
 
@@ -72,10 +74,9 @@ void p1_main_process(struct pcb_s *partition){
     // DELAYED_START(process_id_1, 25, &return_code0);  
     // printf("return code delayed start %d\n", return_code0); 
     START(process_id_0, &return_code0);  
-    START(process_id_1, &return_code1);  
+    // START(process_id_1, &return_code1);  
 
-    START(process_id_0, &return_code0);  
-    START(process_id_2, &return_code0);  
+    // START(process_id_2, &return_code0);  
 
 
     SAMPLING_PORT_ID_TYPE port_id;
