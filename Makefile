@@ -156,6 +156,10 @@ arinc_app: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_app.o app/arinc_app.c
 	@$(MAKE) --no-print-directory link
 
+arinc_app_demo1: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_app_demo1.o app/arinc_app_demo1.c
+	@$(MAKE) --no-print-directory link
+
 arinc_test: arinc_app
 
 arinc_test_api_partition: rebuild
@@ -433,6 +437,6 @@ test:
 all:
 	$(MAKE) veryclean
 	$(MAKE) ucx ARCH=riscv/riscv32-qemu
-	$(MAKE) arinc_test_process
+	$(MAKE) arinc_app_demo1
 	-timeout $(DURATION) qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:./debug/test.txt
 	head -n30 ./debug/test.txt

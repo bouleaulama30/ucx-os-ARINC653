@@ -1,30 +1,28 @@
 # TO-DO
 
 ## matériel
-* installer les logiciels que felipe m'a dit sur windows
 * essayer de faire rouler l'os sur la carte de Felipe
 
 ## test
 * faire une batterie de test unitaires pour voir si le comportement de toute les fonctions de l'apex est correct
-* design les tests 
-* faire un make test 
-
-## related works
-* lire les documents de Tarek
-* voir s'ils sont pertinents (pas sur car j'ai l'impression que c'est un hv)
-* trouver le repo github et voir ce que ça fait
+    * arinc TIME
+    * arinc intercommunication 
+    * arinc intracommunication
+    * arinc HM
 
 ## refactoring
 
 * enlever les reference aux communication port dans partition init 
 * mettre des commentaires
-* faire de la documentation 
+* faire de la documentation
+* faire trois app de demo:
+    * faire un script qui place la bonne static conf dans la courante, qui lance la bonne cible de demo et qui montre le resultat et le stock
 
 <!-- à faire après test unitaire -->
 * sampling_port_s -> sp_s ?
 * voir si pour les ressources comme bb, la reference vers la partition ou le waiting_blackboard est necessaire dans la struct
 * voir pour mettre krnl acquire et release mutex dans un fichier du krnl
-
+* mettre les differents static file dans dans un meme dossier
 
 ## Optimisation
 
