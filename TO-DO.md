@@ -17,7 +17,6 @@
 * faire de la documentation
 * faire deux autres app de demo:
     * faire une app ou on communique entre partition
-    * faire une app ou on a une erreur avec le HM (reprendre celle que l'on a deja)
     * faire une app avec les resume suspend etc... (reprendre celle que l on a deja)
 
 <!-- à faire après test unitaire -->

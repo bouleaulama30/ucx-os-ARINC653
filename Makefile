@@ -167,6 +167,14 @@ arinc_app_demo2: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_app_demo2.o app/arinc_app_demo2.c
 	@$(MAKE) --no-print-directory link
 
+arinc_app_demo3: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_app_demo3.o app/arinc_app_demo3.c
+	@$(MAKE) --no-print-directory link
+
+arinc_app_demo4: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_app_demo4.o app/arinc_app_demo4.c
+	@$(MAKE) --no-print-directory link
+
 arinc_test: arinc_app
 
 arinc_test_api_partition: rebuild
