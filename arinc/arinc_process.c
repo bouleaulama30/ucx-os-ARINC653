@@ -493,13 +493,13 @@ void START (
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
     struct pcb_s *partition = get_current_partition();
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
-    struct process_s *process = process_node->data;
     
     if(!process_node){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
 
+    struct process_s *process = process_node->data;
     if (process->processus_status->PROCESS_STATE != DORMANT)
     {
         *RETURN_CODE = NO_ACTION;
@@ -564,13 +564,13 @@ void DELAYED_START (
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
     struct pcb_s *partition = get_current_partition();
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
-    struct process_s *process = process_node->data;
     
     if(!process_node){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
 
+    struct process_s *process = process_node->data;
     if (process->processus_status->PROCESS_STATE != DORMANT)
     {
         *RETURN_CODE = NO_ACTION;
@@ -651,7 +651,6 @@ void DELAYED_START (
     }
 }
 
-// to do pendant la partie intra communication
 void LOCK_PREEMPTION (
        /*out*/ LOCK_LEVEL_TYPE          *LOCK_LEVEL,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){
@@ -677,7 +676,6 @@ void LOCK_PREEMPTION (
     }
 }
 
-// to do pendant la partie intra communication
 void UNLOCK_PREEMPTION (
        /*out*/ LOCK_LEVEL_TYPE          *LOCK_LEVEL,
        /*out*/ RETURN_CODE_TYPE         *RETURN_CODE ){

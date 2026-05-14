@@ -501,6 +501,82 @@ static int test_suspend_self_validation(void)
 }
 
 __attribute__((section(".p1_code")))
+static int test_lock_unlock_preemption(void)
+{
+	arinc_test_suite_result_t suite;
+	RETURN_CODE_TYPE return_code;
+	LOCK_LEVEL_TYPE lock_level_initial;
+	LOCK_LEVEL_TYPE lock_level_after_lock;
+	LOCK_LEVEL_TYPE lock_level_after_unlock;
+	APEX_INTEGER process_id;
+	int pass = 1;
+	int case_pass;
+
+	arinc_test_suite_begin(&suite, "lock_unlock_preemption");
+
+	GET_MY_ID(&process_id, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "GET_MY_ID", case_pass);
+	pass &= case_pass;
+
+	/* Test LOCK_PREEMPTION - first call should increment LOCK_LEVEL to 1 */
+	LOCK_PREEMPTION(&lock_level_initial, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "LOCK_PREEMPTION - first call", case_pass);
+	pass &= case_pass;
+
+	/* LOCK_LEVEL should be 1 after first LOCK_PREEMPTION */
+	case_pass = arinc_test_check_int(1, lock_level_initial);
+	arinc_test_suite_check(&suite, "LOCK_LEVEL == 1 after first LOCK_PREEMPTION", case_pass);
+	pass &= case_pass;
+
+	/* Test nested LOCK_PREEMPTION - should increment LOCK_LEVEL to 2 */
+	LOCK_PREEMPTION(&lock_level_after_lock, &return_code);
+
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "LOCK_PREEMPTION - second call (nested)", case_pass);
+	pass &= case_pass;
+
+	/* LOCK_LEVEL should be 2 after second LOCK_PREEMPTION */
+	case_pass = arinc_test_check_int(2, lock_level_after_lock);
+	arinc_test_suite_check(&suite, "LOCK_LEVEL == 2 after second LOCK_PREEMPTION", case_pass);
+	pass &= case_pass;
+
+	/* Test UNLOCK_PREEMPTION - should decrement LOCK_LEVEL to 1 */
+	UNLOCK_PREEMPTION(&lock_level_after_unlock, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "UNLOCK_PREEMPTION - first call", case_pass);
+	pass &= case_pass;
+
+	/* LOCK_LEVEL should be 1 after first UNLOCK_PREEMPTION */
+	case_pass = arinc_test_check_int(1, lock_level_after_unlock);
+	arinc_test_suite_check(&suite, "LOCK_LEVEL == 1 after first UNLOCK_PREEMPTION", case_pass);
+	pass &= case_pass;
+
+	/* Test UNLOCK_PREEMPTION - should decrement LOCK_LEVEL to 0 */
+	UNLOCK_PREEMPTION(&lock_level_after_unlock, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ERROR), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "UNLOCK_PREEMPTION - second call", case_pass);
+	pass &= case_pass;
+
+	/* LOCK_LEVEL should be 0 after second UNLOCK_PREEMPTION */
+	case_pass = arinc_test_check_int(0, lock_level_after_unlock);
+	arinc_test_suite_check(&suite, "LOCK_LEVEL == 0 after second UNLOCK_PREEMPTION", case_pass);
+	pass &= case_pass;
+
+	/* Test UNLOCK_PREEMPTION when LOCK_LEVEL == 0 - should return NO_ACTION */
+	UNLOCK_PREEMPTION(&lock_level_after_unlock, &return_code);
+	case_pass = arinc_test_check_str(return_code_to_str(NO_ACTION), return_code_to_str(return_code));
+	arinc_test_suite_check(&suite, "UNLOCK_PREEMPTION when LOCK_LEVEL==0 -> NO_ACTION", case_pass);
+	pass &= case_pass;
+
+	arinc_test_suite_end(&suite);
+	printf("[ARINC_TEST] completed suite lock_unlock_preemption\n");
+
+	return pass;
+}
+
+__attribute__((section(".p1_code")))
 static void run_process_api_suite(void)
 {
 	(void)test_process_identity();
@@ -510,6 +586,7 @@ static void run_process_api_suite(void)
 	(void)test_suspend_self_validation();
 	(void)test_suspend_resume_errors();
 	(void)test_stop_behavior();
+	(void)test_lock_unlock_preemption();
 
 	RETURN_CODE_TYPE return_code;
 	SET_PARTITION_MODE(IDLE, &return_code);

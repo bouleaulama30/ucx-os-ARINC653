@@ -1096,13 +1096,14 @@ void krnl_acquire_mutex(/*in */ MUTEX_ID_TYPE            MUTEX_ID,
         return;
     }
     
-    if (current_process != partition->error_handler_process){
+    if (current_process == partition->error_handler_process){
         *RETURN_CODE = INVALID_MODE;
         return;
     }
         
     struct mutex_s *mutex = &partition->mutexes[index];
-    if (current_process->processus_status->CURRENT_PRIORITY >= mutex->mutex_status.MUTEX_PRIORITY){
+    if (current_process->processus_status->CURRENT_PRIORITY > mutex->mutex_status.MUTEX_PRIORITY){
+        printf("TEST\n");
         *RETURN_CODE = INVALID_MODE;
         return;
     }
