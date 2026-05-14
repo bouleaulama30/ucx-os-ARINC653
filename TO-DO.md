@@ -15,9 +15,10 @@
 * enlever les reference aux communication port dans partition init 
 * mettre des commentaires
 * faire de la documentation
-* faire trois app de demo:
-    * faire un script qui place la bonne static conf dans la courante, qui lance la bonne cible de demo et qui montre le resultat et le stock
-
+* faire deux autres app de demo:
+    * faire une app ou on communique entre partition
+    * faire une app ou on a une erreur avec le HM (reprendre celle que l'on a deja)
+    * faire une app avec les resume suspend etc... (reprendre celle que l on a deja)
 <!-- à faire après test unitaire -->
 * sampling_port_s -> sp_s ?
 * voir si pour les ressources comme bb, la reference vers la partition ou le waiting_blackboard est necessaire dans la struct
