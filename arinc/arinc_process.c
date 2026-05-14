@@ -302,16 +302,22 @@ void SUSPEND (
     struct pcb_s *partition = get_current_partition();
     struct process_s *current_process = partition->process_current->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
+    if(!process_node){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
     struct process_s *process = process_node->data;
+    if(process->process_id == current_process->process_id){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
     if(process->owned_mutex_id != NO_MUTEX_OWNED || is_process_waiting_in_mutex_queue(process)){
         *RETURN_CODE = INVALID_MODE;
         return;
     }
     
-    if(!process_node || process->process_id == current_process->process_id){
-        *RETURN_CODE = INVALID_PARAM;
-        return;
-    }
 
     if(process->processus_status->PROCESS_STATE == DORMANT || process->processus_status->PROCESS_STATE == FAULTED){
         *RETURN_CODE = INVALID_MODE;
@@ -341,8 +347,13 @@ void RESUME (
     struct pcb_s *partition = get_current_partition();
     struct process_s *current_process = partition->process_current->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
+    if(!process_node){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
     struct process_s *process = process_node->data;
-    if(!process_node || process->process_id == current_process->process_id){
+    if(process->process_id == current_process->process_id){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -359,12 +370,14 @@ void RESUME (
 
     if(!process->is_suspended && process->processus_status->PROCESS_STATE != FAULTED){
         *RETURN_CODE = NO_ACTION;
+        return;
     }
 
     if(process->is_suspended){
         process->is_suspended = false;
         process->time_counter = 0;
     }
+
 
     // checker if (the specified process is not waiting on a process queue or TIMED_WAIT
     // time delay or DELAYED_START time delay) then
@@ -439,8 +452,13 @@ void STOP (
     struct pcb_s *partition = get_current_partition();
     struct process_s *current_process = partition->process_current->data;
     struct node_s *process_node = is_process_id_existed(partition, PROCESS_ID);
+    if(!process_node){
+        *RETURN_CODE = INVALID_PARAM;
+        return;
+    }
+
     struct process_s *process = process_node->data;
-    if(!process_node || process->process_id == current_process->process_id){
+    if(process->process_id == current_process->process_id){
         *RETURN_CODE = INVALID_PARAM;
         return;
     }
@@ -697,7 +715,7 @@ void GET_MY_ID (
     struct pcb_s *partition = get_current_partition();
     struct process_s *process = partition->process_current->data;
 
-    if (*PROCESS_ID == NULL_PROCESS_ID || process == partition->error_handler_process) {
+    if (process->process_id == NULL_PROCESS_ID || process == partition->error_handler_process) {
         *RETURN_CODE = INVALID_MODE;
         return;
     }
@@ -781,7 +799,7 @@ void GET_MY_INDEX (
     struct pcb_s *partition = get_current_partition();
     struct process_s *process = partition->process_current->data;
 
-    if (*PROCESS_INDEX == NULL_PROCESS_ID || process == partition->error_handler_process){
+    if (process->process_id == NULL_PROCESS_ID || process == partition->error_handler_process){
         *RETURN_CODE = INVALID_MODE;
         return;
     }
