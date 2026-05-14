@@ -15,6 +15,9 @@ DURATION = 1
 SERIAL_BAUD=57600
 SERIAL_DEVICE=/dev/ttyUSB0
 
+# ARINC app target (can be overridden: make all ARINC_APP_TARGET=arinc_app_demo1)
+ARINC_APP_TARGET ?= arinc_app
+
 SRC_DIR = .
 
 BUILD_DIR = $(SRC_DIR)/build
@@ -436,7 +439,9 @@ test:
 
 all:
 	$(MAKE) veryclean
+	cp include/arinc/static_conf_${ARINC_APP_TARGET}.h include/arinc/static_conf.h
+	cp arinc/static_conf_${ARINC_APP_TARGET}.c arinc/static_conf.c
 	$(MAKE) ucx ARCH=riscv/riscv32-qemu
-	$(MAKE) arinc_app_demo1
+	$(MAKE) $(ARINC_APP_TARGET)
 	-timeout $(DURATION) qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:./debug/test.txt
 	head -n30 ./debug/test.txt

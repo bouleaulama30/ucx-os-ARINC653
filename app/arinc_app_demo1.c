@@ -19,223 +19,89 @@ void print_time()
 	printf("%ld.%03lds\n", secs, msecs);
 }
 
-
-
+// ============================================================================
+// PARTITION 1 : PROCESSUS 1 : LE DECLENCHEUR (Périodique, plus lent)
+// ============================================================================
 __attribute__((section(".p1_code")))
-void test_spatial_violation_p2(void) {
-    printf("--- Test 2: Tentative d'ecriture sur P2 (0x%08x) ---\n", (unsigned int)_p2_code_start);
-    printf("ATTENTION: Le systeme DOIT crasher ou lever une exception maintenant.\n");
-    
-    volatile int *ptr = (int *)_p2_code_start;
-    
-    // Si l'isolation matérielle est active, cette ligne stoppe l'exécution
-    *ptr = 0xDEADBEEF; 
-
-    // Si on arrive ici, c'est un échec de l'isolation
-    printf("[CRITICAL FAIL] P1 a reussi a ecrire dans P2 !\n");
+void p1_process1(void) {
+    RETURN_CODE_TYPE return_code;
+	EVENT_ID_TYPE wake_event_id;
+	GET_EVENT_ID("WakeUpEvent", &wake_event_id, &return_code);
+	if (return_code != NO_ERROR)
+		RAISE_APPLICATION_ERROR(APPLICATION_ERROR, (MESSAGE_ADDR_TYPE)"Simulated error in Process 1", 34, &return_code);
+	
+    while (1) {
+        printf("[P1 Processus 1 - Declencheur] C'est l'heure ! Je reveille le Processus 2 !\n");
+        
+        // Déclenche l'événement. Le Processus 2 va immédiatement passer à l'état READY
+        SET_EVENT(wake_event_id, &return_code);
+        
+        // S'endort jusqu'à la prochaine période (ex: tous les 100 ticks)
+        TIMED_WAIT(0, &return_code);
+    }
 }
 
+
+
+// ============================================================================
+// PARTITION 1 : PROCESSUS 2 : LE TRAVAILLEUR (Apériodique, s'endort et attend)
+// ============================================================================
+__attribute__((section(".p1_code")))
+void p1_process2(void) {
+    RETURN_CODE_TYPE return_code;
+	EVENT_ID_TYPE wake_event_id;
+	GET_EVENT_ID("WakeUpEvent", &wake_event_id, &return_code);
+	if (return_code != NO_ERROR)
+		RAISE_APPLICATION_ERROR(APPLICATION_ERROR, (MESSAGE_ADDR_TYPE)"Simulated error in Process 2", 34, &return_code);
+
+    while (1) {
+        printf("[P1 Processus 2 - Travailleur] Je m'endors... zZz...\n");
+        
+        // Bloque le processus indéfiniment (INFINITE_TIME_VALUE) jusqu'au réveil
+        WAIT_EVENT(wake_event_id, INFINITE_TIME_VALUE, &return_code);
+
+        if (return_code == NO_ERROR) {
+            printf("[P1 Processus 2 - Travailleur] REVEILLE ! J'execute ma tache lourde...\n");
+            
+            // On a fini le travail. On réinitialise l'événement 
+            // pour pouvoir s'endormir au prochain tour de boucle.
+            RESET_EVENT(wake_event_id, &return_code);
+        }
+    }
+}
+
+
+// ============================================================================
+// PARTITION 1 : PROCESSUS 3 : LE CAPTEUR (Périodique, très rapide)
+// ============================================================================
+__attribute__((section(".p1_code")))
+void p1_process3(void) {
+    RETURN_CODE_TYPE return_code;
+    int sensor_value = 0;
+
+    while (1) {
+        sensor_value += 5;
+        printf("[P1 Processus 3 - Capteur] Lecture en cours... Valeur = %d\n", sensor_value);
+        
+        // S'endort jusqu'à la prochaine période (ex: tous les 20 ticks)
+        PERIODIC_WAIT(&return_code); 
+    }
+}
+
+// ============================================================================
+// PARTITION 2 : PROCESSUS 1 : LE DECLENCHEUR (Périodique, plus lent)
+// ============================================================================
 __attribute__((section(".p2_code")))
-void test_spatial_violation_p1(void) {
-    printf("--- Test 2: Tentative d'ecriture sur P1 (0x%08x) ---\n", (unsigned int)_p1_data_start);
-    printf("ATTENTION: Le systeme DOIT crasher ou lever une exception maintenant.\n");
-    
-    volatile int *ptr = (int *)_p1_data_start;
-    
-    // Si l'isolation matérielle est active, cette ligne stoppe l'exécution
-    *ptr = 0xDEADBEEF; 
-
-    // Si on arrive ici, c'est un échec de l'isolation
-    printf("[CRITICAL FAIL] P2 a reussi a ecrire dans P1 !\n");
+void p2_process1(void) {
+    RETURN_CODE_TYPE return_code;
+	    while (1) {
+        printf("[P2 Processus 1] Tache Unique avant IDLE\n");
+        
+		STOP_SELF();
+    }
 }
 
 __attribute__((section(".p1_code")))
-void p1_process1(void)
-{   
-	RETURN_CODE_TYPE return_code;
-	APEX_INTEGER partition_id;
-	APEX_INTEGER process_id;
-	QUEUING_PORT_ID_TYPE queuing_port_id;
-	MESSAGE_SIZE_TYPE message_length;
-	char message[64];
-
-	GET_MY_PARTITION_ID(&partition_id, &return_code);
-	GET_MY_ID(&process_id, &return_code);
-
-	int a = 3;
-	printf("This line should never be printed (a=%d)\n", a);
-	a = a/0;
-	printf("This line should never be printed (a=%d)\n", a);
-
-	while(1)
-	{
-		static char hm_error_message[] = "P1 HM test: raise/get error status";
-		RAISE_APPLICATION_ERROR(APPLICATION_ERROR,
-		                        (MESSAGE_ADDR_TYPE)hm_error_message,
-		                        (ERROR_MESSAGE_SIZE_TYPE)(strlen(hm_error_message) + 1),
-		                        &return_code);
-		printf("[P1/Process1] RAISE_APPLICATION_ERROR rc=%d\n", return_code);
-		TIMED_WAIT(0, &return_code); 
-	}
-
-	while (1) {
-		GET_QUEUING_PORT_ID("P1_IN_CMDS", &queuing_port_id, &return_code);
-		if (return_code == NO_ERROR) {
-			break;
-		}
-		printf("[P1/Process1] GET_QUEUING_PORT_ID('P1_IN_CMDS') rc=%d (retry)\n", return_code);
-		TIMED_WAIT(2, &return_code);
-	}
-
-	printf("\n--- START TEST QUEUING PORT (P2 send -> P1 receive) ---\n");
-	printf("[P1/Process1] partition=%d pid=%d queuing_port_id=%d\n", partition_id, process_id, queuing_port_id);
-
-	while (1) {
-		RECEIVE_QUEUING_MESSAGE(queuing_port_id,
-		                       10,
-		                       (MESSAGE_ADDR_TYPE)message,
-		                       &message_length,
-		                       &return_code);
-
-		if (return_code == NO_ERROR) {
-			printf("[P1/Process1] RECEIVE_QUEUING_MESSAGE rc=%d len=%d msg='%s'\n",
-			       return_code,
-			       message_length,
-			       message);
-		} else {
-			printf("[P1/Process1] RECEIVE_QUEUING_MESSAGE rc=%d\n", return_code);
-		}
-
-		TIMED_WAIT(10, &return_code);
-	}
-}
-
-__attribute__((section(".p1_code")))
-void p1_process2(void)
-{   
-	RETURN_CODE_TYPE return_code;
-	PROCESS_STATUS_TYPE proc_status;
-
-	printf("[P1/Process2] querying status for process 1\n");
-
-	while (1) {
-		GET_PROCESS_STATUS(1, &proc_status, &return_code);
-		if (return_code == NO_ERROR) {
-			printf("[P1/Process2] GET_PROCESS_STATUS rc=%d name=%s state=%d cur_prio=%d base_prio=%d\n",
-				   return_code,
-				   proc_status.ATTRIBUTES.NAME,
-				   proc_status.PROCESS_STATE,
-				   proc_status.CURRENT_PRIORITY,
-				   proc_status.ATTRIBUTES.BASE_PRIORITY);
-		} else {
-			printf("[P1/Process2] GET_PROCESS_STATUS rc=%d\n", return_code);
-		}
-
-		TIMED_WAIT(20, &return_code);
-	}
-}
-
-__attribute__((section(".p1_code")))
-void p1_process3(void)
-{   
-	RETURN_CODE_TYPE return_code;
-
-	while (1) {
-		printf("[P1/Process3] Peridic process\n");
-		PERIODIC_WAIT(&return_code);
-	}
-}
-
-__attribute__((section(".p2_code")))
-void p2_process1(void)
-{   
-	RETURN_CODE_TYPE return_code;
-	APEX_INTEGER partition_id;
-	APEX_INTEGER process_id;
-	QUEUING_PORT_ID_TYPE queuing_port_id;
-	MESSAGE_SIZE_TYPE message_length;
-	char message[64];
-	uint32_t seq = 0;
-	static const char *hm_test_messages[] = {
-		"HM_TEST_P2_0",
-		"HM_TEST_P2_1",
-		"HM_TEST_P2_2"
-	};
-	uint32_t log_slot;
-	size_t message_index;
-	int message_found;
-	char *log_entry;
-
-	GET_MY_PARTITION_ID(&partition_id, &return_code);
-	GET_MY_ID(&process_id, &return_code);
-
-	for (message_index = 0; message_index < sizeof(hm_test_messages) / sizeof(hm_test_messages[0]); ++message_index) {
-		REPORT_APPLICATION_MESSAGE((MESSAGE_ADDR_TYPE)hm_test_messages[message_index],
-		                          (MESSAGE_SIZE_TYPE)(strlen(hm_test_messages[message_index]) + 1),
-		                          &return_code);
-		printf("[P2/Process1] REPORT_APPLICATION_MESSAGE rc=%d msg='%s'\n",
-		       return_code,
-		       hm_test_messages[message_index]);
-	}
-
-	for (message_index = 0; message_index < sizeof(hm_test_messages) / sizeof(hm_test_messages[0]); ++message_index) {
-		message_found = 0;
-		for (log_slot = 0; log_slot < MAX_LOG_ENTRIES; ++log_slot) {
-			log_entry = hm_log_buffer[log_slot];
-			if (memcmp(log_entry, &partition_id, sizeof(PARTITION_ID_TYPE)) == 0 &&
-			    strcmp(log_entry + sizeof(PARTITION_ID_TYPE), hm_test_messages[message_index]) == 0) {
-				printf("[P2/Process1] HM log hit at slot %lu for '%s'\n",
-				       (unsigned long)log_slot,
-				       hm_test_messages[message_index]);
-				message_found = 1;
-				break;
-			}
-		}
-
-		if (!message_found) {
-			printf("[P2/Process1] HM log message not found in hm_log_buffer: '%s'\n",
-			       hm_test_messages[message_index]);
-		}
-	}
-
-	while (1) {
-		GET_QUEUING_PORT_ID("P2_OUT_CMDS", &queuing_port_id, &return_code);
-		if (return_code == NO_ERROR) {
-			break;
-		}
-		printf("[P2/Process1] GET_QUEUING_PORT_ID('P2_OUT_CMDS') rc=%d (retry)\n", return_code);
-		TIMED_WAIT(2, &return_code);
-	}
-
-	printf("[P2/Process1] partition=%d pid=%d queuing_port_id=%d\n", partition_id, process_id, queuing_port_id);
-
-	while (1) {
-		seq++;
-		sprintf(message, "cmd=%lu from=P2", (unsigned long)seq);
-		message_length = (MESSAGE_SIZE_TYPE)(strlen(message) + 1);
-
-		SEND_QUEUING_MESSAGE(queuing_port_id,
-		                     (MESSAGE_ADDR_TYPE)message,
-		                     message_length,
-		                     0,
-		                     &return_code);
-
-		if (return_code == NO_ERROR) {
-			printf("[P2/Process1] SEND_QUEUING_MESSAGE rc=%d seq=%lu len=%d msg='%s'\n",
-			       return_code,
-			       (unsigned long)seq,
-			       message_length,
-			       message);
-		} else {
-			printf("[P2/Process1] SEND_QUEUING_MESSAGE rc=%d seq=%lu\n",
-			       return_code,
-			       (unsigned long)seq);
-		}
-
-		TIMED_WAIT(10, &return_code);
-	}
-}
-
 void error_handler_function(void) {
 	RETURN_CODE_TYPE return_code;
 	ERROR_STATUS_TYPE error_status;
