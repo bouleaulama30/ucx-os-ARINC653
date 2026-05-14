@@ -23,7 +23,6 @@
 * sampling_port_s -> sp_s ?
 * voir si pour les ressources comme bb, la reference vers la partition ou le waiting_blackboard est necessaire dans la struct
 * voir pour mettre krnl acquire et release mutex dans un fichier du krnl
-* mettre les differents static file dans dans un meme dossier
 
 ## Optimisation
 

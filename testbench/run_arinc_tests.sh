@@ -32,8 +32,8 @@ apply_static_conf() {
 			;;
 	esac
 
-	cp "$ROOT_DIR/arinc/${source_base}.c" "$ROOT_DIR/arinc/static_conf.c"
-	cp "$ROOT_DIR/include/arinc/${source_base}.h" "$ROOT_DIR/include/arinc/static_conf.h"
+	cp "$ROOT_DIR/arinc/static/${source_base}.c" "$ROOT_DIR/arinc/static_conf.c"
+	cp "$ROOT_DIR/include/arinc/static/${source_base}.h" "$ROOT_DIR/include/arinc/static_conf.h"
 }
 
 run_test() {
