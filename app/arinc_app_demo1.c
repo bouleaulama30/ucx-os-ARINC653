@@ -89,7 +89,7 @@ void p1_process3(void) {
 }
 
 // ============================================================================
-// PARTITION 2 : PROCESSUS 1 : LE DECLENCHEUR (Périodique, plus lent)
+// PARTITION 2 : PROCESSUS 1 : IDLE
 // ============================================================================
 __attribute__((section(".p2_code")))
 void p2_process1(void) {
