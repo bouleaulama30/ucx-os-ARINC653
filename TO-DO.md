@@ -15,8 +15,7 @@
 * enlever les reference aux communication port dans partition init 
 * mettre des commentaires
 * faire de la documentation
-    * faire en sorte de pouvoir choisir l'app a debug dans le qemu debug
-* faire deux autres app de demo:
+* faire une autre app de demo:
     * faire une app ou on communique entre partition
 
 <!-- à faire après test unitaire -->

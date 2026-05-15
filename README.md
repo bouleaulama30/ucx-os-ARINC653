@@ -54,3 +54,4 @@ This target will:
 * Save the logs into the *./debug/test.txt* file
 
 ## Debug an application 
+To debug the current application compile with the os, you can run in one terminal '*make qemu_debug*' and in other one type '*make gdb*' or '*make multiarch-gdb*' depending on your computer 
