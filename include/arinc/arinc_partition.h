@@ -73,7 +73,7 @@ typedef
       NUM_CORES_TYPE         NUM_ASSIGNED_CORES;
    } PARTITION_STATUS_TYPE;
 
-
+// partition control block maintains the state of all ressources in partition
 struct pcb_s {
    struct tcb_s tcb;
    PARTITION_STATUS_TYPE *status;
