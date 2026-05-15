@@ -17,13 +17,12 @@
 * faire de la documentation
 * faire deux autres app de demo:
     * faire une app ou on communique entre partition
-    * faire une app avec les resume suspend etc... (reprendre celle que l on a deja)
 
 <!-- à faire après test unitaire -->
 * sampling_port_s -> sp_s ?
 * voir si pour les ressources comme bb, la reference vers la partition ou le waiting_blackboard est necessaire dans la struct
 * voir pour mettre krnl acquire et release mutex dans un fichier du krnl
-
+* voir pour mettre des fonctions lié aux channels dans la comm inter partition dans les fichiers du noyau
 ## Optimisation
 
 * retirer les mallocs et les free en utilisant le pool allocator utiliser durant la communication inter et intra partition

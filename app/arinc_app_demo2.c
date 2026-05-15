@@ -63,7 +63,6 @@ void p1_process1(void)
 	GET_MY_ID(&process_id, &return_code);
 
 	int a = 3;
-	printf("This line should never be printed (a=%d)\n", a);
 	a = a/0;
 	printf("This line should never be printed (a=%d)\n", a);
 

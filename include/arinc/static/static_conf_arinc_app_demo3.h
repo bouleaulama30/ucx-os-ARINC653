@@ -35,7 +35,6 @@ extern void test_prio_A(void);
 extern void test_prio_B(void);
 
 
-
 // Déclaration des symboles du linker script du kernel
 extern uint8_t _kernel_end[];
 
@@ -317,7 +316,7 @@ static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_2_CONFIG = {
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = p1_process2,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 2,            // Medium priority (1-239)
+    .BASE_PRIORITY = 10,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "Process 2"
 };
