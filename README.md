@@ -53,5 +53,8 @@ This target will:
 * Launch the application with the duration *DURATION* specified in Makefile variable (by default 1s)
 * Save the logs into the *./debug/test.txt* file
 
+## Test ARINC 653
+To test that everything is working with the correct behavior, you can run the test script : '*./testbench/run_arinc_tests.sh*', it will test the different functions of the ARINC 653 APEX.
+
 ## Debug an application 
 To debug the current application compile with the os, you can run in one terminal '*make qemu_debug*' and in other one type '*make gdb*' or '*make multiarch-gdb*' depending on your computer. You can add a '*-g*' flag in *CFLAGS* of the Makefile to add debug symbole.
