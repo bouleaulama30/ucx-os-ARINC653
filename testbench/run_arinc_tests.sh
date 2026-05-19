@@ -38,6 +38,9 @@ apply_static_conf() {
 		event)
 			source_base="static_conf_arinc_event_test"
 			;;
+		mutex)
+			source_base="static_conf_arinc_mutex_test"
+			;;
 		semaphore)
 			source_base="static_conf_arinc_semaphore_test"
 			;;
@@ -108,7 +111,8 @@ run_test() {
 # run_test arinc_test_queuing_port queuing_port queuing_port
 # run_test arinc_test_buffer buffer buffer
 # run_test arinc_test_semaphore semaphore semaphore
-run_test arinc_test_event event event
+# run_test arinc_test_event event event
+run_test arinc_test_mutex mutex mutex
 
 {
 	echo "Tests reussis: $PASSED_TESTS/$TOTAL_TESTS"

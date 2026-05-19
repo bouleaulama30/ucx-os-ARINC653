@@ -212,6 +212,10 @@ arinc_test_semaphore: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_semaphore.o app/arinc_test_semaphore.c
 	@$(MAKE) --no-print-directory link
 
+arinc_test_mutex: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_mutex.o app/arinc_test_mutex.c
+	@$(MAKE) --no-print-directory link
+
 arinc_test_apex_process_and_time: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_apex_process_and_time.o app/arinc_test_apex_process_and_time.c
 	@$(MAKE) --no-print-directory link
