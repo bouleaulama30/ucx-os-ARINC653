@@ -6,6 +6,7 @@
 ## test
 * faire une batterie de test unitaires pour voir si le comportement de toute les fonctions de l'apex est correct
     * arinc intracommunication
+        * mutex
     * arinc HM
 
 ## refactoring

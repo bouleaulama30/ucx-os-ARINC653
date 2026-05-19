@@ -200,6 +200,18 @@ arinc_test_buffer: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_buffer.o app/arinc_test_buffer.c
 	@$(MAKE) --no-print-directory link
 
+arinc_test_blackboard: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_blackboard.o app/arinc_test_blackboard.c
+	@$(MAKE) --no-print-directory link
+
+arinc_test_event: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_event.o app/arinc_test_event.c
+	@$(MAKE) --no-print-directory link
+
+arinc_test_semaphore: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_semaphore.o app/arinc_test_semaphore.c
+	@$(MAKE) --no-print-directory link
+
 arinc_test_apex_process_and_time: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_apex_process_and_time.o app/arinc_test_apex_process_and_time.c
 	@$(MAKE) --no-print-directory link

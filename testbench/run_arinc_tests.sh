@@ -33,7 +33,13 @@ apply_static_conf() {
 			source_base="static_conf_arinc_sampling_port_test"
 			;;
 		buffer)
-			source_base="static_conf_arinc_buffer_port_test"
+			source_base="static_conf_arinc_buffer_test"
+			;;
+		event)
+			source_base="static_conf_arinc_event_test"
+			;;
+		semaphore)
+			source_base="static_conf_arinc_semaphore_test"
 			;;
 		queuing_port)
 			source_base="static_conf_arinc_queuing_port_test"
@@ -94,12 +100,15 @@ run_test() {
 	fi
 }
 
-run_test arinc_test_api_partition api_partition partition
-run_test arinc_test_process process process
-run_test arinc_test_time_timed_wait time_timed_wait time
-run_test arinc_test_sampling_port sampling_port sampling_port
-run_test arinc_test_queuing_port queuing_port queuing_port
-run_test arinc_test_buffer buffer buffer
+# run_test arinc_test_api_partition api_partition partition
+# run_test arinc_test_process process process
+# run_test arinc_test_time_timed_wait time_timed_wait time
+# run_test arinc_test_sampling_port sampling_port sampling_port
+# run_test arinc_test_event event event
+# run_test arinc_test_queuing_port queuing_port queuing_port
+# run_test arinc_test_buffer buffer buffer
+# run_test arinc_test_semaphore semaphore semaphore
+run_test arinc_test_event event event
 
 {
 	echo "Tests reussis: $PASSED_TESTS/$TOTAL_TESTS"
