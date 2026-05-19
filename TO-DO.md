@@ -5,7 +5,6 @@
 
 ## test
 * faire une batterie de test unitaires pour voir si le comportement de toute les fonctions de l'apex est correct
-    * arinc TIME
     * arinc intercommunication 
     * arinc intracommunication
     * arinc HM

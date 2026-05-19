@@ -26,6 +26,9 @@ apply_static_conf() {
 		partition)
 			source_base="static_conf_partition_test"
 			;;
+		time)
+			source_base="static_conf_time_timed_wait_test"
+			;;
 		*)
 			echo "Unknown test profile: $profile" >&2
 			exit 1
@@ -84,6 +87,7 @@ run_test() {
 
 run_test arinc_test_api_partition api_partition partition
 run_test arinc_test_process process process
+run_test arinc_test_time_timed_wait time_timed_wait time
 
 {
 	echo "Tests reussis: $PASSED_TESTS/$TOTAL_TESTS"
