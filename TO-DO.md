@@ -15,8 +15,6 @@
 * enlever les reference aux communication port dans partition init 
 * mettre des commentaires
 * faire de la documentation
-* faire une autre app de demo:
-    * faire une app ou on communique entre partition
 
 <!-- à faire après test unitaire -->
 * sampling_port_s -> sp_s ?

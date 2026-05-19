@@ -195,6 +195,7 @@ void READ_SAMPLING_MESSAGE (
               *RETURN_CODE = NO_ACTION;
        }
        else {
+              printf("READ SAMOLING MESSAGE %s\n", channel->buffer);
               memcpy(MESSAGE_ADDR, channel->buffer, channel->current_message_size);
               *LENGTH = channel->current_message_size;
               SYSTEM_TIME_TYPE age_message = (SYSTEM_TIME_TYPE)ucx_uptime() - channel->last_update_time;

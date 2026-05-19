@@ -1,24 +1,34 @@
 #include <ucx.h>
 
-static struct node_s *check_available_resources_on_port(struct node_s *node, void *arg) {
-    struct queuing_port_s *queuing_port = node->data;
-    struct krnl_queuing_channel_s *channel = queuing_port->channel;
+void check_available_resources_on_partition_port(struct queuing_port_s *queuing_port, int max_nb_queuing_port){
+    for(int i = 0; i < max_nb_queuing_port; i++){
+        if (queuing_port == NULL) {
+            break;
+        }
+        struct krnl_queuing_channel_s *channel = queuing_port->channel;
+        if (channel == NULL) {
+            break;
+        }
+        
+        if(channel->current_nb_messages < channel->max_nb_messages && queuing_port->queuing_port_status.MAX_MESSAGE_SIZE == SOURCE && queuing_port->waiting_processes->length != 0){
+            struct process_s *waiting_process = list_pop(queuing_port->waiting_processes);
+            waiting_process->processus_status->PROCESS_STATE = READY;
+            queuing_port->queuing_port_status.WAITING_PROCESSES--;
+            waiting_process->waiting_queuing_port = NULL;
+        }
 
-    if(channel->current_nb_messages < channel->max_nb_messages && queuing_port->queuing_port_status.MAX_MESSAGE_SIZE == SOURCE && queuing_port->waiting_processes->length != 0){
-        struct process_s *waiting_process = list_pop(queuing_port->waiting_processes);
-        waiting_process->processus_status->PROCESS_STATE = READY;
-        queuing_port->queuing_port_status.WAITING_PROCESSES--;
-        waiting_process->waiting_queuing_port = NULL;
+        if(channel->current_nb_messages > 0 && queuing_port->queuing_port_status.PORT_DIRECTION == DESTINATION && queuing_port->waiting_processes->length != 0){
+            printf("check_available_resources_on_port: port %s has messages and waiting processes\n", queuing_port->queuing_port_name);
+            struct process_s *waiting_process = list_pop(queuing_port->waiting_processes);
+            waiting_process->processus_status->PROCESS_STATE = READY;
+            queuing_port->queuing_port_status.WAITING_PROCESSES--;
+            waiting_process->waiting_queuing_port = NULL;
+        }
+        queuing_port++;
     }
-
-    if(channel->current_nb_messages > 0 && queuing_port->queuing_port_status.PORT_DIRECTION == DESTINATION && queuing_port->waiting_processes->length != 0){
-        struct process_s *waiting_process = list_pop(queuing_port->waiting_processes);
-        waiting_process->processus_status->PROCESS_STATE = READY;
-        queuing_port->queuing_port_status.WAITING_PROCESSES--;
-        waiting_process->waiting_queuing_port = NULL;
-    }
-    return 0;
+    return;
 }
+
 
 void partition_OS(void)
 {
@@ -44,7 +54,7 @@ start_over:
         if (current_tick != partition->last_tick) {
             partition->last_tick = current_tick;
             arinc_time_update_partition(partition);
-            list_foreach(partition->communication_queuing_ports, check_available_resources_on_port, NULL);
+            check_available_resources_on_partition_port(partition->queuing_ports, partition->max_queuing_ports);
         }
     
         if (!setjmp(partition->partition_context)) {
