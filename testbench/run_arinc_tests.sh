@@ -29,6 +29,9 @@ apply_static_conf() {
 		time)
 			source_base="static_conf_time_timed_wait_test"
 			;;
+		sampling_port)
+				source_base="static_conf_arinc_sampling_port_test"
+			;;
 		*)
 			echo "Unknown test profile: $profile" >&2
 			exit 1
@@ -88,6 +91,7 @@ run_test() {
 run_test arinc_test_api_partition api_partition partition
 run_test arinc_test_process process process
 run_test arinc_test_time_timed_wait time_timed_wait time
+run_test arinc_test_sampling_port sampling_port sampling_port
 
 {
 	echo "Tests reussis: $PASSED_TESTS/$TOTAL_TESTS"
