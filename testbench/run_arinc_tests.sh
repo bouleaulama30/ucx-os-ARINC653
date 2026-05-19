@@ -32,6 +32,9 @@ apply_static_conf() {
 		sampling_port)
 			source_base="static_conf_arinc_sampling_port_test"
 			;;
+		buffer)
+			source_base="static_conf_arinc_buffer_port_test"
+			;;
 		queuing_port)
 			source_base="static_conf_arinc_queuing_port_test"
 			;;
@@ -96,6 +99,7 @@ run_test arinc_test_process process process
 run_test arinc_test_time_timed_wait time_timed_wait time
 run_test arinc_test_sampling_port sampling_port sampling_port
 run_test arinc_test_queuing_port queuing_port queuing_port
+run_test arinc_test_buffer buffer buffer
 
 {
 	echo "Tests reussis: $PASSED_TESTS/$TOTAL_TESTS"

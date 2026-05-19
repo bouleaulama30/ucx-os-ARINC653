@@ -196,6 +196,9 @@ arinc_test_sampling_port: rebuild
 arinc_test_queuing_port: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_queuing_port.o app/arinc_test_queuing_port.c
 	@$(MAKE) --no-print-directory link
+arinc_test_buffer: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_buffer.o app/arinc_test_buffer.c
+	@$(MAKE) --no-print-directory link
 
 arinc_test_apex_process_and_time: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_apex_process_and_time.o app/arinc_test_apex_process_and_time.c
