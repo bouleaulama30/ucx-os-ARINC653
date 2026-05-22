@@ -1,6 +1,14 @@
 MEMORY
 {
 	ram (rwx)     : ORIGIN = 0x80000000, LENGTH = 128M
+
+	/* définition de la p1 */
+	p1_code (rx)  : ORIGIN = 0x81000000, LENGTH = 1M
+	p1_data (rw)  : ORIGIN = 0x82000000, LENGTH = 64K
+	
+	/* définition de la p2 */
+	p2_code (rx)  : ORIGIN = 0x83000000, LENGTH = 1M
+	p2_data (rw)  : ORIGIN = 0x84000000, LENGTH = 64K
 }
 
 /* Entry Point */
@@ -63,4 +71,33 @@ SECTIONS
 	} > ram
 	
 	_end = .;
+	
+	_kernel_end = ORIGIN(ram) + LENGTH(ram);
+
+    .p1_code : {
+        _p1_code_start = .;  
+
+        *(.p1_code)
+		_p1_code_end = .;
+    } > p1_code
+
+	.p1_data : {
+        _p1_data_start = .;
+    } > p1_data
+	
+    _p1_data_end = ORIGIN(p1_data) + LENGTH(p1_data) ;
+
+	.p2_code : {
+        _p2_code_start = .;  
+
+        *(.p2_code)
+		_p2_code_end = .;
+    } > p2_code
+
+	.p2_data : {
+        _p2_data_start = .;
+    } > p2_data
+
+    _p2_data_end = ORIGIN(p2_data) + LENGTH(p2_data) ;
 }
+

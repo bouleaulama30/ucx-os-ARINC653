@@ -9,6 +9,9 @@
 #include <lib/libc.h>
 #include <lib/list.h>
 #include <kernel/kernel.h>
+#include <kernel/hm.h>
+#include <arinc/arinc_partition.h>
+#include <arinc/arinc_HM.h>
 #include <riscv.h>
 
 /* hardware platform dependent stuff */
@@ -106,17 +109,99 @@ void _panic(void)
 
 void _irq_handler(uint64_t cause, uint64_t epc)
 {
-	uint64_t val;
-	
-	val = read_csr(mcause);
-	if (mtime_r() > mtimecmp_r()) {
-		mtimecmp_w(mtime_r() + (F_CPU / F_TIMER));
-		krnl_dispatcher();
-	} else {
-		printf("[%x]\n", val);
-		_panic();
-	}
+ uint64_t val, mepc, mtval, mstatus;
+    
+    /* Désactiver MPRV au début de l'ISR pour que le kernel s'exécute normalement */
+    mstatus = r_mstatus();
+    mstatus &= ~(1 << 17);  // clear MPRV
+    w_mstatus(mstatus);
+    
+    val = read_csr(mcause);
+    if (mtime_r() > mtimecmp_r()) {
+        mepc = read_csr(mepc);
+        mtval = read_csr(mtval);
+        mstatus = read_csr(mstatus);
+        mtimecmp_w(mtime_r() + (F_CPU / F_TIMER));
 
+#ifndef MULTICORE
+        if (kcb->partition_current != NULL) {
+            // On sauve le contexte uniquement si on interrompt une vraie partition
+            struct pcb_s *current_partition = kcb->partition_current->data;
+            if (setjmp(current_partition->tcb.context) == 0) {
+                longjmp(kcb->context, 1);
+            }
+        } else {
+            // Si on était en IDLE, on relance juste le main pour vérifier le planning !
+            longjmp(kcb->context, 1);
+        }
+#else
+        int core_id = _cpu_id();
+        if (kcb[core_id]->partition_current != NULL) {
+            struct pcb_s *current_partition = kcb[core_id]->partition_current->data;
+            if (setjmp(current_partition->tcb.context) == 0) {
+                longjmp(kcb[core_id]->context, 1);
+            }
+        } else {
+            longjmp(kcb[core_id]->context, 1);
+        }
+#endif
+    } else {
+        mepc = read_csr(mepc);
+        mtval = read_csr(mtval);
+        mstatus = read_csr(mstatus);
+
+		ERROR_CODE_TYPE apex_error = HARDWARE_FAULT; 
+        printf("[FAULT] mcause=%x, mepc=%x, mtval=%x, mstatus=%x\n", val, mepc, mtval, mstatus);
+        printf("  mcause: %s\n", 
+            val == 0 ? "Instruction address misaligned" :
+            val == 1 ? "Instruction access fault" :
+            val == 2 ? "Illegal instruction" :
+            val == 3 ? "Breakpoint" :
+            val == 4 ? "Load address misaligned" :
+            val == 5 ? "Load access fault" :
+            val == 6 ? "Store address misaligned" :
+            val == 7 ? "Store access fault" :
+            "Unknown");
+        printf("  MPRV=%d, MPP=%d\n", (mstatus >> 17) & 1, (mstatus >> 11) & 3);
+		switch (val) {
+            case 0: // Instruction address misaligned
+            case 2: // Illegal instruction
+                apex_error = ILLEGAL_REQUEST;
+                break;
+            case 1: // Instruction access fault
+			case 3:
+				apex_error = NUMERIC_ERROR;
+				break;
+            case 4: // Load address misaligned
+            case 5: // Load access fault
+            case 6: // Store address misaligned
+            case 7: // Store access fault
+                apex_error = MEMORY_VIOLATION;
+                break;
+            // Note: RISC-V gère souvent la division par 0 de façon silencieuse, 
+            // mais si une extension matérielle lève un trap, ce serait NUMERIC_ERROR.
+        }
+
+		// On sauve le contexte uniquement si on interrompt une vraie partition
+# ifndef MULTICORE
+		if (kcb->partition_current != NULL) {
+			struct pcb_s *current_partition = kcb->partition_current->data;
+			hm_raise_error(apex_error, "Hardware fault detected", 27, current_partition->process_current);
+		} else {
+			printf("Hardware fault detected and no partition available so panic\n");
+			_panic();
+		}
+# else
+		int core_id = _cpu_id();
+		if (kcb[core_id]->partition_current != NULL) {
+			struct pcb_s *current_partition = kcb[core_id]->partition_current->data;
+			hm_raise_error(apex_error, "Hardware fault detected", 27, current_partition->process_current);
+		} else {
+			printf("Hardware fault detected and no partition available so panic\n");
+			_panic();
+		}
+	}
+#endif
 }
 
 uint32_t _readcounter(void)
@@ -197,6 +282,38 @@ void _timer_disable(void)
 	w_mie(mie);
 }
 
+void _interrupt_tick_partition(void)
+{
+#ifndef MULTICORE
+	if (kcb->partition_current == NULL) return;
+	struct pcb_s *partition = kcb->partition_current->data;
+#else
+	if (kcb[_cpu_id()]->partition_current == NULL) return;
+	struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
+#endif
+	_read_us();
+	/* partition is run for the first time */
+	if ((uint32_t)partition->tcb.task == partition->tcb.context[CONTEXT_RA])
+		asm volatile ("csrs mstatus, 8");
+}
+
+void _interrupt_tick_process(void)
+{
+#ifndef MULTICORE
+	if (kcb->partition_current == NULL) return;
+	struct pcb_s *partition = kcb->partition_current->data;
+#else
+	if (kcb[_cpu_id()]->partition_current == NULL) return;
+	struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
+#endif
+	_read_us();
+	/* partition is run for the first time */
+	struct process_s *process = partition->process_current->data;
+	if ((uint32_t)process->tcb.task == process->tcb.context[CONTEXT_RA])
+		asm volatile ("csrs mstatus, 8");
+}
+
+
 void _interrupt_tick(void)
 {
 #ifndef MULTICORE
@@ -244,4 +361,44 @@ void _context_init(jmp_buf *ctx, size_t sp, size_t ss, size_t ra)
 	
 	ctx_p[CONTEXT_SP] = sp + ss;
 	ctx_p[CONTEXT_RA] = ra;
+}
+
+
+void _pmp_init(uint32_t end_addr){
+
+	uint32_t pmpaddr0 = end_addr >> 2;
+
+	w_pmpaddr0(pmpaddr0);
+
+	uint8_t pmp0cfg = 0b00001111;
+	uint32_t pmpcfg0 = pmp0cfg;
+	w_pmpcfg0(pmpcfg0);
+}
+
+void _pmp_partition_activate(uint32_t kernel_end_addr, uint32_t partition_start_addr, uint32_t partition_end_addr){
+
+	uint32_t pmpaddr0 = kernel_end_addr >> 2;
+	uint32_t pmpaddr1 = partition_start_addr >> 2;
+	uint32_t pmpaddr2 = partition_end_addr >> 2;
+
+	w_pmpaddr0(pmpaddr0);
+	w_pmpaddr1(pmpaddr1);
+	w_pmpaddr2(pmpaddr2);
+
+
+
+	uint8_t pmp0cfg = 0b00001111;
+	uint8_t pmp2cfg = 0b00001111;
+	uint32_t pmpcfg0 = (pmp2cfg << 16) | pmp0cfg;
+	w_pmpcfg0(pmpcfg0);
+}
+
+void _mprv_activate(){
+	uint32_t mstatus = r_mstatus();
+
+	// mettre MPP en mode user
+	mstatus &= ~0x1800;
+	mstatus |= (1 << 17);
+
+	w_mstatus(mstatus);
 }

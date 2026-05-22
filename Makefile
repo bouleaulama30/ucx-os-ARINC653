@@ -12,6 +12,8 @@ TARGET_LIST = \
 #ARCH = none
 DURATION = 1
 
+ARCHI = riscv64
+
 SERIAL_BAUD=57600
 SERIAL_DEVICE=/dev/ttyUSB0
 
@@ -465,7 +467,7 @@ veryclean: clean
 	find '$(BUILD_TARGET_DIR)' -type f -name '*.a' -delete
 
 qemu_debug:
-	qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -nographic -s -S
+	qemu-system-$(ARCHI) -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -nographic -s -S
 
 gdb:
 	gdb -x ./debug/.gdbinit ./build/target/image.elf
@@ -475,16 +477,16 @@ multiarch-gdb:
 
 test:
 	$(MAKE) veryclean
-	$(MAKE) ucx ARCH=riscv/riscv32-qemu
+	$(MAKE) ucx ARCH=riscv/$(ARCHI)-qemu
 	$(MAKE) arinc_test_apex_process_and_time
-	-timeout $(DURATION) qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:./debug/test.txt
+	-timeout $(DURATION) qemu-system-$(ARCHI) -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:./debug/test.txt
 	head -n30 ./debug/test.txt
 
 all:
 	$(MAKE) veryclean
 	cp include/arinc/static/static_conf_${ARINC_APP_TARGET}.h include/arinc/static_conf.h
 	cp arinc/static/static_conf_${ARINC_APP_TARGET}.c arinc/static_conf.c
-	$(MAKE) ucx ARCH=riscv/riscv32-qemu
+	$(MAKE) ucx ARCH=riscv/$(ARCHI)-qemu
 	$(MAKE) $(ARINC_APP_TARGET)
-	-timeout $(DURATION) qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:./debug/test.txt
+	-timeout $(DURATION) qemu-system-$(ARCHI) -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:./debug/test.txt
 	head -n30 ./debug/test.txt
