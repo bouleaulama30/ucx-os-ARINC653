@@ -304,31 +304,31 @@ static const uint32_t DEFAULT_WINDOWS_COUNT = sizeof(DEFAULT_WINDOWS) / sizeof(D
 static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_1_CONFIG = {
     .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
-    .ENTRY_POINT = p1_process1,             // To be set by partition initialization
+    .ENTRY_POINT = test_round_robin_A,
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 10,            // Medium priority (1-239)
+    .BASE_PRIORITY = 50,
     .DEADLINE = SOFT,                // Soft deadline
-    .NAME = "Process 1"
+    .NAME = "ProcA"
 };
 
 // P1 process 2 configuration
 static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_2_CONFIG = {
     .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
-    .ENTRY_POINT = p1_process2,             // To be set by partition initialization
+    .ENTRY_POINT = test_round_robin_B,
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 40,            // Medium priority (1-239)
+    .BASE_PRIORITY = 50,
     .DEADLINE = SOFT,                // Soft deadline
-    .NAME = "Process 2"
+    .NAME = "ProcB"
 };
 
 // P1 process 3 configuration
 static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_3_CONFIG = {
-    .PERIOD = 100,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 60,       // 10ms in nanoseconds
+    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
+    .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = p1_process3,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 50,            // Medium priority (1-239)
+    .BASE_PRIORITY = 2,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "Process 3"
 };
@@ -339,7 +339,7 @@ static const PROCESS_ATTRIBUTE_TYPE P2_PROCESS_1_CONFIG = {
     .TIME_CAPACITY = 10,       // 10ms in nanoseconds
     .ENTRY_POINT = p2_process1,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 3,            // Medium priority (1-239)
+    .BASE_PRIORITY = 2,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "Process 1"
 };
@@ -442,7 +442,7 @@ struct eventConfig {
 };
 
 static const struct eventConfig event_configs[] = {
-    {.event_name = "WakeUpEvent", .event_id = 1},
+    {.event_name = "Event1", .event_id = 1},
 };
 
 struct mutexConfig {

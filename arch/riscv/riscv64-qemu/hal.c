@@ -200,8 +200,8 @@ void _irq_handler(uint64_t cause, uint64_t epc)
 			printf("Hardware fault detected and no partition available so panic\n");
 			_panic();
 		}
-	}
 #endif
+	}
 }
 
 uint32_t _readcounter(void)

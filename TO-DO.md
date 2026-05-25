@@ -1,7 +1,9 @@
 # TO-DO
 
 ## matériel
-* essayer de faire rouler l'os sur la carte de Felipe
+* essayer de faire rouler l'os sur la carte de Felipe:
+    * ajouter la gestion d erreur
+    * ajouter la pmp
 
 ## test
 * faire une batterie de test unitaires pour voir si le comportement de toute les fonctions de l'apex est correct

@@ -74,9 +74,9 @@ void p1_main_process(struct pcb_s *partition){
     // DELAYED_START(process_id_1, 25, &return_code0);  
     // printf("return code delayed start %d\n", return_code0); 
     START(process_id_0, &return_code0);  
-    START(process_id_1, &return_code1);  
+    // START(process_id_1, &return_code1);  
 
-    START(process_id_2, &return_code0);  
+    // START(process_id_2, &return_code0);  
 
 
     SAMPLING_PORT_ID_TYPE port_id;
