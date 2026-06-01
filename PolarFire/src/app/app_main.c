@@ -101,52 +101,52 @@ void p2_process1(void) {
     }
 }
 
-__attribute__((section(".p1_code")))
-void error_handler_function(void) {
-	RETURN_CODE_TYPE return_code;
-	ERROR_STATUS_TYPE error_status;
-
-	printf("[ERROR HANDLER] Error handler is executing.\n");
-	GET_ERROR_STATUS(&error_status, &return_code);
-	if (return_code == NO_ERROR) {
-		printf("[ERROR HANDLER] GET_ERROR_STATUS rc=%d code=%d failed_pid=%d len=%d msg='%s'\n",
-				return_code,
-				error_status.ERROR_CODE,
-				error_status.FAILED_PROCESS_ID,
-				error_status.LENGTH,
-				(char *)error_status.MESSAGE);
-
-		switch (error_status.ERROR_CODE)
-		{
-		case APPLICATION_ERROR:
-			printf("[ERROR HANDLER] Handling application error\n");
-			break;
-		case NUMERIC_ERROR:
-			printf("[ERROR HANDLER] Handling numeric error\n");
-			STOP(1, &return_code);
-			printf("[ERROR HANDLER] STOP(1) rc=%d\n", return_code);
-			// START(1, &return_code);
-			// printf("[ERROR HANDLER] START(1) rc=%d\n", return_code);
-			break;
-		// case DEADLINE_MISSED:
-		// 	printf("[ERROR HANDLER] Handling deadline missed error\n");
-		// 	break;
-		default:
-			printf("[ERROR HANDLER] Handling unknown error code %d\n", error_status.ERROR_CODE);
-			// RAISE_APPLICATION_ERROR(APPLICATION_ERROR,
-			//                         (MESSAGE_ADDR_TYPE)"Unknown error code received in error handler",
-			//                         56,
-			//                         &return_code);
-			hm_raise_partition_error(&error_status);
-			break;
-		}
-
-	}
-	else if (return_code != NO_ACTION) {
-		printf("[ERROR HANDLER] GET_ERROR_STATUS rc=%d\n", return_code);
-	}
-	STOP_SELF();
-}
+//__attribute__((section(".p1_code")))
+//void error_handler_function(void) {
+//	RETURN_CODE_TYPE return_code;
+//	ERROR_STATUS_TYPE error_status;
+//
+//	printf("[ERROR HANDLER] Error handler is executing.\n");
+//	GET_ERROR_STATUS(&error_status, &return_code);
+//	if (return_code == NO_ERROR) {
+//		printf("[ERROR HANDLER] GET_ERROR_STATUS rc=%d code=%d failed_pid=%d len=%d msg='%s'\n",
+//				return_code,
+//				error_status.ERROR_CODE,
+//				error_status.FAILED_PROCESS_ID,
+//				error_status.LENGTH,
+//				(char *)error_status.MESSAGE);
+//
+//		switch (error_status.ERROR_CODE)
+//		{
+//		case APPLICATION_ERROR:
+//			printf("[ERROR HANDLER] Handling application error\n");
+//			break;
+//		case NUMERIC_ERROR:
+//			printf("[ERROR HANDLER] Handling numeric error\n");
+//			STOP(1, &return_code);
+//			printf("[ERROR HANDLER] STOP(1) rc=%d\n", return_code);
+//			// START(1, &return_code);
+//			// printf("[ERROR HANDLER] START(1) rc=%d\n", return_code);
+//			break;
+//		// case DEADLINE_MISSED:
+//		// 	printf("[ERROR HANDLER] Handling deadline missed error\n");
+//		// 	break;
+//		default:
+//			printf("[ERROR HANDLER] Handling unknown error code %d\n", error_status.ERROR_CODE);
+//			// RAISE_APPLICATION_ERROR(APPLICATION_ERROR,
+//			//                         (MESSAGE_ADDR_TYPE)"Unknown error code received in error handler",
+//			//                         56,
+//			//                         &return_code);
+//			hm_raise_partition_error(&error_status);
+//			break;
+//		}
+//
+//	}
+//	else if (return_code != NO_ACTION) {
+//		printf("[ERROR HANDLER] GET_ERROR_STATUS rc=%d\n", return_code);
+//	}
+//	STOP_SELF();
+//}
 
 
 int app_main(void)

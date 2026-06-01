@@ -2,6 +2,10 @@
 
 ## matériel
 * essayer de faire rouler l'os sur la carte de Felipe:
+    * faire un clean des differentes app pour utiliser uniqument les ressources dont elle a besoin pour faire gagner du temps
+    * solutionner le cas ou le mode normal commence apres la premiere major frame
+    * voir ce qui prend le plus de temps (notamment toute les fonctions dans le partition OS a chaque tick)
+    * tester les autre app
     * ajouter la gestion d erreur
     * ajouter la pmp
 

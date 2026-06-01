@@ -108,7 +108,7 @@ void _irq_handler(uint64_t cause, uint64_t epc)
 #endif
     } else {
 
-    printf("\nTRAP cause=0x%lx epc=0x%lx mtval=0x%lx\n",
+    printf("\nTRAP cause=0x%x epc=0x%x mtval=0x%x\n",
            (unsigned long)g_last_trap_cause,
            (unsigned long)g_last_trap_epc,
            (unsigned long)g_last_trap_tval);
@@ -139,6 +139,14 @@ uint16_t _cpu_id(void)
 
 void _hardware_init(void)
 {
+#ifdef MULTICORE
+    if (_cpu_id() == 0u) {
+        mpfs_clint_reset(0u);
+    }
+#else
+    mpfs_clint_reset(_cpu_id());
+#endif
+
     mpfs_uart_init(USART_BAUD);
 
     _stdout_install(__putchar);

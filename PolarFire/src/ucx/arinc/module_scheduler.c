@@ -2,14 +2,14 @@
 
 void print_time_sched()
 {
-	uint64_t secs, msecs, time;
-	RETURN_CODE_TYPE return_code;
-    SYSTEM_TIME_TYPE system_time;
-	GET_TIME(&system_time, &return_code);
-	secs = system_time / 1000000;
-	msecs = system_time - secs * 1000000;
+    uint64_t secs, msecs;
+    uint64_t uptime_ms = ucx_uptime();
+    secs = uptime_ms / 1000;
+    msecs = uptime_ms % 1000;
 	
-	printf("[Uptime %ld.%03lds]\n", secs, msecs);
+    printf("\n[Uptime %lu.%03lus]\n",
+           (unsigned long)secs,
+           (unsigned long)msecs);
 }
 
 void module_scheduler_init(const char* name, uint32_t major_frame_tick, const window_partition_type* windows_partition, uint32_t nbr_windows){
@@ -93,8 +93,8 @@ int32_t partition_scheduler(void){
     uint32_t partition_end_tick = partition_start_tick + partition_duration_tick;
     PARTITION_ID_TYPE partition_id = ms->windows_partition[*windows_idx].id;
 
-    print_time_sched();
-    printf("[SCHED partition] Position tick: %d, Partition end tick: %d, Major frame tick: %d\n", position_in_frame, partition_end_tick, ms->major_frame_tick);
+//    print_time_sched();
+//    printf("\n[SCHED partition] Position tick: %d, Partition end tick: %d, Major frame tick: %d\n", position_in_frame, partition_end_tick, ms->major_frame_tick);
 
     if(ms->idle_current_partition){
         partition_id = krnl_partition_switch(IDLE_PARTITION_ID);

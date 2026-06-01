@@ -149,6 +149,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->id_next = 0;
     new_pcb->next_stack_addr = memory_requirements->memory[DATA].base + PARTIION_OS_AND_MAIN_PROCESS_STACK_SIZE;
     new_pcb->processes = list_create();
+    new_pcb->process_current = NULL;
     new_pcb->communication_queuing_ports = list_create();
     new_pcb->queuing_port_count = 0;
 
@@ -207,6 +208,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 
     // HM partition table
     new_pcb->partition_hm_table = partition_hm_table;
+    new_pcb->error_handler_process = NULL;
 
     CRITICAL_LEAVE();
 

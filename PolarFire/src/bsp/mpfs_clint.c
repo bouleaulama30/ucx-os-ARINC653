@@ -55,3 +55,18 @@ void mpfs_clint_arm_tick(uint32_t hart_id, uint32_t tick_hz)
 
     mpfs_clint_mtimecmp_write(hart_id, now + delta);
 }
+
+void mpfs_clint_reset(uint32_t hart_id)
+{
+    volatile uint32_t * const mtime_lo =
+        (volatile uint32_t *)(CLINT_MTIME_BASE + 0u);
+    volatile uint32_t * const mtime_hi =
+        (volatile uint32_t *)(CLINT_MTIME_BASE + 4u);
+
+    /* Avoid a stale compare value while mtime is reset. */
+    mpfs_clint_mtimecmp_write(hart_id, UINT64_MAX);
+
+    /* Reset global machine time to 0 at program startup. */
+    *mtime_hi = 0u;
+    *mtime_lo = 0u;
+}

@@ -32,7 +32,7 @@ extern uint32_t _gp;
 #endif
 
 #ifndef F_TIMER
-#define F_TIMER    1000u
+#define F_TIMER    100u
 #endif
 
 /* CSR / trap bits */

@@ -88,27 +88,35 @@ SECTIONS
     _kernel_end = ORIGIN(ddr) + LENGTH(ddr);
 
     .p1_code : {
+        . = ALIGN(8);    
         _p1_code_start = .;  
 
         *(.p1_code)
+        . = ALIGN(8);        
 		_p1_code_end = .;
     } > p1_code
 
 	.p1_data : {
+        . = ALIGN(8);
         _p1_data_start = .;
+        . = ALIGN(8);        
     } > p1_data
 	
     _p1_data_end = ORIGIN(p1_data) + LENGTH(p1_data) ;
 
 	.p2_code : {
+        . = ALIGN(8);	
         _p2_code_start = .;  
 
         *(.p2_code)
+        . = ALIGN(8);    
 		_p2_code_end = .;
     } > p2_code
 
 	.p2_data : {
+        . = ALIGN(8);
         _p2_data_start = .;
+        . = ALIGN(8);
     } > p2_data
 
     _p2_data_end = ORIGIN(p2_data) + LENGTH(p2_data) ;
