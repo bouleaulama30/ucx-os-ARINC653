@@ -23,6 +23,7 @@ extern void p1_process1(void);
 extern void p1_process2(void);
 extern void p1_process3(void);
 extern void p2_process1(void);
+extern void p2_process2(void);
 extern void error_handler_function(void);
 extern void test_spatial_violation_p1(void);
 extern void test_spatial_violation_p2(void);
@@ -33,6 +34,7 @@ extern void test_states_slave(void);
 extern void test_states_master(void);
 extern void test_prio_A(void);
 extern void test_prio_B(void);
+
 
 
 // Déclaration des symboles du linker script du kernel
@@ -261,7 +263,7 @@ static const struct PartitionConfig P2_CONFIG = {
 
 // Static module scheduler configuration
 static char const DEFAULT_MODULE_NAME[] = "DefaultModule";
-#define DEFAULT_MAJOR_FRAME_TICK MS_TO_TICKS(300)
+#define DEFAULT_MAJOR_FRAME_TICK MS_TO_TICKS(100)
 
 static const window_partition_type DEFAULT_WINDOWS[] = {
     {
@@ -294,14 +296,6 @@ static const window_partition_type DEFAULT_WINDOWS[] = {
             .duration_tick = MS_TO_TICKS(20),
             .is_periodic_processes_start = (BOOLEAN_TYPE)false,
         },
-    {
-        .name = "DefaultPartition",
-        .id = 1,
-        .start_tick = MS_TO_TICKS(100),
-        .duration_tick = MS_TO_TICKS(300),
-        .is_periodic_processes_start = (BOOLEAN_TYPE)false,
-        // .is_periodic_processes_start = (BOOLEAN_TYPE)true,
-    },
     };
     
 static const uint32_t DEFAULT_WINDOWS_COUNT = sizeof(DEFAULT_WINDOWS) / sizeof(DEFAULT_WINDOWS[0]);
@@ -313,9 +307,9 @@ static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_1_CONFIG = {
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = p1_process1,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 10,            // Medium priority (1-239)
+    .BASE_PRIORITY = 3,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
-    .NAME = "Process 1"
+    .NAME = "P1 Process 1"
 };
 
 // P1 process 2 configuration
@@ -324,31 +318,31 @@ static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_2_CONFIG = {
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = p1_process2,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 10,            // Medium priority (1-239)
+    .BASE_PRIORITY = 3,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
-    .NAME = "Process 2"
-};
-
-// P1 process 3 configuration
-static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_3_CONFIG = {
-    .PERIOD = 100,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 10,       // 10ms in nanoseconds
-    .ENTRY_POINT = p1_process3,             // To be set by partition initialization
-    .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 2,            // Medium priority (1-239)
-    .DEADLINE = SOFT,                // Soft deadline
-    .NAME = "Process 3"
+    .NAME = "P1 Process 2"
 };
 
 // P2 process 1 configuration
 static const PROCESS_ATTRIBUTE_TYPE P2_PROCESS_1_CONFIG = {
     .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 10,       // 10ms in nanoseconds
+    .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = p2_process1,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 3,            // Medium priority (1-239)
+    .BASE_PRIORITY = 2,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
-    .NAME = "Process 1"
+    .NAME = "P2 Process 1"
+};
+
+// P2 process 2 configuration
+static const PROCESS_ATTRIBUTE_TYPE P2_PROCESS_2_CONFIG = {
+    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
+    .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
+    .ENTRY_POINT = p2_process2,             // To be set by partition initialization
+    .STACK_SIZE = 4096,              // 4KB stack
+    .BASE_PRIORITY = 2,            // Medium priority (1-239)
+    .DEADLINE = SOFT,                // Soft deadline
+    .NAME = "P2 Process 2"
 };
 
 struct error_handler_config {
