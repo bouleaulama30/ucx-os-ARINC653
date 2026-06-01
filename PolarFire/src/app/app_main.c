@@ -19,135 +19,50 @@ void print_time()
 	printf("%ld.%03lds\n", secs, msecs);
 }
 
-// ============================================================================
-// PARTITION 1 : PROCESSUS 1 : LE DECLENCHEUR (Périodique, plus lent)
-// ============================================================================
 __attribute__((section(".p1_code")))
 void p1_process1(void) {
-    RETURN_CODE_TYPE return_code;
-	EVENT_ID_TYPE wake_event_id;
-	GET_EVENT_ID("WakeUpEvent", &wake_event_id, &return_code);
-	if (return_code != NO_ERROR)
-		RAISE_APPLICATION_ERROR(APPLICATION_ERROR, (MESSAGE_ADDR_TYPE)"Simulated error in Process 1", 34, &return_code);
-	
-    while (1) {
-        printf("[P1 Processus 1 - Declencheur] C'est l'heure ! Je reveille le Processus 2 !\n");
-        
-        // Déclenche l'événement. Le Processus 2 va immédiatement passer à l'état READY
-        SET_EVENT(wake_event_id, &return_code);
-        
-        // S'endort jusqu'à la prochaine période (ex: tous les 100 ticks)
-        TIMED_WAIT(0, &return_code);
+    RETURN_CODE_TYPE ret;
+    int compteur = 0;
+    
+    printf("[Partition 1] Demarrage Proc 1\n");
+    while (compteur < 3) {
+        printf("A\n");
+        compteur++;
+        // Cède la place à Proc B
+        TIMED_WAIT(0, &ret); 
+        if (ret != NO_ERROR) printf("Erreur TIMED_WAIT 1: %d\n", ret);
     }
+    
+    printf("\n[Partition 1] Proc 1 fait un vrai dodo de 50ms\n");
+    TIMED_WAIT(50, &ret); // 50ms
+    printf("[Partition 1] Proc 1 reveille !\n");
+    
+    STOP_SELF();
 }
 
-
-
-// ============================================================================
-// PARTITION 1 : PROCESSUS 2 : LE TRAVAILLEUR (Apériodique, s'endort et attend)
-// ============================================================================
 __attribute__((section(".p1_code")))
 void p1_process2(void) {
-    RETURN_CODE_TYPE return_code;
-	EVENT_ID_TYPE wake_event_id;
-	GET_EVENT_ID("WakeUpEvent", &wake_event_id, &return_code);
-	if (return_code != NO_ERROR)
-		RAISE_APPLICATION_ERROR(APPLICATION_ERROR, (MESSAGE_ADDR_TYPE)"Simulated error in Process 2", 34, &return_code);
-
-    while (1) {
-        printf("[P1 Processus 2 - Travailleur] Je m'endors... zZz...\n");
-        
-        // Bloque le processus indéfiniment (INFINITE_TIME_VALUE) jusqu'au réveil
-        WAIT_EVENT(wake_event_id, INFINITE_TIME_VALUE, &return_code);
-
-        if (return_code == NO_ERROR) {
-            printf("[P1 Processus 2 - Travailleur] REVEILLE ! J'execute ma tache lourde...\n");
-            
-            // On a fini le travail. On réinitialise l'événement 
-            // pour pouvoir s'endormir au prochain tour de boucle.
-            RESET_EVENT(wake_event_id, &return_code);
-        }
+    RETURN_CODE_TYPE ret;
+    int compteur = 0;
+    
+    printf("[Partition 1] Demarrage Proc 2\n");
+    while (compteur < 3) {
+        printf("B\n");
+        compteur++;
+        // Cède la place à Proc A
+        TIMED_WAIT(0, &ret); 
     }
+    STOP_SELF();
 }
 
-
-// ============================================================================
-// PARTITION 1 : PROCESSUS 3 : LE CAPTEUR (Périodique, très rapide)
-// ============================================================================
-__attribute__((section(".p1_code")))
-void p1_process3(void) {
-    RETURN_CODE_TYPE return_code;
-    int sensor_value = 0;
-
-    while (1) {
-        sensor_value += 5;
-        printf("[P1 Processus 3 - Capteur] Lecture en cours... Valeur = %d\n", sensor_value);
-        
-        // S'endort jusqu'à la prochaine période (ex: tous les 20 ticks)
-        PERIODIC_WAIT(&return_code); 
-    }
-}
-
-// ============================================================================
-// PARTITION 2 : PROCESSUS 1 : IDLE
-// ============================================================================
 __attribute__((section(".p2_code")))
 void p2_process1(void) {
-    RETURN_CODE_TYPE return_code;
-	    while (1) {
-        printf("[P2 Processus 1] Tache Unique avant IDLE\n");
-        
-		STOP_SELF();
-    }
+    RETURN_CODE_TYPE ret;
+    int compteur = 0;
+    
+    printf("[Partition 2 P2] stop\n");
+    STOP_SELF();
 }
-
-//__attribute__((section(".p1_code")))
-//void error_handler_function(void) {
-//	RETURN_CODE_TYPE return_code;
-//	ERROR_STATUS_TYPE error_status;
-//
-//	printf("[ERROR HANDLER] Error handler is executing.\n");
-//	GET_ERROR_STATUS(&error_status, &return_code);
-//	if (return_code == NO_ERROR) {
-//		printf("[ERROR HANDLER] GET_ERROR_STATUS rc=%d code=%d failed_pid=%d len=%d msg='%s'\n",
-//				return_code,
-//				error_status.ERROR_CODE,
-//				error_status.FAILED_PROCESS_ID,
-//				error_status.LENGTH,
-//				(char *)error_status.MESSAGE);
-//
-//		switch (error_status.ERROR_CODE)
-//		{
-//		case APPLICATION_ERROR:
-//			printf("[ERROR HANDLER] Handling application error\n");
-//			break;
-//		case NUMERIC_ERROR:
-//			printf("[ERROR HANDLER] Handling numeric error\n");
-//			STOP(1, &return_code);
-//			printf("[ERROR HANDLER] STOP(1) rc=%d\n", return_code);
-//			// START(1, &return_code);
-//			// printf("[ERROR HANDLER] START(1) rc=%d\n", return_code);
-//			break;
-//		// case DEADLINE_MISSED:
-//		// 	printf("[ERROR HANDLER] Handling deadline missed error\n");
-//		// 	break;
-//		default:
-//			printf("[ERROR HANDLER] Handling unknown error code %d\n", error_status.ERROR_CODE);
-//			// RAISE_APPLICATION_ERROR(APPLICATION_ERROR,
-//			//                         (MESSAGE_ADDR_TYPE)"Unknown error code received in error handler",
-//			//                         56,
-//			//                         &return_code);
-//			hm_raise_partition_error(&error_status);
-//			break;
-//		}
-//
-//	}
-//	else if (return_code != NO_ACTION) {
-//		printf("[ERROR HANDLER] GET_ERROR_STATUS rc=%d\n", return_code);
-//	}
-//	STOP_SELF();
-//}
-
 
 int app_main(void)
 {

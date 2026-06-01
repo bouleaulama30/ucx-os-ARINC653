@@ -35,7 +35,6 @@ extern void test_prio_A(void);
 extern void test_prio_B(void);
 
 
-
 // Déclaration des symboles du linker script du kernel
 extern uint8_t _kernel_end[];
 
@@ -295,13 +294,14 @@ static const window_partition_type DEFAULT_WINDOWS[] = {
             .duration_tick = MS_TO_TICKS(20),
             .is_periodic_processes_start = (BOOLEAN_TYPE)false,
         },
-        {
-            .name = "DefaultPartition",
-            .id = 1,
-            .start_tick = MS_TO_TICKS(100),
-            .duration_tick = MS_TO_TICKS(200),
-            .is_periodic_processes_start = (BOOLEAN_TYPE)false,
-            },
+    {
+        .name = "DefaultPartition",
+        .id = 1,
+        .start_tick = MS_TO_TICKS(100),
+        .duration_tick = MS_TO_TICKS(300),
+        .is_periodic_processes_start = (BOOLEAN_TYPE)false,
+        // .is_periodic_processes_start = (BOOLEAN_TYPE)true,
+    },
     };
     
 static const uint32_t DEFAULT_WINDOWS_COUNT = sizeof(DEFAULT_WINDOWS) / sizeof(DEFAULT_WINDOWS[0]);
@@ -324,7 +324,7 @@ static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_2_CONFIG = {
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = p1_process2,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 40,            // Medium priority (1-239)
+    .BASE_PRIORITY = 10,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "Process 2"
 };
@@ -332,10 +332,10 @@ static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_2_CONFIG = {
 // P1 process 3 configuration
 static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_3_CONFIG = {
     .PERIOD = 100,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 60,       // 10ms in nanoseconds
+    .TIME_CAPACITY = 10,       // 10ms in nanoseconds
     .ENTRY_POINT = p1_process3,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 50,            // Medium priority (1-239)
+    .BASE_PRIORITY = 2,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "Process 3"
 };
@@ -449,7 +449,7 @@ struct eventConfig {
 };
 
 static const struct eventConfig event_configs[] = {
-    {.event_name = "WakeUpEvent", .event_id = 1},
+    {.event_name = "Event1", .event_id = 1},
 };
 
 struct mutexConfig {
