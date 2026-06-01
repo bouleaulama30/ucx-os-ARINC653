@@ -9,10 +9,14 @@
     * ajouter la gestion d erreur
     * ajouter la pmp
 
-## test
-* faire une batterie de test unitaires pour voir si le comportement de toute les fonctions de l'apex est correct
-    * arinc HM
+* Pour la prochaine reu, faire une architecture avionique de banc de test:
+    * y réfléchir, voir ce qui est possible
+    * faire des schemas
 
+## test
+* test le testbench de Felipe pour le plug sur mon OS:
+    * run une ou deux application
+* inclure mes test de vérif avec le TB de Felipe (plus tard)
 ## refactoring
 
 * enlever les reference aux communication port dans partition init 
