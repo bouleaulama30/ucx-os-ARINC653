@@ -23,7 +23,6 @@ extern void p1_process1(void);
 extern void p1_process2(void);
 extern void p1_process3(void);
 extern void p2_process1(void);
-extern void p2_process2(void);
 extern void error_handler_function(void);
 extern void test_spatial_violation_p1(void);
 extern void test_spatial_violation_p2(void);
@@ -307,9 +306,9 @@ static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_1_CONFIG = {
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = p1_process1,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 3,            // Medium priority (1-239)
+    .BASE_PRIORITY = 10,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
-    .NAME = "P1 Process 1"
+    .NAME = "Process 1"
 };
 
 // P1 process 2 configuration
@@ -318,31 +317,31 @@ static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_2_CONFIG = {
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = p1_process2,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 3,            // Medium priority (1-239)
+    .BASE_PRIORITY = 2,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
-    .NAME = "P1 Process 2"
+    .NAME = "Process 2"
+};
+
+// P1 process 3 configuration
+static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_3_CONFIG = {
+    .PERIOD = 100,              // 20ms in nanoseconds
+    .TIME_CAPACITY = 10,       // 10ms in nanoseconds
+    .ENTRY_POINT = p1_process3,             // To be set by partition initialization
+    .STACK_SIZE = 4096,              // 4KB stack
+    .BASE_PRIORITY = 2,            // Medium priority (1-239)
+    .DEADLINE = SOFT,                // Soft deadline
+    .NAME = "Process 3"
 };
 
 // P2 process 1 configuration
 static const PROCESS_ATTRIBUTE_TYPE P2_PROCESS_1_CONFIG = {
     .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
-    .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
+    .TIME_CAPACITY = 10,       // 10ms in nanoseconds
     .ENTRY_POINT = p2_process1,             // To be set by partition initialization
     .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 2,            // Medium priority (1-239)
+    .BASE_PRIORITY = 3,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
-    .NAME = "P2 Process 1"
-};
-
-// P2 process 2 configuration
-static const PROCESS_ATTRIBUTE_TYPE P2_PROCESS_2_CONFIG = {
-    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
-    .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
-    .ENTRY_POINT = p2_process2,             // To be set by partition initialization
-    .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 2,            // Medium priority (1-239)
-    .DEADLINE = SOFT,                // Soft deadline
-    .NAME = "P2 Process 2"
+    .NAME = "Process 1"
 };
 
 struct error_handler_config {
