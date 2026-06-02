@@ -127,6 +127,7 @@ void p2_process1(void)
 
 	while (1) {
 		seq++;
+//		message_length = 1;
 		message_length = (MESSAGE_SIZE_TYPE)sprintf(message, "cmd-seq=%lu from=P2p1", (unsigned long)seq);
 
 		SEND_QUEUING_MESSAGE(queuing_port_id, (MESSAGE_ADDR_TYPE)message, 18 + 1, 10, &return_code);
@@ -169,6 +170,7 @@ void p2_process2(void)
 
 	while (1) {
 		seq++;
+//		message_length = 1;
 		message_length = (MESSAGE_SIZE_TYPE)sprintf(message, "cmd-seq=%lu from=P2p2", (unsigned long)seq);
 
 		SEND_QUEUING_MESSAGE(queuing_port_id, (MESSAGE_ADDR_TYPE)message, 18 + 1, 10, &return_code);

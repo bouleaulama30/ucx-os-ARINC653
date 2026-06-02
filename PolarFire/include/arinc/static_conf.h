@@ -263,7 +263,7 @@ static const struct PartitionConfig P2_CONFIG = {
 
 // Static module scheduler configuration
 static char const DEFAULT_MODULE_NAME[] = "DefaultModule";
-#define DEFAULT_MAJOR_FRAME_TICK MS_TO_TICKS(100)
+#define DEFAULT_MAJOR_FRAME_TICK MS_TO_TICKS(300)
 
 static const window_partition_type DEFAULT_WINDOWS[] = {
     {
@@ -296,6 +296,14 @@ static const window_partition_type DEFAULT_WINDOWS[] = {
             .duration_tick = MS_TO_TICKS(20),
             .is_periodic_processes_start = (BOOLEAN_TYPE)false,
         },
+        {
+            .name = "DefaultPartition",
+            .id = 1,
+            .start_tick = MS_TO_TICKS(100),
+            .duration_tick = MS_TO_TICKS(200),
+            .is_periodic_processes_start = (BOOLEAN_TYPE)false,
+            // .is_periodic_processes_start = (BOOLEAN_TYPE)true,
+        },
     };
     
 static const uint32_t DEFAULT_WINDOWS_COUNT = sizeof(DEFAULT_WINDOWS) / sizeof(DEFAULT_WINDOWS[0]);
@@ -306,7 +314,7 @@ static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_1_CONFIG = {
     .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = p1_process1,             // To be set by partition initialization
-    .STACK_SIZE = 4096,              // 4KB stack
+    .STACK_SIZE = 16384,              // 4KB stack
     .BASE_PRIORITY = 3,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "P1 Process 1"
@@ -317,7 +325,7 @@ static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_2_CONFIG = {
     .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = p1_process2,             // To be set by partition initialization
-    .STACK_SIZE = 4096,              // 4KB stack
+    .STACK_SIZE = 16384,              // 4KB stack
     .BASE_PRIORITY = 3,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "P1 Process 2"
@@ -328,7 +336,7 @@ static const PROCESS_ATTRIBUTE_TYPE P2_PROCESS_1_CONFIG = {
     .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = p2_process1,             // To be set by partition initialization
-    .STACK_SIZE = 4096,              // 4KB stack
+    .STACK_SIZE = 16384,              // 4KB stack
     .BASE_PRIORITY = 2,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "P2 Process 1"
@@ -339,7 +347,7 @@ static const PROCESS_ATTRIBUTE_TYPE P2_PROCESS_2_CONFIG = {
     .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
     .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
     .ENTRY_POINT = p2_process2,             // To be set by partition initialization
-    .STACK_SIZE = 4096,              // 4KB stack
+    .STACK_SIZE = 16384,              // 4KB stack
     .BASE_PRIORITY = 2,            // Medium priority (1-239)
     .DEADLINE = SOFT,                // Soft deadline
     .NAME = "P2 Process 2"
@@ -366,7 +374,7 @@ static struct krnl_sampling_channel channel_temperature = {
 };
 
 // L'allocation de la RAM du noyau
-static uint8_t q_channel_data[10 * 32]; 
+static uint8_t q_channel_data[10 * 64];
 static uint32_t q_channel_sizes[10]; // Tableau pour stocker les 10 tailles
 
 static struct krnl_queuing_channel_s channel_cmds = {
