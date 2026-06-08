@@ -104,7 +104,7 @@ int32_t perf_init(char_t name[])
     EXECUTION_TIMES[pos].deltaTime = 0;
     EXECUTION_TIMES[pos].sPrevTime = 0;
     EXECUTION_TIMES[pos].worstNS = 0;
-    EXECUTION_TIMES[pos].bestNS = 0xFFFFFFFFFFFFFFFF;/;
+    EXECUTION_TIMES[pos].bestNS = 0xFFFFFFFFFFFFFFFF;
 
     EXECUTION_TIMES[pos].worst = 0;
     EXECUTION_TIMES[pos].best = 0xFFFFFFFFFFFFFFFF;

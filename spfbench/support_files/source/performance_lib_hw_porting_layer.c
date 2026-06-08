@@ -100,7 +100,19 @@ uint64_t PerfGetTimeTicks(void)
 {
   uint64_t tick = 0;
 
-#if defined(_TMS570) 
+#if defined(_RISCV32_QEMU)
+  uint32_t th, tl, th_next;
+  
+  // Boucle déterministe pour éviter l'erreur de débordement pendant la lecture
+  do {
+    asm volatile("csrr %0, cycleh" : "=r"(th));
+    asm volatile("csrr %0, cycle"  : "=r"(tl));
+    asm volatile("csrr %0, cycleh" : "=r"(th_next));
+  } while (th != th_next);
+  
+  tick = ((uint64_t)th << 32u) | tl;
+
+#elif defined(_TMS570) 
   uint32_t RTI_CNT_FRCx = portRTI_CNT0_FRC1_REG;
   uint32_t RTI_UP_CNT =  portRTI_CNT0_UC1_REG;
   tick = RTI_UP_CNT ;
@@ -108,8 +120,10 @@ uint64_t PerfGetTimeTicks(void)
 
 #elif defined(_MPC5777C) || defined(_P2020RDB_PC)
   tick = PerfInlineGetTicks();
-#endif
+#else
+  // Fallback si aucune architecture matérielle haute résolution n'est définie
   tick = ucx_ticks();
+#endif
 
   return tick;
 }

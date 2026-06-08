@@ -33,11 +33,11 @@
 
 
 #ifndef NB_ITER
-#define NB_ITER 10
+#define NB_ITER 20000
 #endif
 
 #ifndef NB_TASK
-#define NB_TASK 3
+#define NB_TASK 5
 #endif
 
 perf_task_retval_t task();
@@ -61,7 +61,7 @@ volatile int32_t tasks_idx;
 */
 
 __attribute__((section(".p1_code")))
-void MAIN_FUNCTION()
+void MAIN_FUNCTION(void)
 {
   RETURN_CODE_TYPE errCode;
   perf_initialize_test(round_robin_stress_initialize_test); 
@@ -77,6 +77,7 @@ void MAIN_FUNCTION()
 __attribute__((section(".p1_code")))
 perf_task_retval_t round_robin_stress_initialize_test()
 {
+
   int32_t i;
 
   tasks_idx = 0;

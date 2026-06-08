@@ -227,6 +227,11 @@ arinc_test_interpartition_communication: rebuild
 
 testperf1: rebuild
 	$(CC) $(CFLAGS) -I spfbench/test_applications/test_performance1/Application/Partition1/include -I spfbench/support_files/include -o $(BUILD_APP_DIR)/testperf1.o spfbench/test_applications/test_performance1/Application/Partition1/source/P1_benchmark.c
+	$(CC) $(CFLAGS) -I spfbench/test_applications/test_performance1/Application/Partition1/include -I spfbench/support_files/include -o $(BUILD_APP_DIR)/performance_lib_os_porting_layer.o spfbench/support_files/source/performance_lib_os_porting_layer.c
+	$(CC) $(CFLAGS) -I spfbench/test_applications/test_performance1/Application/Partition1/include -I spfbench/support_files/include -o $(BUILD_APP_DIR)/performance_lib_hw_porting_layer.o spfbench/support_files/source/performance_lib_hw_porting_layer.c
+	$(CC) $(CFLAGS) -I spfbench/test_applications/test_performance1/Application/Partition1/include -I spfbench/support_files/include -o $(BUILD_APP_DIR)/performance_lib_static.o spfbench/support_files/source/performance_lib_static.c
+	$(CC) $(CFLAGS) -I spfbench/test_applications/test_performance1/Application/Partition1/include -I spfbench/support_files/include -o $(BUILD_APP_DIR)/performance_lib_stdio.o spfbench/support_files/source/performance_lib_stdio.c
+	$(CC) $(CFLAGS) -I spfbench/test_applications/test_performance1/Application/Partition1/include -I spfbench/support_files/include -o $(BUILD_APP_DIR)/performance_lib_libc.o spfbench/support_files/source/performance_lib_libc.c
 	@$(MAKE) --no-print-directory link
 
 coroutine_args: rebuild

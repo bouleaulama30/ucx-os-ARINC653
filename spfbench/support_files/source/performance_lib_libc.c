@@ -272,6 +272,8 @@ uint64_t perfStrtoull(const uint8_t *str)
  * RETURN : None.
  * __________________________________________________________________________
  */
+
+#ifndef _RISCV32_QEMU
 int32_t rand(void)
 {
   rand1 = rand1 * 1103515245 + 0xB0B0;
@@ -303,6 +305,9 @@ void srand(uint32_t seed)
  * RETURN : None.
  * __________________________________________________________________________
  */
+
+#endif
+
 void reverse(char_t *str, int32_t len)
 {
   int32_t i=0, j=len-1, temp;

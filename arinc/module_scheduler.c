@@ -93,8 +93,8 @@ int32_t partition_scheduler(void){
     uint32_t partition_end_tick = partition_start_tick + partition_duration_tick;
     PARTITION_ID_TYPE partition_id = ms->windows_partition[*windows_idx].id;
 
-    print_time_sched();
-    printf("[SCHED partition] Position tick: %d, Partition end tick: %d, Major frame tick: %d\n", position_in_frame, partition_end_tick, ms->major_frame_tick);
+    // print_time_sched();
+    // printf("[SCHED partition] Position tick: %d, Partition end tick: %d, Major frame tick: %d\n", position_in_frame, partition_end_tick, ms->major_frame_tick);
 
     if(ms->idle_current_partition){
         partition_id = krnl_partition_switch(IDLE_PARTITION_ID);

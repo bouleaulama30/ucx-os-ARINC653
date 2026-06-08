@@ -27,15 +27,16 @@
  */
 /*INCLUDE LIBS*/
 /*This should be adapted to reflect target OS*/
-#include <ARINC653.h>
-#include <string.h>
-#include <stdio.h>
-#include <time.h>
+
+#ifndef UCX_H 
+#define UCX_H
+#include <ucx.h>
+#endif
 
 
 /*PLATFORM DEPENDENT DEFINITIONS*/
 /*These are the definitions and declarations specific for the target OS*/
-#define CLOCK_FREQ 300000000    					//the system clock can be hardcoded or rely on a function (GET_CLOCK_FREQUENCY(), for instance)
+#define CLOCK_FREQ 10000000    					//the system clock can be hardcoded or rely on a function (GET_CLOCK_FREQUENCY(), for instance)
 
 //functions definitions
 void init_tick_counter();                          //function to initialize system timer

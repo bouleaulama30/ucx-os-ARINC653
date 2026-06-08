@@ -29,8 +29,13 @@
 #ifndef PERFORMANCE_LIB_H_
 #define PERFORMANCE_LIB_H_
 
-#include "ARINC653.h"
-#include "string.h"
+#ifndef UCX_H 
+#define UCX_H
+#include <ucx.h>
+#endif
+
+typedef char char_t;
+typedef float float32_t;
 
 #ifndef PERF_LOW_PRIO
   #define PERF_LOW_PRIO 2
@@ -44,6 +49,8 @@
 
 #define BASE_PRIO 10
 
+#define QUANTITY_OF_TESTS 10
+
 #ifndef MIN
   #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #endif
@@ -54,7 +61,7 @@
 
 uint64_t PerfGetTimeTicks(void);                   //function to read system timer
 #define GET_CURRENT_TICKS() PerfGetTimeTicks()     //mapping for the function
-#define MAIN_FUNCTION() main()
+#define MAIN_FUNCTION p1_main
 
 /*UTILS*/
 int32_t rand(void);
@@ -76,16 +83,16 @@ typedef SEMAPHORE_ID_TYPE perf_sem_t;
 typedef MUTEX_ID_TYPE perf_mutex_t;
 typedef void (*perf_int_handler_t)(int, void*);
 
-#define PERF_NAME_LENGTH 32
-typedef char_t PERF_NAME_TYPE[PERF_NAME_LENGTH];
+// #define PERF_NAME_LENGTH 32
+// typedef char_t PERF_NAME_TYPE[PERF_NAME_LENGTH];
 
-#ifndef SEMAPHORE_NAME_TYPE
-typedef PERF_NAME_TYPE SEMAPHORE_NAME_TYPE;
-#endif
+// #ifndef SEMAPHORE_NAME_TYPE
+// typedef PERF_NAME_TYPE SEMAPHORE_NAME_TYPE;
+// #endif
 
-#ifndef MUTEX_NAME_TYPE
-typedef PERF_NAME_TYPE MUTEX_NAME_TYPE;
-#endif
+// #ifndef MUTEX_NAME_TYPE
+// typedef PERF_NAME_TYPE MUTEX_NAME_TYPE;
+// #endif
 
 #if LIBC == 1
   void ftoa(float32_t n, char_t *res, int32_t afterpoint);
