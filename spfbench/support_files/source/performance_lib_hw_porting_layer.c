@@ -35,6 +35,11 @@
 #include "performance_lib.h"
 #include "performance_lib_mapping.h"
 
+#if defined(_RISCV32_QEMU) || defined(_RISCV32_QEMU_LLVM) || defined(_RISCV64_QEMU) || defined(_RISCV64_QEMU_LLVM)
+  #include "hal.h"
+  #define _RISCV_QEMU
+#endif
+
 #define COMMON_DIVISOR 1000000
 
 #if defined(_TMS570) 
@@ -104,6 +109,7 @@ uint64_t PerfGetTimeTicks(void)
 #elif defined(_MPC5777C) || defined(_P2020RDB_PC)
   tick = PerfInlineGetTicks();
 #endif
+  tick = ucx_ticks();
 
   return tick;
 }
@@ -126,6 +132,11 @@ void init_tick_counter()
   portRTI_CNT0_FRC1_REG =  0x00000000U;
   portRTI_CNT0_CPUC1_REG = 0xFFFFFFFFu;
   portRTI_GCTRL_REG    |= 0x00000002U;
+
+#elif defined(_RISCV_QEMU)
+  /* Initialize RISC-V timer for riscv32-qemu / riscv64-qemu */
+  /* Set timer comparison to a future value */
+  mtimecmp_w(mtime_r() + (F_CPU / F_TIMER));
 #endif
 }
 
@@ -257,6 +268,11 @@ void perf_init_timer()
   portRTI_CNT0_FRC1_REG =  0x00000000U;
   portRTI_CNT0_CPUC1_REG = 0xFFFFFFFFu;
   portRTI_GCTRL_REG    |= 0x00000002U;
+
+#elif defined(_RISCV_QEMU)
+  /* Initialize RISC-V timer for riscv32-qemu / riscv64-qemu */
+  /* Set timer comparison to a future value */
+  mtimecmp_w(mtime_r() + (F_CPU / F_TIMER));
 #endif
 }
 
@@ -274,6 +290,10 @@ void perf_disable_timer()
 {
 #if defined(_TMS570) 
   portRTI_GCTRL_REG    &= 0x00000001U;
+
+#elif defined(_RISCV_QEMU)
+  /* Disable RISC-V timer interrupts for riscv32-qemu / riscv64-qemu */
+  _timer_disable();
 #endif
 }
 
