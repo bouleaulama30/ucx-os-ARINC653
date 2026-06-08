@@ -17,6 +17,7 @@ SERIAL_DEVICE=/dev/ttyUSB0
 
 # ARINC app target (can be overridden: make all ARINC_APP_TARGET=arinc_app_demo1)
 ARINC_APP_TARGET ?= arinc_app
+NUMBER_TEST_PERF ?= 1
 
 SRC_DIR = .
 
@@ -222,6 +223,10 @@ arinc_test_apex_process_and_time: rebuild
 
 arinc_test_interpartition_communication: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_test_interpartition_communication.o app/arinc_test_interpartition_communication.c
+	@$(MAKE) --no-print-directory link
+
+testperf1: rebuild
+	$(CC) $(CFLAGS) -I spfbench/test_applications/test_performance1/Application/Partition1/include -I spfbench/support_files/include -o $(BUILD_APP_DIR)/testperf1.o spfbench/test_applications/test_performance1/Application/Partition1/source/P1_benchmark.c
 	@$(MAKE) --no-print-directory link
 
 coroutine_args: rebuild
@@ -473,10 +478,12 @@ gdb:
 multiarch-gdb:
 	gdb-multiarch -x ./debug/.gdbinit ./build/target/image.elf
 
-test:
+test_perf:
 	$(MAKE) veryclean
+	cp include/arinc/static/static_conf_testperf${NUMBER_TEST_PERF}.h include/arinc/static_conf.h
+	cp arinc/static/static_conf_testperf${NUMBER_TEST_PERF}.c arinc/static_conf.c
 	$(MAKE) ucx ARCH=riscv/riscv32-qemu
-	$(MAKE) arinc_test_apex_process_and_time
+	$(MAKE) testperf${NUMBER_TEST_PERF}
 	-timeout $(DURATION) qemu-system-riscv32 -smp 4 -machine virt -bios none -kernel ./build/target/image.elf -display none -serial file:./debug/test.txt
 	head -n30 ./debug/test.txt
 

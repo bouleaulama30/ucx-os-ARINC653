@@ -28,16 +28,16 @@
 */
 /* INCLUDE SECTION */
 /*Include here any system specific lib that is not with performance_lib.h*/
+#include "performance_lib.h"
 #include "P1.h"
 
-#include "performance_lib.h"
 
 #ifndef NB_ITER
-#define NB_ITER 1000
+#define NB_ITER 10
 #endif
 
 #ifndef NB_TASK
-#define NB_TASK 15
+#define NB_TASK 3
 #endif
 
 perf_task_retval_t task();
@@ -59,6 +59,8 @@ volatile int32_t tasks_idx;
 * RETURN : None.
 * __________________________________________________________________________
 */
+
+__attribute__((section(".p1_code")))
 void MAIN_FUNCTION()
 {
   RETURN_CODE_TYPE errCode;
@@ -72,6 +74,7 @@ void MAIN_FUNCTION()
   while(1);
 }
 
+__attribute__((section(".p1_code")))
 perf_task_retval_t round_robin_stress_initialize_test()
 {
   int32_t i;
@@ -93,6 +96,7 @@ perf_task_retval_t round_robin_stress_initialize_test()
 
 }
 
+__attribute__((section(".p1_code")))
 perf_task_retval_t task()
 {
   int32_t i;
@@ -123,6 +127,81 @@ perf_task_retval_t task()
   while(1);
 
 }
+
+
+int app_main(void)
+{
+	// la partie data est pour l'instant la stack de la task de l'entry point de P1 donc elle grandit vers le bas
+	size_t p1_data_size =  _p1_data_end -_p1_data_start;
+	size_t p1_code_size =  _p1_code_end -_p1_code_start;
+
+	// la partie data est pour l'instant la stack de la task de l'entry point de P1 donc elle grandit vers le bas
+	size_t p2_data_size =  _p2_data_end -_p2_data_start;
+	size_t p2_code_size =  _p2_code_end -_p2_code_start;
+
+	partition_init(DEFAULT_PARTITION_CONFIG.period,
+				   DEFAULT_PARTITION_CONFIG.duration,
+				   DEFAULT_PARTITION_CONFIG.identifier,
+				   DEFAULT_PARTITION_CONFIG.num_assigned_cores,
+				   DEFAULT_PARTITION_CONFIG.name,
+				   DEFAULT_PARTITION_CONFIG.region_name_code_mem,
+				   (void*)_p1_code_start,
+				   (size_t)p1_code_size,
+				   DEFAULT_PARTITION_CONFIG.access_code_mem,
+				   DEFAULT_PARTITION_CONFIG.region_name_data_mem,
+				   (void*)_p1_data_start,
+				   p1_data_size,
+				   DEFAULT_PARTITION_CONFIG.access_data_mem,
+				//    test_spatial_violation_p2,
+				   MAIN_FUNCTION,
+				   DEFAULT_PARTITION_CONFIG.is_system_partition,
+
+				   DEFAULT_PARTITION_CONFIG.sampling_ports,
+				   DEFAULT_PARTITION_CONFIG.max_sampling_ports,
+				   DEFAULT_PARTITION_CONFIG.sampling_port_count,
+				   DEFAULT_PARTITION_CONFIG.max_sampling_port_data_size,
+				   
+				   DEFAULT_PARTITION_CONFIG.queuing_ports,
+				   DEFAULT_PARTITION_CONFIG.max_queuing_ports,
+				   DEFAULT_PARTITION_CONFIG.queuing_port_count,
+				   DEFAULT_PARTITION_CONFIG.max_queuing_port_data_size,
+				   
+				   DEFAULT_PARTITION_CONFIG.blackboards,
+				   DEFAULT_PARTITION_CONFIG.max_blackboards,
+				   DEFAULT_PARTITION_CONFIG.blackboard_count,
+				   DEFAULT_PARTITION_CONFIG.max_blackboard_data_size,
+				   DEFAULT_PARTITION_CONFIG.blackboards_data,
+				   DEFAULT_PARTITION_CONFIG.blackboards_size_data,
+
+				   DEFAULT_PARTITION_CONFIG.buffers,
+				   DEFAULT_PARTITION_CONFIG.max_buffers,
+				   DEFAULT_PARTITION_CONFIG.buffer_count,
+				   DEFAULT_PARTITION_CONFIG.max_buffer_data_size,
+				   DEFAULT_PARTITION_CONFIG.buffers_data,
+				   DEFAULT_PARTITION_CONFIG.buffers_size_data,
+
+				   DEFAULT_PARTITION_CONFIG.semaphores,
+				   DEFAULT_PARTITION_CONFIG.max_semaphores,
+				   DEFAULT_PARTITION_CONFIG.semaphore_count,
+				   DEFAULT_PARTITION_CONFIG.semaphores_counter,
+
+				   DEFAULT_PARTITION_CONFIG.events,
+				   DEFAULT_PARTITION_CONFIG.max_events,
+				   DEFAULT_PARTITION_CONFIG.event_count,
+
+				   DEFAULT_PARTITION_CONFIG.mutexes,
+				   DEFAULT_PARTITION_CONFIG.max_mutexes,
+				   DEFAULT_PARTITION_CONFIG.mutex_count,
+
+				   DEFAULT_PARTITION_CONFIG.error_list,
+				   DEFAULT_PARTITION_CONFIG.error_list_cb,
+				   DEFAULT_PARTITION_CONFIG.partition_hm_table,
+				   DEFAULT_PARTITION_CONFIG.max_errors
+				   );
+
+	return 1;
+}
+
 /* __________________________________________________________________________
 * END OF FILE:
 * -------------
