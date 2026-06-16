@@ -262,46 +262,17 @@ static const struct PartitionConfig P2_CONFIG = {
 
 // Static module scheduler configuration
 static char const DEFAULT_MODULE_NAME[] = "DefaultModule";
-#define DEFAULT_MAJOR_FRAME_TICK MS_TO_TICKS(300)
+#define DEFAULT_MAJOR_FRAME_TICK MS_TO_TICKS(100)
 
 static const window_partition_type DEFAULT_WINDOWS[] = {
     {
         .name = "DefaultPartition",
         .id = 1,
         .start_tick = MS_TO_TICKS(0),
-        .duration_tick = MS_TO_TICKS(40),
+        .duration_tick = MS_TO_TICKS(100),
         .is_periodic_processes_start = (BOOLEAN_TYPE)true,
         // .is_periodic_processes_start = (BOOLEAN_TYPE)false,
     },
-    {
-        .name = "P2",
-        .id = 2,
-        .start_tick = MS_TO_TICKS(40),
-        .duration_tick = MS_TO_TICKS(20),
-        .is_periodic_processes_start = (BOOLEAN_TYPE)true,
-        },
-    {
-        .name = "DefaultPartition",
-        .id = 1,
-        .start_tick = MS_TO_TICKS(60),
-        .duration_tick = MS_TO_TICKS(20),
-        .is_periodic_processes_start = (BOOLEAN_TYPE)false,
-        // .is_periodic_processes_start = (BOOLEAN_TYPE)true,
-    },
-    {
-            .name = "P2",
-            .id = 2,
-            .start_tick = MS_TO_TICKS(80),
-            .duration_tick = MS_TO_TICKS(20),
-            .is_periodic_processes_start = (BOOLEAN_TYPE)false,
-        },
-        {
-            .name = "DefaultPartition",
-            .id = 1,
-            .start_tick = MS_TO_TICKS(100),
-            .duration_tick = MS_TO_TICKS(200),
-            .is_periodic_processes_start = (BOOLEAN_TYPE)false,
-            },
     };
     
 static const uint32_t DEFAULT_WINDOWS_COUNT = sizeof(DEFAULT_WINDOWS) / sizeof(DEFAULT_WINDOWS[0]);
