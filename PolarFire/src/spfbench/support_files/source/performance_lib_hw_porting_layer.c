@@ -35,9 +35,11 @@
 #include "performance_lib.h"
 #include "performance_lib_mapping.h"
 
-#if defined(_RISCV32_QEMU) || defined(_RISCV32_QEMU_LLVM) || defined(_RISCV64_QEMU) || defined(_RISCV64_QEMU_LLVM)
+#if defined(__riscv) || defined(_RISCV32_QEMU) || defined(_RISCV32_QEMU_LLVM) || defined(_RISCV64_QEMU) || defined(_RISCV64_QEMU_LLVM)
   #include "hal.h"
-  #define _RISCV_QEMU
+  #if defined(_RISCV32_QEMU) || defined(_RISCV32_QEMU_LLVM) || defined(_RISCV64_QEMU) || defined(_RISCV64_QEMU_LLVM)
+    #define _RISCV_QEMU
+  #endif
 #endif
 
 #define COMMON_DIVISOR 1000000
@@ -100,7 +102,12 @@ uint64_t PerfGetTimeTicks(void)
 {
   uint64_t tick = 0;
 
-#if defined(_RISCV32_QEMU)
+#if defined(__riscv) && (__riscv_xlen == 64)
+  // Use _read_us() which reads the CLINT timer and converts it to microseconds (1 MHz frequency)
+  tick = _read_us();
+  
+
+#elif defined(_RISCV32_QEMU)
   uint32_t th, tl, th_next;
   
   // Boucle déterministe pour éviter l'erreur de débordement pendant la lecture

@@ -273,7 +273,7 @@ uint64_t perfStrtoull(const uint8_t *str)
  * __________________________________________________________________________
  */
 
-#ifndef _RISCV32_QEMU
+#if !defined(_RISCV32_QEMU) && !defined(__riscv)
 int32_t rand(void)
 {
   rand1 = rand1 * 1103515245 + 0xB0B0;
