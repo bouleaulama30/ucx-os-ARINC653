@@ -5,6 +5,7 @@
 * faire de la doc pour integrer le portage sur la carte clean dans le projet
 * faire clean up des trucs qui ne servent a rien
 * faire une integration clean
+* faire une integration clean du projet de Felipe
 
 ## test
 * test le testbench de Felipe pour le plug sur mon OS:
