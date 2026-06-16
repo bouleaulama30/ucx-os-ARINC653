@@ -33,11 +33,11 @@
 
 
 #ifndef NB_ITER
-#define NB_ITER 1000
+#define NB_ITER 10000
 #endif
 
 #ifndef NB_TASK
-#define NB_TASK 2
+#define NB_TASK 5
 #endif
 
 perf_task_retval_t task();
