@@ -1,11 +1,14 @@
 # TO-DO
 
 ## matériel
-
+* adapter tout les tests et les faire fonctionner dans un seul ficher
+* voir pour mettre les includes des tests autre part
+* faire la doc pour les flags a mettre dans softconsole
+* faire des virtuals links pour polarfire de l os pour ne pas a avoir a modifier les fichiers deux fois en cas de changements
+* merge toutes les branches sur la main (polarfire et testbench)
 * faire de la doc pour integrer le portage sur la carte clean dans le projet
 * faire clean up des trucs qui ne servent a rien
 * faire une integration clean
-* faire une integration clean du projet de Felipe
 
 ## test
 * test le testbench de Felipe pour le plug sur mon OS:
