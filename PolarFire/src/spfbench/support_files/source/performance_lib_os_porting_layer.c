@@ -138,7 +138,7 @@ void perf_task_suspend(perf_task_handle_t task)
 void perf_task_suspend_self()
 {
   RETURN_CODE_TYPE errCode = NO_ERROR;
-  SUSPEND_SELF(0, &errCode);
+  SUSPEND_SELF(INFINITE_TIME_VALUE, &errCode);
 }
 
 /* __________________________________________________________________________
