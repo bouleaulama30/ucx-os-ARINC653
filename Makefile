@@ -10,7 +10,7 @@ TARGET_LIST = \
 	'riscv/riscv64-qemu' 'riscv/riscv64-qemu-llvm'
 
 #ARCH = none
-DURATION = 1
+DURATION = 3
 
 SERIAL_BAUD=57600
 SERIAL_DEVICE=/dev/ttyUSB0

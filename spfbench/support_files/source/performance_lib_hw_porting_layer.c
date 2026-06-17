@@ -101,16 +101,8 @@ uint64_t PerfGetTimeTicks(void)
   uint64_t tick = 0;
 
 #if defined(_RISCV32_QEMU)
-  uint32_t th, tl, th_next;
-  
-  // Boucle déterministe pour éviter l'erreur de débordement pendant la lecture
-  do {
-    asm volatile("csrr %0, cycleh" : "=r"(th));
-    asm volatile("csrr %0, cycle"  : "=r"(tl));
-    asm volatile("csrr %0, cycleh" : "=r"(th_next));
-  } while (th != th_next);
-  
-  tick = ((uint64_t)th << 32u) | tl;
+
+	tick = (uint64_t)MTIME_H << 32 | (uint64_t)MTIME_L;
 
 #elif defined(_TMS570) 
   uint32_t RTI_CNT_FRCx = portRTI_CNT0_FRC1_REG;

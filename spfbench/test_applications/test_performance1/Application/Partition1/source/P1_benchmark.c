@@ -37,7 +37,7 @@
 #endif
 
 #ifndef NB_TASK
-#define NB_TASK 5
+#define NB_TASK 3
 #endif
 
 perf_task_retval_t task();
