@@ -83,16 +83,16 @@ typedef SEMAPHORE_ID_TYPE perf_sem_t;
 typedef MUTEX_ID_TYPE perf_mutex_t;
 typedef void (*perf_int_handler_t)(int, void*);
 
-// #define PERF_NAME_LENGTH 32
-// typedef char_t PERF_NAME_TYPE[PERF_NAME_LENGTH];
+#define PERF_NAME_LENGTH 32
+typedef char_t PERF_NAME_TYPE[PERF_NAME_LENGTH];
 
-// #ifndef SEMAPHORE_NAME_TYPE
-// typedef PERF_NAME_TYPE SEMAPHORE_NAME_TYPE;
-// #endif
+#ifndef SEMAPHORE_NAME_TYPE
+typedef PERF_NAME_TYPE SEMAPHORE_NAME_TYPE;
+#endif
 
-// #ifndef MUTEX_NAME_TYPE
-// typedef PERF_NAME_TYPE MUTEX_NAME_TYPE;
-// #endif
+#ifndef MUTEX_NAME_TYPE
+typedef PERF_NAME_TYPE MUTEX_NAME_TYPE;
+#endif
 
 #if LIBC == 1
   void ftoa(float32_t n, char_t *res, int32_t afterpoint);
@@ -333,6 +333,8 @@ void perf_task_suspend_self();
 void perf_task_delay(uint32_t nanoseconds);
 /* @brief Reads the current value of a time. */
 perf_time_t perf_time_get();
+/* @brief Resets the performance cycle counter. */
+void perf_cycle_reset_counter(void);
 /* @brief Prints the results on the serial output */
 void perf_result_report(int64_t max, int64_t min, int64_t average);
 /* @brief Write a single integer value with a prefix */
