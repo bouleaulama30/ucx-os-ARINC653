@@ -104,20 +104,12 @@ uint64_t PerfGetTimeTicks(void)
 
 #if defined(__riscv) && (__riscv_xlen == 64)
   // Use _read_us() which reads the CLINT timer and converts it to microseconds (1 MHz frequency)
-  tick = _read_us();
-  
+  tick = mpfs_clint_mtime_read();
+
 
 #elif defined(_RISCV32_QEMU)
-  uint32_t th, tl, th_next;
-  
-  // Boucle déterministe pour éviter l'erreur de débordement pendant la lecture
-  do {
-    asm volatile("csrr %0, cycleh" : "=r"(th));
-    asm volatile("csrr %0, cycle"  : "=r"(tl));
-    asm volatile("csrr %0, cycleh" : "=r"(th_next));
-  } while (th != th_next);
-  
-  tick = ((uint64_t)th << 32u) | tl;
+    
+  tick = (uint64_t)MTIME_H << 32 | (uint64_t)MTIME_L;
 
 #elif defined(_TMS570) 
   uint32_t RTI_CNT_FRCx = portRTI_CNT0_FRC1_REG;

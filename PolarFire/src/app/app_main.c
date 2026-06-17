@@ -33,7 +33,7 @@
 
 
 #ifndef NB_ITER
-#define NB_ITER 10000
+#define NB_ITER 100000
 #endif
 
 #ifndef NB_TASK
