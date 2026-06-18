@@ -335,9 +335,10 @@ void perf_reset_timer()
  * RETURN : None.
  * __________________________________________________________________________
  */
-perf_time_t perf_add_times(const perf_time_t* base, unsigned int milliseconds)
+perf_time_t perf_add_times(const perf_time_t* base, unsigned int nanoseconds)
 {
-  perf_time_t retval = ((*base) + milliseconds * 900000);
+  // PolarFire SoC timer runs at 1 MHz, so 1 tick = 1000 ns
+  perf_time_t retval = ((*base) + nanoseconds / 1000);
   return retval;
 }
 

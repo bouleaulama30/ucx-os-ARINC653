@@ -7,6 +7,8 @@
 * faire la doc pour les flags a mettre dans softconsole
 * faire des virtuals links pour polarfire de l os pour ne pas a avoir a modifier les fichiers deux fois en cas de changements
 * merge toutes les branches sur la main (polarfire et testbench)
+* voir si besoin de passer tous les temps en ns car tout est en ms pour le moment:
+    * test perf 6 j ai du changer la fonction void perf_task_delay(uint32_t milliseconds) ns -> ms
 * faire de la doc pour integrer le portage sur la carte clean dans le projet
 * faire clean up des trucs qui ne servent a rien
 * faire une integration clean

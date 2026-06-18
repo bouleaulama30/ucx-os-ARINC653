@@ -85,7 +85,7 @@ perf_task_retval_t jitter_initialize_test()
     tasks_handle[i] = perf_create_task(task, tasks_name[i], BASE_PRIO - 1);
   }
 
-  tasks_handle[NB_TASK + 1] = perf_create_task(monitor, "MON", BASE_PRIO);
+  tasks_handle[NB_TASK] = perf_create_task(monitor, "MON", BASE_PRIO);
 }
 
 perf_task_retval_t task()

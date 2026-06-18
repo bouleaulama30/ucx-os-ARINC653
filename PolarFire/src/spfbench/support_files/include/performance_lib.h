@@ -37,6 +37,15 @@
 typedef char char_t;
 typedef float float32_t;
 
+typedef uint8_t T_uint8;
+typedef uint16_t T_uint16;
+typedef uint32_t T_uint32;
+typedef uint64_t T_uint64;
+typedef int8_t T_int8;
+typedef int16_t T_int16;
+typedef int32_t T_int32;
+typedef int64_t T_int64;
+
 #ifndef PERF_LOW_PRIO
   #define PERF_LOW_PRIO 2
 #endif

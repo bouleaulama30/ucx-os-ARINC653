@@ -170,8 +170,8 @@ void perf_task_resume(perf_task_handle_t task)
 void perf_task_delay(uint32_t milliseconds)
 {
   RETURN_CODE_TYPE errCode = NO_ERROR;
-  uint32_t nano = milliseconds * 1000000;
-  TIMED_WAIT(nano, &errCode);
+  // UCX-OS TIMED_WAIT expects milliseconds directly
+  TIMED_WAIT(milliseconds, &errCode);
 }
 
 /* __________________________________________________________________________
