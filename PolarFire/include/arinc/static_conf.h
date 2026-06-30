@@ -358,6 +358,53 @@ static struct krnl_queuing_channel_s channel_cmds = {
     .dest_partition_id = 1
 };
 
+// --- Test 12 Loopback Channels ---
+static uint8_t q_channel_data_1[8 * 16];
+static uint32_t q_channel_sizes_1[8];
+static struct krnl_queuing_channel_s channel_q1 = {
+    .buffer_data = q_channel_data_1,
+    .buffer_sizes = q_channel_sizes_1,
+    .max_message_size = 16,
+    .max_nb_messages = 8,
+    .current_nb_messages = 0,
+    .read_index = 0,
+    .write_index = 0,
+    .source_partition_id = 1,
+    .dest_partition_id = 1
+};
+
+static uint8_t q_channel_data_2[8 * 16];
+static uint32_t q_channel_sizes_2[8];
+static struct krnl_queuing_channel_s channel_q2 = {
+    .buffer_data = q_channel_data_2,
+    .buffer_sizes = q_channel_sizes_2,
+    .max_message_size = 16,
+    .max_nb_messages = 8,
+    .current_nb_messages = 0,
+    .read_index = 0,
+    .write_index = 0,
+    .source_partition_id = 1,
+    .dest_partition_id = 1
+};
+
+static uint8_t buffer_sp1[16];
+static struct krnl_sampling_channel channel_sp1 = {
+    .name = "channelSP1",
+    .buffer = buffer_sp1,
+    .max_message_size = 16,
+    .current_message_size = 0,
+    .last_update_time = 0,
+};
+
+static uint8_t buffer_sp2[16];
+static struct krnl_sampling_channel channel_sp2 = {
+    .name = "channelSP2",
+    .buffer = buffer_sp2,
+    .max_message_size = 16,
+    .current_message_size = 0,
+    .last_update_time = 0,
+};
+
 struct port_mapping_s {
     PARTITION_ID_TYPE partition_id;
     SAMPLING_PORT_NAME_TYPE port_name;
@@ -375,6 +422,18 @@ static const struct port_mapping_s system_port_table[] = {
     {.partition_id = 2, .port_name = "P2_IN_TEMP", .port_direction = DESTINATION, .messageSizeBytes = 64, .refreshPeriodMs = 200, .sampling_channel = &channel_temperature},
     {.partition_id = 1, .port_name = "P1_IN_CMDS", .port_direction = DESTINATION, .messageSizeBytes = 32, .max_nb_message = 10, .QUEUING_DISCIPLINE = PRIORITY, .queuing_channel = &channel_cmds},
     {.partition_id = 2, .port_name = "P2_OUT_CMDS", .port_direction = SOURCE, .messageSizeBytes = 32, .max_nb_message = 10, .QUEUING_DISCIPLINE = PRIORITY, .queuing_channel = &channel_cmds},
+
+    // Sampling ports for test_performance12
+    {.partition_id = 1, .port_name = "SP1", .port_direction = SOURCE, .messageSizeBytes = 16, .refreshPeriodMs = 200, .sampling_channel = &channel_sp1},
+    {.partition_id = 1, .port_name = "SP3", .port_direction = DESTINATION, .messageSizeBytes = 16, .refreshPeriodMs = 200, .sampling_channel = &channel_sp1},
+    {.partition_id = 1, .port_name = "SP2", .port_direction = SOURCE, .messageSizeBytes = 16, .refreshPeriodMs = 200, .sampling_channel = &channel_sp2},
+    {.partition_id = 1, .port_name = "SP4", .port_direction = DESTINATION, .messageSizeBytes = 16, .refreshPeriodMs = 200, .sampling_channel = &channel_sp2},
+
+    // Queuing ports for test_performance12
+    {.partition_id = 1, .port_name = "P1", .port_direction = SOURCE, .messageSizeBytes = 16, .max_nb_message = 8, .QUEUING_DISCIPLINE = FIFO, .queuing_channel = &channel_q1},
+    {.partition_id = 1, .port_name = "P3", .port_direction = DESTINATION, .messageSizeBytes = 16, .max_nb_message = 8, .QUEUING_DISCIPLINE = FIFO, .queuing_channel = &channel_q1},
+    {.partition_id = 1, .port_name = "P2", .port_direction = SOURCE, .messageSizeBytes = 16, .max_nb_message = 8, .QUEUING_DISCIPLINE = FIFO, .queuing_channel = &channel_q2},
+    {.partition_id = 1, .port_name = "P4", .port_direction = DESTINATION, .messageSizeBytes = 16, .max_nb_message = 8, .QUEUING_DISCIPLINE = FIFO, .queuing_channel = &channel_q2},
 };
 extern const int routing_table_size;
 

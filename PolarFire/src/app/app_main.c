@@ -2068,8 +2068,10 @@ void test_reset_mut(T_uint8 calc_dev)
         PERF_PRINT_NUMBER(errCode);
         PERF_PRINT_EOL();
     }
-       
-}
+
+#elif defined(TEST_PERF12)
+
+#include "p1_benchmark_perf12.h"
 
 #endif
 
