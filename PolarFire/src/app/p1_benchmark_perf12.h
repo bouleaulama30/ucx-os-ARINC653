@@ -35,8 +35,8 @@
  * TESTS SETTINGS
  ******************************************************************************/
 #define BASE_TESTS
-//#define EXTENDED_TESTS
-//#define INTERPARTITION_TESTS
+#define EXTENDED_TESTS
+#define INTERPARTITION_TESTS
 /*******************************************************************************
  * PARTITION SPECIFIC VARIABLES
  ******************************************************************************/
@@ -231,7 +231,7 @@ void  MAIN_FUNCTION()
       test_create_buff(0); 
       test_create_blackboard(0);
 
-      msgToSend16 = (MESSAGE_ADDR_TYPE) malloc(16*sizeof(T_int8));
+      msgToSend16 = (MESSAGE_ADDR_TYPE) malloc(32*sizeof(T_int8));
   #endif
 
   #ifdef EXTENDED_TESTS
@@ -984,7 +984,7 @@ void test_receive_buffer(int size, uint8_t calc_dev)
   BUFFER_ID_TYPE     buffer1Id     = 0;
   MESSAGE_SIZE_TYPE  length         = 0;
   SYSTEM_TIME_TYPE   timeOut        = 15000000;
-  uint8_t            receivedMsg    = 0;
+  uint8_t            receivedMsg[64] = {0};
   DECLARE_TIME_MEASURE()
 
   if (size == 16){
@@ -994,7 +994,7 @@ void test_receive_buffer(int size, uint8_t calc_dev)
   GET_BUFFER_ID(buff_name1, &buffer1Id, &errCode);
   
   INIT_TIME_MEASURE();
-  RECEIVE_BUFFER(buffer1Id, timeOut, &receivedMsg, &length, &errCode);
+  RECEIVE_BUFFER(buffer1Id, timeOut, (MESSAGE_ADDR_TYPE)receivedMsg, &length, &errCode);
   FINISH_TIME_MEASURE();
   if(errCode == NO_ERROR){
       VALIDATE_TIME_MEASURE(calc_dev)
@@ -1006,13 +1006,13 @@ void test_receive_buffer(int size, uint8_t calc_dev)
   }
   
   timeOut        = 15000000; 
-  receivedMsg    = 0;
+  receivedMsg[0] = 0;
   length         = 0;
   buffer1Id     = 0; 
   GET_BUFFER_ID(buff_name2, &buffer1Id, &errCode);
   
   INIT_TIME_MEASURE();
-  RECEIVE_BUFFER(buffer1Id, timeOut, &receivedMsg, &length, &errCode);
+  RECEIVE_BUFFER(buffer1Id, timeOut, (MESSAGE_ADDR_TYPE)receivedMsg, &length, &errCode);
   FINISH_TIME_MEASURE();
   if(errCode == NO_ERROR){
       VALIDATE_TIME_MEASURE(calc_dev)
@@ -1024,13 +1024,13 @@ void test_receive_buffer(int size, uint8_t calc_dev)
   }
   
   timeOut        = 15000000; 
-  receivedMsg    = 0;
+  receivedMsg[0] = 0;
   length         = 0;
   buffer1Id     = 0;
   GET_BUFFER_ID(buff_name3, &buffer1Id, &errCode);
   
   INIT_TIME_MEASURE();
-  RECEIVE_BUFFER(buffer1Id, timeOut, &receivedMsg, &length, &errCode);
+  RECEIVE_BUFFER(buffer1Id, timeOut, (MESSAGE_ADDR_TYPE)receivedMsg, &length, &errCode);
   FINISH_TIME_MEASURE();
   if(errCode == NO_ERROR){
       VALIDATE_TIME_MEASURE(calc_dev)
@@ -1042,13 +1042,13 @@ void test_receive_buffer(int size, uint8_t calc_dev)
   }
   
   timeOut        = 15000000; 
-  receivedMsg    = 0;
+  receivedMsg[0] = 0;
   length         = 0;
   buffer1Id     = 0;
   GET_BUFFER_ID(buff_name4, &buffer1Id, &errCode);
   
   INIT_TIME_MEASURE();
-  RECEIVE_BUFFER(buffer1Id, timeOut, &receivedMsg, &length, &errCode);
+  RECEIVE_BUFFER(buffer1Id, timeOut, (MESSAGE_ADDR_TYPE)receivedMsg, &length, &errCode);
   FINISH_TIME_MEASURE();
   if(errCode == NO_ERROR){
       VALIDATE_TIME_MEASURE(calc_dev)
