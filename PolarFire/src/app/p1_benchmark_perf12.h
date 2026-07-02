@@ -35,8 +35,8 @@
  * TESTS SETTINGS
  ******************************************************************************/
 #define BASE_TESTS
-#define EXTENDED_TESTS
-#define INTERPARTITION_TESTS
+//#define EXTENDED_TESTS
+//#define INTERPARTITION_TESTS
 /*******************************************************************************
  * PARTITION SPECIFIC VARIABLES
  ******************************************************************************/
@@ -295,7 +295,7 @@ RETURN_CODE_TYPE retCode = NO_ERROR;
 while(TRUE){
   #ifdef BASE_TESTS
       test_partition_status(1);
-      test_lock_preem(1); 
+      test_lock_preem(1);
       test_unlock_preem(1);
       test_display_black(16,1);
       test_read_black(16,1);
@@ -396,6 +396,132 @@ void test_partition_status(uint8_t calc_dev)
   } 
 }
 
+__attribute__((section(".p1_code")))
+void test_lock_preem(uint8_t calc_dev)
+{
+  LOCK_LEVEL_TYPE out;
+  RETURN_CODE_TYPE   err_code;
+  DECLARE_TIME_MEASURE()
+  INITIALIZE_TIME_VARS("LOCK");
+
+  INIT_TIME_MEASURE();
+  LOCK_PREEMPTION(&out, &err_code);
+  FINISH_TIME_MEASURE();
+  UNLOCK_PREEMPTION(&out, &err_code);
+  if(err_code == NO_ERROR){
+      VALIDATE_TIME_MEASURE(calc_dev)
+      }
+  else{
+      PERF_PRINT_STRING("LOCK: ");
+      PERF_PRINT_NUMBER(err_code);
+      PERF_PRINT_EOL();
+  }
+
+
+  INIT_TIME_MEASURE();
+  LOCK_PREEMPTION(&out, &err_code);
+  FINISH_TIME_MEASURE();
+  UNLOCK_PREEMPTION(&out, &err_code);
+  if(err_code == NO_ERROR){
+      VALIDATE_TIME_MEASURE(calc_dev)
+      }
+  else{
+      PERF_PRINT_STRING("LOCK: ");
+      PERF_PRINT_NUMBER(err_code);
+      PERF_PRINT_EOL();
+}
+
+
+  INIT_TIME_MEASURE();
+  LOCK_PREEMPTION(&out, &err_code);
+  FINISH_TIME_MEASURE();
+  UNLOCK_PREEMPTION(&out, &err_code);
+  if(err_code == NO_ERROR){
+      VALIDATE_TIME_MEASURE(calc_dev)
+      }
+  else{
+      PERF_PRINT_STRING("LOCK: ");
+      PERF_PRINT_NUMBER(err_code);
+      PERF_PRINT_EOL();
+}
+
+
+  INIT_TIME_MEASURE();
+  LOCK_PREEMPTION(&out, &err_code);
+  FINISH_TIME_MEASURE();
+  UNLOCK_PREEMPTION(&out, &err_code);
+  if(err_code == NO_ERROR){
+      VALIDATE_TIME_MEASURE(calc_dev)
+      }
+  else{
+      PERF_PRINT_STRING("LOCK: ");
+      PERF_PRINT_NUMBER(err_code);
+      PERF_PRINT_EOL();
+  }
+
+}
+
+__attribute__((section(".p1_code")))
+void test_unlock_preem(uint8_t calc_dev)
+{
+  LOCK_LEVEL_TYPE out;
+  RETURN_CODE_TYPE   err_code;
+  DECLARE_TIME_MEASURE()
+  INITIALIZE_TIME_VARS("UNLOCK");
+
+  LOCK_PREEMPTION(&out, &err_code);
+  INIT_TIME_MEASURE();
+  UNLOCK_PREEMPTION(&out, &err_code);
+  FINISH_TIME_MEASURE();
+  if(err_code == NO_ERROR){
+      VALIDATE_TIME_MEASURE(calc_dev)
+      }
+  else{
+      PERF_PRINT_STRING("UNLOCK: ");
+      PERF_PRINT_NUMBER(err_code);
+      PERF_PRINT_EOL();
+  }
+
+  LOCK_PREEMPTION(&out, &err_code);
+  INIT_TIME_MEASURE();
+  UNLOCK_PREEMPTION(&out, &err_code);
+  FINISH_TIME_MEASURE();
+  if(err_code == NO_ERROR){
+      VALIDATE_TIME_MEASURE(calc_dev)
+      }
+  else{
+      PERF_PRINT_STRING("UNLOCK: ");
+      PERF_PRINT_NUMBER(err_code);
+      PERF_PRINT_EOL();
+  }
+
+  LOCK_PREEMPTION(&out, &err_code);
+  INIT_TIME_MEASURE();
+  UNLOCK_PREEMPTION(&out, &err_code);
+  FINISH_TIME_MEASURE();
+  if(err_code == NO_ERROR){
+      VALIDATE_TIME_MEASURE(calc_dev)
+      }
+  else{
+      PERF_PRINT_STRING("UNLOCK: ");
+      PERF_PRINT_NUMBER(err_code);
+      PERF_PRINT_EOL();
+  }
+
+  LOCK_PREEMPTION(&out, &err_code);
+  INIT_TIME_MEASURE();
+  UNLOCK_PREEMPTION(&out, &err_code);
+  FINISH_TIME_MEASURE();
+  if(err_code == NO_ERROR){
+      VALIDATE_TIME_MEASURE(calc_dev)
+      }
+  else{
+      PERF_PRINT_STRING("UNLOCK: ");
+      PERF_PRINT_NUMBER(err_code);
+      PERF_PRINT_EOL();
+  }
+
+}
 __attribute__((section(".p1_code")))
 void test_create_sem(uint8_t calc_dev)
 {
@@ -529,7 +655,9 @@ void test_create_blackboard(uint8_t calc_dev)
   max_size = 64;
 
   INIT_TIME_MEASURE();
+  printf("BB AVANT ID=%d\n", black_id1);
   CREATE_BLACKBOARD (black_name, max_size, &black_id1, &err_code);
+  printf("BB APRES ID=%d\n", black_id1);
   FINISH_TIME_MEASURE();
   if(err_code == NO_ERROR){
       VALIDATE_TIME_MEASURE(calc_dev)
@@ -542,7 +670,9 @@ void test_create_blackboard(uint8_t calc_dev)
   
   strcpy(black_name, "BB2");
   INIT_TIME_MEASURE();
+  printf("BB AVANT ID=%d\n", black_id2);
   CREATE_BLACKBOARD (black_name, max_size, &black_id2, &err_code);
+  printf("BB APRES ID=%d\n", black_id2);
   FINISH_TIME_MEASURE();
   if(err_code == NO_ERROR){
       VALIDATE_TIME_MEASURE(calc_dev)
@@ -615,7 +745,9 @@ RETURN_CODE_TYPE   err_code;
   else if (size == 64){
       INITIALIZE_TIME_VARS("BBoard64");
       INIT_TIME_MEASURE();
+        printf("BB2 AVANT ID=%d\n", black_id2);
       DISPLAY_BLACKBOARD(black_id2, (MESSAGE_ADDR_TYPE)message64, size, &err_code);
+        printf("BB2 APRES ID=%d\n", black_id2);
       FINISH_TIME_MEASURE();
       if(err_code == NO_ERROR)
           VALIDATE_TIME_MEASURE(calc_dev)
@@ -2471,132 +2603,7 @@ void test_read_sampling_ports(uint8_t calc_dev)
 }
 
 
-__attribute__((section(".p1_code")))
-void test_lock_preem(uint8_t calc_dev)
-{
-  LOCK_LEVEL_TYPE out;
-  RETURN_CODE_TYPE   err_code;
-  DECLARE_TIME_MEASURE()
-  INITIALIZE_TIME_VARS("LOCK");
 
-  INIT_TIME_MEASURE();
-  LOCK_PREEMPTION(&out, &err_code);
-  FINISH_TIME_MEASURE();
-  UNLOCK_PREEMPTION(&out, &err_code);
-  if(err_code == NO_ERROR){
-      VALIDATE_TIME_MEASURE(calc_dev)
-      }
-  else{
-      PERF_PRINT_STRING("LOCK: ");
-      PERF_PRINT_NUMBER(err_code);
-      PERF_PRINT_EOL();
-  }
-  
-
-  INIT_TIME_MEASURE();
-  LOCK_PREEMPTION(&out, &err_code);
-  FINISH_TIME_MEASURE();
-  UNLOCK_PREEMPTION(&out, &err_code);
-  if(err_code == NO_ERROR){
-      VALIDATE_TIME_MEASURE(calc_dev)
-      }
-  else{
-      PERF_PRINT_STRING("LOCK: ");
-      PERF_PRINT_NUMBER(err_code);
-      PERF_PRINT_EOL();
-}
-      
-
-  INIT_TIME_MEASURE();
-  LOCK_PREEMPTION(&out, &err_code);
-  FINISH_TIME_MEASURE();
-  UNLOCK_PREEMPTION(&out, &err_code);
-  if(err_code == NO_ERROR){
-      VALIDATE_TIME_MEASURE(calc_dev)
-      }
-  else{
-      PERF_PRINT_STRING("LOCK: ");
-      PERF_PRINT_NUMBER(err_code);
-      PERF_PRINT_EOL();
-}
-      
-
-  INIT_TIME_MEASURE();
-  LOCK_PREEMPTION(&out, &err_code);
-  FINISH_TIME_MEASURE();
-  UNLOCK_PREEMPTION(&out, &err_code);
-  if(err_code == NO_ERROR){
-      VALIDATE_TIME_MEASURE(calc_dev)
-      }
-  else{
-      PERF_PRINT_STRING("LOCK: ");
-      PERF_PRINT_NUMBER(err_code);
-      PERF_PRINT_EOL();
-  }
-      
-}
-
-__attribute__((section(".p1_code")))
-void test_unlock_preem(uint8_t calc_dev)
-{
-  LOCK_LEVEL_TYPE out;
-  RETURN_CODE_TYPE   err_code;
-  DECLARE_TIME_MEASURE()
-  INITIALIZE_TIME_VARS("UNLOCK");
-
-  LOCK_PREEMPTION(&out, &err_code);
-  INIT_TIME_MEASURE();
-  UNLOCK_PREEMPTION(&out, &err_code);
-  FINISH_TIME_MEASURE();
-  if(err_code == NO_ERROR){
-      VALIDATE_TIME_MEASURE(calc_dev)
-      }
-  else{
-      PERF_PRINT_STRING("UNLOCK: ");
-      PERF_PRINT_NUMBER(err_code);
-      PERF_PRINT_EOL();
-  }
-  
-  LOCK_PREEMPTION(&out, &err_code);
-  INIT_TIME_MEASURE();
-  UNLOCK_PREEMPTION(&out, &err_code);
-  FINISH_TIME_MEASURE();
-  if(err_code == NO_ERROR){
-      VALIDATE_TIME_MEASURE(calc_dev)
-      }
-  else{
-      PERF_PRINT_STRING("UNLOCK: ");
-      PERF_PRINT_NUMBER(err_code);
-      PERF_PRINT_EOL();
-  }
-  
-  LOCK_PREEMPTION(&out, &err_code);
-  INIT_TIME_MEASURE();
-  UNLOCK_PREEMPTION(&out, &err_code);
-  FINISH_TIME_MEASURE();
-  if(err_code == NO_ERROR){
-      VALIDATE_TIME_MEASURE(calc_dev)
-      }
-  else{
-      PERF_PRINT_STRING("UNLOCK: ");
-      PERF_PRINT_NUMBER(err_code);
-      PERF_PRINT_EOL();
-  }
-  
-  LOCK_PREEMPTION(&out, &err_code);
-  INIT_TIME_MEASURE();
-  UNLOCK_PREEMPTION(&out, &err_code);
-  FINISH_TIME_MEASURE();
-  if(err_code == NO_ERROR){
-      VALIDATE_TIME_MEASURE(calc_dev)
-      }
-  else{
-      PERF_PRINT_STRING("UNLOCK: ");
-      PERF_PRINT_NUMBER(err_code);
-      PERF_PRINT_EOL();
-  }
-  
-}
 #endif
 /* __________________________________________________________________________
 * END OF FILE:

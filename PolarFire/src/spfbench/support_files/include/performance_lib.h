@@ -58,7 +58,7 @@ typedef int64_t T_int64;
 
 #define BASE_PRIO 10
 
-#define QUANTITY_OF_TESTS 10
+#define QUANTITY_OF_TESTS 100
 
 #ifndef MIN
   #define MIN(x, y) (((x) < (y)) ? (x) : (y))

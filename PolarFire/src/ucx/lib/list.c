@@ -66,9 +66,10 @@ struct node_s *list_push(struct list_s *list, void *val)
 	
 	node = malloc(sizeof(struct node_s));
 	
-	if (!node)
+	if (!node){
+		printf("fail malloc");
 		return 0;
-	
+	}
 	node->data = val;
 	node->next = list->head->next;	
 	list->head->next = node;

@@ -1116,10 +1116,31 @@ void krnl_acquire_mutex(/*in */ MUTEX_ID_TYPE            MUTEX_ID,
         mutex->mutex_status.LOCK_COUNT ++;
         mutex->saved_owner_priority = current_process->processus_status->CURRENT_PRIORITY;
         current_process->processus_status->CURRENT_PRIORITY = mutex->mutex_status.MUTEX_PRIORITY;
+        // =================================================================
+        // --- DÉPLACEMENT EN TÊTE DE LISTE SANS MALLOC NI FREE (PROPRE) ---
+        // =================================================================
+        
+        // 1. On cherche le nœud qui est juste AVANT notre processus actuel
+        struct node_s *prev = partition->processes->head;
+        while (prev->next != current_process_node) {
+            prev = prev->next;
+        }
+        
+        // 2. On effectue le déplacement uniquement s'il n'est pas déjà le premier
+        if (partition->processes->head->next != current_process_node) {
+            // A. On détache le nœud de sa position actuelle (on relie le précédent au suivant)
+            prev->next = current_process_node->next;
+            
+            // B. On insère notre nœud juste après la sentinelle head (en vraie première position)
+            current_process_node->next = partition->processes->head->next;
+            partition->processes->head->next = current_process_node;
+        }
 
-        list_remove(partition->processes, current_process_node);
-        struct node_s *new_process_node = list_push(partition->processes, current_process);
-        partition->process_current = new_process_node;
+        // 3. Le processus reste le processus courant actif de la partition
+        partition->process_current = current_process_node;
+        
+        // =================================================================
+
         *RETURN_CODE = NO_ERROR;
     }
     else if (mutex->mutex_status.MUTEX_STATE == OWNED && mutex->mutex_status.MUTEX_OWNER == current_process->process_id){

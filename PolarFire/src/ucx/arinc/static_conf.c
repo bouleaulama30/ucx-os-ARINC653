@@ -1,6 +1,6 @@
 #include "ucx.h"
 
-const int routing_table_size = 4;
+const int routing_table_size = 12;
 
 const ERROR_ACTION_TYPE hm_table_partition_1[4][4] = {
     // Colonnes : DEADLINE_MISSED, APPLICATION_ERROR, NUMERIC_ERROR, DEFAULT

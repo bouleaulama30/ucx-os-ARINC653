@@ -12,6 +12,7 @@
 * faire de la doc pour integrer le portage sur la carte clean dans le projet
 * faire clean up des trucs qui ne servent a rien
 * faire une integration clean
+* Issue testperf12: dans list_push le malloc fail, c est le probleme d avoir des processes avec mallocs (si ca pose beaucoup de probleme dans la suite envisager de changer)
 
 ## test
 * test le testbench de Felipe pour le plug sur mon OS:

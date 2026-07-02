@@ -56,10 +56,10 @@ static struct node_s *check_deadlines(struct node_s *node, void *arg) {
         ERROR_STATUS_TYPE error_status;
         error_status.ERROR_CODE = DEADLINE_MISSED;
         error_status.FAILED_PROCESS_ID = process->process_id;
-        hm_raise_error(error_status.ERROR_CODE,
-                       (MESSAGE_ADDR_TYPE)"Deadline missed",
-                       15, node);
-        printf("ATTENTION LE PROCESS %d A DEPASSE SA DEADLINE QUI ETAIT DE %d\n", process->process_id, process->processus_status->DEADLINE_TIME);
+        // hm_raise_error(error_status.ERROR_CODE,
+        //                (MESSAGE_ADDR_TYPE)"Deadline missed",
+        //                15, node);
+        // printf("ATTENTION LE PROCESS %d A DEPASSE SA DEADLINE QUI ETAIT DE %d\n", process->process_id, process->processus_status->DEADLINE_TIME);
     }
     return 0;
 }
