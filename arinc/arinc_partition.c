@@ -84,7 +84,7 @@ void GET_PARTITION_STATUS (
     }
 
     *PARTITION_STATUS = *(partition->status);
-    *RETURN_CODE = NOT_AVAILABLE;       
+    *RETURN_CODE = NO_ERROR;       
 }
 
 
