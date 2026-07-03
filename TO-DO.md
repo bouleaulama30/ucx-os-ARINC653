@@ -1,22 +1,15 @@
 # TO-DO
 
 ## matériel
-* adapter tout les tests et les faire fonctionner dans un seul ficher
 * voir pour mettre les includes des tests autre part
 * faire la doc pour les flags a mettre dans softconsole
 * faire des virtuals links pour polarfire de l os pour ne pas a avoir a modifier les fichiers deux fois en cas de changements
 * merge toutes les branches sur la main (polarfire et testbench)
-* voir si besoin de passer tous les temps en ns car tout est en ms pour le moment:
-    * test perf 6 j ai du changer la fonction void perf_task_delay(uint32_t milliseconds) ns -> ms
 * faire de la doc pour integrer le portage sur la carte clean dans le projet
 * faire clean up des trucs qui ne servent a rien
 * faire une integration clean
 * Issue testperf12: dans list_push le malloc fail, c est le probleme d avoir des processes avec mallocs (si ca pose beaucoup de probleme dans la suite envisager de changer)
 
-## test
-* test le testbench de Felipe pour le plug sur mon OS:
-    * run une ou deux application
-* inclure mes test de vérif avec le TB de Felipe (plus tard)
 ## refactoring
 
 * enlever les reference aux communication port dans partition init 
@@ -28,6 +21,7 @@
 * voir si pour les ressources comme bb, la reference vers la partition ou le waiting_blackboard est necessaire dans la struct
 * voir pour mettre krnl acquire et release mutex dans un fichier du krnl
 * voir pour mettre des fonctions lié aux channels dans la comm inter partition dans les fichiers du noyau
+
 ## Optimisation
 
 * retirer les mallocs et les free en utilisant le pool allocator utiliser durant la communication inter et intra partition
@@ -55,10 +49,6 @@
 * protection memoire avec pmp_activate et mprv_activate (lie a riscv32)
 * logique des longjmp et setjmp dans l'irq_handler afin d'executer les fonctions de scheduling dans la stack du kernel 
 * l'irq handler pour la traduction des erreurs os en arinc
-
-## Warning
-* beaucoup d'utilisation de malloc, voir si necessaire d'enlever tous les mallocs
-    * mais alors comment faire pour les liste et tout
 
 ## remind debug
 * build:
