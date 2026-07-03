@@ -2100,6 +2100,11 @@ void test_reset_mut(T_uint8 calc_dev)
 
 #include "p1_benchmark_perf18.h"
 
+#elif defined(TEST_PERF19)
+
+#include "p1_benchmark_perf19.h"
+#include "p2_benchmark_perf19.h"
+
 #endif
 
 int app_main(void)
@@ -2172,7 +2177,7 @@ int app_main(void)
                    DEFAULT_PARTITION_CONFIG.max_errors
                    );
 
-    #if defined(TEST_PERF13)
+    #if defined(TEST_PERF13) || defined(TEST_PERF19)
 
      partition_init(P2_CONFIG.period,
                    P2_CONFIG.duration,
@@ -2188,7 +2193,11 @@ int app_main(void)
                    p2_data_size,
                    P2_CONFIG.access_data_mem,
                 //    test_spatial_violation_p2,
+                   #if defined(TEST_PERF13)
                    main_process,
+                   #elif defined(TEST_PERF19)
+                   p2_main,
+                   #endif
                    P2_CONFIG.is_system_partition,
 
                    P2_CONFIG.sampling_ports,

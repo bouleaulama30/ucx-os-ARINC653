@@ -1,3 +1,6 @@
+#ifndef _STAT_H
+#define _STAT_H
+
 #define S_IFMT  00170000
 #define S_IFSOCK 0140000
 #define S_IFLNK  0120000
@@ -49,3 +52,5 @@ struct stat {
 	unsigned long	st_ctime_nsec;
 	long		__unused[3];
 };
+
+#endif /* _STAT_H */
