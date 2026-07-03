@@ -2073,6 +2073,27 @@ void test_reset_mut(T_uint8 calc_dev)
 
 #include "p1_benchmark_perf12.h"
 
+
+#elif defined(TEST_PERF14)
+
+#include "p1_benchmark_perf14.h"
+
+#elif defined(TEST_PERF15)
+
+#include "p1_benchmark_perf15.h"
+
+#elif defined(TEST_PERF16)
+
+#include "p1_benchmark_perf16.h"
+
+#elif defined(TEST_PERF17)
+
+#include "p1_benchmark_perf17.h"
+
+#elif defined(TEST_PERF18)
+
+#include "p1_benchmark_perf18.h"
+
 #endif
 
 int app_main(void)

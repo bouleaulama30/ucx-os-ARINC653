@@ -1,7 +1,6 @@
 # TO-DO
 
 ## matériel
-* faire changement erreur sur l os global
 * adapter tout les tests et les faire fonctionner dans un seul ficher
 * voir pour mettre les includes des tests autre part
 * faire la doc pour les flags a mettre dans softconsole

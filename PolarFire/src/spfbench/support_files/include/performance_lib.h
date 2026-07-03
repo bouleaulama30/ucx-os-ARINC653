@@ -37,6 +37,9 @@
 typedef char char_t;
 typedef float float32_t;
 
+typedef float T_float32;
+typedef double T_float64;
+
 typedef uint8_t T_uint8;
 typedef uint16_t T_uint16;
 typedef uint32_t T_uint32;
@@ -73,7 +76,7 @@ uint64_t PerfGetTimeTicks(void);                   //function to read system tim
 #define MAIN_FUNCTION p1_main
 
 /*UTILS*/
-int32_t rand(void);
+#define rand() ucx_random()
 void srand(uint32_t seed);
 void perfUltoa(char_t * buf, uint64_t val);
 uint64_t perfStrtoull(const uint8_t *str);
