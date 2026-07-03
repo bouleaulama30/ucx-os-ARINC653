@@ -293,6 +293,44 @@ void print_perf()
 }
 
 #endif
+
+float __floatundisf(uint64_t val)
+{
+    if (val == 0) {
+        union { uint32_t u; float f; } u = {0};
+        return u.f;
+    }
+    int msb = 0;
+    uint64_t temp = val;
+    while (temp >>= 1) {
+        msb++;
+    }
+    uint32_t exponent = 127 + msb;
+    uint32_t mantissa;
+    if (msb <= 23) {
+        mantissa = (uint32_t)(val << (23 - msb));
+    } else {
+        mantissa = (uint32_t)(val >> (msb - 23));
+    }
+    mantissa &= 0x7FFFFF;
+    uint32_t bits = (exponent << 23) | mantissa;
+    union { uint32_t u; float f; } u = { bits };
+    return u.f;
+}
+
+float __floatdisf(int64_t val)
+{
+    if (val < 0) {
+        float f = __floatundisf((uint64_t)(-val));
+        union { uint32_t u; float f; } u;
+        u.f = f;
+        u.u |= 0x80000000;
+        return u.f;
+    } else {
+        return __floatundisf((uint64_t)val);
+    }
+}
+
 /* __________________________________________________________________________
 * END OF FILE:
 * -------------

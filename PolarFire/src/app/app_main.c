@@ -2074,6 +2074,12 @@ void test_reset_mut(T_uint8 calc_dev)
 #include "p1_benchmark_perf12.h"
 
 
+#elif defined(TEST_PERF13)
+
+#include "p1_benchmark_perf13.h"
+#include "p2_benchmark_perf13.h"
+
+
 #elif defined(TEST_PERF14)
 
 #include "p1_benchmark_perf14.h"
@@ -2165,6 +2171,70 @@ int app_main(void)
                    DEFAULT_PARTITION_CONFIG.partition_hm_table,
                    DEFAULT_PARTITION_CONFIG.max_errors
                    );
+
+    #if defined(TEST_PERF13)
+
+     partition_init(P2_CONFIG.period,
+                   P2_CONFIG.duration,
+                   P2_CONFIG.identifier,
+                   P2_CONFIG.num_assigned_cores,
+                   P2_CONFIG.name,
+                   P2_CONFIG.region_name_code_mem,
+                   (void*)_p2_code_start,
+                   (size_t)p1_code_size,
+                   P2_CONFIG.access_code_mem,
+                   P2_CONFIG.region_name_data_mem,
+                   (void*)_p2_data_start,
+                   p2_data_size,
+                   P2_CONFIG.access_data_mem,
+                //    test_spatial_violation_p2,
+                   main_process,
+                   P2_CONFIG.is_system_partition,
+
+                   P2_CONFIG.sampling_ports,
+                   P2_CONFIG.max_sampling_ports,
+                   P2_CONFIG.sampling_port_count,
+                   P2_CONFIG.max_sampling_port_data_size,
+
+                   P2_CONFIG.queuing_ports,
+                   P2_CONFIG.max_queuing_ports,
+                   P2_CONFIG.queuing_port_count,
+                   P2_CONFIG.max_queuing_port_data_size,
+
+                   P2_CONFIG.blackboards,
+                   P2_CONFIG.max_blackboards,
+                   P2_CONFIG.blackboard_count,
+                   P2_CONFIG.max_blackboard_data_size,
+                   P2_CONFIG.blackboards_data,
+                   P2_CONFIG.blackboards_size_data,
+
+                   P2_CONFIG.buffers,
+                   P2_CONFIG.max_buffers,
+                   P2_CONFIG.buffer_count,
+                   P2_CONFIG.max_buffer_data_size,
+                   P2_CONFIG.buffers_data,
+                   P2_CONFIG.buffers_size_data,
+
+                   P2_CONFIG.semaphores,
+                   P2_CONFIG.max_semaphores,
+                   P2_CONFIG.semaphore_count,
+                   P2_CONFIG.semaphores_counter,
+
+                   P2_CONFIG.events,
+                   P2_CONFIG.max_events,
+                   P2_CONFIG.event_count,
+
+                   P2_CONFIG.mutexes,
+                   P2_CONFIG.max_mutexes,
+                   P2_CONFIG.mutex_count,
+
+                   P2_CONFIG.error_list,
+                   P2_CONFIG.error_list_cb,
+                   P2_CONFIG.partition_hm_table,
+                   P2_CONFIG.max_errors
+                   );
+
+    #endif
 
     return 1;
 }

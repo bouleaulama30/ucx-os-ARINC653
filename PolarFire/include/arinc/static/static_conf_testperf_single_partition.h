@@ -151,8 +151,8 @@ struct PartitionConfig {
 
 // Default hardcoded partition configuration et voir le ldscript pour la conf mémoire
 static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
-    .period = 100,                    // 1 second in nanoseconds
-    .duration = 50,                   // 500ms
+    .period = 50,                    // 1 second in nanoseconds
+    .duration = 20,                   // 500ms
     .identifier = 1,
     .num_assigned_cores = 1,
     .name = "DefaultPartition",
@@ -206,8 +206,8 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
 };
 
 static const struct PartitionConfig P2_CONFIG = {
-    .period = 100,                    // 1 second in nanoseconds
-    .duration = 50,                   // 500ms
+    .period = 50,                    // 1 second in nanoseconds
+    .duration = 20,                   // 500ms
     .identifier = 2,
     .num_assigned_cores = 1,
     .name = "P2",
@@ -269,17 +269,10 @@ static const window_partition_type DEFAULT_WINDOWS[] = {
         .name = "DefaultPartition",
         .id = 1,
         .start_tick = MS_TO_TICKS(0),
-        .duration_tick = MS_TO_TICKS(50),
+        .duration_tick = MS_TO_TICKS(100),
         .is_periodic_processes_start = (BOOLEAN_TYPE)true,
         // .is_periodic_processes_start = (BOOLEAN_TYPE)false,
     },
-    {
-        .name = "P2",
-        .id = 2,
-        .start_tick = MS_TO_TICKS(50),
-        .duration_tick = MS_TO_TICKS(50),
-        .is_periodic_processes_start = (BOOLEAN_TYPE)true,
-        },
     };
     
 static const uint32_t DEFAULT_WINDOWS_COUNT = sizeof(DEFAULT_WINDOWS) / sizeof(DEFAULT_WINDOWS[0]);
