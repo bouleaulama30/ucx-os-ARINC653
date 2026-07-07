@@ -37,7 +37,7 @@
 /*PLATFORM DEPENDENT DEFINITIONS*/
 /*These are the definitions and declarations specific for the target OS*/
 #if defined(__riscv) && (__riscv_xlen == 64)
-#define CLOCK_FREQ 1000000                       // CLINT timer on PolarFire runs at 1 MHz
+#define CLOCK_FREQ 600000000UL                       // CLINT timer on PolarFire runs at 1 MHz
 #else
 #define CLOCK_FREQ 10000000    					//the system clock can be hardcoded or rely on a function (GET_CLOCK_FREQUENCY(), for instance)
 #endif

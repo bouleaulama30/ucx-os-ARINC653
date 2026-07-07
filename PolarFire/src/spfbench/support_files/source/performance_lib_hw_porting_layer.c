@@ -104,8 +104,7 @@ uint64_t PerfGetTimeTicks(void)
 
 #if defined(__riscv) && (__riscv_xlen == 64)
   // Use _read_us() which reads the CLINT timer and converts it to microseconds (1 MHz frequency)
-  tick = mpfs_clint_mtime_read();
-
+  asm volatile ("rdcycle %0" : "=r"(tick));
 
 #elif defined(_RISCV32_QEMU)
     
@@ -338,7 +337,7 @@ void perf_reset_timer()
 perf_time_t perf_add_times(const perf_time_t* base, unsigned int nanoseconds)
 {
   // PolarFire SoC timer runs at 1 MHz, so 1 tick = 1000 ns
-  perf_time_t retval = ((*base) + nanoseconds / 1000);
+  perf_time_t retval = ((*base) + perf_ns_to_ticks(nanoseconds));
   return retval;
 }
 
