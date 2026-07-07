@@ -70,9 +70,6 @@ static uint32_t p1_buffers_size_data[MAX_NUMBER_OF_BUFFERS * BUFFER_MAX_NB_MESSA
 static struct semaphore_s p1_semaphores[MAX_NUMBER_OF_SEMAPHORES];
 static volatile int32_t p1_semaphores_counter[MAX_NUMBER_OF_SEMAPHORES];
 
-static struct semaphore_s p2_semaphores[MAX_NUMBER_OF_SEMAPHORES];
-static volatile int32_t p2_semaphores_counter[MAX_NUMBER_OF_SEMAPHORES];
-
 static struct event_s p1_events[MAX_NUMBER_OF_EVENTS];
 
 static struct mutex_s p1_mutexes[MAX_NUMBER_OF_MUTEXES];
@@ -154,8 +151,8 @@ struct PartitionConfig {
 
 // Default hardcoded partition configuration et voir le ldscript pour la conf mémoire
 static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
-    .period = 100,                    // 1 second in nanoseconds
-    .duration = 50,                   // 500ms
+    .period = 50,                    // 1 second in nanoseconds
+    .duration = 20,                   // 500ms
     .identifier = 1,
     .num_assigned_cores = 1,
     .name = "DefaultPartition",
@@ -209,8 +206,8 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
 };
 
 static const struct PartitionConfig P2_CONFIG = {
-    .period = 100,                    // 1 second in nanoseconds
-    .duration = 50,                   // 500ms
+    .period = 50,                    // 1 second in nanoseconds
+    .duration = 20,                   // 500ms
     .identifier = 2,
     .num_assigned_cores = 1,
     .name = "P2",
@@ -244,10 +241,10 @@ static const struct PartitionConfig P2_CONFIG = {
     .buffers_data = NULL,
     .buffers_size_data = NULL,
     
-    .semaphores = p2_semaphores,
-    .max_semaphores = MAX_NUMBER_OF_SEMAPHORES,
+    .semaphores = NULL,
+    .max_semaphores = 0,
     .semaphore_count = 0,
-    .semaphores_counter = p2_semaphores_counter,
+    .semaphores_counter = NULL,
 
     .events = NULL,
     .max_events = 0,
@@ -272,17 +269,10 @@ static const window_partition_type DEFAULT_WINDOWS[] = {
         .name = "DefaultPartition",
         .id = 1,
         .start_tick = MS_TO_TICKS(0),
-        .duration_tick = MS_TO_TICKS(50),
+        .duration_tick = MS_TO_TICKS(100),
         .is_periodic_processes_start = (BOOLEAN_TYPE)true,
         // .is_periodic_processes_start = (BOOLEAN_TYPE)false,
     },
-    {
-        .name = "P2",
-        .id = 2,
-        .start_tick = MS_TO_TICKS(50),
-        .duration_tick = MS_TO_TICKS(50),
-        .is_periodic_processes_start = (BOOLEAN_TYPE)true,
-        },
     };
     
 static const uint32_t DEFAULT_WINDOWS_COUNT = sizeof(DEFAULT_WINDOWS) / sizeof(DEFAULT_WINDOWS[0]);
@@ -415,51 +405,6 @@ static struct krnl_sampling_channel channel_sp2 = {
     .last_update_time = 0,
 };
 
-static uint8_t buffer_command[8];
-static struct krnl_sampling_channel channel_command = {
-    .name = "channelCommand",
-    .buffer = buffer_command,
-    .max_message_size = 8,
-    .current_message_size = 0,
-    .last_update_time = 0,
-};
-
-static uint8_t buffer_target[8];
-static struct krnl_sampling_channel channel_target = {
-    .name = "channelTarget",
-    .buffer = buffer_target,
-    .max_message_size = 8,
-    .current_message_size = 0,
-    .last_update_time = 0,
-};
-
-static uint8_t buffer_sync_a[8];
-static struct krnl_sampling_channel channel_sync_a = {
-    .name = "channelSyncA",
-    .buffer = buffer_sync_a,
-    .max_message_size = 8,
-    .current_message_size = 0,
-    .last_update_time = 0,
-};
-
-static uint8_t buffer_sync_b[8];
-static struct krnl_sampling_channel channel_sync_b = {
-    .name = "channelSyncB",
-    .buffer = buffer_sync_b,
-    .max_message_size = 8,
-    .current_message_size = 0,
-    .last_update_time = 0,
-};
-
-static uint8_t buffer_inter_crc[4];
-static struct krnl_sampling_channel channel_inter_crc = {
-    .name = "channelInterCRC",
-    .buffer = buffer_inter_crc,
-    .max_message_size = 4,
-    .current_message_size = 0,
-    .last_update_time = 0,
-};
-
 struct port_mapping_s {
     PARTITION_ID_TYPE partition_id;
     SAMPLING_PORT_NAME_TYPE port_name;
@@ -489,18 +434,6 @@ static const struct port_mapping_s system_port_table[] = {
     {.partition_id = 1, .port_name = "P3", .port_direction = DESTINATION, .messageSizeBytes = 16, .max_nb_message = 8, .QUEUING_DISCIPLINE = FIFO, .queuing_channel = &channel_q1},
     {.partition_id = 1, .port_name = "P2", .port_direction = SOURCE, .messageSizeBytes = 16, .max_nb_message = 8, .QUEUING_DISCIPLINE = FIFO, .queuing_channel = &channel_q2},
     {.partition_id = 1, .port_name = "P4", .port_direction = DESTINATION, .messageSizeBytes = 16, .max_nb_message = 8, .QUEUING_DISCIPLINE = FIFO, .queuing_channel = &channel_q2},
-
-    // Sampling ports for test_performance19
-    {.partition_id = 1, .port_name = "Command_Src", .port_direction = SOURCE, .messageSizeBytes = 8, .refreshPeriodMs = 30, .sampling_channel = &channel_command},
-    {.partition_id = 1, .port_name = "Command_Dst", .port_direction = DESTINATION, .messageSizeBytes = 8, .refreshPeriodMs = 30, .sampling_channel = &channel_command},
-    {.partition_id = 2, .port_name = "Target_Src", .port_direction = SOURCE, .messageSizeBytes = 8, .refreshPeriodMs = 1000, .sampling_channel = &channel_target},
-    {.partition_id = 1, .port_name = "Target_Dst", .port_direction = DESTINATION, .messageSizeBytes = 8, .refreshPeriodMs = 1000, .sampling_channel = &channel_target},
-    {.partition_id = 1, .port_name = "InitSyncA_Src", .port_direction = SOURCE, .messageSizeBytes = 8, .refreshPeriodMs = 30, .sampling_channel = &channel_sync_a},
-    {.partition_id = 2, .port_name = "InitSyncA_Dst", .port_direction = DESTINATION, .messageSizeBytes = 8, .refreshPeriodMs = 30, .sampling_channel = &channel_sync_a},
-    {.partition_id = 2, .port_name = "InitSyncB_Src", .port_direction = SOURCE, .messageSizeBytes = 8, .refreshPeriodMs = 30, .sampling_channel = &channel_sync_b},
-    {.partition_id = 1, .port_name = "InitSyncB_Dst", .port_direction = DESTINATION, .messageSizeBytes = 8, .refreshPeriodMs = 30, .sampling_channel = &channel_sync_b},
-    {.partition_id = 1, .port_name = "InterCRC_Src", .port_direction = SOURCE, .messageSizeBytes = 4, .refreshPeriodMs = 30, .sampling_channel = &channel_inter_crc},
-    {.partition_id = 2, .port_name = "InterCRC_Dst", .port_direction = DESTINATION, .messageSizeBytes = 4, .refreshPeriodMs = 30, .sampling_channel = &channel_inter_crc},
 };
 extern const int routing_table_size;
 
