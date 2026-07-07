@@ -22,7 +22,7 @@ float ldexp(float x, int32_t exp);
 float modf(float x, float *iptr);
 float floor(float d);
 float ceil(float d);
-float sqrt(float arg);
+float sqrtf(float arg);
 float exp(float arg);
 float log(float arg);
 float log10(float arg);

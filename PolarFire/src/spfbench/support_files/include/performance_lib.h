@@ -117,10 +117,12 @@ typedef PERF_NAME_TYPE MUTEX_NAME_TYPE;
   float32_t ldexp(float32_t val, int32_t expon);
   float32_t frexp(float32_t value, int32_t *eptr);
   float32_t exp(float32_t arg);
-  float32_t sqrt(float32_t arg);
+  float32_t sqrtf(float32_t arg);
   float32_t pow(float32_t arg1, float32_t arg2);
   float32_t log10(float32_t arg);
   float32_t log(float32_t arg);
+#else
+  float32_t sqrtf(float32_t arg);
 #endif
 
 typedef struct{
@@ -298,6 +300,14 @@ void print_perf();
 
 
 #define REPORT_RESULTS(max_cycles, min_cycles, average_cycles) \
+  if (__VARIANCE < 0.0) \
+  { \
+    __STD_DEV = (float32_t)((float32_t)(perf_tick_to_ns(max_cycles) - perf_tick_to_ns(min_cycles)) / 4.0); \
+  } \
+  else \
+  { \
+    __STD_DEV = (float32_t)sqrtf(__VARIANCE); \
+  } \
   PERF_PRINT_EOL(); \
   PERF_PRINT_STRING("Max time(tick): "); \
   PERF_PRINT_UNSIGNED64(max_cycles); \
@@ -317,7 +327,7 @@ void print_perf();
   PERF_PRINT_STRING("Average time(ns): "); \
   PERF_PRINT_UNSIGNED64(__AVERAGE_NS ); \
   PERF_PRINT_EOL(); \
-  PERF_PRINT_STRING("Standard Deviation: "); \
+  PERF_PRINT_STRING("Standard Deviation (ns): "); \
   PERF_PRINT_FLOAT((float32_t)__STD_DEV); \
   PERF_PRINT_EOL(); \
   PERF_PRINT_STRING("Number of samples: "); \

@@ -195,21 +195,21 @@ void perf_validate_measurements(int32_t pos, uint8_t calc_deviation)
       EXECUTION_TIMES[pos].worstNS = EXECUTION_TIMES[pos].timeNS;
     }
 
- if (calc_deviation == 1)
-    {       
-      /*
-      EXECUTION_TIMES[pos].sumNSSQ += EXECUTION_TIMES[pos].timeNS * EXECUTION_TIMES[pos].timeNS;
-      variance = (float32_t)((float32_t)((float32_t)EXECUTION_TIMES[pos].sumNSSQ / (float32_t)EXECUTION_TIMES[pos].noSamples) - (float32_t)(EXECUTION_TIMES[pos].averageNS * EXECUTION_TIMES[pos].averageNS));
-      if (variance < 0)
-        {
-          // Rough estimation of standard deviation
-          EXECUTION_TIMES[pos].deviation = (float32_t)((EXECUTION_TIMES[pos].worstUS - EXECUTION_TIMES[pos].bestUS) / 4.0);
-        }
-      else
-        {
-          EXECUTION_TIMES[pos].deviation = (float32_t)(sqrt(variance) / 1000.0);
-        }*/
-    }
+  if (calc_deviation == 1)
+     {       
+       float32_t variance;
+       EXECUTION_TIMES[pos].sumNSSQ += (float32_t)EXECUTION_TIMES[pos].timeNS * (float32_t)EXECUTION_TIMES[pos].timeNS;
+       variance = (float32_t)((float32_t)((float32_t)EXECUTION_TIMES[pos].sumNSSQ / (float32_t)EXECUTION_TIMES[pos].noSamples) - (float32_t)(EXECUTION_TIMES[pos].averageNS * EXECUTION_TIMES[pos].averageNS));
+       if (variance < 0)
+         {
+           // Rough estimation of standard deviation in ns
+           EXECUTION_TIMES[pos].deviation = (float32_t)((float32_t)(EXECUTION_TIMES[pos].worstNS - EXECUTION_TIMES[pos].bestNS) / 4.0);
+         }
+       else
+         {
+            EXECUTION_TIMES[pos].deviation = (float32_t)sqrtf(variance);
+         }
+     }
 }
 
 
@@ -279,7 +279,7 @@ void print_perf()
     PERF_PRINT_UNSIGNED64(current.bestNS);
     PERF_PRINT_EOL();
 
-    PERF_PRINT_STRING("Standard Deviation (us): ");
+    PERF_PRINT_STRING("Standard Deviation (ns): ");
     PERF_PRINT_FLOAT(current.deviation);
     PERF_PRINT_EOL();
     PERF_PRINT_STRING("Number of samples: ");

@@ -138,11 +138,11 @@ void partition_switch_loop(void){
           variance = (sumTimeNSSQ / (float32_t)noSamples) - (averageNS * averageNS);
           if (variance < 0)
             {
-              deviation = (float32_t)((float32_t)(perf_tick_to_us(wcet) - perf_tick_to_us(bcet)) / 4.0);
+              deviation = (float32_t)((float32_t)(perf_tick_to_ns(wcet) - perf_tick_to_ns(bcet)) / 4.0);
             }
           else
             {
-              deviation = (float32_t)(sqrt(variance)/ 1000.0);
+              deviation = (float32_t)sqrtf(variance);
             }
         }
       time2 = time1;
@@ -174,7 +174,7 @@ void partition_switch_test(void)
     PERF_PRINT_STRING("BCET (us): ");
     PERF_PRINT_FLOAT((float32_t)perf_tick_to_ns(bcet) / 1000.0);
     PERF_PRINT_EOL();
-    PERF_PRINT_STRING("Standard Deviation (us): ");
+    PERF_PRINT_STRING("Standard Deviation (ns): ");
     PERF_PRINT_FLOAT(deviation);
     PERF_PRINT_EOL();
     PERF_PRINT_STRING("Number of samples: ");

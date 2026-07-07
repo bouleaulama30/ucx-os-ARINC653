@@ -1,4 +1,10 @@
 /* IEEE single-precision definitions */
+#if (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined(__LITTLE_ENDIAN__) || defined(_M_ARM) || defined(_M_X64) || defined(_M_IX86)
+#ifndef LITTLE_ENDIAN
+#define LITTLE_ENDIAN 1
+#endif
+#endif
+
 #define SNG_EXPBITS	8
 #define SNG_FRACBITS	23
 #define SNG_EXP_BIAS	127

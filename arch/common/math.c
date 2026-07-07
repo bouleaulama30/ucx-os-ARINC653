@@ -251,7 +251,7 @@ float ceil(float d){
 }
 
 // square root (newton's method of sucessive aproximations)
-float sqrt(float arg){
+float sqrtf(float arg){
 	float x, temp;
 	int32_t exp = 0;
 	int32_t i;
