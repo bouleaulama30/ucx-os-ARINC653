@@ -121,6 +121,7 @@ void  MAIN_FUNCTION()
 }
 
 void partition_switch_loop(void){
+    time2 = GET_CURRENT_TICKS();
     while(1)
     {
       time1 = GET_CURRENT_TICKS();

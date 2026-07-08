@@ -9,7 +9,7 @@
 #define GCD_VALUE 3
 #define MAX_MAXTRIX_ROW 5
 #define MAX_MAXTRIX_COL 8
-#define WRITE_DISK_ITER 1333170 
+#define WRITE_DISK_ITER 13331 
 #define TARGET_TIME_OUT 1000000
 
 // P2.h / declarations

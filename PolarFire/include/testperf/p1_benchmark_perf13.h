@@ -124,6 +124,7 @@ void  MAIN_FUNCTION()
 __attribute__((section(".p1_code")))
 void partition_switch_loop(void){
     RETURN_CODE_TYPE dummy_ret;
+    time2 = GET_CURRENT_TICKS();
     while(1)
     {
       time1 = GET_CURRENT_TICKS();

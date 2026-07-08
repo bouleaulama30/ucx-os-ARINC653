@@ -160,7 +160,8 @@ void PERIODIC_WAIT (
     }
 
     uint64_t uptime = ucx_uptime();
-    uint64_t futur_deadline_time = (uint64_t)current_process->processus_status->ATTRIBUTES.PERIOD + (uint64_t)current_process->release_point_time + (uint64_t)current_process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+    uint64_t time_capacity = (current_process->processus_status->ATTRIBUTES.TIME_CAPACITY == INFINITE_TIME_VALUE) ? 0 : current_process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+    uint64_t futur_deadline_time = (uint64_t)current_process->processus_status->ATTRIBUTES.PERIOD + (uint64_t)current_process->release_point_time + time_capacity;
     if (time_overflow(futur_deadline_time)){
         *RETURN_CODE = INVALID_PARAM;
         return;
