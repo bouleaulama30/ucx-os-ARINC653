@@ -1,14 +1,23 @@
 # TO-DO
 
 ## matériel
-* voir pour mettre les includes des tests autre part
+* voir pour mettre les includes des tests autre part:
+    * mettre la structure des testsperfs dans le projet de base
+    * faire un merge du code du PolarFire et de l os de base
+    * cf si tout fonctionne
+    * refaire un workspace en important les bons fichiers source de l os
+    * faire une doc de ca
+    * voir si possible de faire un xml ou script pour config plus rapidement le workspace eclispe avec tout bien 
 * faire la doc pour les flags a mettre dans softconsole
-* faire des virtuals links pour polarfire de l os pour ne pas a avoir a modifier les fichiers deux fois en cas de changements
 * merge toutes les branches sur la main (polarfire et testbench)
 * faire de la doc pour integrer le portage sur la carte clean dans le projet
 * faire clean up des trucs qui ne servent a rien
 * faire une integration clean
 
+### pour doc
+* importer les fichiers d include dans softconsole (cf le polarfire qui est fonctionnel)
+* importer le ldscript dans softconsole
+* flag compilo: -march=rv64imac -mabi=lp64 -mcmodel=medany -ffreestanding -nostdlib -DMEASURE_STATIC=1 -DPERFORMANCE_PRINT -DTEST_PERF19
 
 ## refactoring
 
