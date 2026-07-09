@@ -6,7 +6,8 @@
     * refaire un workspace en important les bons fichiers source de l os
     * faire une doc de ca
     * voir si possible de faire un xml ou script pour config plus rapidement le workspace eclispe avec tout bien 
-* faire la doc pour les flags a mettre dans softconsole
+    * save le app_main.c pour les tests
+    * penser a documenter le fait de changer la static conf en fonction du nomnre de partition des tests
 * merge toutes les branches sur la main (polarfire et testbench)
 * faire de la doc pour integrer le portage sur la carte clean dans le projet
 * faire clean up des trucs qui ne servent a rien
