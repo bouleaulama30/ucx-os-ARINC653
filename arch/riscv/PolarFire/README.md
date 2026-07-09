@@ -22,7 +22,7 @@
 * exclude src/ucx/arinc/static from build configuration
 * Add these flags to compilation configuration: -march=rv64imac -mabi=lp64 -mcmodel=medany -ffreestanding -nostdlib -DMEASURE_STATIC=1 -DPERFORMANCE_PRINT -DTEST_PERFXX (flag -DTEST_PERFXX is optionnal, you can use it when you want to run test_perf number XX)
 
-* Include these paths into Build Settings:
+* Include these paths into Build Settings (to change according to your architecture):
     * "${workspace_loc:/${ProjName}/PolarFire/include/arinc}"
     * "${workspace_loc:/${ProjName}/PolarFire/include/testperf}"
     * "${workspace_loc:/${ProjName}/PolarFire/src/spfbench/support_files/include}"
@@ -33,6 +33,8 @@
     * "${workspace_loc:/${ProjName}/PolarFire/src/drivers}"
     * "${workspace_loc:/${ProjName}/PolarFire/include/kernel}"
     * "${workspace_loc:/${ProjName}/PolarFire/include/lib}"
+    * "${workspace_loc:/${ProjName}/src/spfbench/test_applications/test_performance19/Application/Partition2/include}"
+    * "${workspace_loc:/${ProjName}/src/spfbench/test_applications/test_performance1/Application/Partition1/include}"
 
 * Add the ldscript src/startup/linker.ld
 
