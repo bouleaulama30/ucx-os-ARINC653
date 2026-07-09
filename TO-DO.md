@@ -1,12 +1,9 @@
 # TO-DO
 
 ## matériel
-* voir pour mettre les includes des tests autre part:
-    * faire une doc de ca
-    * voir si possible de faire un xml ou script pour config plus rapidement le workspace eclispe avec tout bien 
-    * save le app_main.c pour les tests
-    * penser a documenter le fait de changer la static conf en fonction du nombre de partition des tests
+* test que ca marche toujours sur qemu
 * merge toutes les branches sur la main (polarfire et testbench)
+* voir si possible de faire un xml ou script pour config plus rapidement le workspace eclispe avec tout bien 
 
 ## refactoring
 
