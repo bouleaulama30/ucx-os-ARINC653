@@ -12,6 +12,7 @@ Currently, UCX/OS supports the following targets:
 - RV32I (Qemu) / RV32IMA (SMP)
 - RV64I (Qemu) / RV64IMA (SMP)
 - HF-RISCV (RV32E / RV32I)
+- PolarFire SoC (Discovery Kit)
 
 #### ARM (32 bit)
 - Versatilepb (Qemu)
@@ -26,6 +27,9 @@ Currently, UCX/OS supports the following targets:
 - ATMEGA2560 (Arduino Mega)
 - ATMEGA32
 
+## PolarFire SoC Support
+
+For detailed, step-by-step instructions on how to set up the project, compile the code, configure search paths, and run benchmarks on the **PolarFire SoC Discovery Kit** using **Microchip SoftConsole**, please refer to the dedicated setup guide at **`arch/riscv/PolarFire/README.md`**.
 
 ## Supported toolchains
 
