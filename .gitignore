@@ -1,2 +1,7 @@
 test.txt
 testbench/logs
+arch/riscv/PolarFire/include/ucx.h
+arch/riscv/PolarFire/include/arinc
+arch/riscv/PolarFire/include/kernel
+arch/riscv/PolarFire/include/lib
+arch/riscv/PolarFire/include/testperf
