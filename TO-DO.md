@@ -2,8 +2,6 @@
 
 ## matériel
 * voir pour mettre les includes des tests autre part:
-    * mettre la structure des testsperfs dans le projet de base
-    * faire un merge du code du PolarFire et de l os de base
     * cf si tout fonctionne
     * refaire un workspace en important les bons fichiers source de l os
     * faire une doc de ca
