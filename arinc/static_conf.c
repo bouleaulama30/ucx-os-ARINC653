@@ -1,6 +1,6 @@
 #include "ucx.h"
 
-const int routing_table_size = 4;
+const int routing_table_size = sizeof(system_port_table) / sizeof(system_port_table[0]);
 
 const ERROR_ACTION_TYPE hm_table_partition_1[4][4] = {
     // Colonnes : DEADLINE_MISSED, APPLICATION_ERROR, NUMERIC_ERROR, DEFAULT
@@ -50,6 +50,7 @@ const ERROR_ACTION_TYPE hm_table_module[1][4] = {
     { PROCESS_REPLENISH, PROCESS_STOP, PROCESS_RESTART, PROCESS_STOP }
 };
 
+#ifndef MEASURE_STATIC
 __attribute__((section(".p1_code")))
 void p1_main_process(struct pcb_s *partition){
     RETURN_CODE_TYPE return_code0;
@@ -92,3 +93,4 @@ void p2_main_process(struct pcb_s *partition){
     
     SET_PARTITION_MODE(NORMAL, &return_code0);
 }
+#endif

@@ -33,7 +33,7 @@ void check_available_resources_on_partition_port(struct queuing_port_s *queuing_
 void partition_OS(void)
 {
     struct pcb_s *partition = get_current_partition();    
-    _mprv_activate();
+    //_mprv_activate();
 
     // create a mutex for preemption lock
     int port_id;

@@ -289,7 +289,6 @@ void ucx_itoa(int32_t i, char *s, int32_t base)
 	}
 }
 
-
 void *ucx_memcpy(void *dst, const void *src, uint32_t n)
 {
 	char *r1 = dst;
@@ -565,3 +564,4 @@ int32_t ucx_sprintf(char *out, const char *fmt, ...)
 void *memcpy(void *dst, const void *src, size_t n) {
     return ucx_memcpy(dst, src, (uint32_t)n);
 }
+

@@ -559,3 +559,8 @@ int32_t ucx_sprintf(char *out, const char *fmt, ...)
 	va_end(args);
 	return v;
 }
+
+#undef memcpy
+void *memcpy(void *dst, const void *src, size_t n) {
+    return ucx_memcpy(dst, src, (uint32_t)n);
+}

@@ -1116,10 +1116,10 @@ void krnl_acquire_mutex(/*in */ MUTEX_ID_TYPE            MUTEX_ID,
         mutex->mutex_status.LOCK_COUNT ++;
         mutex->saved_owner_priority = current_process->processus_status->CURRENT_PRIORITY;
         current_process->processus_status->CURRENT_PRIORITY = mutex->mutex_status.MUTEX_PRIORITY;
-
         list_remove(partition->processes, current_process_node);
         struct node_s *new_process_node = list_push(partition->processes, current_process);
         partition->process_current = new_process_node;
+
         *RETURN_CODE = NO_ERROR;
     }
     else if (mutex->mutex_status.MUTEX_STATE == OWNED && mutex->mutex_status.MUTEX_OWNER == current_process->process_id){

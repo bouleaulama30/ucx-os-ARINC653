@@ -25,13 +25,13 @@ int main(void)
 	
 	_hardware_init();
 	
+#ifdef MEASURE_STATIC
 	printf("UCX/OS v%s\n", __VER__);
-    print_time_sched();
+	print_time_sched();
 	uint64_t current_time = ucx_uptime();
-    uint64_t current_tick = MS_TO_TICKS(current_time);
-
-    printf("CURRENT_TIME: %d CURRENT_TICK: %d\n", current_time, current_tick);
-
+	uint64_t current_tick = MS_TO_TICKS(current_time);
+	printf("CURRENT_TIME: %d CURRENT_TICK: %d\n", (int)current_time, (int)current_tick);
+#endif
 
 	struct hm_cb_s hm_cb;
 	hm_init(&hm_cb, (char *)hm_log_buffer);
@@ -40,6 +40,9 @@ int main(void)
 	// _pmp_partition_activate((uint32_t)_kernel_end, (uint32_t)0, (uint32_t)0);
 	// _mprv_activate();
 	
+#ifndef MEASURE_STATIC
+	printf("UCX/OS v%s\n", __VER__);
+#endif
 #ifndef UNKNOWN_HEAP
 	ucx_heap_init((size_t *)&_heap_start, (size_t)&_heap_size);
 	printf("heap_init() 0x%p - 0x%p, %d bytes free\n",
