@@ -121,13 +121,17 @@ You can run your own custom ARINC-653 applications or run the pre-existing demo 
 
 2. **Setup the Entry Point**:
    - Copy the contents of your chosen application file (e.g., `app/arinc_app_demo1.c`) and paste it into your project's `src/app/app_main.c` file.
+   - Adapt the entry point function names passed as parameters to the `partition_init` calls in `app_main.c` to match your partition's main execution functions (typically `p1_main_process` for Partition 1, and `p2_main_process` for Partition 2).
 
-3. **Configure Partition Settings**:
-   - Every demo application requires a matching static configuration. You must copy the corresponding configuration file from the root `include/arinc/static/` directory and overwrite `include/arinc/static_conf.h` in your project.
-   - Examples of matching configurations:
-     - For `arinc_app_demo1.c`, copy the contents of `include/arinc/static/static_conf_arinc_app_demo1.h` and overwrite `include/arinc/static_conf.h`.
-     - For `arinc_app_demo2.c`, copy the contents of `include/arinc/static/static_conf_arinc_app_demo2.h` and overwrite `include/arinc/static_conf.h`.
-     - For `arinc_app.c`, copy the contents of `include/arinc/static/static_conf_arinc_app.h` and overwrite `include/arinc/static_conf.h`.
+3. **Configure Partition Settings (Header & Implementation)**:
+   - Every demo application requires a matching static configuration header. Copy the corresponding `.h` file from the root `include/arinc/static/` directory and overwrite `include/arinc/static_conf.h` in your project.
+     - For `arinc_app_demo1.c`, copy `include/arinc/static/static_conf_arinc_app_demo1.h` to `include/arinc/static_conf.h`.
+     - For `arinc_app_demo2.c`, copy `include/arinc/static/static_conf_arinc_app_demo2.h` to `include/arinc/static_conf.h`.
+     - For `arinc_app.c`, copy `include/arinc/static/static_conf_arinc_app.h` to `include/arinc/static_conf.h`.
+   - You must also copy the matching static configuration implementation `.c` file from the root `arinc/static/` directory and overwrite `src/ucx/arinc/static_conf.c` in your project.
+     - For `arinc_app_demo1.c`, copy `arinc/static/static_conf_arinc_app_demo1.c` to `src/ucx/arinc/static_conf.c`.
+     - For `arinc_app_demo2.c`, copy `arinc/static/static_conf_arinc_app_demo2.c` to `src/ucx/arinc/static_conf.c`.
+     - For `arinc_app.c`, copy `arinc/static/static_conf_arinc_app.c` to `src/ucx/arinc/static_conf.c`.
 
 ---
 
@@ -137,12 +141,14 @@ Follow these steps to run performance tests on the PolarFire SoC:
 
 1. **Setup Entry Point**:
    - Copy the contents of the `app/arinc_testperf.c` template (located in the root `/app` folder) and paste them into your project's `src/app/app_main.c` (located in `src/app/`).
+   - Adapt the entry point function names passed as parameters to the `partition_init` calls in `app_main.c` (e.g., using `MAIN_FUNCTION` for Partition 1, and `main_process` or `p2_main` for Partition 2, as defined by the benchmark headers).
 
 2. **Select Partition Configurations**:
    - **For Tests 1–12 and 14–18 (Single Partition)**:
      Copy the contents of `include/arinc/static/static_conf_testperf_single_partition.h` and overwrite the contents of `include/arinc/static_conf.h`.
    - **For Tests 13 and 19 (Double Partition)**:
      Copy the contents of `include/arinc/static/static_conf_testperf_double_partition.h` and overwrite the contents of `include/arinc/static_conf.h`.
+   - **Important**: Copy the test performance configuration implementation file `arinc/static/static_conf_testperf.c` and overwrite `src/ucx/arinc/static_conf.c` in your project.
 
 3. **Specify the Test Number**:
    - Add the flag `-DTEST_PERFXX` to the compilation flags (e.g., `-DTEST_PERF19` to run benchmark test 19).
