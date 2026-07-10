@@ -558,7 +558,7 @@ float asin(float arg){
 		return(0.0f);
 	}
 
-	temp = sqrt(1.0f - arg*arg);
+	temp = sqrtf(1.0f - arg*arg);
 	if(arg > 0.7f)
 		temp = PI_2 - atan(temp/arg);
 	else

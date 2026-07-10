@@ -26,7 +26,6 @@ int main(void)
 	_hardware_init();
 	
 	printf("UCX/OS v%s\n", __VER__);
-	print_time_sched();
 	uint64_t current_time = ucx_uptime();
 	uint64_t current_tick = MS_TO_TICKS(current_time);
 	printf("CURRENT_TIME: %d CURRENT_TICK: %d\n", (int)current_time, (int)current_tick);
