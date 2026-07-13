@@ -1,7 +1,6 @@
 # TO-DO
 
 ## matériel
-* merge toutes les branches sur la main (polarfire et testbench)
 * voir si possible de faire un xml ou script pour config plus rapidement le workspace eclispe avec tout bien 
 
 ## refactoring
@@ -10,7 +9,6 @@
 * mettre des commentaires
 * faire de la documentation
 
-<!-- à faire après test unitaire -->
 * sampling_port_s -> sp_s ?
 * voir si pour les ressources comme bb, la reference vers la partition ou le waiting_blackboard est necessaire dans la struct
 * voir pour mettre krnl acquire et release mutex dans un fichier du krnl
@@ -18,13 +16,13 @@
 
 ## Optimisation
 
-* retirer les mallocs et les free en utilisant le pool allocator utiliser durant la communication inter et intra partition
-
 * ajouter un mecanisme pour dire a une partition que des ressources sont dispo pour une autre partition comme ca on ne verifie pas a chaque tick les ressources des port
 
 * essayer de rassembler les parcours de liste a chaque tick en une seule fonction
 
 * appeler les checks dynamiquement selon la period la plus petite pour eviter les parcours de liste a chaque tick
+
+* retirer les mallocs et les free en utilisant le pool allocator utiliser durant la communication inter et intra partition
 
 ## Partition implem
 ## Process
