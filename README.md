@@ -12,6 +12,7 @@ This project is the adaptation of UCX/OS to the **ARINC 653** standard.
 - [Understand Static Configuration](#understand-static-conf)
   - [1. The Header File: `static_conf.h`](#1-the-header-file-static_confh)
   - [2. The Source File: `static_conf.c`](#2-the-source-file-static_confc)
+- [System Boot Sequence](#system-boot-sequence)
 - [How Inter-Partition Communication Works](#how-inter-partition-communication-works)
   - [1. Concepts: Ports and Channels](#1-concepts-ports-and-channels)
   - [2. Communication Modes](#2-communication-modes)
@@ -24,6 +25,8 @@ This project is the adaptation of UCX/OS to the **ARINC 653** standard.
   - [Step 4: Instantiate the Partition in the Application Main](#step-4-instantiate-the-partition-in-the-application-main)
 - [Test ARINC 653](#test-arinc-653)
 - [Debug an Application](#debug-an-application)
+
+
 
 
 UCX/OS is a preemptive nanokernel RTOS for microcontrollers, aimed to be easily ported. The kernel implements a lightweight multitasking environment in a single address space (based on tasks and coroutines), using a minimum amount of resources.
@@ -128,7 +131,53 @@ During the initialization phase (prior to normal execution), the partition main 
 1. **Creation**: Call creation routines (`CREATE_PROCESS`, `CREATE_SAMPLING_PORT`, `CREATE_SEMAPHORE`, etc.). These routines populate the statically pre-allocated arrays in `static_conf.h` rather than allocating new heap blocks.
 2. **Starting**: Processes are set to the `READY` state via `START()`.
 3. **Transition to Normal Mode**: The partition transition is finalized by calling `SET_PARTITION_MODE(NORMAL, &return_code)`. This enables the partition's internal process scheduler, starting process execution.
- 
+
+
+## System Boot Sequence
+
+The startup and boot sequence of the OS follows a strict multi-stage initialization path, transitioning from bare-metal hardware assembly setup to the kernel scheduler, partition registration, and finally launching partition processes.
+
+### 1. Assembly Entry and Low-Level Setup (`crt0.s`)
+* **Stack Pointer initialization**: The CPU executes the `_entry` section in **crt0.s** file. It initializes the stack pointer (`sp`) and clears the `.bss` section in RAM.
+* **Interrupt Trap Setup**: The machine trap vector address (`mtvec`) is configured to point to the low-level interrupt service routine `_isr`.
+* **Execution Jump**: The assembly code jumps to the C code entry point `main()`.
+
+### 2. Kernel Initialization (`main.c`)
+* The core logic is defined in `main()` in **main.c** file:
+  * **Hardware Setup**: Configures architecture-specific registers and clocks (`_hardware_init()`).
+  * **Health Monitor**: Initializes logging and the global health monitoring control block (`hm_init()`).
+  * **Memory Heap**: Initializes the kernel memory allocator heap (`ucx_heap_init()`).
+  * **Temporal Windows Layout**: Calls `module_scheduler_init()` to set up the major frame scheduling windows (`DEFAULT_WINDOWS[]`).
+  * **Core Tasks List**: Allocates the kernel control block structures (`kcb->tasks` and `kcb->partitions`).
+  * **Application Main Hook**: Invokes `app_main()`.
+
+### 3. Partition Registration (`app_main()` and `partition_init()`)
+* **Partition Size Calculation**: In **arinc_app.c** file, the sizes of code and data segments for each partition are calculated using the linker script bounds.
+* **Registration**: For each partition, `partition_init()` (implemented in **partition.c** file) is called:
+  * Allocates the Partition Control Block (`struct pcb_s *new_pcb`), status block, and memory requirement descriptors.
+  * Binds the partition's kernel scheduling task to the kernel entry thread `partition_OS()`.
+  * Saves the partition's user entry point (e.g., `p1_main_process`).
+  * Appends the new partition to the kernel tasks and partitions list (`kcb->tasks` and `kcb->partitions`).
+  * Statically configures the partition's sampling/queuing ports, blackboards, buffers, semaphores, events, and mutexes.
+
+### 4. Scheduler Execution (`main.c`)
+* After `app_main()` returns, the kernel calls `arinc_start_scheduling()` which configures the hardware CLINT timer to start periodic timer ticks.
+* The main loop uses the `setjmp` / `longjmp` mechanism:
+  * Evaluates the scheduling windows (`kcb->rt_sched()`).
+  * If a partition is active, it performs a context jump (`longjmp`) to the partition entry point `partition_OS()`.
+
+### 5. Partition Entry and Process Spawning (`arinc_partition.c`)
+* Execution enters `partition_OS()` in **arinc_partition.c** file.
+* Since the partition operating mode is initialized to `COLD_START`, the kernel immediately calls the partition's entry point (e.g., `p1_main_process()` in **static_conf.c** file).
+* **Process Creation**: The main process executes the static configuration:
+  * Invokes `CREATE_PROCESS()` for each internal process, allocating stacks and priorities.
+  * Calls `CREATE_SAMPLING_PORT()`, `CREATE_QUEUING_PORT()`, or other intra/inter-partition resources inside the pre-allocated structures.
+  * Launches the created processes using `START()`.
+  * Transitions the operating mode using `SET_PARTITION_MODE(NORMAL, &return_code)`.
+* Once in `NORMAL` mode, `partition_OS()` runs the process scheduler (`process_schedule()`), executing the application processes.
+
+---
+
 
 ## How inter partition communication works
 
