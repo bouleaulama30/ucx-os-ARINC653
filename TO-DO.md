@@ -7,7 +7,7 @@
 
 * mettre des commentaires
 
-* voir pour mettre krnl acquire et release mutex dans un fichier du krnl
+
 * voir pour mettre des fonctions lié aux channels dans la comm inter partition dans les fichiers du noyau
 
 ## Optimisation
