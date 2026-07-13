@@ -18,6 +18,7 @@ This project is the adaptation of UCX/OS to the **ARINC 653** standard.
   - [2. Communication Modes](#2-communication-modes)
   - [3. Example Mapping](#3-example-mapping)
 - [How Timer Interrupts and Scheduling Work](#how-timer-interrupts-and-scheduling-work)
+- [How Health Monitoring (HM) and Error Handling Work](#how-health-monitoring-hm-and-error-handling-work)
 - [How to Add a New Partition](#how-to-add-a-new-partition)
   - [Step 1: Update the Linker Script (`.ld`)](#step-1-update-the-linker-script-ld)
   - [Step 2: Configure the Partition in `static_conf.h`](#step-2-configure-the-partition-in-static_confh)
@@ -259,6 +260,63 @@ The following flowchart and step-by-step breakdown describe what happens at each
   * The partition OS updates its local timers (`arinc_time_update_partition`).
   * It runs `process_schedule()` to select the next `READY` process based on priority and deadline.
   * It restores the selected process context from its TCB context block, returning execution to the application code.
+
+
+## How Health Monitoring (HM) and Error Handling Work
+
+To ensure the safety and predictability of avionic software, the OS implements a three-level **Health Monitor (HM)** matching the ARINC 653 specification. When a software exception (e.g., `NUMERIC_ERROR`, `DEADLINE_MISSED`) or an application-triggered fault occurs, the system routes, logs, and attempts recovery at the Process, Partition, or Module level.
+
+### 1. The Three Levels of Error Management
+
+#### A. Process-Level (Internal Partition Recovery)
+* Each partition can register a single, high-priority **Error Handler Process** using `CREATE_ERROR_HANDLER` during its initialization phase.
+* When a process experiences an error, the kernel suspends the faulty process, logs the error status into the partition's private circular error queue (`error_list_cb`), and wakes up the partition's Error Handler Process.
+* The Error Handler Process has absolute priority over normal processes. When scheduled, it retrieves the error status using `GET_ERROR_STATUS` and executes application-defined recovery routines (e.g., resetting process parameters or logs).
+
+#### B. Partition-Level (Kernel Recovery)
+* If a partition has no registered Error Handler Process, or if an error is raised by the error handler itself, the exception escalates to the partition level.
+* The kernel resolves the error using a static lookup table (`partition_hm_table[operating_mode][error_code]`) configured in **static_conf.h**.
+* Depending on the action configured for the current operating mode, the kernel executes recovery actions:
+  * `IGNORE`: Sets the faulty process back to the `READY` state.
+  * `PROCESS_RESTART` / `PROCESS_REPLENISH`: Attempts to restart or replenish the faulty process.
+  * `PARTITION_STOP`: Halts the execution of the entire partition.
+
+#### C. Module-Level (Global Recovery)
+* If the partition-level action cannot resolve the fault or directs escalation, the error propagates to the module level.
+* The system evaluates `hm_table_module[operating_mode][error_code]` to determine global recovery actions (e.g., resetting the entire processor board or switching to a redundant core).
+
+---
+
+### 2. Step-by-Step Fault Propagation Flow
+
+The following sequence outlines how a fault propagates through the system:
+
+1. **Fault Occurrence**:
+   * **Implicitly**: The processor detects a hardware fault, or the kernel scheduler detects a timing fault (e.g., a periodic process misses its deadline in **arinc_time.c** file).
+     > [!NOTE]
+     > On architectures like RISC-V, division by zero is handled silently by the hardware by default and does not trigger an exception trap. To raise a `NUMERIC_ERROR` for division by zero, the trap exception vector must be configured, and the corresponding exception code must be caught and routed inside `_irq_handler()` (defined in **hal.c** file) to call `hm_raise_error()`.
+   * **Explicitly**: The application invokes `RAISE_APPLICATION_ERROR` (implemented in **arinc_HM.c** file).
+2. **Context Save and Suspension**:
+   * The kernel changes the faulty process's state to `FAULTED` and saves its context.
+3. **Queue Logging**:
+   * The error description (ID of the failed process, error code, and error message) is written to the partition's error list queue (`hm_write_error` in **hm.c** file).
+4. **Error Handler Activation**:
+   * The Error Handler Process state transitions to `READY`.
+   * The kernel forces rescheduling using `longjmp` back to the partition scheduler.
+5. **Exception Resolution**:
+   * The partition scheduler (`process_schedule` in **process.c** file) executes the Error Handler Process first.
+    * If no handler process is active, the kernel calls `hm_raise_partition_error` to lookup and apply the static recovery action.
+
+### 3. Implementation of Recovery Actions in `hm.c`
+
+The core functions that handle recovery actions at the Partition and Module level are implemented in **hm.c** file:
+* **Partition Level Recovery**: Done inside `hm_raise_partition_error()`.
+* **Module Level Recovery**: Done inside `hm_raise_module_error()`.
+
+> [!IMPORTANT]
+> **Completing Switch Cases for Proper Configuration**
+> Currently, the recovery actions (like `PROCESS_RESTART`, `PROCESS_REPLENISH`, and `PARTITION_STOP`) inside the `switch (action)` blocks in **hm.c** file are placeholders containing mostly diagnostic `printf` outputs. 
+> To configure and run a fully functional fault-tolerant system, developers must complete these `switch` case blocks in **hm.c** file with custom logic (e.g., calling `SET_PARTITION_MODE` to start partition-level reboot, or calling hardware reset vectors for module-level recovery).
 
 
 ## How to add a new partition
