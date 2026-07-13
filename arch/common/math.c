@@ -251,7 +251,7 @@ float ceil(float d){
 }
 
 // square root (newton's method of sucessive aproximations)
-float sqrt(float arg){
+float sqrtf(float arg){
 	float x, temp;
 	int32_t exp = 0;
 	int32_t i;
@@ -558,7 +558,7 @@ float asin(float arg){
 		return(0.0f);
 	}
 
-	temp = sqrt(1.0f - arg*arg);
+	temp = sqrtf(1.0f - arg*arg);
 	if(arg > 0.7f)
 		temp = PI_2 - atan(temp/arg);
 	else

@@ -149,6 +149,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
     new_pcb->id_next = 0;
     new_pcb->next_stack_addr = memory_requirements->memory[DATA].base + PARTIION_OS_AND_MAIN_PROCESS_STACK_SIZE;
     new_pcb->processes = list_create();
+    new_pcb->process_current = NULL;
     new_pcb->communication_queuing_ports = list_create();
     new_pcb->queuing_port_count = 0;
 
@@ -207,6 +208,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 
     // HM partition table
     new_pcb->partition_hm_table = partition_hm_table;
+    new_pcb->error_handler_process = NULL;
 
     CRITICAL_LEAVE();
 
@@ -222,7 +224,7 @@ int32_t partition_init(SYSTEM_TIME_TYPE PERIOD,
 
 int32_t krnl_partition_switch(PARTITION_ID_TYPE IDENTIFIER){
     if (IDENTIFIER == IDLE_PARTITION_ID) {
-        _pmp_partition_activate((uint32_t)_kernel_end, (uint32_t)0, (uint32_t)0);
+        // _pmp_partition_activate((uint32_t)_kernel_end, (uint32_t)0, (uint32_t)0);
 #ifndef MULTICORE
         kcb->partition_current = NULL;
 #else
@@ -242,7 +244,7 @@ int32_t krnl_partition_switch(PARTITION_ID_TYPE IDENTIFIER){
     uint32_t partition_end_addr = (uint32_t) partition->memory_requirements->memory[DATA].base + partition->memory_requirements->memory[DATA].size;
     // printf("start partition addr: %x, end partition addr: %x\n", partition_start_addr, partition_end_addr);
 
-    _pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
+    // _pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
 
     if(partition->status->OPERATING_MODE == IDLE){
         int32_t id = krnl_partition_switch(IDLE_PARTITION_ID);
@@ -261,7 +263,7 @@ int32_t krnl_partition_switch(PARTITION_ID_TYPE IDENTIFIER){
     uint32_t partition_start_addr = (uint32_t) partition->memory_requirements->memory[CODE].base;
     uint32_t partition_end_addr = (uint32_t) partition->memory_requirements->memory[DATA].base + partition->memory_requirements->memory[DATA].size;
     // printf("start partition addr: %x, end partition addr: %x\n", partition_start_addr, partition_end_addr);
-    _pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
+    // _pmp_partition_activate((uint32_t) _kernel_end, partition_start_addr, partition_end_addr);
     if(partition->status->OPERATING_MODE == IDLE){
         int32_t id = krnl_partition_switch(IDLE_PARTITION_ID);
         return id;

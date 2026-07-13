@@ -56,9 +56,9 @@ static struct node_s *check_deadlines(struct node_s *node, void *arg) {
         ERROR_STATUS_TYPE error_status;
         error_status.ERROR_CODE = DEADLINE_MISSED;
         error_status.FAILED_PROCESS_ID = process->process_id;
-        hm_raise_error(error_status.ERROR_CODE,
-                       (MESSAGE_ADDR_TYPE)"Deadline missed",
-                       15, node);
+        // hm_raise_error(error_status.ERROR_CODE,
+        //                (MESSAGE_ADDR_TYPE)"Deadline missed",
+        //                15, node);
         // printf("ATTENTION LE PROCESS %d A DEPASSE SA DEADLINE QUI ETAIT DE %d\n", process->process_id, process->processus_status->DEADLINE_TIME);
     }
     return 0;
@@ -160,7 +160,8 @@ void PERIODIC_WAIT (
     }
 
     uint64_t uptime = ucx_uptime();
-    uint64_t futur_deadline_time = (uint64_t)current_process->processus_status->ATTRIBUTES.PERIOD + (uint64_t)current_process->release_point_time + (uint64_t)current_process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+    uint64_t time_capacity = (current_process->processus_status->ATTRIBUTES.TIME_CAPACITY == INFINITE_TIME_VALUE) ? 0 : current_process->processus_status->ATTRIBUTES.TIME_CAPACITY;
+    uint64_t futur_deadline_time = (uint64_t)current_process->processus_status->ATTRIBUTES.PERIOD + (uint64_t)current_process->release_point_time + time_capacity;
     if (time_overflow(futur_deadline_time)){
         *RETURN_CODE = INVALID_PARAM;
         return;

@@ -1,11 +1,8 @@
 # TO-DO
 
 ## matériel
-* essayer de faire rouler l'os sur la carte de Felipe
-
-## test
-* faire une batterie de test unitaires pour voir si le comportement de toute les fonctions de l'apex est correct
-    * arinc HM
+* merge toutes les branches sur la main (polarfire et testbench)
+* voir si possible de faire un xml ou script pour config plus rapidement le workspace eclispe avec tout bien 
 
 ## refactoring
 
@@ -18,6 +15,7 @@
 * voir si pour les ressources comme bb, la reference vers la partition ou le waiting_blackboard est necessaire dans la struct
 * voir pour mettre krnl acquire et release mutex dans un fichier du krnl
 * voir pour mettre des fonctions lié aux channels dans la comm inter partition dans les fichiers du noyau
+
 ## Optimisation
 
 * retirer les mallocs et les free en utilisant le pool allocator utiliser durant la communication inter et intra partition
@@ -45,10 +43,6 @@
 * protection memoire avec pmp_activate et mprv_activate (lie a riscv32)
 * logique des longjmp et setjmp dans l'irq_handler afin d'executer les fonctions de scheduling dans la stack du kernel 
 * l'irq handler pour la traduction des erreurs os en arinc
-
-## Warning
-* beaucoup d'utilisation de malloc, voir si necessaire d'enlever tous les mallocs
-    * mais alors comment faire pour les liste et tout
 
 ## remind debug
 * build:

@@ -1,6 +1,5 @@
 #include "ucx.h"
 
-
 int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *process, struct pcb_s *current_partition, int is_error_handler)
 {
 	struct tcb_s *new_tcb;
@@ -17,7 +16,9 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 	new_tcb->task = task;
 	new_tcb->rt_prio = 0;
 	new_tcb->delay = 0;
-	new_tcb->stack_sz = stack_size;
+
+	// stack_size = (stack_size + 15) & ~15;
+    new_tcb->stack_sz = stack_size;
 
     if (!is_error_handler) {
         current_partition->id_next++;
@@ -29,9 +30,18 @@ int32_t ucx_process_spawn(void *task, uint16_t stack_size, struct process_s *pro
 
 	// alignement de la prochaine stack adresse sur 8 octets
 	size_t addr = (size_t) current_partition->next_stack_addr;
-    addr = (addr + 7) & ~7;
+    addr = (addr + 15) & ~15;
     current_partition->next_stack_addr = (uint8_t *) addr;
-		
+
+    // 2. Alignement strict de l'adresse de départ sur 16 octets
+    // size_t base_addr = (size_t)current_partition->next_stack_addr;
+    // base_addr = (base_addr + 15) & ~15;
+
+    // new_tcb->stack = (uint8_t *)(base_addr + stack_size);
+
+    // current_partition->next_stack_addr = (uint8_t *)(base_addr + stack_size);
+
+
 	CRITICAL_LEAVE();
 	
 	// printf("core %d, task %d: 0x%p, stack: 0x%p, size %d\n", _cpu_id(),
@@ -64,7 +74,7 @@ uint16_t process_schedule(void)
     struct process_s *pselect = NULL;
     int32_t highest_priority = -1;
     
-    if (partition->process_current != NULL) {
+    if (partition->process_current != NULL && partition->process_current->data != NULL) {
         struct process_s *current_process = partition->process_current->data;
         if (current_process->processus_status->PROCESS_STATE == RUNNING) {
             current_process->processus_status->PROCESS_STATE = READY;
