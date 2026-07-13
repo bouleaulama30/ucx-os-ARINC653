@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#111827" />
+      <stop offset="100%" stop-color="#1f2937" />
+    </linearGradient>
+    <!-- Card Gradients -->
+    <linearGradient id="userGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="asmGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+    <linearGradient id="cGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <linearGradient id="kernelGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#6d28d9" />
+    </linearGradient>
+    <linearGradient id="partGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ec4899" />
+      <stop offset="100%" stop-color="#be185d" />
+    </linearGradient>
+    <!-- Arrow Marker -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#9ca3af" />
+    </marker>
+    <!-- Shadow Filter -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="650" rx="12" fill="url(#bgGrad)" />
+
+  <!-- Grid Lines (Subtle) -->
+  <g stroke="#374151" stroke-width="0.5" opacity="0.3">
+    <path d="M 0,100 L 900,100 M 0,200 L 900,200 M 0,300 L 900,300 M 0,400 L 900,400 M 0,500 L 900,500" />
+    <path d="M 150,0 L 150,650 M 300,0 L 300,650 M 450,0 L 450,650 M 600,0 L 600,650 M 750,0 L 750,650" />
+  </g>
+
+  <!-- Title -->
+  <text x="450" y="40" text-anchor="middle" fill="#f9fafb" font-family="system-ui, sans-serif" font-size="22" font-weight="bold" letter-spacing="1">Timer Interrupt &amp; Two-Level Scheduling Flow</text>
+
+  <!-- Node 1: Active Process -->
+  <g filter="url(#shadow)">
+    <rect x="50" y="90" width="220" height="80" rx="8" fill="url(#userGrad)" stroke="#10b981" stroke-width="1.5" />
+    <text x="160" y="125" text-anchor="middle" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="bold">Active Process</text>
+    <text x="160" y="145" text-anchor="middle" fill="#d1fae5" font-family="system-ui, sans-serif" font-size="11">User Space (Partition App)</text>
+  </g>
+
+  <!-- Arrow 1 -> 2 -->
+  <path d="M 270,130 L 330,130" fill="none" stroke="#9ca3af" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="300" y="115" text-anchor="middle" fill="#9ca3af" font-family="system-ui, sans-serif" font-size="10">Timer IRQ</text>
+
+  <!-- Node 2: Low-Level ISR -->
+  <g filter="url(#shadow)">
+    <rect x="330" y="90" width="220" height="80" rx="8" fill="url(#asmGrad)" stroke="#3b82f6" stroke-width="1.5" />
+    <text x="440" y="120" text-anchor="middle" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="bold">Low-Level ISR (_isr)</text>
+    <text x="440" y="138" text-anchor="middle" fill="#dbeafe" font-family="system-ui, sans-serif" font-size="11">crt0.s (Assembly)</text>
+    <text x="440" y="153" text-anchor="middle" fill="#93c5fd" font-family="system-ui, sans-serif" font-size="10">Saves CPU registers on stack</text>
+  </g>
+
+  <!-- Arrow 2 -> 3 -->
+  <path d="M 550,130 L 610,130" fill="none" stroke="#9ca3af" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="580" y="115" text-anchor="middle" fill="#9ca3af" font-family="system-ui, sans-serif" font-size="10">Calls C</text>
+
+  <!-- Node 3: High-Level IRQ -->
+  <g filter="url(#shadow)">
+    <rect x="610" y="90" width="240" height="95" rx="8" fill="url(#cGrad)" stroke="#f59e0b" stroke-width="1.5" />
+    <text x="730" y="118" text-anchor="middle" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="bold">C IRQ Handler (_irq_handler)</text>
+    <text x="730" y="135" text-anchor="middle" fill="#fef3c7" font-family="system-ui, sans-serif" font-size="11">hal.c (Kernel context)</text>
+    <text x="730" y="152" text-anchor="middle" fill="#fde047" font-family="system-ui, sans-serif" font-size="10">1. Disables MPRV (Kernel Space)</text>
+    <text x="730" y="167" text-anchor="middle" fill="#fde047" font-family="system-ui, sans-serif" font-size="10">2. setjmp() context &amp; longjmp()</text>
+  </g>
+
+  <!-- Arrow 3 -> 4 (Vertical down & left) -->
+  <path d="M 730,185 L 730,260 L 550,260" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow)" />
+  <text x="660" y="250" text-anchor="middle" fill="#9ca3af" font-family="system-ui, sans-serif" font-size="11" font-weight="bold">longjmp(kcb-&gt;context)</text>
+
+  <!-- Node 4: Kernel Scheduler -->
+  <g filter="url(#shadow)">
+    <rect x="300" y="215" width="250" height="90" rx="8" fill="url(#kernelGrad)" stroke="#8b5cf6" stroke-width="1.5" />
+    <text x="425" y="243" text-anchor="middle" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="bold">Kernel Scheduler Loop</text>
+    <text x="425" y="260" text-anchor="middle" fill="#ede9fe" font-family="system-ui, sans-serif" font-size="11">main.c (Kernel Space)</text>
+    <text x="425" y="278" text-anchor="middle" fill="#c084fc" font-family="system-ui, sans-serif" font-size="10">Advances ticks &amp; calls rt_sched()</text>
+    <text x="425" y="292" text-anchor="middle" fill="#c084fc" font-family="system-ui, sans-serif" font-size="10">Checks active Partition Window</text>
+  </g>
+
+  <!-- Arrow 4 -> Branch (Down) -->
+  <path d="M 425,305 L 425,350" fill="none" stroke="#9ca3af" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Decision Diamond (Is Active Partition Window?) -->
+  <g filter="url(#shadow)">
+    <polygon points="425,350 515,395 425,440 335,395" fill="#374151" stroke="#9ca3af" stroke-width="1.5" />
+    <text x="425" y="390" text-anchor="middle" fill="#ffffff" font-family="system-ui, sans-serif" font-size="11" font-weight="bold">Active Window</text>
+    <text x="425" y="405" text-anchor="middle" fill="#ffffff" font-family="system-ui, sans-serif" font-size="11" font-weight="bold">Scheduled?</text>
+  </g>
+
+  <!-- Branch No -> IDLE (Right) -->
+  <path d="M 515,395 L 610,395" fill="none" stroke="#ef4444" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="560" y="385" text-anchor="middle" fill="#f87171" font-family="system-ui, sans-serif" font-size="12" font-weight="bold">NO</text>
+
+  <!-- Node: IDLE (Wait for interrupt) -->
+  <g filter="url(#shadow)">
+    <rect x="610" y="355" width="220" height="80" rx="8" fill="#1f2937" stroke="#ef4444" stroke-width="1.5" />
+    <text x="720" y="390" text-anchor="middle" fill="#f87171" font-family="system-ui, sans-serif" font-size="14" font-weight="bold">Idle Mode (wfi)</text>
+    <text x="720" y="410" text-anchor="middle" fill="#9ca3af" font-family="system-ui, sans-serif" font-size="11">Sleeps CPU until next tick</text>
+  </g>
+
+  <!-- Branch Yes -> Partition (Down) -->
+  <path d="M 425,440 L 425,490" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow)" />
+  <text x="455" y="465" text-anchor="middle" fill="#34d399" font-family="system-ui, sans-serif" font-size="12" font-weight="bold">YES</text>
+  <text x="360" y="465" text-anchor="middle" fill="#a78bfa" font-family="system-ui, sans-serif" font-size="10">longjmp(next_partition)</text>
+
+  <!-- Node 5: Partition OS -->
+  <g filter="url(#shadow)">
+    <rect x="300" y="490" width="250" height="95" rx="8" fill="url(#partGrad)" stroke="#ec4899" stroke-width="1.5" />
+    <text x="425" y="518" text-anchor="middle" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="bold">Partition OS Scheduler</text>
+    <text x="425" y="535" text-anchor="middle" fill="#fce7f3" font-family="system-ui, sans-serif" font-size="11">arinc_partition.c (Partition Space)</text>
+    <text x="425" y="552" text-anchor="middle" fill="#f472b6" font-family="system-ui, sans-serif" font-size="10">1. Updates partition-local clocks</text>
+    <text x="425" y="567" text-anchor="middle" fill="#f472b6" font-family="system-ui, sans-serif" font-size="10">2. Runs process_schedule() &amp; longjmp()</text>
+  </g>
+
+  <!-- Return Arrow 5 -> 1 (Vertical up & left) -->
+  <path d="M 300,540 L 160,540 L 160,185" fill="none" stroke="#10b981" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="120" y="325" text-anchor="middle" fill="#34d399" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" transform="rotate(-90 120 325)">Resumes Selected Process</text>
+</svg>

@@ -16,6 +16,7 @@ This project is the adaptation of UCX/OS to the **ARINC 653** standard.
   - [1. Concepts: Ports and Channels](#1-concepts-ports-and-channels)
   - [2. Communication Modes](#2-communication-modes)
   - [3. Example Mapping](#3-example-mapping)
+- [How Timer Interrupts and Scheduling Work](#how-timer-interrupts-and-scheduling-work)
 - [How to Add a New Partition](#how-to-add-a-new-partition)
   - [Step 1: Update the Linker Script (`.ld`)](#step-1-update-the-linker-script-ld)
   - [Step 2: Configure the Partition in `static_conf.h`](#step-2-configure-the-partition-in-static_confh)
@@ -170,6 +171,45 @@ Based on `system_port_table[]` in `static_conf.h`:
 * **Queuing Channel (`channel_cmds`)**:
   * **Source**: Port `"P2_OUT_CMDS"` in Partition 2 sends commands.
   * **Destination**: Port `"P1_IN_CMDS"` in Partition 1 receives commands.
+
+
+## How timer interrupts and scheduling work
+
+To maintain strict temporal and spatial isolation, the kernel relies on hardware timer interrupts and a two-level context switching mechanism.
+
+The following flowchart and step-by-step breakdown describe what happens at each timer interrupt:
+
+### Step-by-Step Flow
+
+![Timer Interrupt & Two-Level Scheduling Flow](schemes/scheduling_flow.svg)
+
+### 1. Hardware Interrupt Entry
+* When the hardware timer comparison register `mtimecmp` matches `mtime`, a timer interrupt triggers.
+* The CPU vector table routes execution immediately to the low-level interrupt service routine (`_isr` in **crt0.s** file).
+
+### 2. Context Saving & Kernel Transition
+* **General-Purpose Register Dump**: `_isr` saves the active CPU registers (`ra`, `t0`-`t6`, `a0`-`a7`) onto the stack of the currently executing partition.
+* Inside the C handler `_irq_handler` in **hal.c** file, the timer comparison register is reloaded for the next tick:
+  $$\text{mtimecmp} = \text{mtime} + \left( \frac{F\_CPU}{F\_TIMER} \right)$$
+
+### 3. Yielding to the Kernel Module Scheduler
+* **Saving Partition Context**: The handler checks if a partition was active (`kcb->partition_current != NULL`). If so, it saves the partition's execution context into `current_partition->tcb.context` using `setjmp()`.
+* **Switching Execution Thread**: The handler performs a `longjmp(kcb->context, 1)` to return control to the main kernel scheduler loop in **main.c** file.
+
+### 4. Running the Two-Level Scheduler
+* **Module-Level Scheduling (Temporal Isolation)**:
+  * The kernel increments the execution tick count (`kcb->ticks++`).
+  * It runs `kcb->rt_sched()` to evaluate the current scheduling plan. It checks `DEFAULT_WINDOWS[]` to determine which partition window is active.
+  * If the active window changes, `kcb->partition_current` is updated.
+* **Idle Mode**: If no partition window is scheduled for the current tick, the kernel runs `_cpu_idle()`, which executes the `wfi` (Wait For Interrupt) instruction to put the processor in a low-power sleep state until the next timer tick.
+* **Transitioning to Partition OS**: If a partition window is active, the kernel performs a `longjmp(next_partition->tcb.context, 1)`.
+
+### 5. Running the Intra-Partition Scheduler
+* Execution resumes inside the partition context at `partition_OS()` in **arinc_partition.c** file.
+* **Process-Level Scheduling (Spatial Isolation)**:
+  * The partition OS updates its local timers (`arinc_time_update_partition`).
+  * It runs `process_schedule()` to select the next `READY` process based on priority and deadline.
+  * It restores the selected process context from its TCB context block, returning execution to the application code.
 
 
 ## How to add a new partition
