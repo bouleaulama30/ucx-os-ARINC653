@@ -1,7 +1,6 @@
 # TO-DO
 
 ## matériel
-* merge toutes les branches sur la main (polarfire et testbench)
 * voir si possible de faire un xml ou script pour config plus rapidement le workspace eclispe avec tout bien 
 
 ## refactoring
