@@ -31,7 +31,6 @@ typedef
 struct buffer_s {
     BUFFER_NAME_TYPE buffer_name;
     BUFFER_ID_TYPE buffer_id;
-    PARTITION_ID_TYPE partition_id;
     BUFFER_STATUS_TYPE buffer_status;
     QUEUING_DISCIPLINE_TYPE queuing_discipline;
     uint32_t read_index;
@@ -107,7 +106,6 @@ typedef
 struct blackboard_s {
        BLACKBOARD_NAME_TYPE blackboard_name;
        BLACKBOARD_ID_TYPE blackboard_id;
-       PARTITION_ID_TYPE partition_id;
        BLACKBOARD_STATUS_TYPE blackboard_status;
        struct list_s *waiting_processes;
 };
@@ -179,7 +177,6 @@ typedef
 struct semaphore_s {
        SEMAPHORE_NAME_TYPE semaphore_name;
        SEMAPHORE_ID_TYPE semaphore_id;
-       PARTITION_ID_TYPE partition_id;
        QUEUING_DISCIPLINE_TYPE queuing_discipline;
        SEMAPHORE_STATUS_TYPE semaphore_status;
        struct list_s *waiting_processes;
@@ -243,7 +240,6 @@ typedef
 struct event_s {
        EVENT_NAME_TYPE event_name;
        EVENT_ID_TYPE event_id;
-       PARTITION_ID_TYPE partition_id;
        EVENT_STATUS_TYPE event_status;
        struct list_s *waiting_processes;
 };
@@ -317,7 +313,6 @@ typedef
 struct mutex_s {
        MUTEX_NAME_TYPE mutex_name;
        MUTEX_ID_TYPE mutex_id;
-       PARTITION_ID_TYPE partition_id;
        QUEUING_DISCIPLINE_TYPE queuing_discipline;
        MUTEX_STATUS_TYPE mutex_status;
        PRIORITY_TYPE saved_owner_priority;

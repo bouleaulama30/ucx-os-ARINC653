@@ -5,12 +5,8 @@
 
 ## refactoring
 
-* enlever les reference aux communication port dans partition init 
 * mettre des commentaires
-* faire de la documentation
 
-* sampling_port_s -> sp_s ?
-* voir si pour les ressources comme bb, la reference vers la partition ou le waiting_blackboard est necessaire dans la struct
 * voir pour mettre krnl acquire et release mutex dans un fichier du krnl
 * voir pour mettre des fonctions lié aux channels dans la comm inter partition dans les fichiers du noyau
 

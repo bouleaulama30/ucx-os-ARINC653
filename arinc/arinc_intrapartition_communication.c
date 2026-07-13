@@ -146,7 +146,6 @@ void CREATE_BLACKBOARD (
     strncpy(bb->blackboard_name, BLACKBOARD_NAME, sizeof(bb->blackboard_name) - 1);
     bb->blackboard_name[sizeof(bb->blackboard_name) - 1] = '\0';
     bb->blackboard_id = partition->blackboard_count;
-    bb->partition_id = partition->status->IDENTIFIER;
     bb->waiting_processes = list_create();
     bb->blackboard_status.EMPTY_INDICATOR = EMPTY;
     bb->blackboard_status.MAX_MESSAGE_SIZE = MAX_MESSAGE_SIZE;
@@ -360,7 +359,6 @@ void CREATE_BUFFER (
     strncpy(buf->buffer_name, BUFFER_NAME, sizeof(buf->buffer_name) - 1);
     buf->buffer_name[sizeof(buf->buffer_name) - 1] = '\0';
     buf->buffer_id = partition->buffer_count;
-    buf->partition_id = partition->status->IDENTIFIER;
     buf->waiting_readers = list_create();
     buf->waiting_writers = list_create();
     buf->read_index = 0;
@@ -664,7 +662,6 @@ void CREATE_SEMAPHORE (
     strncpy(sem->semaphore_name, SEMAPHORE_NAME, sizeof(sem->semaphore_name) - 1);
     sem->semaphore_name[sizeof(sem->semaphore_name) - 1] = '\0';
     sem->semaphore_id = partition->semaphore_count;
-    sem->partition_id = partition->status->IDENTIFIER;
     sem->waiting_processes = list_create();
     sem->semaphore_status.CURRENT_VALUE = CURRENT_VALUE;
     sem->semaphore_status.MAXIMUM_VALUE = MAXIMUM_VALUE;
@@ -832,7 +829,6 @@ void CREATE_EVENT (
     strncpy(event->event_name, EVENT_NAME, sizeof(event->event_name) - 1);
     event->event_name[sizeof(event->event_name) - 1] = '\0';
     event->event_id = partition->event_count;
-    event->partition_id = partition->status->IDENTIFIER;
     event->waiting_processes = list_create();
     event->event_status.EVENT_STATE = DOWN;
     event->event_status.WAITING_PROCESSES = 0;
@@ -1060,7 +1056,6 @@ void CREATE_MUTEX (
     strncpy(mutex->mutex_name, MUTEX_NAME, sizeof(mutex->mutex_name) - 1);
     mutex->mutex_name[sizeof(mutex->mutex_name) - 1] = '\0';
     mutex->mutex_id = partition->mutex_count;
-    mutex->partition_id = partition->status->IDENTIFIER;
     mutex->waiting_processes = list_create();
     mutex->mutex_status.MUTEX_STATE = AVAILABLE;
     mutex->mutex_status.MUTEX_PRIORITY = MUTEX_PRIORITY;
