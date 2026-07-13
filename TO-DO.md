@@ -5,10 +5,8 @@
 
 ## refactoring
 
+* faire de la doc sur comment fonctionne le HM et le system
 * mettre des commentaires
-
-
-* voir pour mettre des fonctions lié aux channels dans la comm inter partition dans les fichiers du noyau
 
 ## Optimisation
 
