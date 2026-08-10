@@ -1,5 +1,23 @@
 # TO-DO
 
+## Testbench matériel
+* se poser plein de question et y répondre:
+    * cf c'est quoi le HW in the loop
+    * mettre un programme en fond sur le fpga polarfire
+    * comment fonctionne spi
+    * comment fonctionne lien entre pl et ps polarfire (cf felipe projet accelerateur sur fpga)
+    * comment fonctionne le spi de la polarfire
+    * comment ecrire spi via fpga polarfire
+    * comment récupérer le signal de holt sur la polarfire
+    * comment mettre la data recupérer dans l'os arinc 653 
+
+
+
+* faire un schema net et précis en boucle fermé
+* bien comprendre la doc de la carte HI-3590
+* se faire la main avec la carte via la rpi
+
+
 ## matériel
 * voir si possible de faire un xml ou script pour config plus rapidement le workspace eclispe avec tout bien 
 
