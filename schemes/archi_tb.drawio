@@ -1,9 +1,72 @@
 <mxfile host="app.diagrams.net">
   <diagram name="Page-1" id="lDzOw--8nNFknvkVqeJD">
-    <mxGraphModel>
+    <mxGraphModel dx="3225" dy="3188" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="KAumEQLT94HZIycERS2t-25" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="290" width="430" x="-1155" y="-1800" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-24" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="420" width="910" x="-1620" y="-2290" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-23" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="330" width="350" x="-1125" y="-2240" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-22" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="300" width="350" x="-1544" y="-2210" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;div&gt;Générateur&lt;/div&gt;&lt;div&gt;altitude&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="-910" y="-2180" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=center;" value="&lt;div&gt;Encodage&lt;/div&gt;&lt;div&gt;ARINC 429&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="-920" y="-2080" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=center;" value="Arbitre + Controller SPI (master)" vertex="1">
+          <mxGeometry height="70" width="300" x="-1100" y="-1960" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=center;" value="Controller SPI (slave)" vertex="1">
+          <mxGeometry height="60" width="120" x="-1000" y="-1742" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=center;" value="TX&amp;nbsp; +-10V" vertex="1">
+          <mxGeometry height="60" width="120" x="-910" y="-1632" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=center;" value="RX&amp;nbsp; +-10V" vertex="1">
+          <mxGeometry height="60" width="120" x="-1090" y="-1632" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Processus 1" vertex="1">
+          <mxGeometry height="60" width="120" x="-1364" y="-2090" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Processus 1" vertex="1">
+          <mxGeometry height="60" width="120" x="-1514" y="-2090" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-11" parent="1" style="ellipse;whiteSpace=wrap;html=1;shapeInside=1;aspect=fixed;" value="Sampling Port" vertex="1">
+          <mxGeometry height="80" width="80" x="-1424" y="-2000" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-13" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;" value="&lt;div&gt;Registre&lt;/div&gt;&lt;div&gt;Mémoire&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="80" x="-1090" y="-2190" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=center;" value="&lt;div&gt;Décodage&lt;/div&gt;&lt;div&gt;ARINC 429&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="-1080" y="-2080" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-20" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Partition 2" vertex="1">
+          <mxGeometry height="170" width="140" x="-1524" y="-2160" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-21" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Partition 1" vertex="1">
+          <mxGeometry height="170" width="140" x="-1374" y="-2160" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-26" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1" value="FPGA" vertex="1">
+          <mxGeometry height="30" width="60" x="-1110" y="-2230" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-27" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1" value="Core 1 ARM (UCX-OS-ARINC653" vertex="1">
+          <mxGeometry height="30" width="176" x="-1540" y="-2200" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-28" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1" value="PolarFire Soc Discovery Kit" vertex="1">
+          <mxGeometry height="30" width="176" x="-1610" y="-2280" as="geometry" />
+        </mxCell>
+        <mxCell id="KAumEQLT94HZIycERS2t-29" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1" value="Holt Board" vertex="1">
+          <mxGeometry height="30" width="176" x="-1176" y="-1790" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
