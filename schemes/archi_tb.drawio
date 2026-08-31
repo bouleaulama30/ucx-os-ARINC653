@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net">
   <diagram name="Page-1" id="lDzOw--8nNFknvkVqeJD">
-    <mxGraphModel dx="4011" dy="3613" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="3829" dy="3533" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -27,11 +27,6 @@
         </mxCell>
         <mxCell id="KAumEQLT94HZIycERS2t-31" edge="1" parent="1" source="KAumEQLT94HZIycERS2t-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" target="KAumEQLT94HZIycERS2t-3">
           <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="KAumEQLT94HZIycERS2t-34" connectable="0" parent="KAumEQLT94HZIycERS2t-31" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=14;" value="Demande envoie 10ms" vertex="1">
-          <mxGeometry relative="1" x="-0.0667" y="1" as="geometry">
-            <mxPoint x="-1" as="offset" />
-          </mxGeometry>
         </mxCell>
         <mxCell id="KAumEQLT94HZIycERS2t-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontSize=16;" value="&lt;div&gt;Encodage&lt;/div&gt;&lt;div&gt;ARINC 429&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="120" x="-920" y="-2001" as="geometry" />
@@ -103,11 +98,6 @@
         <mxCell id="KAumEQLT94HZIycERS2t-32" edge="1" parent="1" source="KAumEQLT94HZIycERS2t-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;startArrow=classic;startFill=1;" target="KAumEQLT94HZIycERS2t-3">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="KAumEQLT94HZIycERS2t-35" connectable="0" parent="KAumEQLT94HZIycERS2t-32" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=14;" value="Demande lecture 100ms" vertex="1">
-          <mxGeometry relative="1" x="0.1385" y="-3" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="KAumEQLT94HZIycERS2t-33" edge="1" parent="1" source="KAumEQLT94HZIycERS2t-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="KAumEQLT94HZIycERS2t-13">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
@@ -123,7 +113,7 @@
         <mxCell id="KAumEQLT94HZIycERS2t-26" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1;fontSize=20;" value="FPGA" vertex="1">
           <mxGeometry height="30" width="60" x="-1110" y="-2151" as="geometry" />
         </mxCell>
-        <mxCell id="KAumEQLT94HZIycERS2t-27" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1;fontSize=20;" value="Core 1 ARM (UCX-OS-ARINC653)" vertex="1">
+        <mxCell id="KAumEQLT94HZIycERS2t-27" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1;fontSize=20;" value="Core 1 RISCV (UCX-OS-ARINC653)" vertex="1">
           <mxGeometry height="30" width="340" x="-1540" y="-2121" as="geometry" />
         </mxCell>
         <mxCell id="KAumEQLT94HZIycERS2t-28" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1;fontSize=20;" value="PolarFire Soc Discovery Kit" vertex="1">
@@ -152,11 +142,6 @@
         </mxCell>
         <mxCell id="KAumEQLT94HZIycERS2t-54" edge="1" parent="1" source="KAumEQLT94HZIycERS2t-56" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="KAumEQLT94HZIycERS2t-96">
           <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="KAumEQLT94HZIycERS2t-55" connectable="0" parent="KAumEQLT94HZIycERS2t-54" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=14;" value="Demande envoie 10ms" vertex="1">
-          <mxGeometry relative="1" x="-0.0667" y="1" as="geometry">
-            <mxPoint x="-1" as="offset" />
-          </mxGeometry>
         </mxCell>
         <mxCell id="KAumEQLT94HZIycERS2t-56" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontSize=16;" value="&lt;div&gt;Encodage&lt;/div&gt;&lt;div&gt;ARINC 429&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="120" x="150" y="-1981" as="geometry" />
@@ -219,11 +204,6 @@
             <mxPoint x="50.400000000000375" y="-1838.3" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="KAumEQLT94HZIycERS2t-76" connectable="0" parent="KAumEQLT94HZIycERS2t-75" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=14;" value="Demande lecture 100ms" vertex="1">
-          <mxGeometry relative="1" x="0.1385" y="-3" as="geometry">
-            <mxPoint x="3" y="-6" as="offset" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="KAumEQLT94HZIycERS2t-77" edge="1" parent="1" source="KAumEQLT94HZIycERS2t-78" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="KAumEQLT94HZIycERS2t-74">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
@@ -236,10 +216,10 @@
         <mxCell id="KAumEQLT94HZIycERS2t-80" parent="1" style="swimlane;whiteSpace=wrap;html=1;fontSize=15;" value="Partition 1" vertex="1">
           <mxGeometry height="170" width="140" x="-304" y="-2061" as="geometry" />
         </mxCell>
-        <mxCell id="KAumEQLT94HZIycERS2t-81" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1;fontSize=20;" value="FPGA" vertex="1">
-          <mxGeometry height="30" width="60" x="-40" y="-2131" as="geometry" />
+        <mxCell id="KAumEQLT94HZIycERS2t-81" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1;fontSize=20;" value="Core 2 RISCV OS Baremetal Microship" vertex="1">
+          <mxGeometry height="30" width="294" x="-40" y="-2131" as="geometry" />
         </mxCell>
-        <mxCell id="KAumEQLT94HZIycERS2t-82" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1;fontSize=20;" value="Core 1 ARM (UCX-OS-ARINC653)" vertex="1">
+        <mxCell id="KAumEQLT94HZIycERS2t-82" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1;fontSize=20;" value="Core 1 RISCV (UCX-OS-ARINC653)" vertex="1">
           <mxGeometry height="30" width="340" x="-470" y="-2101" as="geometry" />
         </mxCell>
         <mxCell id="KAumEQLT94HZIycERS2t-83" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1;fontSize=20;" value="PolarFire Soc Discovery Kit" vertex="1">
