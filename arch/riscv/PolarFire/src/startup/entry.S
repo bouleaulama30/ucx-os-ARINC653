@@ -9,16 +9,16 @@
     .extern system_init
 
 _entry:
-    /* Run only on U54_1 (hart 1). Park all others. */
+    /* Run only on U54_2 (hart 2). Park all others. */
     csrr    a0, mhartid
-    li      t0, 1
-    beq     a0, t0, .Lboot_hart1
+    li      t0, 2
+    beq     a0, t0, .Lboot_hart2
 
 .Lpark_other_harts:
     wfi
     j       .Lpark_other_harts
 
-.Lboot_hart1:
+.Lboot_hart2:
     /* Set up global pointer */
     .option push
     .option norelax

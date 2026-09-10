@@ -14,9 +14,9 @@
     <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbClientOtherOptions" value=""/>
     <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerConnectionAddress" value=""/>
     <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerExecutable" value="${openocd_path}/${openocd_executable}"/>
-    <intAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerGdbPortNumber" value="3333"/>
+    <intAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerGdbPortNumber" value="3335"/>
     <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerLog" value=""/>
-    <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerOther" value="--command &quot;set DEVICE MPFS&quot;&#13;&#10;--command &quot;set COREID 1&quot;&#13;&#10;--file board/microsemi-riscv.cfg"/>
+    <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerOther" value="--command &quot;set DEVICE MPFS&quot;&#13;&#10;--command &quot;set COREID 2&quot;&#13;&#10;--file board/microsemi-riscv.cfg"/>
     <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerTclPortNumber" value="6666"/>
     <intAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerTelnetPortNumber" value="4444"/>
     <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.otherInitCommands" value=""/>
@@ -30,7 +30,7 @@
     <booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.loadImage" value="true"/>
     <booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.loadSymbols" value="true"/>
     <stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.pcRegister" value=""/>
-    <intAttribute key="org.eclipse.cdt.debug.gdbjtag.core.portNumber" value="3333"/>
+    <intAttribute key="org.eclipse.cdt.debug.gdbjtag.core.portNumber" value="3335"/>
     <booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.setPcRegister" value="false"/>
     <booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.setResume" value="false"/>
     <booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.setStopAt" value="false"/>

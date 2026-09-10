@@ -1,255 +1,242 @@
-/* __________________________________________________________________________
-* DEVELOPMENT HISTORY:
-* --------------------
-*
-* $Author:: $: Felipe Gohring de Magalhaes
-* $Rev:: $: Revision of last commit
-* $Date:: $: 10/25/2018
-* $Comments (Refer to applicable SCR/PR) $: Initial version of the file.
-* __________________________________________________________________________
-*/
-/* __________________________________________________________________________
-* MODULE DESCRIPTION:
-* -------------------
-* Filename : P1_benchmark.c
-* Original Author : Felipe Gohring de Magalhaes
-*
-* This module contains partition 1 main function.
-*
-* ASSUMPTIONS, CONSTRAINTS OR LIMITATIONS:
-* ----------------------------------------
-* 
-*
-* REFERENCES:
-* -----------
-* None.
-* __________________________________________________________________________
-*/
-/* INCLUDE SECTION */
-/*Include here any system specific lib that is not with performance_lib.h*/
-#if defined(TEST_PERF1)
+#include <ucx.h>
 
-#include "p1_benchmark_perf1.h"
+// extern uint32_t start_time;
+// extern int time_initialized;
 
-#elif defined(TEST_PERF2)
+void print_time()
+{
+	uint32_t secs, msecs, time;
 
-#include "p1_benchmark_perf2.h"
+	time = ucx_uptime();
+	// if (!time_initialized) {
+    //     start_time = time;
+    //     time_initialized = 1;
+    // }
+	// time -= start_time;
+	secs = time / 1000;
+	msecs = time - secs * 1000;
 
-#elif defined(TEST_PERF3)
+	printf("%ld.%03lds\n", secs, msecs);
+}
 
-#include "p1_benchmark_perf3.h"
+// ============================================================================
+// PARTITION 1 : PROCESSUS 1 : LE DECLENCHEUR (Périodique, plus lent)
+// ============================================================================
+__attribute__((section(".p1_code")))
+void p1_process1(void) {
+    RETURN_CODE_TYPE return_code;
+	EVENT_ID_TYPE wake_event_id;
+	GET_EVENT_ID("WakeUpEvent", &wake_event_id, &return_code);
+	if (return_code != NO_ERROR)
+		RAISE_APPLICATION_ERROR(APPLICATION_ERROR, (MESSAGE_ADDR_TYPE)"Simulated error in Process 1", 34, &return_code);
 
-#elif defined(TEST_PERF4)
+    while (1) {
+        printf("[P1 Processus 1 - Declencheur] C'est l'heure ! Je reveille le Processus 2 !\n");
 
-#include "p1_benchmark_perf4.h"
+        // Déclenche l'événement. Le Processus 2 va immédiatement passer à l'état READY
+        SET_EVENT(wake_event_id, &return_code);
 
-#elif defined(TEST_PERF5)
+        // S'endort jusqu'à la prochaine période (ex: tous les 100 ticks)
+        TIMED_WAIT(0, &return_code);
+    }
+}
 
-#include "p1_benchmark_perf5.h"
 
-#elif defined(TEST_PERF6)
 
-#include "p1_benchmark_perf6.h"
+// ============================================================================
+// PARTITION 1 : PROCESSUS 2 : LE TRAVAILLEUR (Apériodique, s'endort et attend)
+// ============================================================================
+__attribute__((section(".p1_code")))
+void p1_process2(void) {
+    RETURN_CODE_TYPE return_code;
+	EVENT_ID_TYPE wake_event_id;
+	GET_EVENT_ID("WakeUpEvent", &wake_event_id, &return_code);
+	if (return_code != NO_ERROR)
+		RAISE_APPLICATION_ERROR(APPLICATION_ERROR, (MESSAGE_ADDR_TYPE)"Simulated error in Process 2", 34, &return_code);
 
-#elif defined(TEST_PERF7)
+    while (1) {
+        printf("[P1 Processus 2 - Travailleur] Je m'endors... zZz...\n");
 
-#include "p1_benchmark_perf7.h"
+        // Bloque le processus indéfiniment (INFINITE_TIME_VALUE) jusqu'au réveil
+        WAIT_EVENT(wake_event_id, INFINITE_TIME_VALUE, &return_code);
 
-#elif defined(TEST_PERF8)
+        if (return_code == NO_ERROR) {
+            printf("[P1 Processus 2 - Travailleur] REVEILLE ! J'execute ma tache lourde...\n");
 
-#include "p1_benchmark_perf8.h"
+            // On a fini le travail. On réinitialise l'événement
+            // pour pouvoir s'endormir au prochain tour de boucle.
+            RESET_EVENT(wake_event_id, &return_code);
+        }
+    }
+}
 
-#elif defined(TEST_PERF9)
 
-#include "p1_benchmark_perf9.h"
+// ============================================================================
+// PARTITION 1 : PROCESSUS 3 : LE CAPTEUR (Périodique, très rapide)
+// ============================================================================
+__attribute__((section(".p1_code")))
+void p1_process3(void) {
+    RETURN_CODE_TYPE return_code;
+    int sensor_value = 0;
 
-#elif defined(TEST_PERF10)
+    while (1) {
+        sensor_value += 5;
+        printf("[P1 Processus 3 - Capteur] Lecture en cours... Valeur = %d\n", sensor_value);
 
-#include "p1_benchmark_perf10.h"
+        // S'endort jusqu'à la prochaine période (ex: tous les 20 ticks)
+        PERIODIC_WAIT(&return_code);
+    }
+}
 
-#elif defined(TEST_PERF11)
+// ============================================================================
+// PARTITION 2 : PROCESSUS 1 : IDLE
+// ============================================================================
+__attribute__((section(".p2_code")))
+void p2_process1(void) {
+    RETURN_CODE_TYPE return_code;
+	    while (1) {
+        printf("[P2 Processus 1] Tache Unique avant IDLE\n");
 
-#include "p1_benchmark_perf11.h"
+		STOP_SELF();
+    }
+}
 
-#elif defined(TEST_PERF12)
-
-#include "p1_benchmark_perf12.h"
-
-#elif defined(TEST_PERF13)
-
-#include "p1_benchmark_perf13.h"
-#include "p2_benchmark_perf13.h"
-
-#elif defined(TEST_PERF14)
-
-#include "p1_benchmark_perf14.h"
-
-#elif defined(TEST_PERF15)
-
-#include "p1_benchmark_perf15.h"
-
-#elif defined(TEST_PERF16)
-
-#include "p1_benchmark_perf16.h"
-
-#elif defined(TEST_PERF17)
-
-#include "p1_benchmark_perf17.h"
-
-#elif defined(TEST_PERF18)
-
-#include "p1_benchmark_perf18.h"
-
-#elif defined(TEST_PERF19)
-
-#include "p1_benchmark_perf19.h"
-#include "p2_benchmark_perf19.h"
-
-#endif
 
 int app_main(void)
 {
-    // la partie data est pour l'instant la stack de la task de l'entry point de P1 donc elle grandit vers le bas
-    size_t p1_data_size =  _p1_data_end -_p1_data_start;
-    size_t p1_code_size =  _p1_code_end -_p1_code_start;
+	printf("\r\n=======================================================\r\n");
+	printf("  UCX-OS ARINC 653 RTOS Running on PolarFire SoC       \r\n");
+	printf("  Execution Hart / Core ID : %u (U54_%u)              \r\n", (unsigned int)_cpu_id(), (unsigned int)_cpu_id());
+	printf("=======================================================\r\n\r\n");
 
-    // la partie data est pour l'instant la stack de la task de l'entry point de P1 donc elle grandit vers le bas
-    size_t p2_data_size =  _p2_data_end -_p2_data_start;
-    size_t p2_code_size =  _p2_code_end -_p2_code_start;
+	// la partie data est pour l'instant la stack de la task de l'entry point de P1 donc elle grandit vers le bas
+	size_t p1_data_size =  _p1_data_end -_p1_data_start;
+	size_t p1_code_size =  _p1_code_end -_p1_code_start;
 
-    partition_init(DEFAULT_PARTITION_CONFIG.period,
-                   DEFAULT_PARTITION_CONFIG.duration,
-                   DEFAULT_PARTITION_CONFIG.identifier,
-                   DEFAULT_PARTITION_CONFIG.num_assigned_cores,
-                   DEFAULT_PARTITION_CONFIG.name,
-                   DEFAULT_PARTITION_CONFIG.region_name_code_mem,
-                   (void*)_p1_code_start,
-                   (size_t)p1_code_size,
-                   DEFAULT_PARTITION_CONFIG.access_code_mem,
-                   DEFAULT_PARTITION_CONFIG.region_name_data_mem,
-                   (void*)_p1_data_start,
-                   p1_data_size,
-                   DEFAULT_PARTITION_CONFIG.access_data_mem,
-                //    test_spatial_violation_p2,
-                   MAIN_FUNCTION,
-                   DEFAULT_PARTITION_CONFIG.is_system_partition,
+	// la partie data est pour l'instant la stack de la task de l'entry point de P1 donc elle grandit vers le bas
+	size_t p2_data_size =  _p2_data_end -_p2_data_start;
+	size_t p2_code_size =  _p2_code_end -_p2_code_start;
 
-                   DEFAULT_PARTITION_CONFIG.sampling_ports,
-                   DEFAULT_PARTITION_CONFIG.max_sampling_ports,
-                   DEFAULT_PARTITION_CONFIG.sampling_port_count,
-                   DEFAULT_PARTITION_CONFIG.max_sampling_port_data_size,
+	partition_init(DEFAULT_PARTITION_CONFIG.period,
+				   DEFAULT_PARTITION_CONFIG.duration,
+				   DEFAULT_PARTITION_CONFIG.identifier,
+				   DEFAULT_PARTITION_CONFIG.num_assigned_cores,
+				   DEFAULT_PARTITION_CONFIG.name,
+				   DEFAULT_PARTITION_CONFIG.region_name_code_mem,
+				   (void*)_p1_code_start,
+				   (size_t)p1_code_size,
+				   DEFAULT_PARTITION_CONFIG.access_code_mem,
+				   DEFAULT_PARTITION_CONFIG.region_name_data_mem,
+				   (void*)_p1_data_start,
+				   p1_data_size,
+				   DEFAULT_PARTITION_CONFIG.access_data_mem,
+				//    test_spatial_violation_p2,
+				   p1_main_process,
+				   DEFAULT_PARTITION_CONFIG.is_system_partition,
 
-                   DEFAULT_PARTITION_CONFIG.queuing_ports,
-                   DEFAULT_PARTITION_CONFIG.max_queuing_ports,
-                   DEFAULT_PARTITION_CONFIG.queuing_port_count,
-                   DEFAULT_PARTITION_CONFIG.max_queuing_port_data_size,
+				   DEFAULT_PARTITION_CONFIG.sampling_ports,
+				   DEFAULT_PARTITION_CONFIG.max_sampling_ports,
+				   DEFAULT_PARTITION_CONFIG.sampling_port_count,
+				   DEFAULT_PARTITION_CONFIG.max_sampling_port_data_size,
 
-                   DEFAULT_PARTITION_CONFIG.blackboards,
-                   DEFAULT_PARTITION_CONFIG.max_blackboards,
-                   DEFAULT_PARTITION_CONFIG.blackboard_count,
-                   DEFAULT_PARTITION_CONFIG.max_blackboard_data_size,
-                   DEFAULT_PARTITION_CONFIG.blackboards_data,
-                   DEFAULT_PARTITION_CONFIG.blackboards_size_data,
+				   DEFAULT_PARTITION_CONFIG.queuing_ports,
+				   DEFAULT_PARTITION_CONFIG.max_queuing_ports,
+				   DEFAULT_PARTITION_CONFIG.queuing_port_count,
+				   DEFAULT_PARTITION_CONFIG.max_queuing_port_data_size,
 
-                   DEFAULT_PARTITION_CONFIG.buffers,
-                   DEFAULT_PARTITION_CONFIG.max_buffers,
-                   DEFAULT_PARTITION_CONFIG.buffer_count,
-                   DEFAULT_PARTITION_CONFIG.max_buffer_data_size,
-                   DEFAULT_PARTITION_CONFIG.buffers_data,
-                   DEFAULT_PARTITION_CONFIG.buffers_size_data,
+				   DEFAULT_PARTITION_CONFIG.blackboards,
+				   DEFAULT_PARTITION_CONFIG.max_blackboards,
+				   DEFAULT_PARTITION_CONFIG.blackboard_count,
+				   DEFAULT_PARTITION_CONFIG.max_blackboard_data_size,
+				   DEFAULT_PARTITION_CONFIG.blackboards_data,
+				   DEFAULT_PARTITION_CONFIG.blackboards_size_data,
 
-                   DEFAULT_PARTITION_CONFIG.semaphores,
-                   DEFAULT_PARTITION_CONFIG.max_semaphores,
-                   DEFAULT_PARTITION_CONFIG.semaphore_count,
-                   DEFAULT_PARTITION_CONFIG.semaphores_counter,
+				   DEFAULT_PARTITION_CONFIG.buffers,
+				   DEFAULT_PARTITION_CONFIG.max_buffers,
+				   DEFAULT_PARTITION_CONFIG.buffer_count,
+				   DEFAULT_PARTITION_CONFIG.max_buffer_data_size,
+				   DEFAULT_PARTITION_CONFIG.buffers_data,
+				   DEFAULT_PARTITION_CONFIG.buffers_size_data,
 
-                   DEFAULT_PARTITION_CONFIG.events,
-                   DEFAULT_PARTITION_CONFIG.max_events,
-                   DEFAULT_PARTITION_CONFIG.event_count,
+				   DEFAULT_PARTITION_CONFIG.semaphores,
+				   DEFAULT_PARTITION_CONFIG.max_semaphores,
+				   DEFAULT_PARTITION_CONFIG.semaphore_count,
+				   DEFAULT_PARTITION_CONFIG.semaphores_counter,
 
-                   DEFAULT_PARTITION_CONFIG.mutexes,
-                   DEFAULT_PARTITION_CONFIG.max_mutexes,
-                   DEFAULT_PARTITION_CONFIG.mutex_count,
+				   DEFAULT_PARTITION_CONFIG.events,
+				   DEFAULT_PARTITION_CONFIG.max_events,
+				   DEFAULT_PARTITION_CONFIG.event_count,
 
-                   DEFAULT_PARTITION_CONFIG.error_list,
-                   DEFAULT_PARTITION_CONFIG.error_list_cb,
-                   DEFAULT_PARTITION_CONFIG.partition_hm_table,
-                   DEFAULT_PARTITION_CONFIG.max_errors
-                   );
+				   DEFAULT_PARTITION_CONFIG.mutexes,
+				   DEFAULT_PARTITION_CONFIG.max_mutexes,
+				   DEFAULT_PARTITION_CONFIG.mutex_count,
 
-    #if defined(TEST_PERF13) || defined(TEST_PERF19)
+				   DEFAULT_PARTITION_CONFIG.error_list,
+				   DEFAULT_PARTITION_CONFIG.error_list_cb,
+				   DEFAULT_PARTITION_CONFIG.partition_hm_table,
+				   DEFAULT_PARTITION_CONFIG.max_errors
+				   );
 
-     partition_init(P2_CONFIG.period,
-                   P2_CONFIG.duration,
-                   P2_CONFIG.identifier,
-                   P2_CONFIG.num_assigned_cores,
-                   P2_CONFIG.name,
-                   P2_CONFIG.region_name_code_mem,
-                   (void*)_p2_code_start,
-                   (size_t)p1_code_size,
-                   P2_CONFIG.access_code_mem,
-                   P2_CONFIG.region_name_data_mem,
-                   (void*)_p2_data_start,
-                   p2_data_size,
-                   P2_CONFIG.access_data_mem,
-                //    test_spatial_violation_p2,
-                   #if defined(TEST_PERF13)
-                   main_process,
-                   #elif defined(TEST_PERF19)
-                   p2_main,
-                   #endif
-                   P2_CONFIG.is_system_partition,
+	partition_init(P2_CONFIG.period,
+				   P2_CONFIG.duration,
+				   P2_CONFIG.identifier,
+				   P2_CONFIG.num_assigned_cores,
+				   P2_CONFIG.name,
+				   P2_CONFIG.region_name_code_mem,
+				   (void*)_p2_code_start,
+				   (size_t)p2_code_size,
+				   P2_CONFIG.access_code_mem,
+				   P2_CONFIG.region_name_data_mem,
+				   (void*)_p2_data_start,
+				   p2_data_size,
+				   P2_CONFIG.access_data_mem,
+				//    test_spatial_violation_p1,
+				   p2_main_process,
+				   P2_CONFIG.is_system_partition,
 
-                   P2_CONFIG.sampling_ports,
-                   P2_CONFIG.max_sampling_ports,
-                   P2_CONFIG.sampling_port_count,
-                   P2_CONFIG.max_sampling_port_data_size,
+					P2_CONFIG.sampling_ports,
+				   P2_CONFIG.max_sampling_ports,
+				   P2_CONFIG.sampling_port_count,
+				   P2_CONFIG.max_sampling_port_data_size,
 
-                   P2_CONFIG.queuing_ports,
-                   P2_CONFIG.max_queuing_ports,
-                   P2_CONFIG.queuing_port_count,
-                   P2_CONFIG.max_queuing_port_data_size,
+				   P2_CONFIG.queuing_ports,
+				   P2_CONFIG.max_queuing_ports,
+				   P2_CONFIG.queuing_port_count,
+				   P2_CONFIG.max_queuing_port_data_size,
 
-                   P2_CONFIG.blackboards,
-                   P2_CONFIG.max_blackboards,
-                   P2_CONFIG.blackboard_count,
-                   P2_CONFIG.max_blackboard_data_size,
-                   P2_CONFIG.blackboards_data,
-                   P2_CONFIG.blackboards_size_data,
+				   P2_CONFIG.blackboards,
+				   P2_CONFIG.max_blackboards,
+				   P2_CONFIG.blackboard_count,
+				   P2_CONFIG.max_blackboard_data_size,
+				   P2_CONFIG.blackboards_data,
+				   P2_CONFIG.blackboards_size_data,
 
-                   P2_CONFIG.buffers,
-                   P2_CONFIG.max_buffers,
-                   P2_CONFIG.buffer_count,
-                   P2_CONFIG.max_buffer_data_size,
-                   P2_CONFIG.buffers_data,
-                   P2_CONFIG.buffers_size_data,
+				   P2_CONFIG.buffers,
+				   P2_CONFIG.max_buffers,
+				   P2_CONFIG.buffer_count,
+				   P2_CONFIG.max_buffer_data_size,
+				   P2_CONFIG.buffers_data,
+				   P2_CONFIG.buffers_size_data,
 
-                   P2_CONFIG.semaphores,
-                   P2_CONFIG.max_semaphores,
-                   P2_CONFIG.semaphore_count,
-                   P2_CONFIG.semaphores_counter,
+				   P2_CONFIG.semaphores,
+				   P2_CONFIG.max_semaphores,
+				   P2_CONFIG.semaphore_count,
+				   P2_CONFIG.semaphores_counter,
 
-                   P2_CONFIG.events,
-                   P2_CONFIG.max_events,
-                   P2_CONFIG.event_count,
+				   P2_CONFIG.events,
+				   P2_CONFIG.max_events,
+				   P2_CONFIG.event_count,
 
-                   P2_CONFIG.mutexes,
-                   P2_CONFIG.max_mutexes,
-                   P2_CONFIG.mutex_count,
+				   P2_CONFIG.mutexes,
+				   P2_CONFIG.max_mutexes,
+				   P2_CONFIG.mutex_count,
 
-                   P2_CONFIG.error_list,
-                   P2_CONFIG.error_list_cb,
-                   P2_CONFIG.partition_hm_table,
-                   P2_CONFIG.max_errors
-                   );
+				   P2_CONFIG.error_list,
+				   P2_CONFIG.error_list_cb,
+				   P2_CONFIG.partition_hm_table,
+				   P2_CONFIG.max_errors
 
-    #endif
+				   );
 
-    return 1;
+	return 1;
 }
-
-/* __________________________________________________________________________
-* END OF FILE:
-* -------------
-* ___________________________________________________________________________
-*/

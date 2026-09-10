@@ -24,7 +24,7 @@ extern uint32_t _end;
 extern uint32_t _gp;
 
 /* Target identity */
-#define __ARCH__ "RV64 (PolarFire SoC U54_1)"
+#define __ARCH__ "RV64 (PolarFire SoC U54_2)"
 
 /* Scheduling / console configuration */
 #ifndef USART_BAUD
