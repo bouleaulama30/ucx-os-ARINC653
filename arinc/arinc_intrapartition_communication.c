@@ -146,7 +146,6 @@ void CREATE_BLACKBOARD (
     strncpy(bb->blackboard_name, BLACKBOARD_NAME, sizeof(bb->blackboard_name) - 1);
     bb->blackboard_name[sizeof(bb->blackboard_name) - 1] = '\0';
     bb->blackboard_id = partition->blackboard_count;
-    bb->partition_id = partition->status->IDENTIFIER;
     bb->waiting_processes = list_create();
     bb->blackboard_status.EMPTY_INDICATOR = EMPTY;
     bb->blackboard_status.MAX_MESSAGE_SIZE = MAX_MESSAGE_SIZE;
@@ -360,7 +359,6 @@ void CREATE_BUFFER (
     strncpy(buf->buffer_name, BUFFER_NAME, sizeof(buf->buffer_name) - 1);
     buf->buffer_name[sizeof(buf->buffer_name) - 1] = '\0';
     buf->buffer_id = partition->buffer_count;
-    buf->partition_id = partition->status->IDENTIFIER;
     buf->waiting_readers = list_create();
     buf->waiting_writers = list_create();
     buf->read_index = 0;
@@ -664,7 +662,6 @@ void CREATE_SEMAPHORE (
     strncpy(sem->semaphore_name, SEMAPHORE_NAME, sizeof(sem->semaphore_name) - 1);
     sem->semaphore_name[sizeof(sem->semaphore_name) - 1] = '\0';
     sem->semaphore_id = partition->semaphore_count;
-    sem->partition_id = partition->status->IDENTIFIER;
     sem->waiting_processes = list_create();
     sem->semaphore_status.CURRENT_VALUE = CURRENT_VALUE;
     sem->semaphore_status.MAXIMUM_VALUE = MAXIMUM_VALUE;
@@ -832,7 +829,6 @@ void CREATE_EVENT (
     strncpy(event->event_name, EVENT_NAME, sizeof(event->event_name) - 1);
     event->event_name[sizeof(event->event_name) - 1] = '\0';
     event->event_id = partition->event_count;
-    event->partition_id = partition->status->IDENTIFIER;
     event->waiting_processes = list_create();
     event->event_status.EVENT_STATE = DOWN;
     event->event_status.WAITING_PROCESSES = 0;
@@ -1060,7 +1056,6 @@ void CREATE_MUTEX (
     strncpy(mutex->mutex_name, MUTEX_NAME, sizeof(mutex->mutex_name) - 1);
     mutex->mutex_name[sizeof(mutex->mutex_name) - 1] = '\0';
     mutex->mutex_id = partition->mutex_count;
-    mutex->partition_id = partition->status->IDENTIFIER;
     mutex->waiting_processes = list_create();
     mutex->mutex_status.MUTEX_STATE = AVAILABLE;
     mutex->mutex_status.MUTEX_PRIORITY = MUTEX_PRIORITY;
@@ -1070,104 +1065,6 @@ void CREATE_MUTEX (
 
     *MUTEX_ID = mutex->mutex_id;
     *RETURN_CODE = NO_ERROR;
-}
-
-void krnl_acquire_mutex(/*in */ MUTEX_ID_TYPE            MUTEX_ID,
-       /*in */ SYSTEM_TIME_TYPE         TIME_OUT,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE){
-
-    struct pcb_s *partition = get_current_partition();
-    int index = find_mutex_by_id(partition, MUTEX_ID);
-    if (index == -1){
-        *RETURN_CODE = INVALID_PARAM;
-        return;
-    }
-
-
-    if (TIME_OUT < INFINITE_TIME_VALUE || (TIME_OUT >= 0 && time_overflow(ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT))){
-        *RETURN_CODE = INVALID_PARAM;
-        return;
-    }
-
-    struct node_s *current_process_node = partition->process_current;
-    struct process_s *current_process = current_process_node->data;
-    if (current_process->owned_mutex_id != NO_MUTEX_OWNED && current_process->owned_mutex_id != MUTEX_ID){
-        *RETURN_CODE = INVALID_MODE;
-        return;
-    }
-    
-    if (current_process == partition->error_handler_process){
-        *RETURN_CODE = INVALID_MODE;
-        return;
-    }
-        
-    struct mutex_s *mutex = &partition->mutexes[index];
-    if (current_process->processus_status->CURRENT_PRIORITY > mutex->mutex_status.MUTEX_PRIORITY){
-        printf("TEST\n");
-        *RETURN_CODE = INVALID_MODE;
-        return;
-    }
-
-
-    if (mutex->mutex_status.MUTEX_STATE == AVAILABLE){
-        mutex->mutex_status.MUTEX_STATE = OWNED;
-        current_process->owned_mutex_id = MUTEX_ID;
-        mutex->mutex_status.MUTEX_OWNER = current_process->process_id;
-        mutex->mutex_status.LOCK_COUNT ++;
-        mutex->saved_owner_priority = current_process->processus_status->CURRENT_PRIORITY;
-        current_process->processus_status->CURRENT_PRIORITY = mutex->mutex_status.MUTEX_PRIORITY;
-        list_remove(partition->processes, current_process_node);
-        struct node_s *new_process_node = list_push(partition->processes, current_process);
-        partition->process_current = new_process_node;
-
-        *RETURN_CODE = NO_ERROR;
-    }
-    else if (mutex->mutex_status.MUTEX_STATE == OWNED && mutex->mutex_status.MUTEX_OWNER == current_process->process_id){
-        if (mutex->mutex_status.LOCK_COUNT == MAX_LOCK_LEVEL){
-            *RETURN_CODE = INVALID_CONFIG;
-            return;
-        } else {
-            mutex->mutex_status.LOCK_COUNT ++;
-            *RETURN_CODE = NO_ERROR;
-        }
-    }
-    else if (TIME_OUT == 0){
-        *RETURN_CODE = NOT_AVAILABLE;
-    }
-
-    else if (TIME_OUT == INFINITE_TIME_VALUE){
-        printf("ACQUIRE_MUTEX WAIT INFINITE \n");
-        current_process->processus_status->PROCESS_STATE = WAITING;
-        mutex->mutex_status.WAITING_PROCESSES++;
-        current_process->waiting_mutex = mutex;
-        if (mutex->queuing_discipline == PRIORITY){
-            list_insert_sorted(mutex->waiting_processes, current_process);
-        }
-        else {
-            list_pushback(mutex->waiting_processes, current_process);
-        }
-        yield_to_partition(partition, current_process);
-        *RETURN_CODE = NO_ERROR;
-    } else {
-        current_process->processus_status->PROCESS_STATE = WAITING;
-        mutex->mutex_status.WAITING_PROCESSES++;
-        current_process->waiting_mutex = mutex;
-        if (mutex->queuing_discipline == PRIORITY){
-            list_insert_sorted(mutex->waiting_processes, current_process);
-        }
-        else {
-            list_pushback(mutex->waiting_processes, current_process);
-        }
-        current_process->time_counter = (SYSTEM_TIME_TYPE)ucx_uptime() + (SYSTEM_TIME_TYPE)TIME_OUT;
-        yield_to_partition(partition, current_process);
-
-        if(current_process->time_counter == 0){
-            *RETURN_CODE = TIMED_OUT;
-        }
-        else {
-            *RETURN_CODE = NO_ERROR;
-        }
-    }
 }
 
 void ACQUIRE_MUTEX (
@@ -1181,58 +1078,6 @@ void ACQUIRE_MUTEX (
 
     krnl_acquire_mutex(MUTEX_ID, TIME_OUT, RETURN_CODE);
     return;
-}
-
-
-void krnl_release_mutex(/*in */ MUTEX_ID_TYPE            MUTEX_ID,
-       /*out*/ RETURN_CODE_TYPE         *RETURN_CODE){
-    struct pcb_s *partition = get_current_partition();
-    int index = find_mutex_by_id(partition, MUTEX_ID);
-    if (index == -1){
-        *RETURN_CODE = INVALID_PARAM;
-        return;
-    }
-
-    struct node_s *current_process_node = partition->process_current;
-    struct process_s *current_process = current_process_node->data;
-    if (current_process->owned_mutex_id != MUTEX_ID){
-        *RETURN_CODE = INVALID_MODE;
-        return;
-    }
-
-    struct mutex_s *mutex = &partition->mutexes[index];
-    mutex->mutex_status.LOCK_COUNT --;
-    if (mutex->mutex_status.LOCK_COUNT == 0){
-        mutex->mutex_status.MUTEX_STATE = AVAILABLE;
-        current_process->owned_mutex_id = NO_MUTEX_OWNED;
-        mutex->mutex_status.MUTEX_OWNER = NULL_PROCESS_ID;
-        current_process->processus_status->CURRENT_PRIORITY = mutex->saved_owner_priority;
-        list_remove(partition->processes, current_process_node);
-        struct node_s *new_process_node = list_push(partition->processes, current_process);
-        partition->process_current = new_process_node;
-        if(mutex->waiting_processes->length > 0){
-            struct node_s *first_node = mutex->waiting_processes->head->next;
-            list_remove(mutex->waiting_processes, first_node);
-            struct process_s *woken_process = first_node->data;
-            mutex->mutex_status.WAITING_PROCESSES--;
-            if (woken_process->time_counter != 0) {
-                woken_process->time_counter = INFINITE_TIME_VALUE;
-            }
-            mutex->mutex_status.MUTEX_STATE = OWNED;
-            mutex->mutex_status.LOCK_COUNT ++;
-            mutex->mutex_status.MUTEX_OWNER = woken_process->process_id;
-            woken_process->owned_mutex_id = MUTEX_ID;
-            mutex->saved_owner_priority = woken_process->processus_status->CURRENT_PRIORITY;
-            woken_process->processus_status->CURRENT_PRIORITY = mutex->mutex_status.MUTEX_PRIORITY;
-            woken_process->waiting_mutex = NULL;
-            struct node_s *woken_process_node = is_process_id_existed(partition, woken_process->process_id);
-            list_remove(partition->processes, woken_process_node);
-            list_push(partition->processes, woken_process);
-            woken_process->processus_status->PROCESS_STATE = READY;
-        }
-        yield_to_partition(partition, current_process);
-    }
-        *RETURN_CODE = NO_ERROR;
 }
 
 void RELEASE_MUTEX (

@@ -142,7 +142,6 @@ void SET_PARTITION_MODE (
     
     if (OPERATING_MODE == IDLE)
     {   
-        // printf("OPERATING MODE is IDLE\n");
         partition->process_current = NULL;
         signal_idle_current_partition();
         *RETURN_CODE = NO_ERROR;
@@ -152,7 +151,6 @@ void SET_PARTITION_MODE (
     if (OPERATING_MODE == WARM_START || OPERATING_MODE == COLD_START)
     {
         // inhibit process scheduling and switch back to initialization mode
-        // printf("OPERATING MODE is WARM START or COLD START\n");
         partition->process_current = NULL;
         partition->nbr_processes = 0;
         partition->id_next = 0;
@@ -172,7 +170,6 @@ void SET_PARTITION_MODE (
     
     if (OPERATING_MODE == NORMAL)
     {
-        // printf("OPERATING MODE is NORMAL\n");
         *RETURN_CODE = NO_ERROR;
 
         SYSTEM_TIME_TYPE first_release_point = arinc_time_find_first_release_point(partition);

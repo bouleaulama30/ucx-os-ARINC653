@@ -367,8 +367,6 @@ void SEND_QUEUING_MESSAGE (
        else if (TIME_OUT == 0){
               *RETURN_CODE = NOT_AVAILABLE;
        }
-       // cd current process error handler
-       
        else if (current_process->owned_mutex_id != NO_MUTEX_OWNED || partition->error_handler_process == current_process){
               *RETURN_CODE = INVALID_MODE;
        } 
@@ -378,9 +376,7 @@ void SEND_QUEUING_MESSAGE (
               }
               current_process->processus_status->PROCESS_STATE = WAITING;
               queuing_port->queuing_port_status.WAITING_PROCESSES++;
-              // to do implementer selon la discipline de la file d'attente
               if (queuing_port->QUEUING_DISCIPLINE == PRIORITY){
-                     // to do insert process in waiting_processes list according to its priority
                      list_insert_sorted(queuing_port->waiting_processes, current_process);
               }
               else {
@@ -447,7 +443,6 @@ void RECEIVE_QUEUING_MESSAGE (
               *LENGTH = 0;
               *RETURN_CODE = NOT_AVAILABLE;
        }
-       // cd current process error handler
        else if (current_process->owned_mutex_id != NO_MUTEX_OWNED || partition->error_handler_process == current_process){
               *LENGTH = 0;
               *RETURN_CODE = INVALID_MODE;
@@ -459,9 +454,7 @@ void RECEIVE_QUEUING_MESSAGE (
               current_process->processus_status->PROCESS_STATE = WAITING;
               queuing_port->queuing_port_status.WAITING_PROCESSES++;
               if (queuing_port->QUEUING_DISCIPLINE == PRIORITY){
-                     // to do insert process in waiting_processes list according to its priority
                      list_insert_sorted(queuing_port->waiting_processes, current_process);
-
               }
               else {
                      list_pushback(queuing_port->waiting_processes, current_process);

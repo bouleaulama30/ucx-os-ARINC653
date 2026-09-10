@@ -1,18 +1,22 @@
 # TO-DO
 
+
+## Testbench matériel
+* se faire la main avec la carte via la rpi
+
+* faire 3 bloc pour le FPGA:
+    * génération des données (altitude compteur incremental à une freq) probablement bloc déjà existant
+    * formatage en ARINC 429 (voir si bloc existant)
+    * envoie SPI (bloc déjà existant)
+
+
 ## matériel
 * voir si possible de faire un xml ou script pour config plus rapidement le workspace eclispe avec tout bien 
 
 ## refactoring
 
-* enlever les reference aux communication port dans partition init 
+* faire de la doc sur comment fonctionne le HM et le system
 * mettre des commentaires
-* faire de la documentation
-
-* sampling_port_s -> sp_s ?
-* voir si pour les ressources comme bb, la reference vers la partition ou le waiting_blackboard est necessaire dans la struct
-* voir pour mettre krnl acquire et release mutex dans un fichier du krnl
-* voir pour mettre des fonctions lié aux channels dans la comm inter partition dans les fichiers du noyau
 
 ## Optimisation
 

@@ -5,3 +5,4 @@ arch/riscv/PolarFire/include/arinc
 arch/riscv/PolarFire/include/kernel
 arch/riscv/PolarFire/include/lib
 arch/riscv/PolarFire/include/testperf
+ARINC653P1-6.pdf
