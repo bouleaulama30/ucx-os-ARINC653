@@ -71,17 +71,45 @@ void p1_process2(void) {
 }
 
 
+#define SHARED_MEM_ADDR  0x08060000U
+
+typedef struct {
+    volatile uint32_t magic_header;     // 0x4152494E ("ARIN")
+    volatile uint32_t raw_arinc_word;   // Mot ARINC 429 32-bit brut
+    volatile uint32_t altitude_meters;  // Altitude mesurée en mètres (0 à 5000m)
+    volatile uint32_t altitude_feet;    // Altitude mesurée en pieds (0 à 16404 ft)
+    volatile uint32_t flight_phase;     // Phase de vol (0: Montée, 1: Stationnaire, 2: Descente)
+    volatile uint32_t update_counter;  // Incrémenté à chaque trame reçue
+    volatile uint32_t status_flags;     // Bit 0: Valide, Bit 1: Parité OK, Bit 2: Label 312 OK
+    volatile uint64_t timestamp_ticks;  // Horodatage matériel (mtime)
+} shared_altitude_data_t;
+
+#define g_shared_altitude (*(shared_altitude_data_t*)SHARED_MEM_ADDR)
+
 // ============================================================================
 // PARTITION 1 : PROCESSUS 3 : LE CAPTEUR (Périodique, très rapide)
 // ============================================================================
 __attribute__((section(".p1_code")))
 void p1_process3(void) {
     RETURN_CODE_TYPE return_code;
-    int sensor_value = 0;
+    static const char* phase_names[] = {"MONTEE (Climb)", "VOL STATIONNAIRE (Hover)", "DESCENTE (Descent)"};
 
     while (1) {
-        sensor_value += 5;
-        printf("[P1 Processus 3 - Capteur] Lecture en cours... Valeur = %d\n", sensor_value);
+        if (g_shared_altitude.magic_header == 0x4152494EU) {
+            uint32_t alt_m  = g_shared_altitude.altitude_meters;
+            uint32_t alt_ft = g_shared_altitude.altitude_feet;
+            uint32_t count  = g_shared_altitude.update_counter;
+            uint32_t phase  = g_shared_altitude.flight_phase;
+            const char* phase_str = (phase <= 2) ? phase_names[phase] : "INCONNU";
+
+            printf("[P1 Processus 3 - Capteur ARINC 429 IPC @ 0x08060000]\n"
+                   "  -> Altitude = %u m (%u ft) | Phase = %s | Update Count = %u | ARINC Word = 0x%08X\n",
+                   (unsigned int)alt_m, (unsigned int)alt_ft, phase_str,
+                   (unsigned int)count, (unsigned int)g_shared_altitude.raw_arinc_word);
+        } else {
+            printf("[P1 Processus 3 - Capteur] Memoire partagee non prete @ 0x08060000 (Header = 0x%08X)\n",
+                   (unsigned int)g_shared_altitude.magic_header);
+        }
 
         // S'endort jusqu'à la prochaine période (ex: tous les 20 ticks)
         PERIODIC_WAIT(&return_code);
