@@ -25,9 +25,9 @@ typedef struct {
 } altitude_telemetry_msg_t;
 
 static const char* const g_phase_names[] = {
-    "MONTEE (Climb)",
-    "VOL STATIONNAIRE (Hover)",
-    "DESCENTE (Descent)"
+    "MONTEE",
+    "HOVER",
+    "DESCENTE"
 };
 
 // ============================================================================
@@ -38,18 +38,20 @@ void p1_process1(void) {
     RETURN_CODE_TYPE return_code;
     SAMPLING_PORT_ID_TYPE port_id;
 
-    printf("[PARTITION 1 - Processus 1] Demarrage capture IPC (0x08060000) & Ecriture Sampling Port...\n");
+    printf("[P1 Init] Verification Port P1_OUT_ALT...\n");
 
     while (1) {
         GET_SAMPLING_PORT_ID("P1_OUT_ALT", &port_id, &return_code);
         if (return_code == NO_ERROR) {
             break;
         }
-        printf("[P1 Processus 1] Attente d'initialisation du port 'P1_OUT_ALT'...\n");
         TIMED_WAIT(2, &return_code);
     }
 
     while (1) {
+        // Core 2 L1 Cache Fence to ensure fresh L2 LIM read from Core 1 SPI Generator
+        asm volatile ("fence rw, rw" ::: "memory");
+
         if (g_shared_altitude.magic_header == 0x4152494EU) {
             altitude_telemetry_msg_t msg;
             msg.raw_arinc_word  = g_shared_altitude.raw_arinc_word;
@@ -62,17 +64,9 @@ void p1_process1(void) {
             WRITE_SAMPLING_MESSAGE(port_id, (MESSAGE_ADDR_TYPE)&msg, sizeof(msg), &return_code);
 
             if (return_code == NO_ERROR) {
-                printf("[PARTITION 1 - Process 1] IPC -> Sampling Port 'P1_OUT_ALT' [ECRITURE OK]\n"
-                       "  -> Alt: %u m (%u ft) | Phase: %u | Count: %u | Word: 0x%08X\n",
-                       (unsigned int)msg.altitude_meters, (unsigned int)msg.altitude_feet,
-                       (unsigned int)msg.flight_phase, (unsigned int)msg.update_counter,
-                       (unsigned int)msg.raw_arinc_word);
-            } else {
-                printf("[PARTITION 1 - Process 1] WRITE_SAMPLING_MESSAGE ECHEC (rc = %d)\n", return_code);
+                printf("[P1] IPC->Port OK | Alt: %u m | Count: %u\n",
+                       (unsigned int)msg.altitude_meters, (unsigned int)msg.update_counter);
             }
-        } else {
-            printf("[PARTITION 1 - Process 1] Memoire partagee IPC non prete @ 0x08060000 (Header: 0x%08X)\n",
-                   (unsigned int)g_shared_altitude.magic_header);
         }
 
         PERIODIC_WAIT(&return_code);
@@ -90,14 +84,13 @@ void p2_process1(void) {
     VALIDITY_TYPE validity;
     altitude_telemetry_msg_t rx_msg;
 
-    printf("[PARTITION 2 - Processus 1] Demarrage reception Sampling Port & Interprétation UART...\n");
+    printf("[P2 Init] Verification Port P2_IN_ALT...\n");
 
     while (1) {
         GET_SAMPLING_PORT_ID("P2_IN_ALT", &port_id, &return_code);
         if (return_code == NO_ERROR) {
             break;
         }
-        printf("[P2 Processus 1] Attente d'initialisation du port 'P2_IN_ALT'...\n");
         TIMED_WAIT(2, &return_code);
     }
 
@@ -107,19 +100,15 @@ void p2_process1(void) {
 
         if (return_code == NO_ERROR && validity == VALID) {
             uint32_t phase = rx_msg.flight_phase;
-            const char* phase_str = (phase <= 2) ? g_phase_names[phase] : "INCONNU";
+            const char* phase_str = (phase <= 2) ? g_phase_names[phase] : "UNK";
 
-            printf("-----------------------------------------------------------------------\n");
-            printf("[PARTITION 2 - Processus 1] INTERPRETATION & FEEDBACK UART\n");
-            printf("  <- Sampling Port 'P2_IN_ALT' [LECTURE REUSSIE & MESSAGE VALIDE]\n");
-            printf("  * Altitude Alt-Gen : %u m (%u pieds)\n", (unsigned int)rx_msg.altitude_meters, (unsigned int)rx_msg.altitude_feet);
-            printf("  * Phase de Vol     : %s\n", phase_str);
-            printf("  * Mot ARINC 429    : 0x%08X (Label Octal 312)\n", (unsigned int)rx_msg.raw_arinc_word);
-            printf("  * Incrementation  : Trame #%u | Uptime RTOS: %u ms\n", (unsigned int)rx_msg.update_counter, (unsigned int)rx_msg.timestamp_ms);
-            printf("-----------------------------------------------------------------------\n");
-        } else {
-            printf("[PARTITION 2 - Processus 1] READ_SAMPLING_MESSAGE (rc = %d, validity = %s)\n",
-                   return_code, (validity == VALID) ? "VALID" : "INVALID/EMPTY");
+            printf("[P2] READ OK | Alt: %u m (%u ft) | Phase: %s | ARINC: 0x%08X | Trame: #%u | %u ms\n",
+                   (unsigned int)rx_msg.altitude_meters,
+                   (unsigned int)rx_msg.altitude_feet,
+                   phase_str,
+                   (unsigned int)rx_msg.raw_arinc_word,
+                   (unsigned int)rx_msg.update_counter,
+                   (unsigned int)rx_msg.timestamp_ms);
         }
 
         PERIODIC_WAIT(&return_code);
@@ -130,7 +119,7 @@ void p2_process1(void) {
 int app_main(void)
 {
 	printf("\r\n=======================================================\r\n");
-	printf("  UCX-OS ARINC 653 RTOS - Multi-Partition Telemetry App\r\n");
+	printf("  UCX-OS ARINC 653 RTOS - Optimized Telemetry App      \r\n");
 	printf("  Execution Hart / Core ID : %u (U54_%u)              \r\n", (unsigned int)_cpu_id(), (unsigned int)_cpu_id());
 	printf("=======================================================\r\n\r\n");
 
