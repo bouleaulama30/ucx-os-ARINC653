@@ -10,7 +10,6 @@
 
 
 ## documentation
-* faire orga github pour les projets
 * update doc pour les app testsbench
     * comment mettre un hss dedans
     * comment faire fonctionner l'app avionic (flow de travail) (via spi et carte holt)
@@ -20,6 +19,7 @@
     * je veux plus tard pouvoir refaire l'app facilement limite mettre juste les binaires ou le elf dans un des repo comme ça c'est plus simple
     * ajouter la doc pour le mappage des pins et les branchements elec aussi 
     * save libero et ip sur github
+* une fois la recherche terminé ajouter tout dans des repo de l'orga de poly sur github
 
 
 
