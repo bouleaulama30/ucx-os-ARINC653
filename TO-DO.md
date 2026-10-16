@@ -11,16 +11,11 @@
 
 ## documentation
 * update doc pour les app testsbench
-    * comment mettre un hss dedans
-    * comment faire fonctionner l'app avionic (flow de travail) (via spi et carte holt)
-    * les outils utilisé (uart, usb flash, hss payload)
-    * mettre des refs au bon repo github avec les tuto pour comprendre amp etc...
-    * ajouter le truc pour l'IP des cartes holt sur fpga et le flow libero soc
+    * save libero et ip sur github (arinc429) (update la doc sur ça)
     * test si fonctionnel avec binaire tb app dans le repo (les test pour savoir s'ils sont bien fonctionnel)
-    * ajouter la doc pour le mappage des pins et les branchements elec aussi 
-    * save libero et ip sur github
+    * vérifier la doc pour le mappage des pins et les branchements elec aussi
 
-* une fois la recherche terminé ajouter tout dans des repo de l'orga de poly sur github
+* une fois la recherche terminé ajouter tout dans des repo de l'orga de poly sur github (mpfs, arinc429, ucx-os-653)
 
 
 
