@@ -16,9 +16,10 @@
     * les outils utilisé (uart, usb flash, hss payload)
     * mettre des refs au bon repo github avec les tuto pour comprendre amp etc...
     * ajouter le truc pour l'IP des cartes holt sur fpga et le flow libero soc
-    * je veux plus tard pouvoir refaire l'app facilement limite mettre juste les binaires ou le elf dans un des repo comme ça c'est plus simple (les test pour savoir s'ils sont bien fonctionnel)
+    * test si fonctionnel avec binaire tb app dans le repo (les test pour savoir s'ils sont bien fonctionnel)
     * ajouter la doc pour le mappage des pins et les branchements elec aussi 
     * save libero et ip sur github
+
 * une fois la recherche terminé ajouter tout dans des repo de l'orga de poly sur github
 
 

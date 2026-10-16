@@ -1,0 +1,8 @@
+# Configuration Payload AMP : Bare-metal (Core 1) + UCX-OS RTOS (Core 2)
+set-name: 'AMP_BM_UCXOS'
+
+hart-entry-points: {u54_1: '0x08000000', u54_2: '0x80000000'}
+
+payloads:
+  'C:/Microchip/SoftConsole-v2022.2-RISC-V-747/extras/workspace.spi/mpfs-spi-master-slave/LIM-Debug-DiscoveryKit/mpfs-spi-master-slave.elf': {exec-addr: '0x08000000', owner-hart: u54_1, priv-mode: prv_m, skip-opensbi: true}
+  'C:/Microchip/SoftConsole-v2022.2-RISC-V-747/extras/workspace.final/PolarFire/Debug/PolarFire.elf': {exec-addr: '0x80000000', owner-hart: u54_2, priv-mode: prv_m, skip-opensbi: true}
