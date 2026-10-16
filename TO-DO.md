@@ -1,20 +1,28 @@
 # TO-DO
 
+## banc de test sur amd
+* installer vivado 
+* mettre deux soft core sur une carte en utilisant le hf-riscv et les faire communiquer entre eux
+* faire afdx en P4
+* simuler et vérifier son comportement via l'outil
+* générer le rtl via l'outil
+* intégrer l'ip au banc de test
 
-## Testbench matériel
-* se faire la main avec la carte via la rpi
 
-* faire 3 bloc pour le FPGA:
-    * génération des données (altitude compteur incremental à une freq) probablement bloc déjà existant
-    * formatage en ARINC 429 (voir si bloc existant)
-    * envoie SPI (bloc déjà existant)
+## documentation
+* faire orga github pour les projets
+* update doc pour les app testsbench
+    * comment mettre un hss dedans
+    * comment faire fonctionner l'app avionic (flow de travail) (via spi et carte holt)
+    * les outils utilisé (uart, usb flash, hss payload)
+    * mettre des refs au bon repo github avec les tuto pour comprendre amp etc...
+    * ajouter le truc pour l'IP des cartes holt sur fpga et le flow libero soc
+    * je veux plus tard pouvoir refaire l'app facilement limite mettre juste les binaires ou le elf dans un des repo comme ça c'est plus simple
+    * ajouter la doc pour le mappage des pins et les branchements elec aussi 
 
 
-## matériel
-* voir si possible de faire un xml ou script pour config plus rapidement le workspace eclispe avec tout bien 
 
 ## refactoring
-
 * faire de la doc sur comment fonctionne le HM et le system
 * mettre des commentaires
 
