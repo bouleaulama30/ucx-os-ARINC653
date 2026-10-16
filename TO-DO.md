@@ -19,6 +19,7 @@
     * ajouter le truc pour l'IP des cartes holt sur fpga et le flow libero soc
     * je veux plus tard pouvoir refaire l'app facilement limite mettre juste les binaires ou le elf dans un des repo comme ça c'est plus simple
     * ajouter la doc pour le mappage des pins et les branchements elec aussi 
+    * save libero et ip sur github
 
 
 
