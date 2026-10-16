@@ -22,8 +22,9 @@ Hardware testbench is a real avionic application composed with two core (**ucx-o
     - ouvrir les uart com4, 5, 6 avec 115200 de baudrate sur tera machin
     - faire la commande "RESET" sur le menu du bootloader
 
-- Pour le spi
+- Pour le SPI
     - faire un schema ou explication du shema electrique ou des pins
 
 - Pour le FPGA 
-    - expliquer comment faire le projet sur libéro soc (importer l'ip via tcl) ou voir si possible de git le projet avec le bon dossier projet
+    - dire c'est quel fichier mathlab à ouvrir (cf repo arinc429_ip)
+    - expliquer comment faire le projet sur libéro soc (importer l'ip via tcl) ou voir si possible de git le projet avec le bon dossier projet (repo arinc429_ip)
