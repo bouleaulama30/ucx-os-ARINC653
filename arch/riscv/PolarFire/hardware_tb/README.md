@@ -4,10 +4,12 @@ Hardware testbench is a real avionic application composed with two core (**ucx-o
 ## liste étape à décrire
 
 - prerequis
-    - mettre design générale sur la carte via libero soc (donner le github)
+    - mettre design générale sur la carte via libero soc ([github](https://github.com/polarfire-soc/polarfire-soc-discovery-kit-reference-design))
+
     - faire fonctionner amp sur la carte (donner lien github/readme)
-        -  HSS à mettre sur la carte (mettre lien github/readme)
-        - installer hss payload (cf readme/github)
+        - HSS à build [github hss](https://github.com/polarfire-soc/hart-software-services)
+        - HSS à mettre sur la carte [github tool flow](https://github.com/polarfire-soc/polarfire-soc-documentation/blob/master/knowledge-base/polarfire-soc-software-tool-flow.md#programming-the-envm) et [video tuto](https://www.microchip.com/en-us/about/media-center/videos/caNsH4dDnLU)
+        - installer hss payload 
     - installer l'outil pour flash
     - installer l'outil pour l'uart
 
