@@ -152,3 +152,9 @@ Follow these steps to run performance tests on the PolarFire SoC:
 
 3. **Specify the Test Number**:
    - Add the flag `-DTEST_PERFXX` to the compilation flags (e.g., `-DTEST_PERF19` to run benchmark test 19).
+
+### 4.3 Running Hardware Testbench 
+
+Hardware testbench is a real avionic application composed with two core (**ucx-os-ARINC653** and **BM Microship system**) on **AMP** architecture.
+
+To deploy this application on the PolarFire Soc Discovery Kit read the `hardware_tb/README.md`
