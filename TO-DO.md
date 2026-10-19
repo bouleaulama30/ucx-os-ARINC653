@@ -10,10 +10,6 @@
 
 
 ## documentation
-* update doc pour les app testsbench
-    * save libero et ip sur github (arinc429) (update la doc sur ça)
-    * test si fonctionnel avec binaire tb app dans le repo (les test pour savoir s'ils sont bien fonctionnel)
-    * vérifier la doc pour le mappage des pins et les branchements elec aussi
 
 * une fois la recherche terminé ajouter tout dans des repo de l'orga de poly sur github (mpfs, arinc429, ucx-os-653)
 

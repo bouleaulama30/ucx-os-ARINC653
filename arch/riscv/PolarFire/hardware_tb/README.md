@@ -228,29 +228,38 @@ Ouvrir **trois fenêtres distinctes de Tera Term**, configurées à **115200 bau
 
 ## 8. Étape 5 : Câblage Matériel & Schéma des Broches (Mode SPI)
 
-En mode SPI, la liaison entre le PolarFire SoC et la carte éval Holt s'effectue via le connecteur d'extension **Raspberry Pi 40 broches (J10)** ou le connecteur **MikroBUS** de la Discovery Kit.
+En mode SPI, la liaison entre le PolarFire SoC et la carte éval Holt s'effectue via le connecteur d'extension **Raspberry Pi 40 broches (J10)** (pour la réception) et le connecteur **MikroBUS (J5)** (pour l'émission) de la Discovery Kit.
 
-### 8.1 Broches SPI sur le Connecteur Raspberry Pi 40 broches (J10)
+### 8.1 Broches SPI sur le Connecteur MikroBUS (J5) (Emission)
 
 ```text
-Discovery Kit J10 (40 broches)                  Carte Holt ARINC 429
+Discovery Kit J5 (8 broches)                  Carte Holt 1 ARINC 429
 +-----------------------------+                 +---------------------+
-| Pin 1  : 3.3V Power         |---------------->| VDD / 3.3V Logic    |
-| Pin 6  : GND Ground         |---------------->| GND                 |
-| Pin 19 : SPI0_MOSI (GPIO10) |---------------->| SI  (Serial In)     |
-| Pin 21 : SPI0_MISO (GPIO9)  |---------------->| SO  (Serial Out)    |
-| Pin 23 : SPI0_SCLK (GPIO11) |---------------->| SCK (Serial Clock)  |
-| Pin 24 : SPI0_SS0  (GPIO8)  |---------------->| /CS (Chip Select)   |
+| Pin 7  : 3.3V Power         |---------------->| VDD / 3.3V Logic    |
+| Pin 8  : GND Ground         |---------------->| GND                 |
+| Pin 6 : SPI0_MOSI           |---------------->| SI  (Serial In)     |
+| Pin 5  : SPI0_MISO          |---------------->| SO  (Serial Out)    |
+| Pin 4  : SPI0_SCLK          |---------------->| SCK (Serial Clock)  |
+| Pin 3  : SPI0_SS0           |---------------->| /CS (Chip Select)   |
++-----------------------------+                 +---------------------+
+```
+### 8.2 Broches SPI sur le Connecteur Raspberry Pi 40 broches (J10) (Réception)
+
+```text
+Discovery Kit J10 (40 broches)                  Carte Holt 2 ARINC 429
++-----------------------------+                 +---------------------+
+| Pin 1  : 3.3V Power         |<----------------| VDD / 3.3V Logic    |
+| Pin 6  : GND Ground         |<----------------| GND                 |
+| Pin 19 : SPI0_MOSI (GPIO10) |<----------------| SI  (Serial In)     |
+| Pin 21 : SPI0_MISO (GPIO9)  |<----------------| SO  (Serial Out)    |
+| Pin 23 : SPI0_SCLK (GPIO11) |<----------------| SCK (Serial Clock)  |
+| Pin 24 : SPI0_SS0  (GPIO8)  |<----------------| /CS (Chip Select)   |
 +-----------------------------+                 +---------------------+
 ```
 
-> [!NOTE]
-> Si vous utilisez deux cartes Holt distinctes (Architecture 2 : une émettrice et une réceptrice) :
-> - **Carte Holt 1 (TX)** : Reliée sur le contrôleur `SPI0` (Broches 19, 21, 23, 24).
-> - **Carte Holt 2 (RX)** : Reliée sur le contrôleur `SPI1` (disponible sur le connecteur MikroBUS ou routé sur le connecteur J10 via les broches libres `SPI1_SS0`, `SPI1_MOSI`, `SPI1_MISO`, `SPI1_SCLK`).
 
-### 8.2 Liaison Bus Avionique ARINC 429 ($\pm 10\text{V}$)
-Relier la sortie de la carte émettrice à l'entrée de la carte réceptrice avec une paire torsadée :
+### 8.3 Liaison Bus Avionique ARINC 429 ($\pm 10\text{V}$)
+Relier la sortie de la carte émettrice à l'entrée de la carte réceptrice  :
 
 ```text
 +-----------------------+                         +-----------------------+
@@ -258,7 +267,6 @@ Relier la sortie de la carte émettrice à l'entrée de la carte réceptrice ave
 |                       |                         |                       |
 |   Borne AOUT (TX_A)   |========================>|   Borne ARX (RX_A)    |
 |   Borne BOUT (TX_B)   |========================>|   Borne BRX (RX_B)    |
-|   Masse / Blindage    |------------------------>|   Masse / Blindage    |
 +-----------------------+                         +-----------------------+
         Ligne différentielle avionique ARINC 429 (Niveaux +10V / 0V / -10V)
 ```
@@ -267,21 +275,32 @@ Relier la sortie de la carte émettrice à l'entrée de la carte réceptrice ave
 
 ## 9. Étape 6 : Procédure pour l'IP FPGA ARINC 429 (Mode FPGA)
 
-Pour la variante FPGA, le décodage et l'encodage ARINC 429 ne sont plus gérés logiciellement par bitbang ou SPI standard, mais par une **IP matérielle VHDL/Verilog** implantée dans la matrice FPGA.
+Pour la variante FPGA, le décodage et l'encodage ARINC 429 ne sont plus gérés logiciellement par une **IP matérielle VHDL/Verilog** implantée dans la matrice FPGA.
 
 Les sources complètes de l'IP se trouvent dans le dépôt externe dédié : **`arinc429_ip`**.
 
-### 9.1 Modélisation & Génération HDL sous MATLAB / Simulink
+Faire l'étape **9.1** si vous voulez directement programmer le FPGA de la carte avec l'IP arinc429
+
+Faire les étapes **9.2** et **9.3** si vous voulez modifier le mathlab
+
+
+### 9.1 Ouverture du projet sur Libero Soc
+Vous pouvez directement ouvrir le projet Libero Soc présent dans le dépot **`arinc429_ip`**. Ce projet contient déjà l'IP raccordé au projet principal.
+Il suffit de lancer la chaîne de conception Libero :
+   - `Synthesize` -> `Place and Route` -> `Generate Bitstream`.
+   - Exporter et programmer le nouveau bitstream via **FlashPro Express**.
+
+### 9.2 Modélisation & Génération HDL sous MATLAB / Simulink
 1. Cloner ou ouvrir le dossier du dépôt `arinc429_ip`.
 2. Ouvrir **MATLAB**.
-3. Ouvrir le modèle Simulink principal : `arinc429_transceiver.slx` (ou exécuter le script de configuration `setup_arinc429.m`).
+3. Ouvrir le modèle Simulink principal : `ARINC429_converter_v3.slx` 
 4. Dans Simulink, ouvrir **HDL Coder** (`Apps > HDL Coder > HDL Workflow Advisor`).
 5. Configurer la cible :
    - Synthèse pour PolarFire SoC (famille PolarFire).
    - Fréquence d'horloge de l'IP : correspondante à la fabric (ex: 50 MHz ou 100 MHz).
 6. Exécuter l'étape **Generate HDL** : les fichiers VHDL/Verilog générés se trouvent dans le sous-dossier `hdlsrc/`.
 
-### 9.2 Intégration dans Libero SoC
+### 9.3 Intégration dans Libero SoC
 1. Ouvrir votre projet Libero SoC pour la Discovery Kit.
 2. Importer l'IP dans le projet :
    - **Méthode 1 (Automatisée)** : Exécuter le script TCL fourni dans `arinc429_ip` via `Ctrl + U` :  
