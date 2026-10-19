@@ -1,216 +1,215 @@
-# Hardware Testbench : Banc de Test Avionique AMP sur PolarFire SoC Discovery Kit
+# Hardware Testbench: AMP Avionics Testbench on PolarFire SoC Discovery Kit
 
-Ce dossier contient l'ensemble des éléments, configurations et binaires nécessaires pour exécuter le **banc de test matériel avionique (Hardware Testbench)** sur la carte **PolarFire SoC Discovery Kit (MPFS-DISCO-KIT)**.
+This folder contains all the components, configurations, and binaries required to run the **avionics hardware testbench (Hardware Testbench)** on the **PolarFire SoC Discovery Kit (MPFS-DISCO-KIT)** board.
 
-Le système repose sur une architecture **AMP (Asymmetric Multi-Processing)** exploitant deux cœurs d'application RISC-V 64 bits (U54) interconnectés via la mémoire interne partagée (**L2 LIM**) :
-1. **Hart 1 (Core 1 - U54_1)** : Système **Bare-metal Microchip** exécutant la couche de communication matérielle (contrôleur SPI ou IP FPGA ARINC 429) et la génération/décodage des trames avioniques.
-2. **Hart 2 (Core 2 - U54_2)** : Système d'exploitation temps-réel certifiable **UCX-OS-ARINC653**, exécutant deux partitions spatialement et temporellement isolées communiquant via un **Sampling Port**.
-3. **Hart 0 (E51)** : Cœur moniteur exécutant le bootloader de premier niveau **HSS (Hart Software Services)** en mémoire non volatile (**eNVM**).
-
----
-
-## Sommaire
-
-1. [Structure du Dossier](#1-structure-du-dossier)
-2. [Vue d'Ensemble de l'Architecture](#2-vue-densemble-de-larchitecture)
-3. [Prérequis Matériels & Logiciels](#3-prérequis-matériels--logiciels)
-4. [Étape 1 : Préparation de la Carte (Design Libero & HSS en eNVM)](#4-étape-1--préparation-de-la-carte-design-libero--hss-en-envm)
-5. [Étape 2 : Déploiement Rapide avec les Binaires Fournis](#5-étape-2--déploiement-rapide-avec-les-binaires-fournis)
-6. [Étape 3 : Flasher la Carte Micro SD avec USBImager](#6-étape-3--flasher-la-carte-micro-sd-avec-usbimager)
-7. [Étape 4 : Connexions UART et Lancement du Système](#7-étape-4--connexions-uart-et-lancement-du-système)
-8. [Étape 5 : Câblage Matériel & Schéma des Broches (Mode SPI)](#8-étape-5--câblage-matériel--schéma-des-broches-mode-spi)
-9. [Étape 6 : Procédure pour l'IP FPGA ARINC 429 (Mode FPGA)](#9-étape-6--procédure-pour-lip-fpga-arinc-429-mode-fpga)
-10. [Étape 7 : Modification et Recompilation des Applications (Si Besoin)](#10-étape-7--modification-et-recompilation-des-applications-si-besoin)
-11. [Dépannage & Bonnes Pratiques](#11-dépannage--bonnes-pratiques)
+The system is based on an **AMP (Asymmetric Multi-Processing)** architecture utilizing two 64-bit RISC-V application cores (U54) interconnected via internal shared memory (**L2 LIM**):
+1. **Hart 1 (Core 1 - U54_1)**: **Microchip Bare-metal** system executing the hardware communication layer (SPI controller or FPGA ARINC 429 IP) and the generation/decoding of avionics frames.
+2. **Hart 2 (Core 2 - U54_2)**: Certifiable real-time operating system **UCX-OS-ARINC653**, executing two spatially and temporally isolated partitions communicating via a **Sampling Port**.
+3. **Hart 0 (E51)**: Monitor core executing the first-stage bootloader **HSS (Hart Software Services)** in non-volatile memory (**eNVM**).
 
 ---
 
-## 1. Structure du Dossier
+## Table of Contents
+
+1. [Folder Structure](#1-folder-structure)
+2. [Architecture Overview](#2-architecture-overview)
+3. [Hardware & Software Prerequisites](#3-hardware--software-prerequisites)
+4. [Step 1: Board Preparation (Libero Design & HSS in eNVM)](#4-step-1-board-preparation-libero-design--hss-in-envm)
+5. [Step 2: Quick Deployment with Provided Binaries](#5-step-2-quick-deployment-with-provided-binaries)
+6. [Step 3: Flash the Micro SD Card with USBImager](#6-step-3-flash-the-micro-sd-card-with-usbimager)
+7. [Step 4: UART Connections and System Launch](#7-step-4-uart-connections-and-system-launch)
+8. [Step 5: Hardware Wiring & Pinout Diagram (SPI Mode)](#8-step-5-hardware-wiring--pinout-diagram-spi-mode)
+9. [Step 6: Procedure for the ARINC 429 FPGA IP (FPGA Mode)](#9-step-6-procedure-for-the-arinc-429-fpga-ip-fpga-mode)
+10. [Step 7: Modifying and Recompiling Applications (If Needed)](#10-step-7-modifying-and-recompiling-applications-if-needed)
+11. [Troubleshooting & Best Practices](#11-troubleshooting--best-practices)
+
+---
+
+## 1. Folder Structure
 
 ```text
 arch/riscv/PolarFire/hardware_tb/
-├── README.md                 # Le présent guide complet d'installation et d'exécution
-├── INFO-README.md            # Notes initiales et liens de référence
-├── holt_spi/                 # Variante 1 : Communication directe SPI vers carte Holt
-│   ├── PolarFire.elf         # Exécutable UCX-OS ARINC 653 (Core 2, DDR @ 0x80000000)
-│   ├── mpfs-spi-master-slave.elf # Exécutable Bare-metal SPI (Core 1, LIM @ 0x08000000)
-│   └── payload.bin           # Image binaire fusionnée prête à flasher sur SD
-├── holt_fpga/                # Variante 2 : Communication via IP ARINC 429 dans la fabric FPGA
-│   ├── PolarFire.elf         # Exécutable UCX-OS ARINC 653 (Core 2, DDR @ 0x80000000)
-│   ├── mpfs-spi-master-slave.elf # Exécutable Bare-metal FPGA (Core 1, LIM @ 0x08000000)
-│   └── payload.bin           # Image binaire fusionnée prête à flasher sur SD
-└── hss_payload/              # Outil de génération d'image de boot HSS (Payload Generator)
-    ├── hss-payload-generator     # Binaire exécutable Linux
-    ├── hss-payload-generator.exe # Binaire exécutable Windows
-    ├── msys-*.dll                # Bibliothèques dynamiques pour Windows
-    ├── payload.yaml              # Fichier de configuration du payload AMP
-    └── README.md                 # Documentation officielle du générateur HSS
+├── README.md                 # Complete installation and execution guide
+├── INFO-README.md            # Initial notes and reference links
+├── holt_spi/                 # Variant 1: Direct SPI communication to Holt board
+│   ├── PolarFire.elf         # UCX-OS ARINC 653 executable (Core 2, DDR @ 0x80000000)
+│   ├── mpfs-spi-master-slave.elf # Bare-metal SPI executable (Core 1, LIM @ 0x08000000)
+│   └── payload.bin           # Merged binary image ready to flash on SD
+├── holt_fpga/                # Variant 2: Communication via ARINC 429 IP in the FPGA fabric
+│   ├── PolarFire.elf         # UCX-OS ARINC 653 executable (Core 2, DDR @ 0x80000000)
+│   ├── mpfs-spi-master-slave.elf # Bare-metal FPGA executable (Core 1, LIM @ 0x08000000)
+│   └── payload.bin           # Merged binary image ready to flash on SD
+└── hss_payload/              # HSS boot image generation tool (Payload Generator)
+    ├── hss-payload-generator     # Linux executable binary
+    ├── hss-payload-generator.exe # Windows executable binary
+    ├── msys-*.dll                # Dynamic libraries for Windows
+    ├── payload.yaml              # AMP payload configuration file
+    └── README.md                 # Official documentation for the HSS generator
 ```
 
 > [!TIP]
-> Si vous ne souhaitez pas modifier le code source, **les fichiers `payload.bin` pré-compilés sont déjà prêts à l'emploi** dans `holt_spi/` et `holt_fpga/`. Vous pouvez passer directement à l'[Étape 3](#6-étape-3--flasher-la-carte-micro-sd-avec-usbimager).
+> If you do not wish to modify the source code, **the pre-compiled `payload.bin` files are already ready to use** in `holt_spi/` and `holt_fpga/`. You can skip directly to [Step 3](#6-step-3-flash-the-micro-sd-card-with-usbimager).
 
 ---
 
-## 2. Vue d'Ensemble de l'Architecture
+## 2. Architecture Overview
 
-### Deux Variantes Matérielles Prises en Charge
+### Two Supported Hardware Variants
 
 ```
 +---------------------------------------------------------------------------------------------------+
 | POLARFIRE SOC DISCOVERY KIT (MPFS-DISCO-KIT)                                                      |
 |                                                                                                   |
 |  +--------------------+         +---------------------------------------------------------------+ |
-|  | Hart 0 (E51)       |         | Hart 1 (U54_1) - BARE-METAL MICROCHIP                         | |
-|  | Bootloader HSS     |         | - Générateur de données de vol (Altitude : montée, palier...) | |
-|  | (Réside en eNVM)   |         | - Encodage / Décodage trames ARINC 429                        | |
-|  +--------------------+         | - Pilote SPI matériel OU interface IP Fabric FPGA             | |
+|  | Hart 0 (E51)       |         | Hart 1 (U54_1) - MICROCHIP BARE-METAL                         | |
+|  | HSS Bootloader     |         | - Flight data generator (Altitude: climb, level-off...)       | |
+|  | (Resides in eNVM)  |         | - ARINC 429 frame encoding / decoding                         | |
+|  +--------------------+         | - Hardware SPI driver OR FPGA Fabric IP interface             | |
 |                                 +-------------------------------+-------------------------------+ |
 |                                                                 |                                 |
-|                                                                 v (Ecriture IPC)                  |
+|                                                                 v (IPC Write)                     |
 |                                 +---------------------------------------------------------------+ |
-|                                 | L2 LIM SHARED MEMORY (Adresse 0x08060000)                     | |
-|                                 | Header Magique: 0x4152494E ("ARIN")                           | |
-|                                 | Structure: shared_altitude_data_t (mètres, pieds, trame, ...)  | |
+|                                 | L2 LIM SHARED MEMORY (Address 0x08060000)                     | |
+|                                 | Magic Header: 0x4152494E ("ARIN")                             | |
+|                                 | Structure: shared_altitude_data_t (meters, feet, frame, ...)  | |
 |                                 +-------------------------------+-------------------------------+ |
 |                                                                 |                                 |
-|                                                                 v (Lecture IPC avec fence)        |
+|                                                                 v (IPC Read with fence)           |
 |  +--------------------------------------------------------------+-------------------------------+ |
-|  | Hart 2 (U54_2) - RTOS UCX-OS-ARINC653                                                        | |
+|  | Hart 2 (U54_2) - UCX-OS-ARINC653 RTOS                                                        | |
 |  |                                                                                              | |
 |  |  +--------------------------------+               +---------------------------------------+  | |
-|  |  | Partition 1 : P1_OUT_ALT       |               | Partition 2 : P2_IN_ALT               |  | |
-|  |  | - Lit la mémoire partagée LIM  |               | - Lit le port SAMPLING_PORT           |  | |
-|  |  | - Écrit dans le SAMPLING_PORT  | -(Canal ARINC)-> - Interprète la phase de vol         |  | |
-|  |  |   (Période 200ms)              |     653       | - Affiche la télémétrie sur l'UART    |  | |
+|  |  | Partition 1: P1_OUT_ALT        |               | Partition 2: P2_IN_ALT                |  | |
+|  |  | - Reads LIM shared memory      |               | - Reads SAMPLING_PORT                 |  | |
+|  |  | - Writes to SAMPLING_PORT      | -(ARINC 653)->| - Interprets flight phase             |  | |
+|  |  |   (Period: 200ms)              |    Channel    | - Displays telemetry on UART          |  | |
 |  |  +--------------------------------+               +---------------------------------------+  | |
 |  +----------------------------------------------------------------------------------------------+ |
 +---------------------------------------------------------------------------------------------------+
 ```
 
-### Détail des Variantes :
-- **Variante 1 : Mode SPI (`holt_spi`)**
-  Le Bare-metal (Core 1) utilise directement les contrôleurs SPI du PolarFire SoC reliés aux broches d'extension vers la ou les cartes Holt (transceivers ARINC 429).
-- **Variante 2 : Mode FPGA (`holt_fpga`)**
-  Une IP matérielle ARINC 429 (développée sous MATLAB/Simulink et instanciée dans la fabric FPGA via Libero SoC) assure la sérialisation/désérialisation du protocole avionique.
+### Variant Details:
+- **Variant 1: SPI Mode (`holt_spi`)**  
+  The Bare-metal system (Core 1) directly uses the PolarFire SoC SPI controllers routed to the expansion header pins connected to the Holt ARINC 429 transceiver board(s).
+- **Variant 2: FPGA Mode (`holt_fpga`)**  
+  A dedicated hardware ARINC 429 IP (developed in MATLAB/Simulink and instantiated in the FPGA fabric via Libero SoC) handles the serialization/deserialization of the avionics protocol.
 
 ---
 
-## 3. Prérequis Matériels & Logiciels
+## 3. Hardware & Software Prerequisites
 
-### Matériel
-- **Carte PolarFire® SoC Discovery Kit** (Microchip MPFS-DISCO-KIT, puce MPFS095T).
-- **Carte(s) transceiver ARINC 429 Holt** (ex: cartes d'évaluation Holt HI-3593 / HI-8582 ou équivalent).
-- **Carte Micro SD** (capacité 4 Go à 32 Go, classe 10 recommandée).
-- **Câble USB** pour la connexion à la carte (programmation JTAG FlashPro et 4 ports UART virtuels).
-- **Câbles de liaison Dupont femelles-femelles** pour relier le connecteur GPIO de la Discovery Kit à la carte Holt.
-- **Paire torsadée** pour la ligne différentielle avionique ARINC 429 ($A$ et $B$, $\pm 10\text{V}$).
+### Hardware
+- **PolarFire® SoC Discovery Kit Board** (Microchip MPFS-DISCO-KIT, MPFS095T chip).
+- **Holt ARINC 429 Transceiver Board(s)** (e.g., Holt HI-3593 / HI-8582 evaluation boards or equivalent).
+- **Micro SD Card** (4 GB to 32 GB capacity, Class 10 recommended).
+- **USB Cable** for board connection (FlashPro JTAG programming and 4 virtual UART ports).
+- **Female-to-Female Dupont Jumper Wires** to connect the Discovery Kit GPIO header to the Holt board.
+- **Twisted Pair Cable** for the ARINC 429 differential avionics bus ($A$ and $B$, $\pm 10\text{V}$).
 
-### Logiciels PC
-- **Microchip Libero® SoC v2024.1 ou v2025.2+** (avec licence gratuite *Silver*).
-- **Microchip SoftConsole v2022.2-RISC-V-747** (environnement IDE Eclipse + chaîne de compilation RISC-V 64).
-- **FlashPro Express** (fourni avec Libero SoC ou avec les *Program and Debug Tools*).
-- **USBImager** : utilitaire ultra-léger et fiable pour flasher des images raw sur carte SD.  
-  👉 Téléchargement : [GitLab USBImager](https://gitlab.com/bztsrc/usbimager)
-- **Tera Term VT** (ou tout émulateur série multi-fenêtres supportant 115200 bauds).  
-  👉 Téléchargement : [GitHub Tera Term](https://github.com/TeraTermProject/teraterm/releases)
-- **HSS Payload Generator** (fourni directement dans `hss_payload/`).
-- *(Optionnel pour le mode FPGA)* : **MATLAB / Simulink** avec **HDL Coder** (pour régénérer l'IP du dépôt `arinc429_ip`).
-
----
-
-## 4. Étape 1 : Préparation de la Carte (Design Libero & HSS en eNVM)
-
-Avant de lancer le système pour la première fois, la carte PolarFire SoC doit posséder :
-1. Le bitstream FPGA de base programmé dans la puce.
-2. Le bootloader **HSS** programmé dans la mémoire non volatile interne (**eNVM**) avec la carte configurée en **Boot Mode 1**.
-
-### 1.1 Programmer le Design de Référence dans le FPGA
-Le design de référence configure les horloges, la mémoire DDR4 et le multiplexage des broches I/O.
-1. Télécharger ou cloner le dépôt de référence Microchip :  
-   [polarfire-soc-discovery-kit-reference-design sur GitHub](https://github.com/polarfire-soc/polarfire-soc-discovery-kit-reference-design)
-2. Ouvrir **Libero SoC**.
-3. Ouvrir la fenêtre d'exécution de script : `Project > Execute Script...` (ou raccourci `Ctrl + U`).
-4. Sélectionner le script `MPFS_DISCOVERY_KIT_REFERENCE_DESIGN.tcl` et cliquer sur **Run**.
-5. Une fois le projet généré, double-cliquer sur **Program Device** dans le volet *Design Flow* pour programmer le FPGA via FlashPro Express.
-
-### 1.2 Construire et Programmer le Bootloader HSS dans l'eNVM
-Le HSS (Hart Software Services) est le zero-stage bootloader (ZSBL) tournant sur le cœur moniteur E51.
-1. Consulter la documentation et le tutoriel vidéo officiels :
-   - Documentation : [PolarFire SoC Software Tool Flow - Programming the eNVM](https://github.com/polarfire-soc/polarfire-soc-documentation/blob/master/knowledge-base/polarfire-soc-software-tool-flow.md#programming-the-envm)
-   - Tutoriel vidéo : [Microchip Media Center - Video Tutorial eNVM HSS](https://www.microchip.com/en-us/about/media-center/videos/caNsH4dDnLU)
-   - Code source HSS : [hart-software-services sur GitHub](https://github.com/polarfire-soc/hart-software-services)
-2. Dans **SoftConsole**, importer le projet HSS configuré pour la Discovery Kit (`mpfs-discovery-kit`).
-
-3. Vérifier que le mode de démarrage de la carte est bien le **Boot Mode 1** (démarrage automatique du HSS depuis l'eNVM au reset).
+### PC Software
+- **Microchip Libero® SoC v2024.1 or v2025.2+** (with free *Silver* license).
+- **Microchip SoftConsole v2022.2-RISC-V-747** (Eclipse IDE environment + 64-bit RISC-V cross-compilation toolchain).
+- **FlashPro Express** (bundled with Libero SoC or *Program and Debug Tools*).
+- **USBImager**: Ultra-lightweight and reliable utility to flash raw disk images to SD cards.  
+  👉 Download: [GitLab USBImager](https://gitlab.com/bztsrc/usbimager)
+- **Tera Term VT** (or any multi-window serial terminal supporting 115200 baud).  
+  👉 Download: [GitHub Tera Term](https://github.com/TeraTermProject/teraterm/releases)
+- **HSS Payload Generator** (provided directly in `hss_payload/`).
+- *(Optional for FPGA mode)*: **MATLAB / Simulink** with **HDL Coder** (to regenerate the IP from the `arinc429_ip` repository).
 
 ---
 
-## 5. Étape 2 : Déploiement Rapide avec les Binaires Fournis
+## 4. Step 1: Board Preparation (Libero Design & HSS in eNVM)
 
-Deux images complètes pré-générées sont prêtes à être déployées selon la configuration physique retenue :
+Before running the system for the first time, the PolarFire SoC board must have:
+1. The base FPGA bitstream programmed into the device.
+2. The **HSS** bootloader programmed into internal non-volatile memory (**eNVM**) with the board configured in **Boot Mode 1**.
 
-| Configuration | Dossier | Fichier Binaire | Description |
+### 1.1 Program the Reference Design into the FPGA
+The reference design configures system clocks, DDR4 memory controller, and I/O pin multiplexing.
+1. Download or clone the Microchip reference repository:  
+   [polarfire-soc-discovery-kit-reference-design on GitHub](https://github.com/polarfire-soc/polarfire-soc-discovery-kit-reference-design)
+2. Open **Libero SoC**.
+3. Open the script execution dialog: `Project > Execute Script...` (or shortcut `Ctrl + U`).
+4. Select the `MPFS_DISCOVERY_KIT_REFERENCE_DESIGN.tcl` script and click **Run**.
+5. Once project generation finishes, double-click **Program Device** in the *Design Flow* tab to program the FPGA via FlashPro Express.
+
+### 1.2 Build and Program the HSS Bootloader into eNVM
+The HSS (Hart Software Services) is the zero-stage bootloader (ZSBL) executing on the E51 monitor core.
+1. Consult the official documentation and video tutorial:
+   - Documentation: [PolarFire SoC Software Tool Flow - Programming the eNVM](https://github.com/polarfire-soc/polarfire-soc-documentation/blob/master/knowledge-base/polarfire-soc-software-tool-flow.md#programming-the-envm)
+   - Video tutorial: [Microchip Media Center - Video Tutorial eNVM HSS](https://www.microchip.com/en-us/about/media-center/videos/caNsH4dDnLU)
+   - HSS source code: [hart-software-services on GitHub](https://github.com/polarfire-soc/hart-software-services)
+2. In **SoftConsole**, import the HSS project configured for the Discovery Kit (`mpfs-discovery-kit`).
+3. Verify that the board boot mode is set to **Boot Mode 1** (automatic boot of HSS from eNVM upon reset).
+
+---
+
+## 5. Step 2: Quick Deployment with Provided Binaries
+
+Two pre-generated complete images are ready to be deployed depending on the chosen physical configuration:
+
+| Configuration | Folder | Binary File | Description |
 | :--- | :--- | :--- | :--- |
-| **Variante SPI** | `arch/riscv/PolarFire/hardware_tb/holt_spi/` | `payload.bin` | Contrôleur SPI direct vers carte(s) Holt |
-| **Variante FPGA** | `arch/riscv/PolarFire/hardware_tb/holt_fpga/` | `payload.bin` | IP ARINC 429 synthétisée dans la fabric FPGA |
+| **SPI Variant** | `arch/riscv/PolarFire/hardware_tb/holt_spi/` | `payload.bin` | Direct SPI controller to Holt board(s) |
+| **FPGA Variant** | `arch/riscv/PolarFire/hardware_tb/holt_fpga/` | `payload.bin` | ARINC 429 IP synthesized in the FPGA fabric |
 
-Chaque dossier contient également :
-- `PolarFire.elf` : L'exécutable compilé d'UCX-OS-ARINC653 (Core 2).
-- `mpfs-spi-master-slave.elf` : L'exécutable compilé du système Bare-metal Microchip (Core 1).
-
----
-
-## 6. Étape 3 : Flasher la Carte Micro SD avec USBImager
-
-Le binaire `payload.bin` doit être gravé en format brut sur la carte Micro SD. **USBImager** est l'outil recommandé
-
-### Procédure pas à pas :
-1. Insérer la carte Micro SD dans votre PC (via adaptateur SD ou lecteur USB).
-2. Lancer **USBImager**.
-3. Dans le premier champ (Image), cliquer sur `...` et sélectionner le fichier :
-   - `arch/riscv/PolarFire/hardware_tb/holt_spi/payload.bin` (pour le mode SPI)  
-   *OU*
-   - `arch/riscv/PolarFire/hardware_tb/holt_fpga/payload.bin` (pour le mode FPGA).
-4. Dans le deuxième champ (Device), sélectionner soigneusement la carte Micro SD (attention à ne pas écraser vos disques durs système !).
-5. Cliquer sur le bouton **Write**. L'écriture ne prend que quelques secondes (taille $\approx 60\text{ Ko}$).
-6. Une fois l'opération terminée, éjecter proprement la carte Micro SD du PC.
-7. Insérer la carte Micro SD dans le slot dédié de la PolarFire SoC Discovery Kit (**J1**).
+Each folder also contains:
+- `PolarFire.elf`: Compiled executable for UCX-OS-ARINC653 (Core 2).
+- `mpfs-spi-master-slave.elf`: Compiled executable for the Microchip Bare-metal system (Core 1).
 
 ---
 
-## 7. Étape 4 : Connexions UART et Lancement du Système
+## 6. Step 3: Flash the Micro SD Card with USBImager
 
-La puce pont USB-Série de la Discovery Kit expose **plusieurs ports COM virtuels** sur un seul câble USB.
+The `payload.bin` binary must be written as a raw disk image onto the Micro SD card. **USBImager** is the recommended tool.
 
-### 7.1 Repérage des Ports COM
-Brancher le câble USB entre la Discovery Kit et votre ordinateur.
-- **Sous Windows** : Ouvrir le *Gestionnaire de périphériques* > *Ports (COM et LPT)*. Vous verrez 3 ou 4 ports consécutifs (par exemple : `COM4`, `COM5`, `COM6`, `COM7`).
-- **Sous Linux** : Exécuter `ls -l /dev/ttyUSB*` (vous verrez `/dev/ttyUSB0`, `/dev/ttyUSB1`, `/dev/ttyUSB2`, etc.).
+### Step-by-Step Procedure:
+1. Insert the Micro SD card into your PC (via an SD adapter or USB card reader).
+2. Launch **USBImager**.
+3. In the first field (Image), click `...` and select the file:
+   - `arch/riscv/PolarFire/hardware_tb/holt_spi/payload.bin` (for SPI mode)  
+   *OR*
+   - `arch/riscv/PolarFire/hardware_tb/holt_fpga/payload.bin` (for FPGA mode).
+4. In the second field (Device), carefully select the Micro SD card (take care not to overwrite system drives!).
+5. Click the **Write** button. Writing takes only a few seconds (size $\approx 60\text{ KB}$).
+6. Once the operation is complete, safely eject the Micro SD card from the PC.
+7. Insert the Micro SD card into the dedicated slot on the PolarFire SoC Discovery Kit (**J1**).
 
-### 7.2 Configuration de Tera Term (ou PuTTY)
-Ouvrir **trois fenêtres distinctes de Tera Term**, configurées à **115200 bauds, 8 bits de données, 1 bit de stop, pas de parité (115200 8N1)** :
+---
 
-| Instance Tera Term | Port Typique (Windows) | Rôle dans le Banc de Test | Description du Flux |
+## 7. Step 4: UART Connections and System Launch
+
+The USB-to-Serial bridge chip on the Discovery Kit exposes **multiple virtual COM ports** over a single USB cable.
+
+### 7.1 Identifying COM Ports
+Connect the USB cable between the Discovery Kit and your computer.
+- **On Windows**: Open *Device Manager* > *Ports (COM & LPT)*. You will see 3 or 4 consecutive ports (for example: `COM4`, `COM5`, `COM6`, `COM7`).
+- **On Linux**: Run `ls -l /dev/ttyUSB*` (you will see `/dev/ttyUSB0`, `/dev/ttyUSB1`, `/dev/ttyUSB2`, etc.).
+
+### 7.2 Configuring Tera Term (or PuTTY)
+Open **three separate Tera Term windows**, configured to **115200 baud, 8 data bits, 1 stop bit, no parity (115200 8N1)**:
+
+| Tera Term Instance | Typical Port (Windows) | Role in Testbench | Stream Description |
 | :--- | :--- | :--- | :--- |
-| **Console 1** | `COM4` | **Hart 0 (E51) - HSS Bootloader** | Menu HSS, statut de boot SD, commandes système |
-| **Console 2** | `COM5` | **Hart 1 (U54_1) - Bare-metal Microchip** | Traces d'émission/réception SPI/FPGA ARINC 429 |
-| **Console 3** | `COM6` | **Hart 2 (U54_2) - UCX-OS ARINC 653** | Traces RTOS, partitions P1 et P2, télémétrie reçue |
+| **Console 1** | `COM4` | **Hart 0 (E51) - HSS Bootloader** | HSS menu, SD boot status, system commands |
+| **Console 2** | `COM5` | **Hart 1 (U54_1) - Microchip Bare-metal** | ARINC 429 SPI/FPGA TX/RX logs |
+| **Console 3** | `COM6` | **Hart 2 (U54_2) - UCX-OS ARINC 653** | RTOS traces, P1 and P2 partitions, received telemetry |
 
-### 7.3 Démarrage de l'Application
-1. Une fois les trois fenêtres ouvertes, appuyez sur le bouton-poussoir **RESET** de la carte Discovery Kit (ou tapez la commande `RESET` dans la Console HSS sur `COM4`).
-2. Sur la **Console 1 (COM4 - HSS)**, vous verrez le journal de démarrage HSS qui charge les deux contextes ELF depuis la carte SD vers la RAM :
+### 7.3 Starting the Application
+1. Once all three windows are open, press the **RESET** push button on the Discovery Kit board (or type the command `RESET` into the HSS Console on `COM4`).
+2. On **Console 1 (COM4 - HSS)**, you will see the HSS boot log loading the two ELF contexts from the SD card into RAM:
    ```text
    [HSS] Reading payload from MMC/SD...
    [HSS] Booting Hart 1 at 0x08000000 (PRV_M)...
    [HSS] Booting Hart 2 at 0x80000000 (PRV_M)...
    ```
-3. Sur la **Console 2 (COM5 - Bare-metal)**, les messages de vol simulés et de transmission de mots ARINC 429 s'affichent :
+3. On **Console 2 (COM5 - Bare-metal)**, simulated flight messages and ARINC 429 word transmissions are displayed:
    ```text
    [Core 1] ARINC 429 Flight Generator Started
    [Core 1] TX ARINC Word: 0x0138406A | Alt: 1250 m | Phase: MONTEE
    ```
-4. Sur la **Console 3 (COM6 - UCX-OS ARINC 653)**, vous observerez le démarrage du noyau et le dialogue inter-partitions :
+4. On **Console 3 (COM6 - UCX-OS ARINC 653)**, you will observe the kernel boot and inter-partition communication:
    ```text
    =======================================================
      UCX-OS ARINC 653 RTOS - Optimized Telemetry App      
@@ -226,27 +225,28 @@ Ouvrir **trois fenêtres distinctes de Tera Term**, configurées à **115200 bau
 
 ---
 
-## 8. Étape 5 : Câblage Matériel & Schéma des Broches (Mode SPI)
+## 8. Step 5: Hardware Wiring & Pinout Diagram (SPI Mode)
 
-En mode SPI, la liaison entre le PolarFire SoC et la carte éval Holt s'effectue via le connecteur d'extension **Raspberry Pi 40 broches (J10)** (pour la réception) et le connecteur **MikroBUS (J5)** (pour l'émission) de la Discovery Kit.
+In SPI mode, the connection between the PolarFire SoC and the Holt evaluation boards is established via the **MikroBUS connector (J5)** (for transmission) and the **40-pin Raspberry Pi extension connector (J10)** (for reception) on the Discovery Kit.
 
-### 8.1 Broches SPI sur le Connecteur MikroBUS (J5) (Emission)
+### 8.1 SPI Pins on MikroBUS Connector (J5) (Transmission)
 
 ```text
-Discovery Kit J5 (8 broches)                  Carte Holt 1 ARINC 429
+Discovery Kit J5 (8 pins)                     Holt Board 1 ARINC 429
 +-----------------------------+                 +---------------------+
 | Pin 7  : 3.3V Power         |---------------->| VDD / 3.3V Logic    |
 | Pin 8  : GND Ground         |---------------->| GND                 |
-| Pin 6 : SPI0_MOSI           |---------------->| SI  (Serial In)     |
+| Pin 6  : SPI0_MOSI          |---------------->| SI  (Serial In)     |
 | Pin 5  : SPI0_MISO          |---------------->| SO  (Serial Out)    |
 | Pin 4  : SPI0_SCLK          |---------------->| SCK (Serial Clock)  |
 | Pin 3  : SPI0_SS0           |---------------->| /CS (Chip Select)   |
 +-----------------------------+                 +---------------------+
 ```
-### 8.2 Broches SPI sur le Connecteur Raspberry Pi 40 broches (J10) (Réception)
+
+### 8.2 SPI Pins on 40-Pin Raspberry Pi Connector (J10) (Reception)
 
 ```text
-Discovery Kit J10 (40 broches)                  Carte Holt 2 ARINC 429
+Discovery Kit J10 (40 pins)                   Holt Board 2 ARINC 429
 +-----------------------------+                 +---------------------+
 | Pin 1  : 3.3V Power         |<----------------| VDD / 3.3V Logic    |
 | Pin 6  : GND Ground         |<----------------| GND                 |
@@ -257,133 +257,130 @@ Discovery Kit J10 (40 broches)                  Carte Holt 2 ARINC 429
 +-----------------------------+                 +---------------------+
 ```
 
-
-### 8.3 Liaison Bus Avionique ARINC 429 ($\pm 10\text{V}$)
-Relier la sortie de la carte émettrice à l'entrée de la carte réceptrice  :
+### 8.3 ARINC 429 Avionics Bus Interconnection ($\pm 10\text{V}$)
+Connect the transmitter board output to the receiver board input:
 
 ```text
 +-----------------------+                         +-----------------------+
-|  Carte Holt 1 (TX)    |                         |  Carte Holt 2 (RX)    |
+|  Holt Board 1 (TX)    |                         |  Holt Board 2 (RX)    |
 |                       |                         |                       |
-|   Borne AOUT (TX_A)   |========================>|   Borne ARX (RX_A)    |
-|   Borne BOUT (TX_B)   |========================>|   Borne BRX (RX_B)    |
+|   AOUT Terminal (TX_A)|========================>|   ARX Terminal (RX_A) |
+|   BOUT Terminal (TX_B)|========================>|   BRX Terminal (RX_B) |
 +-----------------------+                         +-----------------------+
-        Ligne différentielle avionique ARINC 429 (Niveaux +10V / 0V / -10V)
+        ARINC 429 Differential Avionics Line (+10V / 0V / -10V Levels)
 ```
 
 ---
 
-## 9. Étape 6 : Procédure pour l'IP FPGA ARINC 429 (Mode FPGA)
+## 9. Step 6: Procedure for the ARINC 429 FPGA IP (FPGA Mode)
 
-Pour la variante FPGA, le décodage et l'encodage ARINC 429 ne sont plus gérés logiciellement par une **IP matérielle VHDL/Verilog** implantée dans la matrice FPGA.
+For the FPGA variant, ARINC 429 encoding and decoding are no longer handled in software, but by a **hardware VHDL/Verilog IP** implemented in the FPGA fabric.
 
-Les sources complètes de l'IP se trouvent dans le dépôt externe dédié : **`arinc429_ip`**.
+The complete IP source files are located in the dedicated external repository: **`arinc429_ip`**.
 
-Faire l'étape **9.1** si vous voulez directement programmer le FPGA de la carte avec l'IP arinc429
+- Follow step **9.1** if you want to directly program the board's FPGA with the ARINC 429 IP.
+- Follow steps **9.2** and **9.3** if you want to modify the MATLAB model.
 
-Faire les étapes **9.2** et **9.3** si vous voulez modifier le mathlab
+### 9.1 Opening the Project in Libero SoC
+You can directly open the Libero SoC project located in the **`arinc429_ip`** repository. This project already contains the IP connected to the main design.
+Simply run the Libero design flow:
+- `Synthesize` -> `Place and Route` -> `Generate Bitstream`.
+- Export and program the new bitstream using **FlashPro Express**.
 
+### 9.2 Modeling & HDL Generation in MATLAB / Simulink
+1. Clone or open the `arinc429_ip` repository folder.
+2. Open **MATLAB**.
+3. Open the main Simulink model: `ARINC429_converter_v3.slx`.
+4. In Simulink, open **HDL Coder** (`Apps > HDL Coder > HDL Workflow Advisor`).
+5. Configure the target:
+   - Synthesis for PolarFire SoC (PolarFire family).
+   - IP clock frequency: matching the fabric (e.g., 50 MHz or 100 MHz).
+6. Execute the **Generate HDL** step: generated VHDL/Verilog files are located in the `hdlsrc/` subfolder.
 
-### 9.1 Ouverture du projet sur Libero Soc
-Vous pouvez directement ouvrir le projet Libero Soc présent dans le dépot **`arinc429_ip`**. Ce projet contient déjà l'IP raccordé au projet principal.
-Il suffit de lancer la chaîne de conception Libero :
-   - `Synthesize` -> `Place and Route` -> `Generate Bitstream`.
-   - Exporter et programmer le nouveau bitstream via **FlashPro Express**.
-
-### 9.2 Modélisation & Génération HDL sous MATLAB / Simulink
-1. Cloner ou ouvrir le dossier du dépôt `arinc429_ip`.
-2. Ouvrir **MATLAB**.
-3. Ouvrir le modèle Simulink principal : `ARINC429_converter_v3.slx` 
-4. Dans Simulink, ouvrir **HDL Coder** (`Apps > HDL Coder > HDL Workflow Advisor`).
-5. Configurer la cible :
-   - Synthèse pour PolarFire SoC (famille PolarFire).
-   - Fréquence d'horloge de l'IP : correspondante à la fabric (ex: 50 MHz ou 100 MHz).
-6. Exécuter l'étape **Generate HDL** : les fichiers VHDL/Verilog générés se trouvent dans le sous-dossier `hdlsrc/`.
-
-### 9.3 Intégration dans Libero SoC
-1. Ouvrir votre projet Libero SoC pour la Discovery Kit.
-2. Importer l'IP dans le projet :
-   - **Méthode 1 (Automatisée)** : Exécuter le script TCL fourni dans `arinc429_ip` via `Ctrl + U` :  
+### 9.3 Integration in Libero SoC
+1. Open your Libero SoC project for the Discovery Kit.
+2. Import the IP into the project:
+   - **Method 1 (Automated)**: Execute the TCL script provided in `arinc429_ip` using `Ctrl + U`:  
      `source import_arinc429_ip.tcl`
-   - **Méthode 2 (Manuelle)** : Aller dans `Catalog > Create Core from HDL...`, sélectionner les fichiers VHDL générés par MATLAB, puis instancier le bloc dans votre schéma **SmartDesign**.
-3. Raccorder les interfaces de l'IP :
-   - Bus de registres (APB ou AXI) relié au bus MSS FIC0/FIC1.
-   - Entrées/Sorties ARINC 429 connectées aux tampons I/O physiques vers les broches du connecteur d'extension.
-4. Lancer la chaîne de conception Libero :
+   - **Method 2 (Manual)**: Go to `Catalog > Create Core from HDL...`, select the VHDL files generated by MATLAB, and instantiate the block in your **SmartDesign** canvas.
+3. Connect the IP interfaces:
+   - Register bus (APB or AXI) connected to MSS FIC0/FIC1 bus.
+   - ARINC 429 Inputs/Outputs connected to physical I/O buffers routing to the extension connector pins.
+4. Run the Libero design flow:
    - `Synthesize` -> `Place and Route` -> `Generate Bitstream`.
-5. Exporter et programmer le nouveau bitstream via **FlashPro Express**.
+5. Export and program the new bitstream using **FlashPro Express**.
 
 ---
 
-## 10. Étape 7 : Modification et Recompilation des Applications (Si Besoin)
+## 10. Step 7: Modifying and Recompiling Applications (If Needed)
 
-Si vous devez adapter les applications pour vos propres tests, suivez les étapes ci-dessous.
+If you need to adapt the applications for your own tests, follow the steps below.
 
-### 10.1 Préparation et Compilation de l'Application UCX-OS
-1. **Remplacer le code applicatif principal** :  
-   Copier le contenu du fichier template `app/arinc_app_altitude.c` dans le fichier d'entrée de la cible PolarFire `arch/riscv/PolarFire/src/app/app_main.c`.
-2. **Configurer les descripteurs statiques ARINC 653** :
-   - Copier le fichier d'en-tête `include/arinc/static/static_conf_arinc_app_altitude.h` vers `include/arinc/static_conf.h` dans votre projet SoftConsole.
-   - Copier le fichier d'implémentation `arinc/static/static_conf_arinc_app_altitude.c` vers `src/ucx/arinc/static_conf.c` dans votre projet SoftConsole.
-3. **Compiler le projet sous SoftConsole** :
-   - Clic droit sur le projet `PolarFire` > **Build Project**.
-   - Le binaire généré se trouve dans `Debug/PolarFire.elf` (ou `Release/PolarFire.elf`).
+### 10.1 Preparing and Compiling the UCX-OS Application
+1. **Replace the main application code**:  
+   Copy the contents of the template file `app/arinc_app_altitude.c` into the PolarFire target entry file `arch/riscv/PolarFire/src/app/app_main.c`.
+2. **Configure ARINC 653 static descriptors**:
+   - Copy the header file `include/arinc/static/static_conf_arinc_app_altitude.h` to `include/arinc/static_conf.h` in your SoftConsole project.
+   - Copy the implementation file `arinc/static/static_conf_arinc_app_altitude.c` to `src/ucx/arinc/static_conf.c` in your SoftConsole project.
+3. **Compile the project in SoftConsole**:
+   - Right-click the `PolarFire` project > **Build Project**.
+   - The generated binary is located in `Debug/PolarFire.elf` (or `Release/PolarFire.elf`).
 
-### 10.2 Préparation et Compilation de l'Application Bare-metal
-1. Dans le projet SoftConsole `mpfs-spi-master-slave`, ouvrir `src/platform/drivers/mss/mss_spi/u54_1.c` (ou le fichier applicatif du Hart 1).
-2. Vérifier que la boucle d'émission écrit bien dans l'adresse partagée **`0x08060000`** avec le magic `0x4152494E`.
-3. Compiler le projet sous la configuration cible : **`LIM-Debug-DiscoveryKit`**.
-4. Le binaire généré se trouve dans `LIM-Debug-DiscoveryKit/mpfs-spi-master-slave.elf`.
+### 10.2 Preparing and Compiling the Bare-metal Application
+1. In the SoftConsole project `mpfs-spi-master-slave`, open `src/platform/drivers/mss/mss_spi/u54_1.c` (or the Hart 1 application file).
+2. Ensure that the transmit loop writes to the shared address **`0x08060000`** with the magic value `0x4152494E`.
+3. Compile the project under the target configuration: **`LIM-Debug-DiscoveryKit`**.
+4. The generated binary is located in `LIM-Debug-DiscoveryKit/mpfs-spi-master-slave.elf`.
 
-### 10.3 Générer un Nouveau `payload.bin`
-1. Se positionner dans le dossier `hss_payload/` :
+### 10.3 Generating a New `payload.bin`
+1. Navigate to the `hss_payload/` folder:
    ```bash
    cd arch/riscv/PolarFire/hardware_tb/hss_payload
    ```
-2. Vérifier les chemins absolus ou relatifs des deux fichiers `.elf` dans `payload.yaml` :
+2. Verify the absolute or relative paths of the two `.elf` files in `payload.yaml`:
    ```yaml
    set-name: 'AMP_BM_UCXOS'
    hart-entry-points: {u54_1: '0x08000000', u54_2: '0x80000000'}
 
    payloads:
-     'chemin/vers/mpfs-spi-master-slave.elf': {exec-addr: '0x08000000', owner-hart: u54_1, priv-mode: prv_m, skip-opensbi: true}
-     'chemin/vers/PolarFire.elf': {exec-addr: '0x80000000', owner-hart: u54_2, priv-mode: prv_m, skip-opensbi: true}
+     'path/to/mpfs-spi-master-slave.elf': {exec-addr: '0x08000000', owner-hart: u54_1, priv-mode: prv_m, skip-opensbi: true}
+     'path/to/PolarFire.elf': {exec-addr: '0x80000000', owner-hart: u54_2, priv-mode: prv_m, skip-opensbi: true}
    ```
-3. Exécuter le générateur :
-   - **Sous Windows** :
+3. Run the generator:
+   - **On Windows**:
      ```cmd
      hss-payload-generator.exe -c payload.yaml payload.bin
      ```
-   - **Sous Linux** :
+   - **On Linux**:
      ```bash
      chmod +x hss-payload-generator
      ./hss-payload-generator -c payload.yaml payload.bin
      ```
-4. Copier le nouveau fichier `payload.bin` vers votre dossier cible (`holt_spi/` ou `holt_fpga/`) et flasher sur la Micro SD avec USBImager (Étape 3).
+4. Copy the new `payload.bin` file to your target folder (`holt_spi/` or `holt_fpga/`) and flash it onto the Micro SD card using USBImager (Step 3).
 
 ---
 
-## 11. Dépannage & Bonnes Pratiques
+## 11. Troubleshooting & Best Practices
 
-### 1. La console HSS n'affiche rien lors du RESET
-- Vérifiez le câble USB et les cavaliers d'alimentation de la carte.
-- Vérifiez que le port COM sélectionné correspond bien au cœur E51 (premier port virtuel, souvent le numéro le plus bas, ex: COM4).
-- Assurez-vous que le baudrate est strictement fixé à **115200 bauds**.
-- Vérifiez que le **Boot Mode 1** est bien activé et que le HSS a été programmé en eNVM.
+### 1. HSS Console displays nothing upon RESET
+- Check the USB cable and the board power jumpers.
+- Verify that the selected COM port corresponds to the E51 core (first virtual port, typically the lowest number, e.g., COM4).
+- Ensure that the baud rate is strictly set to **115200 baud**.
+- Verify that **Boot Mode 1** is active and that the HSS has been programmed into eNVM.
 
-### 2. Le HSS affiche `Failed to read payload from MMC/SD`
-- La carte Micro SD n'est pas insérée ou est mal insérée dans le slot J1.
-- La carte a été formatée au lieu d'être écrite en image brute : utilisez impérativement **USBImager** pour écrire `payload.bin` directement sur le périphérique bloc.
+### 2. HSS displays `Failed to read payload from MMC/SD`
+- The Micro SD card is not inserted or improperly seated in slot J1.
+- The card was filesystem-formatted instead of written as a raw image: you must use **USBImager** to write `payload.bin` directly to the raw block device.
 
-### 3. Les cœurs démarrent mais les données d'altitude restent à 0 ou n'évoluent pas
-- **Vérification du Magic Number** : Le Core 2 attend le mot d'en-tête `0x4152494E` ("ARIN" en ASCII). Si le Core 1 n'a pas encore écrit ou a une adresse différente de `0x08060000`, le Core 2 attendra.
-- **Barrière mémoire (Fence)** : Le cœur U54_2 dispose d'un cache L1. Le code applicatif dans `app_main.c` utilise l'instruction assembleur :
+### 3. Cores boot but altitude data stays at 0 or does not change
+- **Magic Number Verification**: Core 2 expects the header word `0x4152494E` ("ARIN" in ASCII). If Core 1 has not written yet or wrote to an address different from `0x08060000`, Core 2 will wait.
+- **Memory Barrier (Fence)**: The U54_2 core has an L1 cache. The application code in `app_main.c` uses the assembly instruction:
   ```c
   asm volatile ("fence rw, rw" ::: "memory");
   ```
-  pour forcer le rechargement effectif de la mémoire physique partagée L2 LIM.
-- **Inversion du câblage ARINC 429** : Vérifiez que la ligne AOUT est bien connectée à ARX, et BOUT à BRX. Si les lignes sont croisées ($A$ sur $B$), la parité et les labels seront rejetés par le décodeur.
+  to force reloading from the physical L2 LIM shared memory.
+- **ARINC 429 Inverted Wiring**: Verify that the AOUT line is properly connected to ARX, and BOUT to BRX. If the lines are swapped ($A$ to $B$), parity and labels will be rejected by the decoder.
 
 ---
 
-> Pour toute information complémentaire sur le système d'exploitation ARINC 653, la configuration statique des tables de santé HM ou l'ordonnanceur deux niveaux, consultez le fichier `README.md` situé à la racine du dépôt ucx-os-ARINC653.
+> For any additional information regarding the ARINC 653 operating system, static configuration of HM health tables, or the two-level scheduler, refer to the `README.md` file located at the root of the ucx-os-ARINC653 repository.
