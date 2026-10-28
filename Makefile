@@ -12,13 +12,13 @@ TARGET_LIST = \
 #ARCH = none
 DURATION = 1
 
-ARCHI = riscv64
+ARCHI = riscv32
 
 SERIAL_BAUD=57600
 SERIAL_DEVICE=/dev/ttyUSB0
 
 # ARINC app target (can be overridden: make all ARINC_APP_TARGET=arinc_app_demo1)
-ARINC_APP_TARGET ?= arinc_app
+ARINC_APP_TARGET ?= arinc_app_demo1
 
 SRC_DIR = .
 

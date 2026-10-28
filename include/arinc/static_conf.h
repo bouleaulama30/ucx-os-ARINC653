@@ -20,19 +20,36 @@
 #define MAX_LOG_ENTRY_SIZE 256
 
 extern void p1_process1(void);
+extern void p1_process2(void);
+extern void p1_process3(void);
 extern void p2_process1(void);
 extern void error_handler_function(void);
+extern void test_spatial_violation_p1(void);
+extern void test_spatial_violation_p2(void);
+extern void test_round_robin_A(void);
+extern void test_round_robin_B(void);
+extern void test_periodic_accuracy(void);
+extern void test_states_slave(void);
+extern void test_states_master(void);
+extern void test_prio_A(void);
+extern void test_prio_B(void);
 
-// Linker script symbols for kernel and partitions
+
+
+// Déclaration des symboles du linker script du kernel
 extern uint8_t _kernel_end[];
 
+// Déclaration des symboles du linker script de la p1
 extern uint8_t _p1_code_start[];
 extern uint8_t _p1_code_end[];
+
 extern uint8_t _p1_data_start[];
 extern uint8_t _p1_data_end[];
 
+// Déclaration des symboles du linker script de la p2
 extern uint8_t _p2_code_start[];
 extern uint8_t _p2_code_end[];
+
 extern uint8_t _p2_data_start[];
 extern uint8_t _p2_data_end[];
 
@@ -43,12 +60,12 @@ static struct queuing_port_s p1_queuing_ports[MAX_NUMBER_OF_QUEUING_PORTS];
 static struct queuing_port_s p2_queuing_ports[MAX_NUMBER_OF_QUEUING_PORTS];
 
 static struct blackboard_s p1_blackboards[MAX_NUMBER_OF_BLACKBOARDS];
-static uint8_t p1_blackboards_data[MAX_NUMBER_OF_BLACKBOARDS * BLACKBOARD_MAX_MESSAGE_SIZE];
+static uint8_t p1_blackboards_data[MAX_NUMBER_OF_BLACKBOARDS * BLACKBOARD_MAX_MESSAGE_SIZE]; // 512 bytes par blackboard
 static uint32_t p1_blackboards_size_data[MAX_NUMBER_OF_BLACKBOARDS];
 
 static struct buffer_s p1_buffers[MAX_NUMBER_OF_BUFFERS];
-static uint8_t p1_buffers_data[MAX_NUMBER_OF_BUFFERS * BUFFER_MAX_MESSAGE_SIZE * BUFFER_MAX_NB_MESSAGE];
-static uint32_t p1_buffers_size_data[MAX_NUMBER_OF_BUFFERS * BUFFER_MAX_NB_MESSAGE];
+static uint8_t p1_buffers_data[MAX_NUMBER_OF_BUFFERS * BUFFER_MAX_MESSAGE_SIZE * BUFFER_MAX_NB_MESSAGE]; // 512 bytes par buffer
+static uint32_t p1_buffers_size_data[MAX_NUMBER_OF_BUFFERS * BUFFER_MAX_NB_MESSAGE]; // 512 bytes par buffer
 
 static struct semaphore_s p1_semaphores[MAX_NUMBER_OF_SEMAPHORES];
 static volatile int32_t p1_semaphores_counter[MAX_NUMBER_OF_SEMAPHORES];
@@ -68,6 +85,7 @@ extern char hm_log_buffer[MAX_LOG_ENTRIES][MAX_LOG_ENTRY_SIZE];
 
 extern const ERROR_ACTION_TYPE hm_table_partition_1[4][4];
 extern const ERROR_ACTION_TYPE hm_table_partition_2[4][4];
+
 extern const ERROR_ACTION_TYPE hm_table_module[1][4];
 
 // Hardcoded partition configuration
@@ -131,13 +149,13 @@ struct PartitionConfig {
     APEX_INTEGER max_errors;
 };
 
-// Partition 1 configuration
+// Default hardcoded partition configuration et voir le ldscript pour la conf mémoire
 static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
-    .period = 50,
-    .duration = 20,
+    .period = 50,                    // 1 second in nanoseconds
+    .duration = 20,                   // 500ms
     .identifier = 1,
     .num_assigned_cores = 1,
-    .name = "Partition1",
+    .name = "DefaultPartition",
     .region_name_code_mem = "p1_code",
     .access_code_mem = "RX",
     .region_name_data_mem = "p1_data",
@@ -157,14 +175,14 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
     .blackboards = p1_blackboards,
     .max_blackboards = MAX_NUMBER_OF_BLACKBOARDS,
     .blackboard_count = 0,
-    .max_blackboard_data_size = BLACKBOARD_MAX_MESSAGE_SIZE,
+    .max_blackboard_data_size = BLACKBOARD_MAX_MESSAGE_SIZE, // 512 bytes par blackboard
     .blackboards_data = p1_blackboards_data,
     .blackboards_size_data = p1_blackboards_size_data,
 
     .buffers = p1_buffers,
     .max_buffers = MAX_NUMBER_OF_BUFFERS,
     .buffer_count = 0,
-    .max_buffer_data_size = BUFFER_MAX_MESSAGE_SIZE * BUFFER_MAX_NB_MESSAGE,
+    .max_buffer_data_size = BUFFER_MAX_MESSAGE_SIZE * BUFFER_MAX_NB_MESSAGE, // 512 bytes par buffer
     .buffers_data = p1_buffers_data,
     .buffers_size_data = p1_buffers_size_data,
 
@@ -187,13 +205,12 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
     .max_errors = MAX_NUMBER_OF_ERRORS,
 };
 
-// Partition 2 configuration
 static const struct PartitionConfig P2_CONFIG = {
-    .period = 50,
-    .duration = 20,
+    .period = 50,                    // 1 second in nanoseconds
+    .duration = 20,                   // 500ms
     .identifier = 2,
     .num_assigned_cores = 1,
-    .name = "Partition2",
+    .name = "P2",
     .region_name_code_mem = "p2_code",
     .access_code_mem = "RX",
     .region_name_data_mem = "p2_data",
@@ -249,57 +266,82 @@ static char const DEFAULT_MODULE_NAME[] = "DefaultModule";
 
 static const window_partition_type DEFAULT_WINDOWS[] = {
     {
-        .name = "Partition1",
+        .name = "DefaultPartition",
         .id = 1,
         .start_tick = MS_TO_TICKS(0),
         .duration_tick = MS_TO_TICKS(40),
         .is_periodic_processes_start = (BOOLEAN_TYPE)true,
+        // .is_periodic_processes_start = (BOOLEAN_TYPE)false,
     },
     {
-        .name = "Partition2",
+        .name = "P2",
         .id = 2,
         .start_tick = MS_TO_TICKS(40),
         .duration_tick = MS_TO_TICKS(20),
         .is_periodic_processes_start = (BOOLEAN_TYPE)true,
-    },
+        },
     {
-        .name = "Partition1",
+        .name = "DefaultPartition",
         .id = 1,
         .start_tick = MS_TO_TICKS(60),
         .duration_tick = MS_TO_TICKS(20),
         .is_periodic_processes_start = (BOOLEAN_TYPE)false,
+        // .is_periodic_processes_start = (BOOLEAN_TYPE)true,
     },
     {
-        .name = "Partition2",
-        .id = 2,
-        .start_tick = MS_TO_TICKS(80),
-        .duration_tick = MS_TO_TICKS(20),
-        .is_periodic_processes_start = (BOOLEAN_TYPE)false,
-    },
-};
+            .name = "P2",
+            .id = 2,
+            .start_tick = MS_TO_TICKS(80),
+            .duration_tick = MS_TO_TICKS(20),
+            .is_periodic_processes_start = (BOOLEAN_TYPE)false,
+        },
+    };
     
 static const uint32_t DEFAULT_WINDOWS_COUNT = sizeof(DEFAULT_WINDOWS) / sizeof(DEFAULT_WINDOWS[0]);
 
-// P1 process 1 configuration (IPC -> Sampling Port)
+
+// P1 process 1 configuration
 static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_1_CONFIG = {
-    .PERIOD = 100,                              // 100ms
-    .TIME_CAPACITY = 40,                        // 40ms
-    .ENTRY_POINT = p1_process1,
-    .STACK_SIZE = 4096,                         // 4KB stack
-    .BASE_PRIORITY = 50,                        // Priority
-    .DEADLINE = SOFT,                           // Soft deadline
-    .NAME = "P1_Proc1"
+    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
+    .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
+    .ENTRY_POINT = p1_process1,             // To be set by partition initialization
+    .STACK_SIZE = 4096,              // 4KB stack
+    .BASE_PRIORITY = 10,            // Medium priority (1-239)
+    .DEADLINE = SOFT,                // Soft deadline
+    .NAME = "Process 1"
 };
 
-// P2 process 1 configuration (Sampling Port -> UART Log)
+// P1 process 2 configuration
+static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_2_CONFIG = {
+    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
+    .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
+    .ENTRY_POINT = p1_process2,             // To be set by partition initialization
+    .STACK_SIZE = 4096,              // 4KB stack
+    .BASE_PRIORITY = 40,            // Medium priority (1-239)
+    .DEADLINE = SOFT,                // Soft deadline
+    .NAME = "Process 2"
+};
+
+// P1 process 3 configuration
+static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_3_CONFIG = {
+    .PERIOD = 100,              // 20ms in nanoseconds
+    .TIME_CAPACITY = 60,       // 10ms in nanoseconds
+    .ENTRY_POINT = p1_process3,             // To be set by partition initialization
+    .STACK_SIZE = 4096,              // 4KB stack
+    .BASE_PRIORITY = 50,            // Medium priority (1-239)
+    .DEADLINE = SOFT,                // Soft deadline
+    .NAME = "Process 3"
+};
+
+// P2 process 1 configuration
 static const PROCESS_ATTRIBUTE_TYPE P2_PROCESS_1_CONFIG = {
-    .PERIOD = 100,                              // 100ms
-    .TIME_CAPACITY = 40,                        // 40ms
-    .ENTRY_POINT = p2_process1,
-    .STACK_SIZE = 4096,                         // 4KB stack
-    .BASE_PRIORITY = 50,                        // Priority
-    .DEADLINE = SOFT,                           // Soft deadline
-    .NAME = "P2_Proc1"
+    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
+    .TIME_CAPACITY = 10,       // 10ms in nanoseconds
+    .ENTRY_POINT = p2_process1,             // To be set by partition initialization
+    .STACK_SIZE = 4096,              // 4KB stack
+    .BASE_PRIORITY = 3,            // Medium priority (1-239)
+    .DEADLINE = SOFT,                // Soft deadline
+    .NAME = "Process 1"
 };
 
 struct error_handler_config {
@@ -308,22 +350,23 @@ struct error_handler_config {
 };
 
 static const struct error_handler_config DEFAULT_ERROR_HANDLER_CONFIG = {
-    .entry_point = error_handler_function,
-    .stack_size = 4096,
+    .entry_point = error_handler_function, // To be set by partition initialization
+    .stack_size = 4096,  // 4KB stack
 };
 
-static uint8_t buffer_altitude[64];
+static uint8_t buffer_temperature[64];
 
-static struct krnl_sampling_channel channel_altitude = {
-    .name = "channelAltitude",
-    .buffer = buffer_altitude,
+static struct krnl_sampling_channel channel_temperature = {
+    .name = "channelTemperature",
+    .buffer = buffer_temperature,
     .max_message_size = 64,
     .current_message_size = 0,
     .last_update_time = 0,
 };
 
+// L'allocation de la RAM du noyau
 static uint8_t q_channel_data[10 * 64]; 
-static uint32_t q_channel_sizes[10];
+static uint32_t q_channel_sizes[10]; // Tableau pour stocker les 10 tailles
 
 static struct krnl_queuing_channel_s channel_cmds = {
     .buffer_data = q_channel_data,
@@ -350,10 +393,13 @@ struct port_mapping_s {
 };
 
 static const struct port_mapping_s system_port_table[] = {
-    {.partition_id = 1, .port_name = "P1_OUT_ALT", .port_direction = SOURCE, .messageSizeBytes = 64, .refreshPeriodMs = 200, .sampling_channel = &channel_altitude},
-    {.partition_id = 2, .port_name = "P2_IN_ALT", .port_direction = DESTINATION, .messageSizeBytes = 64, .refreshPeriodMs = 200, .sampling_channel = &channel_altitude},
+    {.partition_id = 1, .port_name = "P1_OUT_TEMP", .port_direction = SOURCE, .messageSizeBytes = 64, .refreshPeriodMs = 200, .sampling_channel = &channel_temperature},
+    {.partition_id = 2, .port_name = "P2_IN_TEMP", .port_direction = DESTINATION, .messageSizeBytes = 64, .refreshPeriodMs = 200, .sampling_channel = &channel_temperature},
+    {.partition_id = 1, .port_name = "P1_IN_CMDS", .port_direction = DESTINATION, .messageSizeBytes = 32, .max_nb_message = 10, .QUEUING_DISCIPLINE = PRIORITY, .queuing_channel = &channel_cmds},
+    {.partition_id = 2, .port_name = "P2_OUT_CMDS", .port_direction = SOURCE, .messageSizeBytes = 32, .max_nb_message = 10, .QUEUING_DISCIPLINE = PRIORITY, .queuing_channel = &channel_cmds},
 };
 extern const int routing_table_size;
+
 
 struct blackboardConfig {
     BLACKBOARD_NAME_TYPE blackboard_name;
@@ -364,6 +410,7 @@ static const struct blackboardConfig blackboard_configs[] = {
     {.blackboard_name = "BB1", .max_message_size = BLACKBOARD_MAX_MESSAGE_SIZE},
     {.blackboard_name = "BB2", .max_message_size = BLACKBOARD_MAX_MESSAGE_SIZE},
 };
+
 
 struct bufferConfig {
     BUFFER_NAME_TYPE buffer_name;
@@ -409,4 +456,4 @@ static const struct mutexConfig mutex_configs[] = {
     {.mutex_name = "Mutex1", .mutex_priority = 2, .queuing_discipline = FIFO},
 };
 
-#endif
+#endif 
