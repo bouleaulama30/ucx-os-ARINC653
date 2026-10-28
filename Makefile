@@ -37,7 +37,7 @@ BUILD_TARGET_DIR = $(BUILD_DIR)/target
 INC_DIRS += -I $(SRC_DIR)/include -I $(SRC_DIR)/include/lib \
 	-I $(SRC_DIR)/drivers/bus/include -I $(SRC_DIR)/drivers/device/include \
 	-I $(SRC_DIR)/net/include -I $(SRC_DIR)/arch/common
-CFLAGS += -D__VER__=\"$(VERSION)\" \
+CFLAGS += -D__VER__=\"$(VERSION)\" -std=gnu11 -Wno-incompatible-pointer-types \
 -g \
 #-DCONFIG_POWER_ALLOC \
 #-DCONFIG_ALT_ALLOCATOR \
