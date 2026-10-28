@@ -6,6 +6,11 @@
 
 #include <hal.h>
 #include <lib/libc.h>
+#include <lib/list.h>
+#include <kernel/kernel.h>
+#include <kernel/hm.h>
+#include <arinc/arinc_partition.h>
+#include <arinc/arinc_HM.h>
 
 /* defined interrupt handlers */
 void dummy_handler(void);
@@ -279,8 +284,14 @@ void irq_handler(uint32_t cause, uint32_t *stack)
 
 int32_t exception_handler(int32_t service, int32_t arg0, int32_t arg1, int32_t arg2)
 {
-	/* for testing purposes, right now */
-	printf("syscall: %d, [arg0: %d, arg1: %d, arg2: %d]", service, arg0, arg1, arg2);
+	printf("[FAULT] exception service: %d, [arg0: %d, arg1: %d, arg2: %d]\n", service, arg0, arg1, arg2);
+	if (kcb->partition_current != NULL) {
+		struct pcb_s *current_partition = kcb->partition_current->data;
+		hm_raise_error(HARDWARE_FAULT, (MESSAGE_ADDR_TYPE)"Hardware fault detected", 24, current_partition->process_current);
+	} else {
+		printf("Hardware fault detected and no partition available so panic\n");
+		_panic();
+	}
 	
 	return -1;
 }

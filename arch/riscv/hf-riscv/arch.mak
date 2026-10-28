@@ -8,7 +8,7 @@ F_CLK = 25000000
 # uart baud rate
 SERIAL_BAUDRATE=57600
 # timer interrupt frequency (100 -> 100 ints/s -> 10ms tick time. 0 -> timer0 fixed frequency)
-F_TICK = 0
+F_TICK = 100
 # fixed tick frequency
 F_TICK_FIXED = (${F_CLK} / 262144)
 

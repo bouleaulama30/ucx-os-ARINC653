@@ -83,7 +83,11 @@ int main(void)
 		if (kcb->partition_current == NULL) {
             // Mode IDLE : On réactive manuellement les interruptions Timer (bit 3 de mstatus)
 			printf("[IDLE TIME]\n");
+#if defined(__riscv) && defined(__riscv_zicsr)
             asm volatile ("csrs mstatus, 8");
+#else
+            _interrupt_set(1);
+#endif
             _cpu_idle(); // On met le processeur en pause jusqu'au prochain Tick !
         } else {
             // Mode Normal : On lance la vraie partition
@@ -131,7 +135,11 @@ int main(void)
 		_interrupt_tick_partition();
         if (kcb[core_id]->partition_current == NULL) {
 			printf("[CPU IDLE]\n");
+#if defined(__riscv) && defined(__riscv_zicsr)
             asm volatile ("csrs mstatus, 8");
+#else
+            _interrupt_set(1);
+#endif
             _cpu_idle();
         } else {
             struct pcb_s *next_partition = kcb[core_id]->partition_current->data;

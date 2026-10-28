@@ -9,6 +9,9 @@
 #include <lib/libc.h>
 #include <lib/list.h>
 #include <kernel/kernel.h>
+#include <kernel/hm.h>
+#include <arinc/arinc_partition.h>
+#include <arinc/arinc_HM.h>
 #include <device.h>
 #include <uart.h>
 #include <usart.h>
@@ -126,6 +129,11 @@ void _cpu_idle(void)
 {
 }
 
+void _panic(void)
+{
+	while (1);
+}
+
 uint16_t _cpu_id(void)
 {
 	return 0;
@@ -133,17 +141,41 @@ uint16_t _cpu_id(void)
 
 /* kernel auxiliary routines */
 
+static void _arinc_timer_tick(void)
+{
+#ifndef MULTICORE
+	if (kcb->partition_current != NULL) {
+		struct pcb_s *current_partition = kcb->partition_current->data;
+		if (setjmp(current_partition->tcb.context) == 0) {
+			longjmp(kcb->context, 1);
+		}
+	} else {
+		longjmp(kcb->context, 1);
+	}
+#else
+	int core_id = _cpu_id();
+	if (kcb[core_id]->partition_current != NULL) {
+		struct pcb_s *current_partition = kcb[core_id]->partition_current->data;
+		if (setjmp(current_partition->tcb.context) == 0) {
+			longjmp(kcb[core_id]->context, 1);
+		}
+	} else {
+		longjmp(kcb[core_id]->context, 1);
+	}
+#endif
+}
+
 #if F_TIMER > 0
 void timer1ctc_handler(void)
 {
-	krnl_dispatcher();
+	_arinc_timer_tick();
 }
 
 #else
 
 void timer0b_handler(void)
 {
-	krnl_dispatcher();
+	_arinc_timer_tick();
 }
 #endif
 
@@ -225,4 +257,51 @@ void _context_init(jmp_buf *ctx, size_t sp, size_t ss, size_t ra)
 	
 	ctx_p[CONTEXT_SP] = sp + ss;
 	ctx_p[CONTEXT_RA] = ra;
+}
+
+void _interrupt_tick_partition(void)
+{
+#ifndef MULTICORE
+	if (kcb->partition_current == NULL) return;
+	struct pcb_s *partition = kcb->partition_current->data;
+#else
+	if (kcb[_cpu_id()]->partition_current == NULL) return;
+	struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
+#endif
+	_read_us();
+	/* partition is run for the first time */
+	if ((uint32_t)partition->tcb.task == partition->tcb.context[CONTEXT_RA])
+		_interrupt_set(1);
+}
+
+void _interrupt_tick_process(void)
+{
+#ifndef MULTICORE
+	if (kcb->partition_current == NULL) return;
+	struct pcb_s *partition = kcb->partition_current->data;
+#else
+	if (kcb[_cpu_id()]->partition_current == NULL) return;
+	struct pcb_s *partition = kcb[_cpu_id()]->partition_current->data;
+#endif
+	_read_us();
+	/* process is run for the first time */
+	struct process_s *process = partition->process_current->data;
+	if ((uint32_t)process->tcb.task == process->tcb.context[CONTEXT_RA])
+		_interrupt_set(1);
+}
+
+void _pmp_init(uint32_t end_addr)
+{
+	(void)end_addr;
+}
+
+void _pmp_partition_activate(uint32_t kernel_end_addr, uint32_t partition_start_addr, uint32_t partition_end_addr)
+{
+	(void)kernel_end_addr;
+	(void)partition_start_addr;
+	(void)partition_end_addr;
+}
+
+void _mprv_activate(void)
+{
 }

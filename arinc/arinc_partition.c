@@ -66,7 +66,11 @@ start_over:
                 longjmp(process->tcb.context, 1); 
             } 
             else {
+#if defined(__riscv) && defined(__riscv_zicsr)
                 asm volatile ("csrs mstatus, 8"); 
+#else
+                _interrupt_set(1);
+#endif
                 _cpu_idle(); 
             }
         }
