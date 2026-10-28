@@ -49,21 +49,21 @@
 
 #define  SYSTEM_LIMIT_MESSAGE_SIZE              8192    /* module scope */
 
-#define  SYSTEM_LIMIT_NUMBER_OF_PROCESSES       128     /* partition scope */
+#define  SYSTEM_LIMIT_NUMBER_OF_PROCESSES       16     /* partition scope */
 
-#define  SYSTEM_LIMIT_NUMBER_OF_SAMPLING_PORTS  512     /* partition scope */
+#define  SYSTEM_LIMIT_NUMBER_OF_SAMPLING_PORTS  16     /* partition scope */
 
-#define  SYSTEM_LIMIT_NUMBER_OF_QUEUING_PORTS   512     /* partition scope */
+#define  SYSTEM_LIMIT_NUMBER_OF_QUEUING_PORTS   16     /* partition scope */
 
-#define  SYSTEM_LIMIT_NUMBER_OF_BUFFERS         256     /* partition scope */
+#define  SYSTEM_LIMIT_NUMBER_OF_BUFFERS         8      /* partition scope */
 
-#define  SYSTEM_LIMIT_NUMBER_OF_BLACKBOARDS     256     /* partition scope */
+#define  SYSTEM_LIMIT_NUMBER_OF_BLACKBOARDS     8      /* partition scope */
 
-#define  SYSTEM_LIMIT_NUMBER_OF_SEMAPHORES      256     /* partition scope */
+#define  SYSTEM_LIMIT_NUMBER_OF_SEMAPHORES      8      /* partition scope */
 
-#define  SYSTEM_LIMIT_NUMBER_OF_EVENTS          256     /* partition scope */
+#define  SYSTEM_LIMIT_NUMBER_OF_EVENTS          8      /* partition scope */
 
-#define  SYSTEM_LIMIT_NUMBER_OF_MUTEXES         256     /* partition scope */
+#define  SYSTEM_LIMIT_NUMBER_OF_MUTEXES         8      /* partition scope */
 
 /*----------------------*/
 /* Base APEX types      */

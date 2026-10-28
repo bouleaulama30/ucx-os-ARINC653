@@ -1,6 +1,6 @@
 MEMORY
 {
-	ram (rwx)     : ORIGIN = 0x40000000, LENGTH = 512K
+	ram (rwx)     : ORIGIN = 0x40000000, LENGTH = 256K
 }
 
 /* Entry Point */

@@ -16,7 +16,7 @@
 
 #define MAX_NUMBER_OF_ERRORS 10
 
-#define MAX_LOG_ENTRIES 100
+#define MAX_LOG_ENTRIES 16
 #define MAX_LOG_ENTRY_SIZE 256
 
 extern void p1_process1(void);
