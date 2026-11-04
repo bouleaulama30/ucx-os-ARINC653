@@ -7,6 +7,7 @@ This project is the adaptation of UCX/OS to the **ARINC 653** standard.
 ## Table of Contents
 
 - [PolarFire SoC Support](#polarfire-soc-support)
+- [Nexys A7-100T (Artix-7) Dual-Core HF-RISCV & ARINC 429 Support](#nexys-a7-100t-artix-7-dual-core-hf-riscv--arinc-429-support)
 - [Supported Toolchains](#supported-toolchains)
 - [Building Example Applications](#building-example-applications)
 - [Understand Static Configuration](#understand-static-conf)
@@ -56,6 +57,23 @@ Currently, UCX/OS supports the following targets:
 ## PolarFire SoC Support
 
 For detailed, step-by-step instructions on how to set up the project, compile the code, configure search paths, and run benchmarks on the **PolarFire SoC Discovery Kit** using **Microchip SoftConsole**, please refer to the dedicated setup guide at **`arch/riscv/PolarFire/README.md`**.
+
+## Nexys A7-100T (Artix-7) Dual-Core HF-RISCV & ARINC 429 Support
+
+For detailed instructions on how to build and run the dual-core ARINC 653 applications communicating through the hardware ARINC 429 IP core on the Digilent Nexys A7-100T FPGA, refer to the dedicated guide:
+👉 **[`README_NEXYS_A7_ARINC429.md`](README_NEXYS_A7_ARINC429.md)**.
+
+Quick build commands:
+```bash
+# Build the ARINC 653 kernel library
+make ucx ARCH=riscv/hf-riscv
+
+# Build Core 0 (TX) ARINC 429 application (Altitude Label 312)
+make arinc653_tx ARCH=riscv/hf-riscv
+
+# Build Core 1 (RX) ARINC 429 application (Continuous Polling & Decoding)
+make arinc653_rx ARCH=riscv/hf-riscv
+```
 
 ## Supported toolchains
 
