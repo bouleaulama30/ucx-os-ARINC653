@@ -1,8 +1,6 @@
 # TO-DO
 
 ## banc de test sur amd
-* installer vivado 
-* mettre deux soft core sur une carte en utilisant le hf-riscv et les faire communiquer entre eux
 * faire afdx en P4
 * simuler et vérifier son comportement via l'outil
 * générer le rtl via l'outil
