@@ -496,7 +496,17 @@ static int ucx_vsprintf(char **buf, const char *fmt, va_list args)
 			continue;
 		case 'l':
 			fmt++;
-			num = va_arg(args, long);
+			if (*fmt == 'x' || *fmt == 'X') {
+				base = 16;
+				num = va_arg(args, unsigned long);
+			} else if (*fmt == 'd') {
+				sign = 1;
+				num = va_arg(args, long);
+			} else if (*fmt == 'u') {
+				num = va_arg(args, unsigned long);
+			} else {
+				continue;
+			}
 			break;
 		case 'X':
 		case 'x':

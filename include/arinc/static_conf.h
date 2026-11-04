@@ -6,7 +6,6 @@
 #include "arinc/arinc_apex_types.h"
 #include "kernel/interpartition_communication.h"
 
-
 #define SAMPLING_PORT_MAX_MESSAGE_SIZE 512
 #define QUEUING_PORT_MAX_MESSAGE_SIZE 512
 #define BLACKBOARD_MAX_MESSAGE_SIZE 512
@@ -20,36 +19,19 @@
 #define MAX_LOG_ENTRY_SIZE 256
 
 extern void p1_process1(void);
-extern void p1_process2(void);
-extern void p1_process3(void);
 extern void p2_process1(void);
 extern void error_handler_function(void);
-extern void test_spatial_violation_p1(void);
-extern void test_spatial_violation_p2(void);
-extern void test_round_robin_A(void);
-extern void test_round_robin_B(void);
-extern void test_periodic_accuracy(void);
-extern void test_states_slave(void);
-extern void test_states_master(void);
-extern void test_prio_A(void);
-extern void test_prio_B(void);
 
-
-
-// Déclaration des symboles du linker script du kernel
+// Linker script symbols for kernel and partitions
 extern uint8_t _kernel_end[];
 
-// Déclaration des symboles du linker script de la p1
 extern uint8_t _p1_code_start[];
 extern uint8_t _p1_code_end[];
-
 extern uint8_t _p1_data_start[];
 extern uint8_t _p1_data_end[];
 
-// Déclaration des symboles du linker script de la p2
 extern uint8_t _p2_code_start[];
 extern uint8_t _p2_code_end[];
-
 extern uint8_t _p2_data_start[];
 extern uint8_t _p2_data_end[];
 
@@ -60,12 +42,12 @@ static struct queuing_port_s p1_queuing_ports[MAX_NUMBER_OF_QUEUING_PORTS];
 static struct queuing_port_s p2_queuing_ports[MAX_NUMBER_OF_QUEUING_PORTS];
 
 static struct blackboard_s p1_blackboards[MAX_NUMBER_OF_BLACKBOARDS];
-static uint8_t p1_blackboards_data[MAX_NUMBER_OF_BLACKBOARDS * BLACKBOARD_MAX_MESSAGE_SIZE]; // 512 bytes par blackboard
+static uint8_t p1_blackboards_data[MAX_NUMBER_OF_BLACKBOARDS * BLACKBOARD_MAX_MESSAGE_SIZE];
 static uint32_t p1_blackboards_size_data[MAX_NUMBER_OF_BLACKBOARDS];
 
 static struct buffer_s p1_buffers[MAX_NUMBER_OF_BUFFERS];
-static uint8_t p1_buffers_data[MAX_NUMBER_OF_BUFFERS * BUFFER_MAX_MESSAGE_SIZE * BUFFER_MAX_NB_MESSAGE]; // 512 bytes par buffer
-static uint32_t p1_buffers_size_data[MAX_NUMBER_OF_BUFFERS * BUFFER_MAX_NB_MESSAGE]; // 512 bytes par buffer
+static uint8_t p1_buffers_data[MAX_NUMBER_OF_BUFFERS * BUFFER_MAX_MESSAGE_SIZE * BUFFER_MAX_NB_MESSAGE];
+static uint32_t p1_buffers_size_data[MAX_NUMBER_OF_BUFFERS * BUFFER_MAX_NB_MESSAGE];
 
 static struct semaphore_s p1_semaphores[MAX_NUMBER_OF_SEMAPHORES];
 static volatile int32_t p1_semaphores_counter[MAX_NUMBER_OF_SEMAPHORES];
@@ -85,7 +67,6 @@ extern char hm_log_buffer[MAX_LOG_ENTRIES][MAX_LOG_ENTRY_SIZE];
 
 extern const ERROR_ACTION_TYPE hm_table_partition_1[4][4];
 extern const ERROR_ACTION_TYPE hm_table_partition_2[4][4];
-
 extern const ERROR_ACTION_TYPE hm_table_module[1][4];
 
 // Hardcoded partition configuration
@@ -149,13 +130,13 @@ struct PartitionConfig {
     APEX_INTEGER max_errors;
 };
 
-// Default hardcoded partition configuration et voir le ldscript pour la conf mémoire
+// Partition 1 configuration (ARINC 429 Core Task)
 static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
-    .period = 50,                    // 1 second in nanoseconds
-    .duration = 20,                   // 500ms
+    .period = 100,
+    .duration = 50,
     .identifier = 1,
     .num_assigned_cores = 1,
-    .name = "DefaultPartition",
+    .name = "P1_ARINC429",
     .region_name_code_mem = "p1_code",
     .access_code_mem = "RX",
     .region_name_data_mem = "p1_data",
@@ -175,14 +156,14 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
     .blackboards = p1_blackboards,
     .max_blackboards = MAX_NUMBER_OF_BLACKBOARDS,
     .blackboard_count = 0,
-    .max_blackboard_data_size = BLACKBOARD_MAX_MESSAGE_SIZE, // 512 bytes par blackboard
+    .max_blackboard_data_size = BLACKBOARD_MAX_MESSAGE_SIZE,
     .blackboards_data = p1_blackboards_data,
     .blackboards_size_data = p1_blackboards_size_data,
 
     .buffers = p1_buffers,
     .max_buffers = MAX_NUMBER_OF_BUFFERS,
     .buffer_count = 0,
-    .max_buffer_data_size = BUFFER_MAX_MESSAGE_SIZE * BUFFER_MAX_NB_MESSAGE, // 512 bytes par buffer
+    .max_buffer_data_size = BUFFER_MAX_MESSAGE_SIZE * BUFFER_MAX_NB_MESSAGE,
     .buffers_data = p1_buffers_data,
     .buffers_size_data = p1_buffers_size_data,
 
@@ -205,12 +186,13 @@ static const struct PartitionConfig DEFAULT_PARTITION_CONFIG = {
     .max_errors = MAX_NUMBER_OF_ERRORS,
 };
 
+// Partition 2 configuration (Health Monitoring / Display Task)
 static const struct PartitionConfig P2_CONFIG = {
-    .period = 50,                    // 1 second in nanoseconds
-    .duration = 20,                   // 500ms
+    .period = 100,
+    .duration = 50,
     .identifier = 2,
     .num_assigned_cores = 1,
-    .name = "P2",
+    .name = "P2_MONITOR",
     .region_name_code_mem = "p2_code",
     .access_code_mem = "RX",
     .region_name_data_mem = "p2_data",
@@ -261,87 +243,48 @@ static const struct PartitionConfig P2_CONFIG = {
 };
 
 // Static module scheduler configuration
-static char const DEFAULT_MODULE_NAME[] = "DefaultModule";
+static char const DEFAULT_MODULE_NAME[] = "ARINC429_Module";
 #define DEFAULT_MAJOR_FRAME_TICK MS_TO_TICKS(100)
 
 static const window_partition_type DEFAULT_WINDOWS[] = {
     {
-        .name = "DefaultPartition",
+        .name = "P1_ARINC429",
         .id = 1,
         .start_tick = MS_TO_TICKS(0),
-        .duration_tick = MS_TO_TICKS(40),
+        .duration_tick = MS_TO_TICKS(50),
         .is_periodic_processes_start = (BOOLEAN_TYPE)true,
-        // .is_periodic_processes_start = (BOOLEAN_TYPE)false,
     },
     {
-        .name = "P2",
+        .name = "P2_MONITOR",
         .id = 2,
-        .start_tick = MS_TO_TICKS(40),
-        .duration_tick = MS_TO_TICKS(20),
+        .start_tick = MS_TO_TICKS(50),
+        .duration_tick = MS_TO_TICKS(50),
         .is_periodic_processes_start = (BOOLEAN_TYPE)true,
-        },
-    {
-        .name = "DefaultPartition",
-        .id = 1,
-        .start_tick = MS_TO_TICKS(60),
-        .duration_tick = MS_TO_TICKS(20),
-        .is_periodic_processes_start = (BOOLEAN_TYPE)false,
-        // .is_periodic_processes_start = (BOOLEAN_TYPE)true,
     },
-    {
-            .name = "P2",
-            .id = 2,
-            .start_tick = MS_TO_TICKS(80),
-            .duration_tick = MS_TO_TICKS(20),
-            .is_periodic_processes_start = (BOOLEAN_TYPE)false,
-        },
-    };
+};
     
 static const uint32_t DEFAULT_WINDOWS_COUNT = sizeof(DEFAULT_WINDOWS) / sizeof(DEFAULT_WINDOWS[0]);
 
-
-// P1 process 1 configuration
+// P1 Process 1 configuration
 static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_1_CONFIG = {
-    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
-    .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
-    .ENTRY_POINT = p1_process1,             // To be set by partition initialization
-    .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 10,            // Medium priority (1-239)
-    .DEADLINE = SOFT,                // Soft deadline
-    .NAME = "Process 1"
+    .PERIOD = INFINITE_TIME_VALUE,
+    .TIME_CAPACITY = INFINITE_TIME_VALUE,
+    .ENTRY_POINT = p1_process1,
+    .STACK_SIZE = 4096,
+    .BASE_PRIORITY = 10,
+    .DEADLINE = SOFT,
+    .NAME = "P1_ARINC429_Proc"
 };
 
-// P1 process 2 configuration
-static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_2_CONFIG = {
-    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
-    .TIME_CAPACITY = INFINITE_TIME_VALUE,       // 10ms in nanoseconds
-    .ENTRY_POINT = p1_process2,             // To be set by partition initialization
-    .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 40,            // Medium priority (1-239)
-    .DEADLINE = SOFT,                // Soft deadline
-    .NAME = "Process 2"
-};
-
-// P1 process 3 configuration
-static const PROCESS_ATTRIBUTE_TYPE P1_PROCESS_3_CONFIG = {
-    .PERIOD = 100,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 60,       // 10ms in nanoseconds
-    .ENTRY_POINT = p1_process3,             // To be set by partition initialization
-    .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 50,            // Medium priority (1-239)
-    .DEADLINE = SOFT,                // Soft deadline
-    .NAME = "Process 3"
-};
-
-// P2 process 1 configuration
+// P2 Process 1 configuration
 static const PROCESS_ATTRIBUTE_TYPE P2_PROCESS_1_CONFIG = {
-    .PERIOD = INFINITE_TIME_VALUE,              // 20ms in nanoseconds
-    .TIME_CAPACITY = 10,       // 10ms in nanoseconds
-    .ENTRY_POINT = p2_process1,             // To be set by partition initialization
-    .STACK_SIZE = 4096,              // 4KB stack
-    .BASE_PRIORITY = 3,            // Medium priority (1-239)
-    .DEADLINE = SOFT,                // Soft deadline
-    .NAME = "Process 1"
+    .PERIOD = INFINITE_TIME_VALUE,
+    .TIME_CAPACITY = INFINITE_TIME_VALUE,
+    .ENTRY_POINT = p2_process1,
+    .STACK_SIZE = 4096,
+    .BASE_PRIORITY = 10,
+    .DEADLINE = SOFT,
+    .NAME = "P2_Monitor_Proc"
 };
 
 struct error_handler_config {
@@ -350,34 +293,8 @@ struct error_handler_config {
 };
 
 static const struct error_handler_config DEFAULT_ERROR_HANDLER_CONFIG = {
-    .entry_point = error_handler_function, // To be set by partition initialization
-    .stack_size = 4096,  // 4KB stack
-};
-
-static uint8_t buffer_temperature[64];
-
-static struct krnl_sampling_channel channel_temperature = {
-    .name = "channelTemperature",
-    .buffer = buffer_temperature,
-    .max_message_size = 64,
-    .current_message_size = 0,
-    .last_update_time = 0,
-};
-
-// L'allocation de la RAM du noyau
-static uint8_t q_channel_data[10 * 64]; 
-static uint32_t q_channel_sizes[10]; // Tableau pour stocker les 10 tailles
-
-static struct krnl_queuing_channel_s channel_cmds = {
-    .buffer_data = q_channel_data,
-    .buffer_sizes = q_channel_sizes,
-    .max_message_size = 64,
-    .max_nb_messages = 10,
-    .current_nb_messages = 0,
-    .read_index = 0,
-    .write_index = 0,
-    .source_partition_id = 2,
-    .dest_partition_id = 1
+    .entry_point = error_handler_function,
+    .stack_size = 4096,
 };
 
 struct port_mapping_s {
@@ -392,25 +309,14 @@ struct port_mapping_s {
     struct krnl_queuing_channel_s *queuing_channel;
 };
 
-static const struct port_mapping_s system_port_table[] = {
-    {.partition_id = 1, .port_name = "P1_OUT_TEMP", .port_direction = SOURCE, .messageSizeBytes = 64, .refreshPeriodMs = 200, .sampling_channel = &channel_temperature},
-    {.partition_id = 2, .port_name = "P2_IN_TEMP", .port_direction = DESTINATION, .messageSizeBytes = 64, .refreshPeriodMs = 200, .sampling_channel = &channel_temperature},
-    {.partition_id = 1, .port_name = "P1_IN_CMDS", .port_direction = DESTINATION, .messageSizeBytes = 32, .max_nb_message = 10, .QUEUING_DISCIPLINE = PRIORITY, .queuing_channel = &channel_cmds},
-    {.partition_id = 2, .port_name = "P2_OUT_CMDS", .port_direction = SOURCE, .messageSizeBytes = 32, .max_nb_message = 10, .QUEUING_DISCIPLINE = PRIORITY, .queuing_channel = &channel_cmds},
-};
+static const struct port_mapping_s system_port_table[] = {};
 extern const int routing_table_size;
-
 
 struct blackboardConfig {
     BLACKBOARD_NAME_TYPE blackboard_name;
     MESSAGE_SIZE_TYPE max_message_size;
 };
-
-static const struct blackboardConfig blackboard_configs[] = {
-    {.blackboard_name = "BB1", .max_message_size = BLACKBOARD_MAX_MESSAGE_SIZE},
-    {.blackboard_name = "BB2", .max_message_size = BLACKBOARD_MAX_MESSAGE_SIZE},
-};
-
+static const struct blackboardConfig blackboard_configs[] = {};
 
 struct bufferConfig {
     BUFFER_NAME_TYPE buffer_name;
@@ -418,11 +324,7 @@ struct bufferConfig {
     MESSAGE_RANGE_TYPE max_nb_message;
     QUEUING_DISCIPLINE_TYPE queuing_discipline;
 };
-
-static const struct bufferConfig buffer_configs[] = {
-    {.buffer_name = "Buffer1", .max_message_size = BUFFER_MAX_MESSAGE_SIZE, .max_nb_message = BUFFER_MAX_NB_MESSAGE, .queuing_discipline = FIFO},
-    {.buffer_name = "Buffer2", .max_message_size = BUFFER_MAX_MESSAGE_SIZE, .max_nb_message = BUFFER_MAX_NB_MESSAGE, .queuing_discipline = FIFO},
-};
+static const struct bufferConfig buffer_configs[] = {};
 
 struct semaphoreConfig {
     SEMAPHORE_NAME_TYPE semaphore_name;
@@ -430,20 +332,14 @@ struct semaphoreConfig {
     SEMAPHORE_VALUE_TYPE maximum_value;
     QUEUING_DISCIPLINE_TYPE queuing_discipline;
 };
-    
-static const struct semaphoreConfig semaphore_configs[] = {
-    {.semaphore_name = "Semaphore1", .current_value = 0, .maximum_value = 1, .queuing_discipline = FIFO},
-};
+static const struct semaphoreConfig semaphore_configs[] = {};
 
 struct eventConfig {
     EVENT_NAME_TYPE event_name;
     EVENT_ID_TYPE event_id;
     PARTITION_ID_TYPE partition_id;
 };
-
-static const struct eventConfig event_configs[] = {
-    {.event_name = "WakeUpEvent", .event_id = 1},
-};
+static const struct eventConfig event_configs[] = {};
 
 struct mutexConfig {
     MUTEX_NAME_TYPE mutex_name;
@@ -451,9 +347,6 @@ struct mutexConfig {
     PARTITION_ID_TYPE partition_id;
     QUEUING_DISCIPLINE_TYPE queuing_discipline;
 };
+static const struct mutexConfig mutex_configs[] = {};
 
-static const struct mutexConfig mutex_configs[] = {
-    {.mutex_name = "Mutex1", .mutex_priority = 2, .queuing_discipline = FIFO},
-};
-
-#endif 
+#endif

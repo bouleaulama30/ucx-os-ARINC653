@@ -159,6 +159,14 @@ endif
 	hexdump -v -e '4/1 "%02x" "\n"' $(BUILD_TARGET_DIR)/image.bin > $(BUILD_TARGET_DIR)/code.txt
 
 ## applications
+arinc653_tx: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc653_tx.o app/arinc653_tx.c
+	@$(MAKE) --no-print-directory link
+
+arinc653_rx: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc653_rx.o app/arinc653_rx.c
+	@$(MAKE) --no-print-directory link
+
 arinc_app: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc_app.o app/arinc_app.c
 	@$(MAKE) --no-print-directory link
@@ -287,6 +295,14 @@ gpio_int: rebuild
 
 hello: rebuild
 	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/hello.o app/hello.c
+	@$(MAKE) --no-print-directory link
+
+arinc429_tx: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc429_tx.o app/arinc429_tx.c
+	@$(MAKE) --no-print-directory link
+
+arinc429_rx: rebuild
+	$(CC) $(CFLAGS) -o $(BUILD_APP_DIR)/arinc429_rx.o app/arinc429_rx.c
 	@$(MAKE) --no-print-directory link
 
 hello_multicore: rebuild
