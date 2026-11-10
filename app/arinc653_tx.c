@@ -1,77 +1,34 @@
 #include <ucx.h>
 
-#define ARINC_TX_DATA   (*(volatile uint32_t *)0x50000000)
-#define ARINC_TX_DELAY  (*(volatile uint32_t *)0x50000004)
-#define ARINC_TX_SPEED  (*(volatile uint32_t *)0x50000008)
-
-static uint8_t reverse_bits_8(uint8_t b)
-{
-	b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
-	b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
-	b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
-	return b;
-}
-
-static uint8_t calculate_odd_parity(uint32_t word_31bits)
-{
-	uint32_t temp = word_31bits & 0x7FFFFFFF;
-	uint32_t count = 0;
-	while (temp) {
-		count += (temp & 1);
-		temp >>= 1;
-	}
-	return (count % 2 == 0) ? 1 : 0;
-}
-
-static uint32_t build_arinc_word_label312(uint32_t alt_meters)
-{
-	uint32_t alt_feet = (alt_meters * 32808U) / 10000U;
-	uint8_t label_oct_val = 0xCA; // Octal 312 = 0xCA
-	uint8_t label_rev = reverse_bits_8(label_oct_val); // 0x53
-	uint8_t sdi = 0;
-	uint8_t ssm = 2; // Normal Operation (0b10)
-
-	uint32_t data16 = alt_feet & 0xFFFFU;
-
-	uint32_t word = ((uint32_t)label_rev) |
-	                (((uint32_t)(sdi & 0x03)) << 8) |
-	                ((data16 & 0xFFFF) << 10) |
-	                (((uint32_t)(ssm & 0x03)) << 29);
-
-	uint8_t parity = calculate_odd_parity(word);
-	word |= (((uint32_t)parity) << 31);
-	return word;
-}
-
 // ============================================================================
-// PARTITION 1 : PROCESSUS 1 : Émetteur ARINC 429 (Label 312 Altitude)
+// PARTITION 1 : PROCESSUS 1 : Émetteur Altitude (via Sampling Port APEX)
+// L'encapsulation ARINC 429 (Label 312, SDI, SSM, Parité) est intégralement
+// déportée en matériel dans le module VHDL `arinc429_encap_decap.vhd`.
+// Si le bus matériel est remplacé par de l'AFDX, ce code reste 100% identique.
 // ============================================================================
 __attribute__((section(".p1_code")))
 void p1_process1(void)
 {
 	RETURN_CODE_TYPE return_code;
+	SAMPLING_PORT_ID_TYPE port_id;
 	uint32_t current_alt_m = 500;
 	uint32_t step = 1;
 
-	// Configuration temporelle ARINC 429 (Horloge 25 MHz) :
-	// 100 kbps => half_period = 125 cycles, gap = 1000 cycles
-	ARINC_TX_SPEED = 125;
-	ARINC_TX_DELAY = 1000;
+	GET_SAMPLING_PORT_ID("P1_OUT_ALT", &port_id, &return_code);
 
 	printf("\n=======================================================\n");
-	printf("   UCX-OS ARINC 653 - CORE 0 TX (Label 312 Altitude)   \n");
-	printf("   Partition 1 / Process 1 (ARINC 429 Altitude TX)     \n");
+	printf("   UCX-OS ARINC 653 - CORE 0 TX (Sampling Port APEX)   \n");
+	printf("   Port : P1_OUT_ALT (ID=%d, Encapsulation VHDL)       \n", (int)port_id);
 	printf("=======================================================\n\n");
 
 	while (1) {
-		uint32_t arinc_word = build_arinc_word_label312(current_alt_m);
-		uint32_t alt_ft = (current_alt_m * 32808U) / 10000U;
+		WRITE_SAMPLING_MESSAGE(port_id,
+		                       (MESSAGE_ADDR_TYPE)&current_alt_m,
+		                       sizeof(current_alt_m),
+		                       &return_code);
 
-		printf("[CORE 0 ARINC653 TX #%u] Alt = %u m (%u ft) | Word = 0x%08x\n",
-		       step, current_alt_m, alt_ft, arinc_word);
-
-		// Écriture matérielle
-		ARINC_TX_DATA = arinc_word;
+		printf("[CORE 0 ARINC653 TX #%u] WRITE_SAMPLING_MESSAGE(P1_OUT_ALT) -> Alt = %u m (Ret=%d)\n",
+		       step, current_alt_m, (int)return_code);
 
 		current_alt_m += 50;
 		if (current_alt_m > 5000) {

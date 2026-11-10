@@ -297,6 +297,16 @@ static const struct error_handler_config DEFAULT_ERROR_HANDLER_CONFIG = {
     .stack_size = 4096,
 };
 
+static uint8_t buffer_altitude[64];
+
+static struct krnl_sampling_channel channel_altitude = {
+    .name = "channelAltitude",
+    .buffer = buffer_altitude,
+    .max_message_size = sizeof(uint32_t),
+    .current_message_size = 0,
+    .last_update_time = 0,
+};
+
 struct port_mapping_s {
     PARTITION_ID_TYPE partition_id;
     SAMPLING_PORT_NAME_TYPE port_name;
@@ -309,7 +319,10 @@ struct port_mapping_s {
     struct krnl_queuing_channel_s *queuing_channel;
 };
 
-static const struct port_mapping_s system_port_table[] = {};
+static const struct port_mapping_s system_port_table[] = {
+    {.partition_id = 1, .port_name = "P1_OUT_ALT", .port_direction = SOURCE,      .messageSizeBytes = sizeof(uint32_t), .refreshPeriodMs = 200, .sampling_channel = &channel_altitude},
+    {.partition_id = 1, .port_name = "P1_IN_ALT",  .port_direction = DESTINATION, .messageSizeBytes = sizeof(uint32_t), .refreshPeriodMs = 200, .sampling_channel = &channel_altitude},
+};
 extern const int routing_table_size;
 
 struct blackboardConfig {

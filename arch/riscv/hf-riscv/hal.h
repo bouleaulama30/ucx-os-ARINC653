@@ -38,6 +38,11 @@ extern uint32_t _end;			/* Start address of the heap memory, defined in linker s
 #define ROM_BASE			0x00000000
 #define SYSTEM_BASE			0x20000000
 #define RAM_BASE			0x40000000
+#define HW_SAMPLING_PORT_BASE		0x50000000
+#define HW_SAMPLING_TX_DATA		(*(volatile uint32_t *)(HW_SAMPLING_PORT_BASE + 0x00))
+#define HW_SAMPLING_RX_DATA		(*(volatile uint32_t *)(HW_SAMPLING_PORT_BASE + 0x10))
+#define HW_SAMPLING_RX_VALID		(*(volatile uint32_t *)(HW_SAMPLING_PORT_BASE + 0x14))
+#define HW_SAMPLING_RX_RAW_DEBUG	(*(volatile uint32_t *)(HW_SAMPLING_PORT_BASE + 0x18))
 #define EXTERNAL_BASE			0x60000000
 #define EXTERNAL_UNCACHED_BASE		0xa0000000
 #define S0_BASE				0xe1000000

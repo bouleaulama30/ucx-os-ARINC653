@@ -1,67 +1,44 @@
 #include <ucx.h>
 
-#define ARINC_RX_DATA     (*(volatile uint32_t *)0x50000010)
-#define ARINC_RX_STATUS   (*(volatile uint32_t *)0x50000014)
-#define ARINC_RX_LATCHED  (*(volatile uint32_t *)0x50000018)
-
-static uint8_t reverse_bits_8(uint8_t b)
-{
-	b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
-	b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
-	b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
-	return b;
-}
-
-static uint8_t calculate_odd_parity(uint32_t word_31bits)
-{
-	uint32_t temp = word_31bits & 0x7FFFFFFF;
-	uint32_t count = 0;
-	while (temp) {
-		count += (temp & 1);
-		temp >>= 1;
-	}
-	return (count % 2 == 0) ? 1 : 0;
-}
-
 // ============================================================================
-// PARTITION 1 : PROCESSUS 1 : Récepteur et Décodeur ARINC 429
+// PARTITION 1 : PROCESSUS 1 : Récepteur Altitude (via Sampling Port APEX)
+// La désencapsulation ARINC 429 (vérification Label 312, SSM, Parité impaire
+// et extraction de la donnée) est intégralement déportée en matériel dans
+// le module VHDL `arinc429_encap_decap.vhd`.
+// Si le bus matériel est remplacé par de l'AFDX, ce code reste 100% identique.
 // ============================================================================
 __attribute__((section(".p1_code")))
 void p1_process1(void)
 {
 	RETURN_CODE_TYPE return_code;
+	SAMPLING_PORT_ID_TYPE port_id;
+	MESSAGE_SIZE_TYPE msg_length = 0;
+	VALIDITY_TYPE validity = INVALID;
+	uint32_t rx_alt_m = 0;
 	uint32_t count = 0;
 
+	GET_SAMPLING_PORT_ID("P1_IN_ALT", &port_id, &return_code);
+
 	printf("\n=======================================================\n");
-	printf("   UCX-OS ARINC 653 - CORE 1 RX (Continuous Polling)   \n");
-	printf("   Partition 1 / Process 1 (ARINC 429 Altitude RX)     \n");
+	printf("   UCX-OS ARINC 653 - CORE 1 RX (Sampling Port APEX)   \n");
+	printf("   Port : P1_IN_ALT (ID=%d, Desencapsulation VHDL)     \n", (int)port_id);
 	printf("=======================================================\n\n");
 
 	while (1) {
 		count++;
-		uint32_t raw_word     = ARINC_RX_DATA;
-		uint32_t status       = ARINC_RX_STATUS;
-		uint32_t latched_word = ARINC_RX_LATCHED;
+		msg_length = sizeof(rx_alt_m);
+		READ_SAMPLING_MESSAGE(port_id,
+		                      (MESSAGE_ADDR_TYPE)&rx_alt_m,
+		                      &msg_length,
+		                      &validity,
+		                      &return_code);
 
-		printf("[CORE 1 ARINC653 RX #%u] DATA=0x%08x | STATUS=0x%08x | LATCHED=0x%08x\n",
-		       count, raw_word, status, latched_word);
-
-		// Si un mot est présent (direct ou verrouillé)
-		uint32_t active_word = (raw_word != 0U) ? raw_word : latched_word;
-
-		if (active_word != 0U) {
-			uint8_t rx_label_raw    = active_word & 0xFFU;
-			uint8_t rx_label_oct    = reverse_bits_8(rx_label_raw);
-			uint16_t rx_alt_feet    = (uint16_t)((active_word >> 10) & 0xFFFFU);
-			uint32_t rx_alt_meters  = ((uint32_t)rx_alt_feet * 10000U) / 32808U;
-			uint8_t computed_parity = calculate_odd_parity(active_word & 0x7FFFFFFF);
-			uint8_t actual_parity   = (uint8_t)((active_word >> 31) & 0x01U);
-
-			printf("  >>> [ARINC 653] RECU MOT ARINC 429 VALIDE <<<\n");
-			printf("      Mot Brut          = 0x%08x\n", active_word);
-			printf("      Label Octal       = %03o (raw: 0x%02x)\n", rx_label_oct, rx_label_raw);
-			printf("      Altitude Decodee  = %u m (%u ft)\n", rx_alt_meters, rx_alt_feet);
-			printf("      Parite            = %s\n\n", (computed_parity == actual_parity) ? "OK (ODD)" : "FAIL");
+		if (return_code == NO_ERROR && validity == VALID) {
+			printf("[CORE 1 ARINC653 RX #%u] READ_SAMPLING_MESSAGE(P1_IN_ALT) -> Alt = %u m | Len = %u | VALID\n",
+			       count, rx_alt_m, (unsigned int)msg_length);
+		} else {
+			printf("[CORE 1 ARINC653 RX #%u] READ_SAMPLING_MESSAGE(P1_IN_ALT) -> En attente (Validity=%d, Ret=%d)\n",
+			       count, (int)validity, (int)return_code);
 		}
 
 		// Temporisation gérée par le RTOS APEX ARINC 653 (50 ticks = ~500 ms)

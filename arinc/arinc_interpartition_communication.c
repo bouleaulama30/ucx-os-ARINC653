@@ -163,6 +163,14 @@ void WRITE_SAMPLING_MESSAGE (
        channel->current_message_size = LENGTH;
        channel->last_update_time = (SYSTEM_TIME_TYPE)ucx_uptime();
 
+#ifdef HW_SAMPLING_PORT_BASE
+       if (LENGTH <= (MESSAGE_SIZE_TYPE)sizeof(uint32_t)) {
+              uint32_t hw_word = 0;
+              memcpy(&hw_word, MESSAGE_ADDR, LENGTH);
+              HW_SAMPLING_TX_DATA = hw_word;
+       }
+#endif
+
        *RETURN_CODE = NO_ERROR;
 }
 
@@ -189,13 +197,25 @@ void READ_SAMPLING_MESSAGE (
        }
 
        struct krnl_sampling_channel *channel = sampling_port->channel;
+
+#ifdef HW_SAMPLING_PORT_BASE
+       if (HW_SAMPLING_RX_VALID & 0x1U) {
+              uint32_t hw_word = HW_SAMPLING_RX_DATA;
+              MESSAGE_SIZE_TYPE msg_sz = sampling_port->sampling_port_status.MAX_MESSAGE_SIZE;
+              if (msg_sz > (MESSAGE_SIZE_TYPE)sizeof(uint32_t))
+                     msg_sz = sizeof(uint32_t);
+              memcpy(channel->buffer, &hw_word, msg_sz);
+              channel->current_message_size = msg_sz;
+              channel->last_update_time = (SYSTEM_TIME_TYPE)ucx_uptime();
+       }
+#endif
+
        if(!channel->current_message_size){
               *LENGTH = 0;
               *VALIDITY = INVALID;
               *RETURN_CODE = NO_ACTION;
        }
        else {
-              printf("READ SAMOLING MESSAGE %s\n", channel->buffer);
               memcpy(MESSAGE_ADDR, channel->buffer, channel->current_message_size);
               *LENGTH = channel->current_message_size;
               SYSTEM_TIME_TYPE age_message = (SYSTEM_TIME_TYPE)ucx_uptime() - channel->last_update_time;
